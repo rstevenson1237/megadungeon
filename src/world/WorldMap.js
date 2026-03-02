@@ -7,6 +7,12 @@
  * Level 11–15: Deep Dungeon (Dwarven Deeps, Elemental Grottos)
  * Level 16–20: The Mythic Underworld (Demon Warrens, Void Passages)
  */
+
+import { createInitialTownState } from '../data/town.js';
+import { RNG } from '../engine/RNG.js';
+import { LevelGen } from './LevelGen.js';
+import { TileMap } from './TileMap.js';
+
 export class WorldMap {
   constructor(masterSeed) {
     this.masterSeed = masterSeed;
