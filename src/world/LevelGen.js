@@ -276,14 +276,12 @@ export class LevelGen {
 
   static _pickTheme(levelNumber, rng) {
     const bands = [
-      { min: 1,  max: 5,  pool: ['dungeon_cellar'] }, // Simplified for stub
+      { min: 1,  max: 5,  pool: ['dungeon_cellar', 'goblin_warren'] },
+      { min: 6,  max: 20, pool: ['catacomb'] }, // Expand as more themes are added
     ];
-    const band = bands.find(b => levelNumber >= b.min && levelNumber <= b.max);
+    const band = bands.find(b => levelNumber >= b.min && levelNumber <= b.max) ?? bands[0];
     const key  = rng.pick(band.pool);
-    // THEMES is currently in data/town.js as a stub
-    const theme = THEMES[key] || THEMES.default_theme;
-    theme.name = key; // Ensure theme has a name for logging
-    return theme;
+    return { ...THEMES[key], key }; // spread to avoid mutating the source object
   }
 
   static _populateRooms(map, rooms, rng, levelNumber, theme) {
