@@ -84,12 +84,35 @@ function carveRoom(map, room, theme) {
 
 // Corridor carving stubs
 function primMST(centers) {
-  console.log(`Stub primMST: Connecting ${centers.length} centers.`);
-  // For now, return a dummy connection
-  if (centers.length > 1) {
-    return [[centers[0], centers[1]]];
+  if (centers.length < 2) return [];
+
+  const mstEdges = [];
+  const inTree = new Set([centers[0]]);
+  const notInTree = new Set(centers.slice(1));
+
+  while (notInTree.size > 0) {
+    let minEdge = { from: null, to: null, dist: Infinity };
+
+    for (const outNode of notInTree) {
+      for (const inNode of inTree) {
+        const dist = Math.hypot(outNode.x - inNode.x, outNode.y - inNode.y);
+        if (dist < minEdge.dist) {
+          minEdge = { from: inNode, to: outNode, dist: dist };
+        }
+      }
+    }
+
+    if (minEdge.to) {
+      mstEdges.push([minEdge.from, minEdge.to]);
+      inTree.add(minEdge.to);
+      notInTree.delete(minEdge.to);
+    } else {
+      // This should not happen in a connected graph of room centers
+      break;
+    }
   }
-  return [];
+
+  return mstEdges;
 }
 
 function carveLCorridor(map, roomA, roomB, theme) {
