@@ -92,17 +92,70 @@ function primMST(centers) {
   return [];
 }
 
-function carveLCorridor(map, a, b) {
-  console.log(`Stub carveLCorridor: Connecting ${a.x},${a.y} to ${b.x},${b.y}`);
-  // Add some metadata for verification
-  map.metadata.corridors = map.metadata.corridors || [];
-  map.metadata.corridors.push({ type: 'L', from: a, to: b });
+function carveLCorridor(map, roomA, roomB, theme) {
+  const ax = roomA.x + Math.floor(roomA.w / 2);
+  const ay = roomA.y + Math.floor(roomA.h / 2);
+  const bx = roomB.x + Math.floor(roomB.w / 2);
+  const by = roomB.y + Math.floor(roomB.h / 2);
+
+  // Horizontal segment
+  for (let x = Math.min(ax, bx); x <= Math.max(ax, bx); x++) {
+    if (map.inBounds(x, ay)) {
+      const tile = map.get(x, ay);
+      tile.type = 'floor';
+      tile.solid = false;
+      tile.opaque = false;
+      tile.glyph = theme.floorGlyphs[0];
+      tile.fg = theme.floorFg;
+      tile.bg = theme.floorBg;
+    }
+  }
+
+  // Vertical segment
+  for (let y = Math.min(ay, by); y <= Math.max(ay, by); y++) {
+    if (map.inBounds(bx, y)) {
+      const tile = map.get(bx, y);
+      tile.type = 'floor';
+      tile.solid = false;
+      tile.opaque = false;
+      tile.glyph = theme.floorGlyphs[0];
+      tile.fg = theme.floorFg;
+      tile.bg = theme.floorBg;
+    }
+  }
 }
 
-function carveZCorridor(map, a, b) {
-  console.log(`Stub carveZCorridor: Connecting ${a.x},${a.y} to ${b.x},${b.y}`);
-  map.metadata.corridors = map.metadata.corridors || [];
-  map.metadata.corridors.push({ type: 'Z', from: a, to: b });
+function carveZCorridor(map, roomA, roomB, theme) {
+  const ax = roomA.x + Math.floor(roomA.w / 2);
+  const ay = roomA.y + Math.floor(roomA.h / 2);
+  const bx = roomB.x + Math.floor(roomB.w / 2);
+  const by = roomB.y + Math.floor(roomB.h / 2);
+
+  // Vertical segment
+  for (let y = Math.min(ay, by); y <= Math.max(ay, by); y++) {
+    if (map.inBounds(ax, y)) {
+      const tile = map.get(ax, y);
+      tile.type = 'floor';
+      tile.solid = false;
+      tile.opaque = false;
+      tile.glyph = theme.floorGlyphs[0];
+      tile.fg = theme.floorFg;
+      tile.bg = theme.floorBg;
+    }
+  }
+
+  // Horizontal segment
+  for (let x = Math.min(ax, bx); x <= Math.max(ax, bx); x++) {
+    if (map.inBounds(x, by)) {
+      const tile = map.get(x, by);
+      tile.type = 'floor';
+      tile.solid = false;
+      tile.opaque = false;
+      tile.glyph = theme.floorGlyphs[0];
+      tile.fg = theme.floorFg;
+      tile.bg = theme.floorBg;
+    }
+  }
 }
 
 // RoomGen Stub
@@ -132,7 +185,7 @@ export class LevelGen {
     const theme   = this._pickTheme(levelNumber, rng);
     const map     = new TileMap(MAP_W, MAP_H);
     const rooms   = this._carveRooms(map, rng, theme);
-    this._connectRooms(map, rooms, rng);
+    this._connectRooms(map, rooms, rng, theme);
     this._placeStairs(map, rooms, rng, levelNumber);
     this._applyThemeDressing(map, rooms, rng, theme);
     this._populateRooms(map, rooms, rng, levelNumber, theme);
@@ -167,19 +220,19 @@ export class LevelGen {
     return rooms;
   }
 
-  static _connectRooms(map, rooms, rng) {
+  static _connectRooms(map, rooms, rng, theme) {
     if (rooms.length < 2) return; // Need at least two rooms to connect
     const centers = rooms.map(r => ({ x: r.x + (r.w>>1), y: r.y + (r.h>>1), room: r }));
     const mst     = primMST(centers);
     for (const [a, b] of mst) {
-      if (rng.chance(0.5)) carveLCorridor(map, a.room, b.room); // Pass room objects for clarity
-      else                  carveZCorridor(map, a.room, b.room);
+      if (rng.chance(0.5)) carveLCorridor(map, a.room, b.room, theme); // Pass room objects for clarity
+      else                  carveZCorridor(map, a.room, b.room, theme);
     }
     // Extra loops (simplified for stub)
     const extras = Math.floor(rooms.length * 0.2);
     for (let i = 0; i < extras; i++) {
       const [a, b] = [rng.pick(centers), rng.pick(centers)];
-      if (a.room !== b.room) carveLCorridor(map, a.room, b.room);
+      if (a.room !== b.room) carveLCorridor(map, a.room, b.room, theme);
     }
   }
 
