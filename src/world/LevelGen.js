@@ -62,10 +62,24 @@ class BSP {
 
 // Room carving stub
 function carveRoom(map, room, theme) {
-  console.log(`Stub carveRoom: Carving room at (${room.x},${room.y},${room.w},${room.h})`);
-  // For now, just mark the room in the map metadata
+  // Store room in map metadata
   map.metadata.rooms = map.metadata.rooms || [];
   map.metadata.rooms.push(room);
+
+  for (let y = room.y; y < room.y + room.h; y++) {
+    for (let x = room.x; x < room.x + room.w; x++) {
+      if (map.inBounds(x, y)) {
+        const tile = map.get(x, y);
+        tile.type = 'floor';
+        tile.solid = false;
+        tile.opaque = false;
+        tile.glyph = theme.floorGlyphs[0];
+        tile.fg = theme.floorFg;
+        tile.bg = theme.floorBg;
+        tile.roomId = room.id;
+      }
+    }
+  }
 }
 
 // Corridor carving stubs
