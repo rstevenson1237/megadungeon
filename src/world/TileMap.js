@@ -17,14 +17,58 @@ const createVoidTile = () => ({
 });
 
 // Stub for shadowcast FOV algorithm
-function shadowcast(map, ox, oy, radius, octant) {
-  // console.log(`Stub shadowcast: From (${ox},${oy}) in octant ${octant} with radius ${radius}`);
-  // For verification, mark the origin as visible and explored
-  if (map.inBounds(ox,oy)) {
-    const originTile = map.get(ox,oy);
-    originTile.visible = true;
-    originTile.explored = true;
+function castLight(map, cx, cy, row, start, end, radius, xx, xy, yx, yy) {
+  if (start < end) return;
+  const radiusSq = radius * radius;
+  let newStart = 0;
+  let blocked = false;
+
+  for (let distance = row; distance <= radius && !blocked; distance++) {
+    const dy = -distance;
+    for (let dx = -distance; dx <= 0; dx++) {
+      const currentX = cx + dx * xx + dy * xy;
+      const currentY = cy + dx * yx + dy * yy;
+      const leftSlope  = (dx - 0.5) / (dy + 0.5);
+      const rightSlope = (dx + 0.5) / (dy - 0.5);
+
+      if (!map.inBounds(currentX, currentY) || start < rightSlope) continue;
+      if (end > leftSlope) break;
+
+      if (dx * dx + dy * dy <= radiusSq) {
+        const tile = map.get(currentX, currentY);
+        tile.visible  = true;
+        tile.explored = true;
+      }
+
+      if (blocked) {
+        if (map.get(currentX, currentY)?.opaque) {
+          newStart = rightSlope;
+        } else {
+          blocked = false;
+          start = newStart;
+        }
+      } else if (map.inBounds(currentX, currentY) && map.get(currentX, currentY)?.opaque && distance < radius) {
+        blocked = true;
+        castLight(map, cx, cy, distance + 1, start, leftSlope, radius, xx, xy, yx, yy);
+        newStart = rightSlope;
+      }
+    }
   }
+}
+
+function shadowcast(map, ox, oy, radius, octant) {
+  const MULT = [
+    [1,  0,  0, -1, -1,  0,  0,  1],
+    [0,  1, -1,  0,  0, -1,  1,  0],
+    [0,  1,  1,  0,  0, -1, -1,  0],
+    [1,  0,  0,  1, -1,  0,  0, -1],
+  ];
+  castLight(
+    map, ox, oy,
+    1, 1.0, 0.0, radius,
+    MULT[0][octant], MULT[1][octant],
+    MULT[2][octant], MULT[3][octant]
+  );
 }
 
 // --- TileMap Implementation ---
@@ -68,16 +112,15 @@ export class TileMap {
 
   /** Compute visible tiles using shadowcasting FOV */
   computeFOV(ox, oy, radius) {
-    console.log(`TileMap: Computing FOV from (${ox},${oy}) with radius ${radius}`);
-    // Mark all previously-visible tiles as not currently visible
     for (const tile of this.tiles) tile.visible = false;
-    // Shadowcast from (ox, oy) in all 8 octants
+    // Mark origin always visible
+    if (this.inBounds(ox, oy)) {
+      const t = this.get(ox, oy);
+      t.visible  = true;
+      t.explored = true;
+    }
     for (let octant = 0; octant < 8; octant++) {
       shadowcast(this, ox, oy, radius, octant);
-    }
-    // Mark visible tiles as explored
-    for (const tile of this.tiles) {
-      if (tile.visible) tile.explored = true;
     }
   }
 
