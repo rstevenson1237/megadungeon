@@ -34,6 +34,8 @@ export class InputManager {
       'stairs:up':   ['Comma',  'Shift+Comma'],
       'confirm':     ['Enter', 'Space'],
       'cancel':      ['Escape'],
+      'save':        ['F5'],
+      'load':        ['F8'],
     };
     for (const [action, keys] of Object.entries(defaults)) {
       this._bindings.set(action, new Set(keys));

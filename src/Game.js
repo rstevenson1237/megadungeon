@@ -2,6 +2,7 @@ import { InputManager } from './engine/InputManager.js';
 import { GameLoop } from './engine/GameLoop.js';
 import { EventBus } from './engine/EventBus.js';
 import { RNG } from './engine/RNG.js';
+import { SaveManager } from './engine/SaveManager.js';
 
 class Game {
     constructor() {
@@ -11,14 +12,31 @@ class Game {
         this.bus = new EventBus();
         this.rng = new RNG(Date.now());
         this.ctx = this.canvasEl.getContext('2d');
+        
+        // A simple gameState object for serialization
+        this.gameState = {
+            level: 1,
+            player: {
+                hp: 10,
+                x: 5,
+                y: 5
+            },
+            // The `serialize` method is crucial for SaveManager
+            serialize: function() {
+                return {
+                    level: this.level,
+                    player: this.player
+                };
+            }
+        };
+
         console.log("Game created");
     }
 
     async init() {
         console.log("Initializing game...");
-        // Set canvas size manually since we are not using CanvasRenderer for it
-        this.canvasEl.width = 960; // 80 cols * 12px
-        this.canvasEl.height = 800; // 40 rows * 20px
+        this.canvasEl.width = 960;
+        this.canvasEl.height = 800;
         
         this.loop.start();
         console.log("Game loop started.");
@@ -28,33 +46,72 @@ class Game {
         });
 
         this.bus.emit('log:message', { text: 'Game Initialized! (Font loading skipped)', category: 'game' });
+        if (SaveManager.hasSave()) {
+            this.bus.emit('log:message', { text: 'Existing save file found. Press F8 to load.', category: 'save' });
+        }
     }
 
     update(dt) {
         let action;
         while ((action = this.input.consumeAction())) {
             this.bus.emit('log:message', { text: `Action: ${action}`, category: 'input' });
+
+            switch(action) {
+                case 'save':
+                    if (SaveManager.quickSave(this.gameState)) {
+                        this.bus.emit('log:message', { text: 'Game state saved.', category: 'save' });
+                    } else {
+                        this.bus.emit('log:message', { text: 'Failed to save game state.', category: 'error' });
+                    }
+                    break;
+                case 'load':
+                    const loadedState = SaveManager.quickLoad();
+                    if (loadedState) {
+                        // Normally, you'd have a proper deserialization process
+                        this.gameState.level = loadedState.level;
+                        this.gameState.player = loadedState.player;
+                        this.bus.emit('log:message', { text: `Game state loaded: Level ${loadedState.level}`, category: 'save' });
+                        console.log('Loaded data:', loadedState);
+                    } else {
+                        this.bus.emit('log:message', { text: 'No save file to load.', category: 'save' });
+                    }
+                    break;
+                case 'move:n':
+                    this.gameState.player.y--;
+                    break;
+                case 'move:s':
+                    this.gameState.player.y++;
+                    break;
+                case 'move:e':
+                    this.gameState.player.x++;
+                    break;
+                case 'move:w':
+                    this.gameState.player.x--;
+                    break;
+            }
         }
     }
 
     render(dt) {
-        // Clear screen
         this.ctx.fillStyle = '#000';
         this.ctx.fillRect(0, 0, this.canvasEl.width, this.canvasEl.height);
 
-        // Draw text using native canvas text
         this.ctx.fillStyle = "#ffcc88";
         this.ctx.font = "20px monospace";
         this.ctx.fillText("MEGADUNGEON", 20, 40);
 
         this.ctx.fillStyle = "#00ff00";
-        this.ctx.fillText("Step 1.4 Implementation Verified.", 20, 80);
+        this.ctx.fillText("Step 1.6 (SaveManager) Verified.", 20, 80);
 
         this.ctx.fillStyle = "#ccc";
-        this.ctx.fillText("Press any bound key (WASD, Arrows, etc).", 20, 120);
-        this.ctx.fillText("Check the browser's developer console for action logs.", 20, 150);
-        this.ctx.fillText("NOTE: font.png is empty, using native text rendering.", 20, 180);
+        this.ctx.fillText("Press F5 to Save, F8 to Load.", 20, 120);
+        this.ctx.fillText("Use WASD to move the player data.", 20, 150);
+        this.ctx.fillText("Check the browser's console for logs.", 20, 180);
 
+        this.ctx.fillStyle = "#ffff00";
+        this.ctx.fillText(`Player HP: ${this.gameState.player.hp}`, 20, 220);
+        this.ctx.fillText(`Player Pos: (${this.gameState.player.x}, ${this.gameState.player.y})`, 20, 250);
+        this.ctx.fillText(`Dungeon Level: ${this.gameState.level}`, 20, 280);
     }
 }
 
