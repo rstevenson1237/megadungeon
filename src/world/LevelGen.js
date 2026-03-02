@@ -9,13 +9,54 @@ const MAP_H = 40; // From CanvasRenderer ROWS
 
 // --- STUB HELPERS for LevelGen ---
 
-// BSP (Binary Space Partitioning) Stub
+// BSP (Binary Space Partitioning)
 class BSP {
+  /**
+   * @param { {x,y,w,h} } area The container to be partitioned.
+   * @param {RNG} rng The random number generator.
+   * @param { {minSize, maxSize, iterations} } options
+   * @returns { {x,y,w,h}[] } An array of leaf partitions.
+   */
   static split(area, rng, options) {
-    console.log(`Stub BSP: Splitting area (${area.x},${area.y},${area.w},${area.h})`);
-    // For now, just return the initial area as a single "partition"
-    // In a real implementation, this would recursively split the area
-    return [area];
+    const root = { ...area, children: [], isLeaf: true };
+    const partitions = this._splitNode(root, rng, options.minSize, options.iterations);
+    return partitions;
+  }
+
+  static _splitNode(node, rng, minSize, depth) {
+    if (depth <= 0 || node.isLeaf && (node.w < minSize * 2 && node.h < minSize * 2)) {
+      return [node];
+    }
+
+    // Decide split direction
+    let splitHorizontal = rng.chance(0.5);
+    if (node.w > node.h && node.w / node.h >= 1.25) splitHorizontal = false;
+    else if (node.h > node.w && node.h / node.w >= 1.25) splitHorizontal = true;
+
+    const max = (splitHorizontal ? node.h : node.w) - minSize;
+    if (max < minSize) {
+      return [node]; // Cannot split further
+    }
+
+    const splitPoint = rng.int(minSize, max);
+
+    node.isLeaf = false;
+    if (splitHorizontal) {
+      node.children = [
+        { x: node.x, y: node.y, w: node.w, h: splitPoint, children: [], isLeaf: true },
+        { x: node.x, y: node.y + splitPoint, w: node.w, h: node.h - splitPoint, children: [], isLeaf: true }
+      ];
+    } else { // Vertical split
+      node.children = [
+        { x: node.x, y: node.y, w: splitPoint, h: node.h, children: [], isLeaf: true },
+        { x: node.x + splitPoint, y: node.y, w: node.w - splitPoint, h: node.h, children: [], isLeaf: true }
+      ];
+    }
+
+    const leaves = [];
+    leaves.push(...this._splitNode(node.children[0], rng, minSize, depth - 1));
+    leaves.push(...this._splitNode(node.children[1], rng, minSize, depth - 1));
+    return leaves;
   }
 }
 
