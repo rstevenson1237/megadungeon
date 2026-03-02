@@ -1,0 +1,35 @@
+<!-- index.html — complete game entry point -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MEGADUNGEON</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+    #game-wrapper { position: relative; }
+    #main-canvas  { display: block; image-rendering: pixelated; }
+    #crt-canvas   { position: absolute; top: 0; left: 0; pointer-events: none; }
+    #minimap-canvas {
+      position: absolute; top: 10px; right: 10px;
+      opacity: 0.85; border: 1px solid #444;
+      display: none; /* toggled by [M] */
+    }
+  </style>
+</head>
+<body>
+  <div id="game-wrapper">
+    <canvas id="main-canvas"></canvas>
+    <canvas id="crt-canvas"></canvas>
+    <canvas id="minimap-canvas"></canvas>
+  </div>
+  <script type="module" src="dist/game.js"></script>
+</body>
+</html>
