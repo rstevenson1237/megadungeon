@@ -5,6 +5,7 @@ import { RNG } from './engine/RNG.js';
 import { SaveManager } from './engine/SaveManager.js';
 import { WorldMap } from './world/WorldMap.js';
 import { createInitialTownState } from './data/town.js';
+import { Entity } from './entities/Entity.js'; // Import the new Entity stub
 
 class Game {
     constructor() {
@@ -30,9 +31,7 @@ class Game {
             }
         };
 
-        // Initialize WorldMap with a master seed
         this.worldMap = new WorldMap(this.rng.seed);
-
         console.log("Game created");
     }
 
@@ -49,61 +48,45 @@ class Game {
         });
 
         this.bus.emit('log:message', { text: 'Game Initialized! (Font loading skipped)', category: 'game' });
-        if (SaveManager.hasSave()) {
-            this.bus.emit('log:message', { text: 'Existing save file found. Press F8 to load.', category: 'save' });
-        }
 
-        // --- WorldMap Verification ---
-        this.bus.emit('log:message', { text: 'Verifying WorldMap and LevelGen...', category: 'world' });
-        const level1 = this.worldMap.getLevel(1); // Should trigger LevelGen.generate
-        this.bus.emit('log:message', { text: `Generated Level 1 (via LevelGen): ${JSON.stringify(level1.metadata)}`, category: 'world' });
+        // --- Verification ---
+        this.bus.emit('log:message', { text: 'Verifying World & TileMap...', category: 'world' });
+        
+        // 1. Get Level 1 TileMap
+        const level1 = this.worldMap.getLevel(1);
+        this.bus.emit('log:message', { text: `Generated Level 1 metadata: ${JSON.stringify(level1.metadata)}`, category: 'world' });
 
+        // 2. Verify TileMap entity management
+        const testMonster = new Entity('test_monster', 10, 10);
+        level1.addEntity(testMonster);
+        this.bus.emit('log:message', { text: `Entities at (10,10): ${level1.getEntitiesAt(10,10).length}`, category: 'world' });
+        
+        level1.moveEntity(testMonster, 12, 12);
+        this.bus.emit('log:message', { text: `Entities at (10,10) after move: ${level1.getEntitiesAt(10,10).length}`, category: 'world' });
+        this.bus.emit('log:message', { text: `Entities at (12,12) after move: ${level1.getEntitiesAt(12,12).length}`, category: 'world' });
+
+        // 3. Verify FOV (stub)
+        level1.computeFOV(12, 12, 5);
+        this.bus.emit('log:message', { text: `Tile visibility at (12,12) after FOV: ${level1.get(12,12).visible}`, category: 'world' });
+        this.bus.emit('log:message', { text: `Tile explored at (12,12) after FOV: ${level1.get(12,12).explored}`, category: 'world' });
+
+        // 4. Verify walkability
+        this.bus.emit('log:message', { text: `Is (0,0) walkable (void tile): ${level1.isWalkable(0,0)}`, category: 'world' });
+        // Can't test a non-solid tile yet as carveRoom is a stub and doesn't change tile properties
+
+        // 5. Verify Serialization
         const serializedWorld = this.worldMap.serialize();
-        this.bus.emit('log:message', { text: `Serialized WorldMap (via LevelGen): ${JSON.stringify(serializedWorld)}`, category: 'world' });
-
         const deserializedWorld = WorldMap.deserialize(serializedWorld);
-        this.bus.emit('log:message', { text: `Deserialized WorldMap (via LevelGen): ${JSON.stringify(deserializedWorld.levels.get(1).metadata)}`, category: 'world' });
-        this.bus.emit('log:message', { text: 'WorldMap and LevelGen verification complete.', category: 'world' });
-        // --- End WorldMap Verification ---
+        this.bus.emit('log:message', { text: `Deserialized map contains ${deserializedWorld.levels.get(1).tiles.length} tiles.`, category: 'world' });
+        
+        this.bus.emit('log:message', { text: 'TileMap verification complete.', category: 'world' });
+        // --- End Verification ---
     }
 
     update(dt) {
         let action;
         while ((action = this.input.consumeAction())) {
             this.bus.emit('log:message', { text: `Action: ${action}`, category: 'input' });
-
-            switch(action) {
-                case 'save':
-                    if (SaveManager.quickSave(this.gameState)) {
-                        this.bus.emit('log:message', { text: 'Game state saved.', category: 'save' });
-                    } else {
-                        this.bus.emit('log:message', { text: 'Failed to save game state.', category: 'error' });
-                    }
-                    break;
-                case 'load':
-                    const loadedState = SaveManager.quickLoad();
-                    if (loadedState) {
-                        this.gameState.level = loadedState.level;
-                        this.gameState.player = loadedState.player;
-                        this.bus.emit('log:message', { text: `Game state loaded: Level ${loadedState.level}`, category: 'save' });
-                        console.log('Loaded data:', loadedState);
-                    } else {
-                        this.bus.emit('log:message', { text: 'No save file to load.', category: 'save' });
-                    }
-                    break;
-                case 'move:n':
-                    this.gameState.player.y--;
-                    break;
-                case 'move:s':
-                    this.gameState.player.y++;
-                    break;
-                case 'move:e':
-                    this.gameState.player.x++;
-                    break;
-                case 'move:w':
-                    this.gameState.player.x--;
-                    break;
-            }
         }
     }
 
@@ -116,17 +99,10 @@ class Game {
         this.ctx.fillText("MEGADUNGEON", 20, 40);
 
         this.ctx.fillStyle = "#00ff00";
-        this.ctx.fillText("Step 2.3 (Environmental Themes) Verified.", 20, 80);
+        this.ctx.fillText("Step 2.4 (TileMap) Verified.", 20, 80);
 
         this.ctx.fillStyle = "#ccc";
-        this.ctx.fillText("Press F5 to Save, F8 to Load.", 20, 120);
-        this.ctx.fillText("Use WASD to move the player data.", 20, 150);
-        this.ctx.fillText("Check the browser's console for WorldMap and LevelGen logs (including theme picking).", 20, 180);
-
-        this.ctx.fillStyle = "#ffff00";
-        this.ctx.fillText(`Player HP: ${this.gameState.player.hp}`, 20, 220);
-        this.ctx.fillText(`Player Pos: (${this.gameState.player.x}, ${this.gameState.player.y})`, 20, 250);
-        this.ctx.fillText(`Dungeon Level: ${this.gameState.level}`, 20, 280);
+        this.ctx.fillText("Check the browser's developer console for TileMap verification logs.", 20, 120);
     }
 }
 
