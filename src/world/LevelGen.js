@@ -260,12 +260,42 @@ export class LevelGen {
   }
 
   static _placeStairs(map, rooms, rng, levelNumber) {
-    console.log(`Stub LevelGen: Placing stairs for level ${levelNumber}`);
-    // Assume first room is entry, place stairs down in a random other room
+    // Stair UP in the first room (entry), only on levels > 1
+    if (levelNumber > 1 && rooms.length > 0) {
+      const upRoom = rooms[0];
+      const ux = upRoom.x + Math.floor(upRoom.w / 2);
+      const uy = upRoom.y + Math.floor(upRoom.h / 2);
+      if (map.inBounds(ux, uy)) {
+        const t = map.get(ux, uy);
+        t.type  = 'stair_up';
+        t.glyph = 0x3C; // '<'
+        t.fg    = '#ffaaaa';
+        t.solid = false;
+      }
+    }
+
+    // Stair DOWN in the last room
     if (rooms.length > 1) {
-        const stairDownRoom = rng.pick(rooms.filter(r => r.type !== 'entry'));
-        map.metadata.stairs = map.metadata.stairs || {};
-        map.metadata.stairs.down = { x: stairDownRoom.x + (stairDownRoom.w>>1), y: stairDownRoom.y + (stairDownRoom.h>>1) };
+      const downRoom = rooms[rooms.length - 1];
+      const dx = downRoom.x + Math.floor(downRoom.w / 2);
+      const dy = downRoom.y + Math.floor(downRoom.h / 2);
+      if (map.inBounds(dx, dy)) {
+        const t = map.get(dx, dy);
+        t.type  = 'stair_down';
+        t.glyph = 0x3E; // '>'
+        t.fg    = '#aaffaa';
+        t.solid = false;
+        map.metadata.stairDown = { x: dx, y: dy };
+      }
+    }
+
+    // Store entry position for player spawn
+    if (rooms.length > 0) {
+      const r = rooms[0];
+      map.metadata.entry = {
+        x: r.x + Math.floor(r.w / 2),
+        y: r.y + Math.floor(r.h / 2)
+      };
     }
   }
 
