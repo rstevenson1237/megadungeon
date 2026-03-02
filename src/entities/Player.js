@@ -1,3 +1,9 @@
+
+import { Entity } from './Entity.js';
+import { Item } from './Item.js';
+import { CLASSES } from '../data/classes.js';
+import { rollDie, statModifier, XP_TABLE, MAX_LEVEL } from '../engine/rules.js';
+
 /**
  * @typedef {Object} PlayerStats
  * @property {number} str  Strength      — melee damage, carry weight
@@ -66,8 +72,8 @@ export class Player extends Entity {
     for (const [skill, rank] of Object.entries(cls.startingSkills ?? {})) {
       this.skills[skill] = rank;
     }
-    for (const item of cls.startingItems ?? []) {
-      this.addToInventory(Item.create(item));
+    for (const itemKey of cls.startingItems ?? []) {
+      this.addToInventory(Item.create(itemKey));
     }
   }
 
@@ -95,6 +101,11 @@ export class Player extends Entity {
     for (const ability of newAbilities) this._grantAbility(ability);
 
     return { leveled: true, hpGained: hpGain, newAbilities };
+  }
+
+  _grantAbility(abilityKey) {
+    // Stub for a future system to handle learning new abilities.
+    console.log(`${this.name} has gained ability: ${abilityKey}!`);
   }
 
   /** Attack roll: d20 + THAC0-based modifier vs target AC */

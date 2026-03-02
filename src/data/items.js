@@ -1,50 +1,14 @@
-/**
- * @typedef {Object} ItemDef
- * @property {string}   key
- * @property {string}   name
- * @property {string}   category    'weapon'|'armor'|'potion'|'scroll'|'wand'|'ring'|'tool'|'food'|'treasure'|'quest'
- * @property {number}   glyph
- * @property {string}   color
- * @property {number}   weight      Encumbrance units
- * @property {number}   value       GP value
- * @property {boolean}  stackable
- * @property {boolean}  cursed      Revealed only on identification
- * @property {boolean}  identified  Initially unidentified items show generic name
- * @property {string}   genericName Displayed when unidentified
- * @property {Object}   [weapon]    { damage, attackBonus, damageMod, range, twoHanded }
- * @property {Object}   [armor]     { acBonus, slot, maxDexBonus }
- * @property {Object}   [potion]    { effect, duration, magnitude }
- * @property {Object}   [scroll]    { spellKey, casterLevel }
- * @property {Object}   [wand]      { spellKey, charges, chargesMax }
- * @property {Object}   [food]      { nutrition, poisoned, poisonType }
- * @property {string}   description
- */
 
 export const ITEMS = {
-
   // === WEAPONS ===
   short_sword: {
     key: 'short_sword', name: 'Short Sword', category: 'weapon',
     glyph: 0x29, color: '#aaaaaa', weight: 3, value: 10, stackable: false,
     weapon: { damage: [1, 6], attackBonus: 0, damageMod: 0, range: 1, twoHanded: false },
-    description: 'A reliable single-edged blade. The mercenary's choice.',
-  },
-
-  long_sword: {
-    key: 'long_sword', name: 'Long Sword', category: 'weapon',
-    glyph: 0x2F, color: '#aaaaaa', weight: 5, value: 25, stackable: false,
-    weapon: { damage: [1, 8], attackBonus: 0, damageMod: 0, range: 1, twoHanded: false },
-    description: 'The classic knight's blade. Excellent reach, balanced feel.',
+    description: 'A reliable single-edged blade. The mercenary\'s choice.',
   },
 
   // === ARMOR ===
-  leather_armor: {
-    key: 'leather_armor', name: 'Leather Armor', category: 'armor',
-    glyph: 0x28, color: '#885533', weight: 8, value: 20, stackable: false,
-    armor: { acBonus: 2, slot: 'body', maxDexBonus: 6 },
-    description: 'Hardened leather, adequate protection without restricting movement.',
-  },
-
   chain_mail: {
     key: 'chain_mail', name: 'Chain Mail', category: 'armor',
     glyph: 0x28, color: '#888888', weight: 15, value: 75, stackable: false,
@@ -52,53 +16,23 @@ export const ITEMS = {
     description: 'Interlocking iron rings. Deflects blades well, rattles conspicuously.',
   },
 
-  // === POTIONS (unidentified until tested or ID'd) ===
-  healing_potion: {
-    key: 'healing_potion', name: 'Potion of Healing', genericName: 'Red Potion', category: 'potion',
-    glyph: 0x21, color: '#ff4444', weight: 1, value: 50, stackable: true,
-    potion: { effect: 'heal', magnitude: '2d4+2', duration: 0 },
-    description: 'A warm, copper-tasting liquid that knits wounds with uncanny speed.',
+  // === TOOLS / MISC ===
+  torch: {
+    key: 'torch', name: 'Torch', category: 'tool',
+    glyph: 0x7E, color: '#ffaa00', weight: 1, value: 1, stackable: true,
+    description: 'A wooden stick wrapped in oil-soaked cloth. Provides light.',
   },
 
-  potion_of_speed: {
-    key: 'potion_of_speed', name: 'Potion of Speed', genericName: 'Silver Potion', category: 'potion',
-    glyph: 0x21, color: '#aaaaff', weight: 1, value: 100, stackable: true,
-    potion: { effect: 'haste', magnitude: 2, duration: 20 }, // 2× speed for 20 turns
-    description: 'The world lurches into slow motion around you.',
+  ration: {
+    key: 'ration', name: 'Ration', category: 'food',
+    glyph: 0x25, color: '#aa8844', weight: 2, value: 5, stackable: true,
+    food: { nutrition: 500 },
+    description: 'A portion of dried meat, hardtack, and nuts. Barely edible, but keeps you going.',
   },
 
-  // === SCROLLS ===
-  scroll_magic_missile: {
-    key: 'scroll_magic_missile', name: 'Scroll of Magic Missile', genericName: 'Rolled Parchment',
-    category: 'scroll', glyph: 0x3F, color: '#ccccff', weight: 0, value: 35, stackable: false,
-    scroll: { spellKey: 'magic_missile', casterLevel: 3 },
-    description: 'Barely legible runes flare as your eyes trace the words of power.',
-  },
-
-  // === MAGICAL ITEMS ===
-  ring_of_protection: {
-    key: 'ring_of_protection', name: 'Ring of Protection +1', genericName: 'Plain Ring',
-    category: 'ring', glyph: 0xB0, color: '#ffcc44', weight: 0, value: 1000, stackable: false,
-    effects: [{ type: 'ac', value: 1 }, { type: 'saves', value: 1 }],
-    description: 'A faint shimmer plays over your skin when you wear it.',
-  },
-
-  amulet_of_life_protection: {
-    key: 'amulet_of_life_protection', name: 'Amulet of Life Protection',
-    category: 'amulet', glyph: 0x09, color: '#ffcc88', weight: 0, value: 5000, stackable: false,
-    effects: [{ type: 'immune', value: 'energy_drain' }],
-    description: 'A soul-gem that holds a tiny piece of your life force at all times — beyond reach of the undead.',
-  },
-
-  // === CURSED ITEMS ===
-  sword_of_wounding: {
-    key: 'sword_of_wounding', name: 'Long Sword -1', genericName: 'Fine Long Sword',
-    category: 'weapon', glyph: 0x2F, color: '#ff6644', weight: 5, value: 0, stackable: false,
-    cursed: true,
-    weapon: { damage: [1, 8], attackBonus: -1, damageMod: -1, range: 1, twoHanded: false },
-    curse: { type: 'cannot_unequip', displayedAs: 'Long Sword +0' },
-    description: 'It feels right in your hand — too right. You don't want to let go.',
-  },
-
-  // +200 more items: wands, artifacts, unique legendary items, trade goods, puzzle items
+  rope: {
+    key: 'rope', name: '50ft of Rope', category: 'tool',
+    glyph: 0x26, color: '#8b4513', weight: 5, value: 1, stackable: false,
+    description: 'A coil of sturdy hemp rope. Never leave home without it.',
+  }
 };
