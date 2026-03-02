@@ -1,6 +1,6 @@
 // megadungeon/src/world/LevelGen.js
 import { TileMap } from './TileMap.js';
-import { THEMES } from '../data/town.js'; // Note: THEMES is currently in town.js stub
+import { THEMES } from '../data/themes.js';
 import { RNG } from '../engine/RNG.js';
 
 // Constants for map dimensions

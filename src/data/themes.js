@@ -70,7 +70,4 @@ export const THEMES = {
       'Something moves behind the sealed sarcophagi.',
     ]
   },
-
-  // Additional themes follow same structure...
-  // dwarven_deep, elemental_grotto, flooded_vault, demon_warren, void_passage, primordial_chaos
 };

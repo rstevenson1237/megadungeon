@@ -116,12 +116,12 @@ class Game {
         this.ctx.fillText("MEGADUNGEON", 20, 40);
 
         this.ctx.fillStyle = "#00ff00";
-        this.ctx.fillText("Step 2.2 (LevelGen) Verified.", 20, 80);
+        this.ctx.fillText("Step 2.3 (Environmental Themes) Verified.", 20, 80);
 
         this.ctx.fillStyle = "#ccc";
         this.ctx.fillText("Press F5 to Save, F8 to Load.", 20, 120);
         this.ctx.fillText("Use WASD to move the player data.", 20, 150);
-        this.ctx.fillText("Check the browser's console for WorldMap and LevelGen logs.", 20, 180);
+        this.ctx.fillText("Check the browser's console for WorldMap and LevelGen logs (including theme picking).", 20, 180);
 
         this.ctx.fillStyle = "#ffff00";
         this.ctx.fillText(`Player HP: ${this.gameState.player.hp}`, 20, 220);
