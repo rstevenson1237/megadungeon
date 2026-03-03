@@ -1,3 +1,10 @@
+const RIDDLES = [
+  { question: 'I have cities, but no houses live there. I have forests, but no trees grow there. I have water, but no fish swim there. What am I?', answers: ['map'] },
+  { question: 'I speak without a mouth and hear without ears. I have no body but come alive with wind. What am I?', answers: ['echo'] },
+  { question: 'The more you take, the more you leave behind. What am I?', answers: ['footsteps', 'footstep', 'steps'] },
+  { question: 'I pass before the sun yet make no shadow. What am I?', answers: ['wind', 'air'] },
+];
+
 export const PUZZLES = {
 
   three_statue_offering: {
@@ -36,7 +43,7 @@ An inscription reads: GIVE EACH THEIR OWN.`;
           if (!item || !item.tags?.includes('holy'))
             return { success: false, message: 'The priest tilts its carved head, unimpressed.' };
           player.removeFromInventory(item);
-          return { success: true, message: 'The holy symbol rises from your hand into the statue's palms.', stateChanges: { priest_given: true } };
+          return { success: true, message: 'The holy symbol rises from your hand into the statue\'s palms.', stateChanges: { priest_given: true } };
         }
       },
       {
@@ -44,7 +51,7 @@ An inscription reads: GIVE EACH THEIR OWN.`;
         available: (s) => !s.mage_given,
         resolve: (state, player, { item }) => {
           if (!item || !(item.category === 'scroll' || item.category === 'wand' || item.category === 'ring'))
-            return { success: false, message: 'The mage's blank eyes do not move.' };
+            return { success: false, message: 'The mage\'s blank eyes do not move.' };
           player.removeFromInventory(item);
           return { success: true, message: 'The magical item floats into the cradle and hums with resonance.', stateChanges: { mage_given: true } };
         }
@@ -88,10 +95,3 @@ You may speak your answer.`,
     reward: { xp: 150, openPassage: 'gate' },
   },
 };
-
-const RIDDLES = [
-  { question: 'I have cities, but no houses live there. I have forests, but no trees grow there. I have water, but no fish swim there. What am I?', answers: ['map'] },
-  { question: 'I speak without a mouth and hear without ears. I have no body but come alive with wind. What am I?', answers: ['echo'] },
-  { question: 'The more you take, the more you leave behind. What am I?', answers: ['footsteps', 'footstep', 'steps'] },
-  { question: 'I pass before the sun yet make no shadow. What am I?', answers: ['wind', 'air'] },
-];

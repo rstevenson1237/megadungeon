@@ -23,13 +23,6 @@ export class Player extends Entity {
     this.level  = 1;
     this.xp     = 0;
     this.stats  = { ...stats };
-    this.hpMax  = this._rollHP();
-    this.hp     = this.hpMax;
-    this.mpMax  = this._rollMP();
-    this.mp     = this.mpMax;
-    this.ac     = this._computeAC();
-    this.gold   = this.class.startingGold;
-    this.depth  = 0;          // Deepest floor reached (for scoring)
 
     this.inventory = [];      // Item[]  (max 26 slots, indexed a–z)
     this.equipped  = {        // Slot → Item | null
@@ -40,6 +33,14 @@ export class Player extends Entity {
     this.skills    = {};      // skillKey → rank (0–5)
     this.statuses  = [];      // Active StatusEffect[]
     this.scars     = [];      // Permanent negative effects from near-deaths
+
+    this.hpMax  = this._rollHP();
+    this.hp     = this.hpMax;
+    this.mpMax  = this._rollMP();
+    this.mp     = this.mpMax;
+    this.ac     = this._computeAC();
+    this.gold   = this.class.startingGold;
+    this.depth  = 0;          // Deepest floor reached (for scoring)
 
     this._initClass();
   }

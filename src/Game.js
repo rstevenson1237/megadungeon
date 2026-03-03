@@ -212,7 +212,7 @@ class Game {
   _monsterAttacksPlayer(monster) {
     const attack = monster.getPrimaryAttack();
     // Simple THAC0 roll: d20 vs player AC
-    const roll = this.rng.die(20);
+    const roll = this.rng.int(1, 20);
     const hit  = roll >= (20 - this.player.ac);
     if (hit) {
       const dmg = Math.max(1, monster.rollDamage(attack));
