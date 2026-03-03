@@ -141,7 +141,10 @@ export class CombatSystem {
 
   /** Ranged attack: adds range penalty, cover modifiers */
   resolveRangedAttack(attacker, defender, weapon) {
-    // TODO Phase 5: implement range penalty
+    const dist    = chebyshevDistance(attacker, defender);
+    const range   = weapon?.weapon?.range ?? 3;
+    const penalty = dist > range ? Math.floor((dist - range) / 2) : 0;
+    // TODO Phase 5: apply penalty to attack roll
     return this.resolveAttack(attacker, defender, weapon);
   }
 
