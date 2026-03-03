@@ -1,31 +1,75 @@
 // src/ui/Renderer.js
 
 export class Renderer {
-  constructor(canvasEl) {
-    this.canvas  = canvasEl;
-    this.ctx     = canvasEl.getContext('2d');
-    this.TILE_W  = 12;   // px per tile column
-    this.TILE_H  = 20;   // px per tile row
-    this.VIEW_COLS = 56; // Map viewport columns (leaves room for HUD panel)
-    this.VIEW_ROWS = 36; // Map viewport rows (leaves room for log)
-    this.HUD_X    = this.VIEW_COLS * this.TILE_W + 8; // HUD panel starts here
-    this.LOG_Y    = this.VIEW_ROWS * this.TILE_H + 4; // Log panel starts here
-    
-    // Set canvas size
-    canvasEl.width  = 80 * this.TILE_W;   // 960px
-    canvasEl.height = 40 * this.TILE_H;   // 800px
-    
-    this.ctx.font = `${this.TILE_H - 2}px monospace`;
-    this.ctx.textBaseline = 'top';
-  }
+    constructor(canvasEl) {
+        this.canvas = canvasEl;
+        this.ctx = canvasEl.getContext('2d');
+        
+        // Base tile size at reference resolution (960×800)
+        this.BASE_TILE_W = 12;
+        this.BASE_TILE_H = 20;
+        
+        // These get recalculated on resize:
+        this.TILE_W = 12;
+        this.TILE_H = 20;
+        this.VIEW_COLS = 56;
+        this.VIEW_ROWS = 36;
+        this.TOTAL_COLS = 80;
+        this.TOTAL_ROWS = 40;
+        this.HUD_X = 0;
+        this.LOG_Y = 0;
+        this.scale = 1;
+        
+        this.ctx.imageSmoothingEnabled = false;
+        // The initial resize will be triggered by the game.
+    }
+
+    resize(availableWidth, availableHeight) {
+        // Calculate scale factor: fit 80 columns × 40 rows into available space
+        const scaleX = availableWidth / (this.TOTAL_COLS * this.BASE_TILE_W);
+        const scaleY = availableHeight / (this.TOTAL_ROWS * this.BASE_TILE_H);
+        this.scale = Math.min(scaleX, scaleY);
+        
+        this.TILE_W = Math.floor(this.BASE_TILE_W * this.scale);
+        this.TILE_H = Math.floor(this.BASE_TILE_H * this.scale);
+        
+        // Ensure minimum tile size for readability (8px wide minimum)
+        if (this.TILE_W < 8) {
+            this.TILE_W = 8;
+            this.TILE_H = Math.floor(this.TILE_W * (this.BASE_TILE_H / this.BASE_TILE_W));
+        }
+        
+        const totalPixelW = availableWidth;
+        const totalPixelH = availableHeight;
+        
+        const totalCols = Math.floor(totalPixelW / this.TILE_W);
+        const totalRows = Math.floor(totalPixelH / this.TILE_H);
+        
+        this.compactMode = totalCols < 65;
+        
+        if (this.compactMode) {
+            this.VIEW_COLS = totalCols;
+            this.VIEW_ROWS = totalRows - 5; // Reserve 5 rows for log at bottom
+            this.HUD_X = -1; // Signal: draw HUD as overlay
+        } else {
+            this.VIEW_COLS = totalCols - 24; // Reserve 24 cols for HUD panel
+            this.VIEW_ROWS = totalRows - 4;  // Reserve 4 rows for log
+            this.HUD_X = this.VIEW_COLS * this.TILE_W + 8;
+        }
+        
+        this.LOG_Y = this.VIEW_ROWS * this.TILE_H + 4;
+        
+        this.canvas.width = totalCols * this.TILE_W;
+        this.canvas.height = totalRows * this.TILE_H;
+        
+        this.fontSize = Math.max(10, this.TILE_H - 2);
+        this.ctx.font = `${this.fontSize}px monospace`;
+        this.ctx.textBaseline = 'top';
+        this.ctx.imageSmoothingEnabled = false;
+    }
 
   /**
    * Master render call. Called every frame by Game.render().
-   * @param {TileMap}      map
-   * @param {Player}       player
-   * @param {MessageLog}   log
-   * @param {number}       cameraX  Top-left tile of viewport (for scrolling)
-   * @param {number}       cameraY
    */
   render(map, player, log, cameraX = 0, cameraY = 0, theme = null) {
     this._clear();
@@ -36,28 +80,11 @@ export class Renderer {
     this._drawLog(log);
   }
 
-  // ---------------------------------------------------------------
-  // PRIVATE METHODS — implement each:
-
   _clear() {
     this.ctx.fillStyle = '#000';
     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
   }
 
-  /**
-   * Draw all tiles in the viewport area.
-   * For each visible column col in [0, VIEW_COLS) and row in [0, VIEW_ROWS):
-   *   1. Compute map coords: mx = cameraX + col, my = cameraY + row
-   *   2. If out of bounds: draw black
-   *   3. Get tile at (mx, my)
-   *   4. If !tile.explored: draw black
-   *   5. If tile.explored but !tile.visible: draw tile in "dim" colors
-   *      (multiply RGB by 0.4 — apply a '#333' overlay or use dimmed fg color)
-   *   6. If tile.visible: draw tile at full color
-   *   7. Draw background rect then character glyph:
-   *      ctx.fillStyle = tile.bg; ctx.fillRect(x, y, TILE_W, TILE_H);
-   *      ctx.fillStyle = tile.fg; ctx.fillText(glyphToChar(tile.glyph), x, y);
-   */
     _drawTileMap(map, cameraX, cameraY) {
         for (let row = 0; row < this.VIEW_ROWS; row++) {
             for (let col = 0; col < this.VIEW_COLS; col++) {
@@ -94,7 +121,8 @@ export class Renderer {
     }
 
     _dimColor(color) {
-        if (!color.startsWith('#')) return color;
+        if (color && !color.startsWith('#')) return color;
+        if (!color) return '#000000';
         const r = parseInt(color.slice(1, 3), 16);
         const g = parseInt(color.slice(3, 5), 16);
         const b = parseInt(color.slice(5, 7), 16);
@@ -105,20 +133,6 @@ export class Renderer {
         return `#${dr.toString(16).padStart(2, '0')}${dg.toString(16).padStart(2, '0')}${db.toString(16).padStart(2, '0')}`;
     }
 
-  /**
-   * Draw entities (monsters, items) on the map.
-   * Iterate map.entities (Map of key → Entity[]).
-   * For each entity array:
-   *   1. Parse x,y from the key ("x,y")
-   *   2. Compute screen col/row relative to camera
-   *   3. Skip if outside viewport
-   *   4. Check if tile at (x,y) is visible — only draw if visible
-   *   5. Look up glyph and color from entity.def (for monsters) or entity data (for items)
-   *   6. Draw background then character
-   * 
-   * Monster glyph: entity.def.glyph (CP437 code → char via glyphToChar)
-   * Monster color: entity.def.color
-   */
     _drawEntities(map, cameraX, cameraY) {
         for (const [key, entityList] of map.entities) {
             if (!entityList || entityList.length === 0) continue;
@@ -152,13 +166,6 @@ export class Renderer {
         }
     }
 
-  /**
-   * Draw the player '@' glyph.
-   * Player is always in the center of the viewport (camera tracks player).
-   * Screen position = (VIEW_COLS/2, VIEW_ROWS/2) — but use actual camera offset.
-   * col = player.x - cameraX, row = player.y - cameraY
-   * Color: '#ffffff' always (player is always visible)
-   */
     _drawPlayer(player, cameraX, cameraY) {
         const col = player.x - cameraX;
         const row = player.y - cameraY;
@@ -169,21 +176,18 @@ export class Renderer {
         this.ctx.fillText('@', x, y);
     }
 
-  /**
-   * Draw the HUD panel on the right side.
-   */
     _drawHUD(player, theme) {
         const x = this.HUD_X;
         let y = 10;
         const lineH = this.TILE_H;
         const panelW = this.canvas.width - x;
 
+        this.ctx.font = `${this.fontSize}px monospace`;
+
         // Separator
         this.ctx.fillStyle = '#333333';
         this.ctx.fillRect(x - 4, 0, 2, this.canvas.height);
         
-        this.ctx.font = `16px monospace`;
-
         // Name, Class, Level
         this.ctx.fillStyle = '#ffffff';
         this.ctx.fillText(player.name, x, y);
@@ -244,19 +248,16 @@ export class Renderer {
         this.ctx.fillText(`Level ${player.depth}: ${theme?.name ?? 'Unknown'}`, x, y);
         y += lineH;
 
-        this.ctx.font = `${this.TILE_H - 2}px monospace`; // Reset font
+        this.ctx.font = `${this.fontSize}px monospace`; // Reset font
     }
 
-  /**
-   * Draw the message log at the bottom of the canvas.
-   */
     _drawLog(log) {
         const x = 10;
         const y = this.LOG_Y;
 
         // Separator
         this.ctx.fillStyle = '#333333';
-        this.ctx.fillRect(0, y - 4, this.HUD_X - 8, 2);
+        this.ctx.fillRect(0, y - 4, this.HUD_X > 0 ? this.HUD_X - 8 : this.canvas.width, 2);
 
         const messages = log.getVisible(4);
         messages.forEach((msg, i) => {
@@ -266,15 +267,9 @@ export class Renderer {
     }
 }
 
-/**
- * Convert a CP437 char code to a renderable character string.
- * For MVP, handle the common cases. Unknown codes fall back to '?'.
- */
 export function glyphToChar(code) {
-  // Direct ASCII range: just use String.fromCharCode
   if (code >= 0x20 && code <= 0x7E) return String.fromCharCode(code);
   
-  // Common CP437 non-ASCII glyphs used by the game:
   const cp437Map = {
     0x01: '☺', 0x02: '☻', 0x03: '♥', 0x04: '♦', 0x05: '♣', 0x06: '♠',
     0x07: '•', 0x0F: '☼',
@@ -288,11 +283,6 @@ export function glyphToChar(code) {
   return cp437Map[code] ?? '?';
 }
 
-/**
- * Renders a subtle CRT scanline + vignette overlay on top of the game canvas.
- * Implemented as a second canvas layered over the main canvas via CSS.
- * Performance: Pre-rendered to an OffscreenCanvas, drawn once per frame.
- */
 export function buildCRTOverlay(w, h) {
   const canvas = (typeof OffscreenCanvas !== 'undefined') ? new OffscreenCanvas(w, h) : document.createElement('canvas');
   if (canvas.tagName === 'CANVAS') {
@@ -301,11 +291,9 @@ export function buildCRTOverlay(w, h) {
   }
   const ctx = canvas.getContext('2d');
 
-  // Scanlines
   ctx.fillStyle = 'rgba(0,0,0,0.08)';
   for (let y = 0; y < h; y += 2) ctx.fillRect(0, y, w, 1);
 
-  // Vignette
   const vignette = ctx.createRadialGradient(w/2, h/2, h*0.4, w/2, h/2, h*0.9);
   vignette.addColorStop(0, 'rgba(0,0,0,0)');
   vignette.addColorStop(1, 'rgba(0,0,0,0.55)');
