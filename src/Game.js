@@ -398,7 +398,7 @@ class Game {
   _renderPlaying() {
     if (!this.player || !this.worldMap) return;
     const map = this.worldMap.getLevel(this.currentLevel);
-    this.renderer.render(map, this.player, this.log, this.camera.x, this.camera.y);
+    this.renderer.render(map, this.player, this.log, this.camera.x, this.camera.y, map.metadata.theme);
   }
 
   _renderDead() {

@@ -178,6 +178,7 @@ export class LevelGen {
   static generate(levelNumber, rng) {
     const theme   = this._pickTheme(levelNumber, rng);
     const map     = new TileMap(MAP_W, MAP_H);
+    map.metadata.theme = theme;
     const rooms   = this._carveRooms(map, rng, theme);
     if(rooms.length > 1) {
         this._connectRooms(map, rooms, rng, theme);

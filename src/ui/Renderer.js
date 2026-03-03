@@ -27,12 +27,12 @@ export class Renderer {
    * @param {number}       cameraX  Top-left tile of viewport (for scrolling)
    * @param {number}       cameraY
    */
-  render(map, player, log, cameraX = 0, cameraY = 0) {
+  render(map, player, log, cameraX = 0, cameraY = 0, theme = null) {
     this._clear();
     this._drawTileMap(map, cameraX, cameraY);
     this._drawEntities(map, cameraX, cameraY);
     this._drawPlayer(player, cameraX, cameraY);
-    this._drawHUD(player);
+    this._drawHUD(player, theme);
     this._drawLog(log);
   }
 
@@ -171,25 +171,12 @@ export class Renderer {
 
   /**
    * Draw the HUD panel on the right side.
-   * Starting at pixel x = HUD_X, draw text lines top-to-bottom:
-   *   Line 0:  Player name (white)
-   *   Line 1:  "Class: {className}  L:{level}" (yellow)
-   *   Line 2:  "HP: {hp}/{hpMax}" — color green if >50%, yellow if >25%, red if lower
-   *   Line 3:  HP bar — draw filled rect for current HP ratio, empty for rest
-   *   Line 4:  "AC: {ac}" (white)
-   *   Line 5:  "STR:{str} DEX:{dex}" (gray)
-   *   Line 6:  "CON:{con} INT:{int}" (gray)
-   *   Line 7:  "WIS:{wis} CHA:{cha}" (gray)
-   *   Line 8:  "XP: {xp}" (cyan)
-   *   Line 9:  "Gold: {gold}gp" (yellow)
-   *   Line 10: "Depth: {depth}" (white)
-   * Use ctx.fillText() for all text in this panel.
-   * Draw a vertical separator line at HUD_X - 4px in dark gray.
    */
-    _drawHUD(player) {
+    _drawHUD(player, theme) {
         const x = this.HUD_X;
         let y = 10;
         const lineH = this.TILE_H;
+        const panelW = this.canvas.width - x;
 
         // Separator
         this.ctx.fillStyle = '#333333';
@@ -197,17 +184,15 @@ export class Renderer {
         
         this.ctx.font = `16px monospace`;
 
-        // Line 0: Player name
+        // Name, Class, Level
         this.ctx.fillStyle = '#ffffff';
         this.ctx.fillText(player.name, x, y);
         y += lineH;
-
-        // Line 1: Class and Level
         this.ctx.fillStyle = '#ffff00';
-        this.ctx.fillText(`Class: ${player.className} L:${player.level}`, x, y);
-        y += lineH;
+        this.ctx.fillText(`Lvl ${player.level} ${player.class.name}`, x, y);
+        y += lineH * 1.5;
 
-        // Line 2: HP text
+        // HP
         const hpRatio = player.hp / player.hpMax;
         let hpColor = '#00ff00';
         if (hpRatio <= 0.5) hpColor = '#ffff00';
@@ -215,52 +200,55 @@ export class Renderer {
         this.ctx.fillStyle = hpColor;
         this.ctx.fillText(`HP: ${player.hp}/${player.hpMax}`, x, y);
         y += lineH;
-
-        // Line 3: HP bar
-        const barWidth = 150;
+        const barWidth = panelW - 16;
         this.ctx.fillStyle = '#440000';
         this.ctx.fillRect(x, y, barWidth, lineH - 4);
         this.ctx.fillStyle = hpColor;
         this.ctx.fillRect(x, y, barWidth * hpRatio, lineH - 4);
-        y += lineH;
+        y += lineH * 1.5;
 
-        // Line 4: AC
+        // Stats
+        this.ctx.fillStyle = '#888888';
+        this.ctx.fillText(`STR:${player.stats.str} DEX:${player.stats.dex} CON:${player.stats.con}`, x, y);
+        y += lineH;
+        this.ctx.fillText(`INT:${player.stats.int} WIS:${player.stats.wis} CHA:${player.stats.cha}`, x, y);
+        y += lineH;
         this.ctx.fillStyle = '#ffffff';
         this.ctx.fillText(`AC: ${player.ac}`, x, y);
-        y += lineH;
-        
-        // Line 5-7: Stats
+        y += lineH * 1.5;
+
+        // Equipment
         this.ctx.fillStyle = '#888888';
-        this.ctx.fillText(`STR:${player.stats.str} DEX:${player.stats.dex}`, x, y);
+        this.ctx.fillText('─ Equipment ─', x, y);
         y += lineH;
-        this.ctx.fillText(`CON:${player.stats.con} INT:${player.stats.int}`, x, y);
-        y += lineH;
-        this.ctx.fillText(`WIS:${player.stats.wis} CHA:${player.stats.cha}`, x, y);
-        y += lineH;
-
-        // Line 8: XP
-        this.ctx.fillStyle = '#00ffff';
-        this.ctx.fillText(`XP: ${player.xp}`, x, y);
-        y += lineH;
-
-        // Line 9: Gold
-        this.ctx.fillStyle = '#ffff00';
-        this.ctx.fillText(`Gold: ${player.gold}gp`, x, y);
-        y += lineH;
-
-        // Line 10: Depth
         this.ctx.fillStyle = '#ffffff';
-        this.ctx.fillText(`Depth: ${player.depth}`, x, y);
-        
+        this.ctx.fillText(`Wpn: ${player.equipped.weapon?.name ?? 'Unarmed'}`, x, y);
+        y += lineH;
+        this.ctx.fillText(`Arm: ${player.equipped.body?.name ?? 'None'}`, x, y);
+        y += lineH * 1.5;
+
+        // Status
+        this.ctx.fillStyle = '#888888';
+        this.ctx.fillText('─ Status ─', x, y);
+        y += lineH;
+        this.ctx.fillStyle = '#ff6666';
+        const statuses = player.statuses.map(s => `[${s.key}]`).join(' ');
+        this.ctx.fillText(statuses, x, y);
+        y += lineH * 1.5;
+
+        // Depth
+        this.ctx.fillStyle = '#888888';
+        this.ctx.fillText('─ Depth ─', x, y);
+        y += lineH;
+        this.ctx.fillStyle = '#ffffff';
+        this.ctx.fillText(`Level ${player.depth}: ${theme?.name ?? 'Unknown'}`, x, y);
+        y += lineH;
+
         this.ctx.font = `${this.TILE_H - 2}px monospace`; // Reset font
     }
 
   /**
    * Draw the message log at the bottom of the canvas.
-   * Get last 4 messages from log.getVisible(4).
-   * Draw each message line at LOG_Y + (lineIndex * TILE_H).
-   * Use the message's .color property for the text color.
-   * Draw a horizontal separator at LOG_Y - 4px.
    */
     _drawLog(log) {
         const x = 10;
