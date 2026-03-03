@@ -5,10 +5,10 @@ export const PUZZLES = {
     name: 'The Three Shrines',
     description: 'Three stone statues stand in alcoves — a warrior, a priest, and a mage.',
     examineText: (state) => {
-      const base = 'Three ancient statues stand in alcoves:
+      const base = `Three ancient statues stand in alcoves:
   The Warrior grips an empty shield-hand.
   The Priest raises open palms toward heaven.
-  The Mage's staff-cradle is carved but empty.';
+  The Mage's staff-cradle is carved but empty.`;
       if (state.warrior_given && state.priest_given && state.mage_given)
         return base + '
 
