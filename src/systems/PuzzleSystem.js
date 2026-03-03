@@ -1,21 +1,14 @@
+import { Item } from '../entities/Item.js';
+
 /**
  * Puzzles are stateful objects placed in rooms.
  * They expose an examine/interact interface and resolve when solved.
- * 
- * PUZZLE ARCHETYPES:
- *   'combination_lock'  — Discover combination from room clues, enter it
- *   'elemental_altar'   — Place correct item types on altar to unlock passage
- *   'inscription_riddle'— Read inscription, answer riddle via menu
- *   'lever_sequence'    — Flip levers in correct order (clues in room)
- *   'statue_offering'   — Offer correct item to statue for reward
- *   'water_basin'       — Fill basin, drain, manipulate water flow
- *   'mural_alignment'   — Rotate mural panels to form coherent image
- *   'magic_rune_trace'  — Trace rune pattern on floor using movement
- *   'mirror_redirect'   — Orient mirrors to redirect magical beam to target
- *   'weight_scale'      — Balance scale with correct item weights
  */
 export class PuzzleSystem {
-  constructor(eventBus) { this.bus = eventBus; }
+  constructor(eventBus, game) { 
+      this.bus = eventBus;
+      this.game = game;
+    }
 
   /** 
    * Called when player examines a puzzle tile.
@@ -32,7 +25,7 @@ export class PuzzleSystem {
   /** Attempt an interaction. Returns { success, message, sideEffects } */
   interact(puzzle, player, interactionKey, params = {}) {
     const interaction = puzzle.def.interactions.find(i => i.key === interactionKey);
-    if (!interaction) return { success: false, message: 'You can't do that.' };
+    if (!interaction) return { success: false, message: 'You can\'t do that.' };
 
     const result = interaction.resolve(puzzle.state, player, params);
     Object.assign(puzzle.state, result.stateChanges ?? {});
@@ -55,6 +48,38 @@ export class PuzzleSystem {
     // Rewards: XP, items, passage opens, lore reveals, stat bonuses
     if (reward.xp)     player.gainXP(reward.xp);
     if (reward.items)  reward.items.forEach(i => player.addToInventory(Item.create(i)));
-    if (reward.openPassage) this._openPassage(puzzle.location, reward.openPassage);
+    if (reward.openPassage) this._openPassage(puzzle, reward.openPassage);
+  }
+
+  _openPassage(puzzle, direction) {
+      const map = this.game.worldMap.getLevel(puzzle.location.z);
+      if(!map) return;
+
+      let {x, y} = puzzle.location;
+      
+      // Super simple implementation: just open the wall tile in the given direction
+      let wallX = x;
+      let wallY = y;
+
+      switch(direction) {
+          case 'north': wallY--; break;
+          case 'south': wallY++; break;
+          case 'east':  wallX++; break;
+          case 'west':  wallX--; break;
+      }
+
+      if(map.inBounds(wallX, wallY)) {
+          const tile = map.get(wallX, wallY);
+          if(!tile.solid) return; // Already open
+
+          tile.solid = false;
+          tile.opaque = false;
+          tile.type = 'floor';
+          // Use a generic floor look for now
+          tile.glyph = 0x2E;
+          tile.fg = '#5a5a5a';
+          tile.bg = '#0a0a0a';
+          this.bus.emit('log:message', { text: 'You hear a grinding sound as a wall slides away.', category: 'important' });
+      }
   }
 }

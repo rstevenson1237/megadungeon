@@ -15,9 +15,9 @@ function rollSave(entity, saveType) {
  * Resolves spell casting and effects.
  */
 export class MagicSystem {
-  constructor(eventBus, worldMap) {
+  constructor(eventBus, game) {
     this.bus = eventBus;
-    this.worldMap = worldMap;
+    this.game = game;
   }
 
   /**
@@ -29,7 +29,7 @@ export class MagicSystem {
     if (!spell) return { success: false, message: 'Unknown spell.' };
     if (caster.mp < spell.mpCost) return { success: false, message: 'Not enough mana.' };
     
-    const map = this.worldMap.getLevel(caster.depth);
+    const map = this.game.worldMap.getLevel(caster.depth);
     if (!this._inRange(caster, targetPos, spell.range, map)) {
         return { success: false, message: 'Out of range.' };
     }
@@ -44,13 +44,14 @@ export class MagicSystem {
 
   _inRange(caster, targetPos, rangeStr, map) {
       if (rangeStr === 'self' || rangeStr === 'touch') {
-          return caster.x === targetPos.x && caster.y === targetPos.y;
+          // For touch, assume targetPos is adjacent or on self
+          return Math.abs(caster.x - targetPos.x) <= 1 && Math.abs(caster.y - targetPos.y) <= 1;
       }
       if (rangeStr === 'sight') {
           const targetTile = map.get(targetPos.x, targetPos.y);
           return targetTile && targetTile.visible;
       }
-      const range = parseInt(rangeStr);
+      const range = parseInt(rangeStr) / 5; // Convert feet to tiles
       const dist = Math.hypot(caster.x - targetPos.x, caster.y - targetPos.y);
       return dist <= range;
   }
@@ -73,11 +74,11 @@ export class MagicSystem {
   _resolveTargets(caster, pos, spell, map) {
     switch (spell.area) {
       case 'single':
-        return map.getEntitiesAt(pos.x, pos.y).filter(e => e !== caster);
+        return map.getEntitiesAt(pos.x, pos.y);
       case 'burst:15ft':
       case 'burst:20ft': {
         const radius = parseInt(spell.area.split(':')[1]) / 5; // 5ft per tile
-        return this._entitiesInRadius(pos, radius, map).filter(e => e !== caster);
+        return this._entitiesInRadius(pos, radius, map);
       }
       case 'all_visible':
         return [...map.entities.values()].flat().filter(e => {
@@ -110,7 +111,7 @@ export class MagicSystem {
         }
         if (saved && spell.saveEffect === 'half') dmg = Math.floor(dmg / 2);
         if (!saved || spell.saveEffect !== 'negate') {
-          target.hp -= Math.max(0, dmg - (target.resistance?.[effect.element] ?? 0));
+          target.hp = Math.max(0, target.hp - (target.resistance?.[effect.element] ?? 0));
         }
         return { target, effect: 'damage', value: dmg, saved };
       }
@@ -120,29 +121,30 @@ export class MagicSystem {
         return { target, effect: 'heal', value: healed };
       }
       case 'sleep': {
-        if (target.hasTag('undead') || target.hasTag('construct')) return { target, effect: 'immune' };
+        if (target.tags?.has('undead') || target.tags?.has('construct')) return { target, effect: 'immune' };
         if (!saved) StatusSystem.apply(target, 'sleep', { duration: rollDiceStr('1d4+4') });
         return { target, effect: 'sleep', saved };
       }
       case 'turn': {
         const hd = target.def?.hd ?? 1;
-        const turn = TurnUndeadTable[caster.level]?.[hd-1];
-        if (turn === 'T') StatusSystem.apply(target, 'flee', { duration: 10 });
-        if (turn === 'D') target.hp = 0; // Destroyed
-        return { target, effect: 'turn', result: turn };
+        const turnResult = TurnUndeadTable[caster.level]?.[hd-1];
+        if (turnResult === 'T') StatusSystem.apply(target, 'flee', { duration: 10 });
+        if (turnResult === 'D') target.hp = 0; // Destroyed
+        return { target, effect: 'turn', result: turnResult };
       }
       case 'light': {
           // This would be handled by a system that applies light sources to the map
-          console.log(`Applying light effect at ${target.x}, ${target.y}`);
+          this.bus.emit('log:message', { text: 'A magical light begins to glow.'});
           return {target, effect: 'light'};
       }
       case 'detect': {
           // This would be handled by a system that reveals entities on the map
-          console.log(`Detecting ${effect.target}`);
+          this.bus.emit('log:message', { text: `You sense the presence of ${effect.target}.`});
           return {target, effect: 'detect'};
       }
       case 'buff': {
           StatusSystem.apply(target, 'buff', { stat: effect.stat, value: effect.value, duration: 10 /* temp */ });
+          this.bus.emit('log:message', { text: `${target.name} feels blessed!`});
           return {target, effect: 'buff'};
       }
     }

@@ -131,7 +131,7 @@ export class RoomGen {
       const pos = this._randomFloorInRoom(map, room);
       if (pos) {
           const puzzleKey = this.rng.pick(Object.keys(PUZZLES));
-          const puzzle = { ...PUZZLES[puzzleKey] };
+          const puzzle = { def: PUZZLES[puzzleKey], state: { ...PUZZLES[puzzleKey].initialState }, solved: false, location: { x: pos.x, y: pos.y, z: this.level } };
           map.get(pos.x, pos.y).features.puzzle = puzzle;
           bus.emit('log:message', { text: `You see something interesting.` });
       }

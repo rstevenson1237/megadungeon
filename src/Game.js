@@ -9,6 +9,8 @@ import { Player }        from './entities/Player.js';
 import { Renderer, glyphToChar } from './ui/Renderer.js';
 import { MessageLog }    from './ui/HUD.js';
 import { CombatSystem }  from './systems/CombatSystem.js';
+import { MagicSystem } from './systems/MagicSystem.js';
+import { PuzzleSystem } from './systems/PuzzleSystem.js';
 
 const PLAYER_FOV_RADIUS = 8;
 
@@ -18,6 +20,7 @@ const STATE = {
   CHAR_CREATE: 'char_create',
   PLAYING:     'playing',
   DEAD:        'dead',
+  PUZZLE:      'puzzle',
 };
 
 class Game {
@@ -30,12 +33,15 @@ class Game {
     this.renderer  = new Renderer(this.canvasEl);
     this.log       = new MessageLog(200);
     this.combat    = new CombatSystem(this.bus);
+    this.magic     = new MagicSystem(this.bus, this);
+    this.puzzles   = new PuzzleSystem(this.bus, this);
 
     this.state        = STATE.TITLE;
     this.player       = null;
     this.worldMap     = null;
     this.currentLevel = 1;
     this.camera       = { x: 0, y: 0 };
+    this.activePuzzle = null;
 
     this._setupEventListeners();
   }
@@ -107,6 +113,7 @@ class Game {
       case STATE.TITLE:       this._updateTitle(); break;
       case STATE.PLAYING:     this._updatePlaying(); break;
       case STATE.DEAD:        this._updateDead(); break;
+      case STATE.PUZZLE:      this._updatePuzzle(); break;
     }
   }
 
@@ -120,6 +127,11 @@ class Game {
     if (!action) return; // Turn-based: only advance on input
 
     const map = this.worldMap.getLevel(this.currentLevel);
+
+    if(action === 'examine') {
+        this._handleExamine();
+        return;
+    }
 
     if (this._handleMovement(action, map)) {
       // Movement or attack consumed the turn — run monster AI
@@ -144,6 +156,36 @@ class Game {
       this.worldMap = null;
       this.log.messages = [];
     }
+  }
+
+  _updatePuzzle() {
+      // In a real UI, this would handle menu selections.
+      // For now, we'll just exit on any key press.
+      const action = this.input.consumeAction();
+      if(action) {
+          this.state = STATE.PLAYING;
+          this.activePuzzle = null;
+          this.log.add('You step back from the puzzle.', 'system');
+      }
+  }
+
+  _handleExamine() {
+      const map = this.worldMap.getLevel(this.currentLevel);
+      const tile = map.get(this.player.x, this.player.y);
+      const puzzle = tile.features.puzzle;
+
+      if(puzzle) {
+          this.activePuzzle = puzzle;
+          const puzzleState = this.puzzles.examine(puzzle);
+          this.log.add(`-- ${puzzleState.name} --`, 'important');
+          this.log.add(puzzleState.description, 'puzzle');
+          puzzleState.interactions.forEach(int => {
+              this.log.add(`- ${int.label}`, 'puzzle-action');
+          });
+          this.state = STATE.PUZZLE;
+      } else {
+          this.log.add('There is nothing to examine here.', 'system');
+      }
   }
 
   // ---------------------------------------------------------------
@@ -327,6 +369,7 @@ class Game {
     switch (this.state) {
       case STATE.TITLE:   this._renderTitle(); break;
       case STATE.PLAYING: this._renderPlaying(); break;
+      case STATE.PUZZLE:  this._renderPlaying(); break; // For now, just show the game screen
       case STATE.DEAD:    this._renderDead(); break;
     }
   }
