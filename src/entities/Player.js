@@ -59,9 +59,9 @@ export class Player extends Entity {
   _computeAC() {
     let ac = 10;
     ac -= statModifier(this.stats.dex);
-    if (this.equipped.body)   ac -= this.equipped.body.acBonus   ?? 0;
-    if (this.equipped.helmet) ac -= this.equipped.helmet.acBonus ?? 0;
-    if (this.equipped.boots)  ac -= this.equipped.boots.acBonus  ?? 0;
+    if (this.equipped.body)   ac -= this.equipped.body.armor?.acBonus   ?? 0;
+    if (this.equipped.helmet) ac -= this.equipped.helmet.armor?.acBonus ?? 0;
+    if (this.equipped.boots)  ac -= this.equipped.boots.armor?.acBonus  ?? 0;
     for (const status of this.statuses) ac += status.acMod ?? 0;
     return ac;
   }
@@ -125,7 +125,7 @@ export class Player extends Entity {
 
   _rollDamage() {
     const weapon = this.equipped.weapon;
-    const [num, die] = weapon ? weapon.damage : [1, 4]; // unarmed = 1d4
+    const [num, die] = weapon ? weapon.weapon.damage : [1, 4]; // unarmed = 1d4
     let dmg = 0;
     for (let i = 0; i < num; i++) dmg += rollDie(die);
     dmg += statModifier(this.stats.str) + (weapon?.damageMod ?? 0);
