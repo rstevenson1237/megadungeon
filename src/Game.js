@@ -11,6 +11,7 @@ import { MessageLog }    from './ui/HUD.js';
 import { CombatSystem }  from './systems/CombatSystem.js';
 import { MagicSystem } from './systems/MagicSystem.js';
 import { PuzzleSystem } from './systems/PuzzleSystem.js';
+import { QuestSystem } from './systems/QuestSystem.js';
 
 const PLAYER_FOV_RADIUS = 8;
 
@@ -39,6 +40,7 @@ class Game {
     this.state        = STATE.TITLE;
     this.player       = null;
     this.worldMap     = null;
+    this.quests       = null;
     this.currentLevel = 1;
     this.camera       = { x: 0, y: 0 };
     this.activePuzzle = null;
@@ -78,6 +80,7 @@ class Game {
     const seed = Date.now();
     this.rng.seed = seed;
     this.worldMap = new WorldMap(this.rng.seed);
+    this.quests = new QuestSystem(this.worldMap, this.rng);
     
     // Auto-create a level 1 Fighter for MVP (bypassing char creation)
     const stats = { str: 16, dex: 12, con: 14, int: 9, wis: 11, cha: 10 };
