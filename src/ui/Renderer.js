@@ -261,7 +261,7 @@ export class Renderer {
         const messages = log.getVisible(4);
         messages.forEach((msg, i) => {
             this.ctx.fillStyle = msg.color;
-            this.ctx.fillText(msg.text, x, y + i * (this.TILE_H - 4));
+            this.ctx.fillText(msg.text, x, y + i * this.TILE_H);
         });
     }
 }

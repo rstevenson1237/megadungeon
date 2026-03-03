@@ -423,28 +423,28 @@ class Game {
   }
 
   async _toggleMinimap() {
-    const mc = document.getElementById('minimap-canvas');
+    let mc = document.getElementById('minimap-canvas');
     if (!mc) {
-        const newCanvas = document.createElement('canvas');
-        newCanvas.id = 'minimap-canvas';
-        newCanvas.style.position = 'absolute';
-        newCanvas.style.top = '50%';
-        newCanvas.style.left = '50%';
-        newCanvas.style.transform = 'translate(-50%, -50%)';
-        newCanvas.style.border = '2px solid #555';
-        newCanvas.style.display = 'none';
-        document.body.appendChild(newCanvas);
+        mc = document.createElement('canvas');
+        mc.id = 'minimap-canvas';
+        mc.style.position = 'absolute';
+        mc.style.top = '50%';
+        mc.style.left = '50%';
+        mc.style.transform = 'translate(-50%, -50%)';
+        mc.style.border = '2px solid #555';
+        mc.style.background = 'rgba(0,0,0,0.8)';
+        document.getElementById('game-wrapper').appendChild(mc);
     }
-    const newMc = document.getElementById('minimap-canvas');
-    if (newMc.style.display === 'none' || newMc.style.display === '') {
+    
+    if (mc.style.display === 'none' || mc.style.display === '') {
       // Render and show minimap
       const { Minimap } = await import('./ui/Minimap.js'); // lazy import
       const map = this.worldMap.getLevel(this.currentLevel);
-      const mm = new Minimap(map, newMc);
+      const mm = new Minimap(map, mc);
       mm.render(this.player.x, this.player.y);
-      newMc.style.display = 'block';
+      mc.style.display = 'block';
     } else {
-      newMc.style.display = 'none';
+      mc.style.display = 'none';
     }
   }
 }
