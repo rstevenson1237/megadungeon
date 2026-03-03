@@ -24,6 +24,26 @@ export function statModifier(stat) {
 }
 
 /**
+ * Parses a dice string (e.g., '2d6+3') and returns the result.
+ * @param {string} diceStr The dice string to roll.
+ * @returns {number} The total result of the roll.
+ */
+export function rollDiceStr(diceStr) {
+    const match = diceStr.match(/(\d+)?d(\d+)([+-]\d+)?/);
+    if (!match) return 0;
+
+    const numDice = match[1] ? parseInt(match[1]) : 1;
+    const sides = parseInt(match[2]);
+    const mod = match[3] ? parseInt(match[3]) : 0;
+
+    let total = 0;
+    for (let i = 0; i < numDice; i++) {
+        total += rollDie(sides);
+    }
+    return total + mod;
+}
+
+/**
  * The maximum level a player can attain.
  */
 export const MAX_LEVEL = 20;
