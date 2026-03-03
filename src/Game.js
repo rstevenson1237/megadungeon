@@ -46,6 +46,27 @@ class Game {
     this.activePuzzle = null;
 
     this._setupEventListeners();
+    this._handleResize = () => {
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+        this.renderer.resize(w, h);
+        
+        // Resize CRT overlay to match
+        const crtCanvas = document.getElementById('crt-canvas');
+        if (crtCanvas) {
+            crtCanvas.width = this.renderer.canvas.width;
+            crtCanvas.height = this.renderer.canvas.height;
+            const crtCtx = crtCanvas.getContext('2d');
+            const crtOverlay = buildCRTOverlay(crtCanvas.width, crtCanvas.height);
+            crtCtx.drawImage(crtOverlay, 0, 0);
+        }
+        
+        // Recalculate camera
+        if (this.worldMap && this.player) {
+            const map = this.worldMap.getLevel(this.currentLevel);
+            this._updateCamera(map);
+        }
+    };
   }
 
   _setupEventListeners() {
@@ -69,12 +90,8 @@ class Game {
   async init() {
     // Start in TITLE state — the update loop handles transitions
     this.loop.start();
-    const crtCanvas = document.getElementById('crt-canvas');
-    const crtCtx = crtCanvas.getContext('2d');
-    crtCanvas.width = this.canvasEl.width;
-    crtCanvas.height = this.canvasEl.height;
-    const crtOverlay = buildCRTOverlay(crtCanvas.width, crtCanvas.height);
-    crtCtx.drawImage(crtOverlay, 0, 0);
+    window.addEventListener('resize', this._handleResize);
+    this._handleResize(); // Initial sizing
   }
 
   // ---------------------------------------------------------------
