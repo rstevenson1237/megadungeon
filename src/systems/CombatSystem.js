@@ -1,3 +1,22 @@
+import { rollDie, statModifier } from '../engine/rules.js';
+import { RNG } from '../engine/RNG.js';
+
+// Local RNG for fumble resolution (not seeded — that's acceptable for fumble flavor)
+const rng = new RNG(Date.now());
+
+// Stub for rollSave — implement properly in Phase 5
+function rollSave(entity, saveType) {
+  const threshold = entity.class?.savingThrows?.[saveType]
+    ?? entity.def?.savingThrows?.[saveType]
+    ?? 15;
+  return rollDie(20) >= threshold;
+}
+
+// Stub for chebyshevDistance
+function chebyshevDistance(a, b) {
+  return Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y));
+}
+
 /**
  * Handles all combat resolution. No game objects; operates on entity data.
  * Turn order uses initiative (d6 + DEX mod), resolved per turn.
@@ -122,10 +141,8 @@ export class CombatSystem {
 
   /** Ranged attack: adds range penalty, cover modifiers */
   resolveRangedAttack(attacker, defender, weapon) {
-    const dist    = chebyshevDistance(attacker, defender);
-    const range   = weapon?.weapon?.range ?? 3;
-    const penalty = dist > range ? Math.floor((dist - range) / 2) : 0;
-    // ... delegates to resolveAttack with penalty applied
+    // TODO Phase 5: implement range penalty
+    return this.resolveAttack(attacker, defender, weapon);
   }
 
   /** Morale check for monsters — do they flee? */

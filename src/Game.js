@@ -1,113 +1,403 @@
-import { InputManager } from './engine/InputManager.js';
-import { GameLoop } from './engine/GameLoop.js';
-import { EventBus } from './engine/EventBus.js';
-import { RNG } from './engine/RNG.js';
-import { SaveManager } from './engine/SaveManager.js';
-import { WorldMap } from './world/WorldMap.js';
-import { createInitialTownState } from './data/town.js';
-import { Entity } from './entities/Entity.js'; // Import the new Entity stub
+// src/Game.js — restructure to this shape:
+
+import { InputManager }  from './engine/InputManager.js';
+import { GameLoop }      from './engine/GameLoop.js';
+import { EventBus }      from './engine/EventBus.js';
+import { RNG }           from './engine/RNG.js';
+import { WorldMap }      from './world/WorldMap.js';
+import { Player }        from './entities/Player.js';
+import { Renderer, glyphToChar } from './ui/Renderer.js';
+import { MessageLog }    from './ui/HUD.js';
+import { CombatSystem }  from './systems/CombatSystem.js';
+
+const PLAYER_FOV_RADIUS = 8;
+
+// Game states
+const STATE = {
+  TITLE:       'title',
+  CHAR_CREATE: 'char_create',
+  PLAYING:     'playing',
+  DEAD:        'dead',
+};
 
 class Game {
-    constructor() {
-        this.canvasEl = document.getElementById('main-canvas');
-        this.input = new InputManager();
-        this.loop = new GameLoop(this.update.bind(this), this.render.bind(this));
-        this.bus = new EventBus();
-        this.rng = new RNG(Date.now()); // Master RNG for the game
-        this.ctx = this.canvasEl.getContext('2d');
-        
-        this.gameState = {
-            level: 1,
-            player: {
-                hp: 10,
-                x: 5,
-                y: 5
-            },
-            serialize: function() {
-                return {
-                    level: this.level,
-                    player: this.player
-                };
-            }
-        };
+  constructor() {
+    this.canvasEl  = document.getElementById('main-canvas');
+    this.input     = new InputManager();
+    this.loop      = new GameLoop(this.update.bind(this), this.render.bind(this));
+    this.bus       = new EventBus();
+    this.rng       = new RNG(Date.now());
+    this.renderer  = new Renderer(this.canvasEl);
+    this.log       = new MessageLog(200);
+    this.combat    = new CombatSystem(this.bus);
 
-        this.worldMap = new WorldMap(this.rng.seed);
-        console.log("Game created");
+    this.state        = STATE.TITLE;
+    this.player       = null;
+    this.worldMap     = null;
+    this.currentLevel = 1;
+    this.camera       = { x: 0, y: 0 };
+
+    this._setupEventListeners();
+  }
+
+  _setupEventListeners() {
+    // Wire bus events to message log
+    this.bus.on('log:message', ({ text, category }) => {
+      this.log.add(text, category ?? 'system');
+    });
+
+    this.bus.on('player:death', () => {
+      this.log.add('You have died!', 'danger');
+      this.state = STATE.DEAD;
+    });
+
+    this.bus.on('monster:death', ({ entity }) => {
+      this.log.add(`${entity.name} is slain!`, 'combat');
+      const map = this.worldMap.getLevel(this.currentLevel);
+      map.removeEntity(entity);
+    });
+  }
+
+  async init() {
+    // Start in TITLE state — the update loop handles transitions
+    this.loop.start();
+  }
+
+  // ---------------------------------------------------------------
+  // STATE: TITLE
+  // Show title screen. Press ENTER to start a new game.
+  // For MVP, skip character creation and auto-create a Fighter.
+
+  _startNewGame() {
+    const seed = Date.now();
+    this.rng.seed = seed;
+    this.worldMap = new WorldMap(this.rng.seed);
+    
+    // Auto-create a level 1 Fighter for MVP (bypassing char creation)
+    const stats = { str: 16, dex: 12, con: 14, int: 9, wis: 11, cha: 10 };
+    this.player = new Player('fighter', 'Adventurer', stats);
+    
+    this._enterLevel(1);
+    this.state = STATE.PLAYING;
+    this.log.add('You descend into the dungeon...', 'important');
+  }
+
+  _enterLevel(levelNum) {
+    this.currentLevel = levelNum;
+    this.player.depth = Math.max(this.player.depth, levelNum);
+    
+    const map = this.worldMap.getLevel(levelNum);
+    
+    // Place player at entry point
+    const entry = map.metadata.entry ?? { x: 5, y: 5 };
+    map.removeEntity(this.player); // In case re-entering
+    this.player.x = entry.x;
+    this.player.y = entry.y;
+    map.addEntity(this.player);
+    
+    // Compute initial FOV
+    map.computeFOV(this.player.x, this.player.y, PLAYER_FOV_RADIUS);
+    this._updateCamera(map);
+  }
+
+  // ---------------------------------------------------------------
+  // MAIN UPDATE — called every frame by GameLoop
+  update(dt) {
+    switch (this.state) {
+      case STATE.TITLE:       this._updateTitle(); break;
+      case STATE.PLAYING:     this._updatePlaying(); break;
+      case STATE.DEAD:        this._updateDead(); break;
+    }
+  }
+
+  _updateTitle() {
+    const action = this.input.consumeAction();
+    if (action === 'confirm') this._startNewGame();
+  }
+
+  _updatePlaying() {
+    const action = this.input.consumeAction();
+    if (!action) return; // Turn-based: only advance on input
+
+    const map = this.worldMap.getLevel(this.currentLevel);
+
+    if (this._handleMovement(action, map)) {
+      // Movement or attack consumed the turn — run monster AI
+      this._runMonsterAI(map);
+      map.computeFOV(this.player.x, this.player.y, PLAYER_FOV_RADIUS);
+      this._updateCamera(map);
+      this.bus.emit('turn:end', {});
     }
 
-    async init() {
-        console.log("Initializing game...");
-        this.canvasEl.width = 960;
-        this.canvasEl.height = 800;
-        
-        this.loop.start();
-        console.log("Game loop started.");
+    // Non-movement actions (no turn cost for MVP):
+    if (action === 'map') this._toggleMinimap();
+    if (action === 'stairs:down') this._tryDescend(map);
+    if (action === 'stairs:up')   this._tryAscend(map);
+  }
 
-        this.bus.on('log:message', (data) => {
-            console.log(`[LOG - ${data.category || 'general'}]: ${data.text}`);
-        });
+  _updateDead() {
+    const action = this.input.consumeAction();
+    if (action === 'confirm' || action === 'cancel') {
+      // Reset to title
+      this.state  = STATE.TITLE;
+      this.player = null;
+      this.worldMap = null;
+      this.log.messages = [];
+    }
+  }
 
-        this.bus.emit('log:message', { text: 'Game Initialized! (Font loading skipped)', category: 'game' });
+  // ---------------------------------------------------------------
+  // MOVEMENT & BUMP COMBAT
 
-        // --- Verification ---
-        this.bus.emit('log:message', { text: 'Verifying World & TileMap...', category: 'world' });
-        
-        // 1. Get Level 1 TileMap
-        const level1 = this.worldMap.getLevel(1);
-        this.bus.emit('log:message', { text: `Generated Level 1 metadata: ${JSON.stringify(level1.metadata)}`, category: 'world' });
+  _handleMovement(action, map) {
+    const DIR = {
+      'move:n':  [ 0, -1], 'move:s':  [ 0,  1],
+      'move:e':  [ 1,  0], 'move:w':  [-1,  0],
+      'move:ne': [ 1, -1], 'move:nw': [-1, -1],
+      'move:se': [ 1,  1], 'move:sw': [-1,  1],
+      'wait':    [ 0,  0],
+    };
 
-        // 2. Verify TileMap entity management
-        const testMonster = new Entity('test_monster', 10, 10);
-        level1.addEntity(testMonster);
-        this.bus.emit('log:message', { text: `Entities at (10,10): ${level1.getEntitiesAt(10,10).length}`, category: 'world' });
-        
-        level1.moveEntity(testMonster, 12, 12);
-        this.bus.emit('log:message', { text: `Entities at (10,10) after move: ${level1.getEntitiesAt(10,10).length}`, category: 'world' });
-        this.bus.emit('log:message', { text: `Entities at (12,12) after move: ${level1.getEntitiesAt(12,12).length}`, category: 'world' });
+    const dir = DIR[action];
+    if (!dir) return false;
 
-        // 3. Verify FOV (stub)
-        level1.computeFOV(12, 12, 5);
-        this.bus.emit('log:message', { text: `Tile visibility at (12,12) after FOV: ${level1.get(12,12).visible}`, category: 'world' });
-        this.bus.emit('log:message', { text: `Tile explored at (12,12) after FOV: ${level1.get(12,12).explored}`, category: 'world' });
-
-        // 4. Verify walkability
-        this.bus.emit('log:message', { text: `Is (0,0) walkable (void tile): ${level1.isWalkable(0,0)}`, category: 'world' });
-        // Can't test a non-solid tile yet as carveRoom is a stub and doesn't change tile properties
-
-        // 5. Verify Serialization
-        const serializedWorld = this.worldMap.serialize();
-        const deserializedWorld = WorldMap.deserialize(serializedWorld);
-        this.bus.emit('log:message', { text: `Deserialized map contains ${deserializedWorld.levels.get(1).tiles.length} tiles.`, category: 'world' });
-        
-        this.bus.emit('log:message', { text: 'TileMap verification complete.', category: 'world' });
-        // --- End Verification ---
+    const [dx, dy] = dir;
+    if (dx === 0 && dy === 0) {
+      this.log.add('You wait.', 'system');
+      return true; // Wait costs a turn
     }
 
-    update(dt) {
-        let action;
-        while ((action = this.input.consumeAction())) {
-            this.bus.emit('log:message', { text: `Action: ${action}`, category: 'input' });
+    const nx = this.player.x + dx;
+    const ny = this.player.y + dy;
+
+    // Check for monster at target position — bump attack
+    const entitiesAtTarget = map.getEntitiesAt(nx, ny);
+    const monster = entitiesAtTarget.find(e => e.type === 'monster');
+    if (monster) {
+      this._playerAttacks(monster);
+      return true;
+    }
+
+    // Check walkability
+    if (!map.isWalkable(nx, ny)) {
+      // Silent fail — wall bumps don't cost a turn in classic roguelikes
+      return false;
+    }
+
+    // Move player
+    map.moveEntity(this.player, nx, ny);
+    return true;
+  }
+
+  _playerAttacks(monster) {
+    const result = this.player.rollAttack(monster);
+    if (result.hit) {
+      monster.hp = Math.max(0, monster.hp - result.dmg);
+      const msg = result.critical
+        ? `CRITICAL HIT! You strike ${monster.name} for ${result.dmg} damage!`
+        : `You hit ${monster.name} for ${result.dmg} damage.`;
+      this.log.add(msg, 'combat');
+      if (monster.hp <= 0) {
+        const xpResult = this.player.gainXP(monster.def.xpBase + monster.def.xpPerHD * monster.def.hd);
+        this.bus.emit('monster:death', { entity: monster });
+        if (xpResult.leveled) {
+          this.log.add(`You feel more powerful! Level ${this.player.level}!`, 'important');
         }
+      }
+    } else {
+      this.log.add(`You miss ${monster.name}.`, 'combat');
+    }
+  }
+
+  _monsterAttacksPlayer(monster) {
+    const attack = monster.getPrimaryAttack();
+    // Simple THAC0 roll: d20 vs player AC
+    const roll = this.rng.die(20);
+    const hit  = roll >= (20 - this.player.ac);
+    if (hit) {
+      const dmg = Math.max(1, monster.rollDamage(attack));
+      this.player.hp = Math.max(0, this.player.hp - dmg);
+      this.log.add(`${monster.name} hits you for ${dmg} damage.`, 'danger');
+      if (this.player.hp <= 0) {
+        this.bus.emit('player:death', { cause: monster.name });
+      }
+    } else {
+      this.log.add(`${monster.name} misses you.`, 'combat');
+    }
+  }
+
+  // ---------------------------------------------------------------
+  // MONSTER AI (simple chase)
+
+  _runMonsterAI(map) {
+    const monsters = [];
+    for (const entityList of map.entities.values()) {
+      for (const e of entityList) {
+        if (e.type === 'monster') monsters.push(e);
+      }
     }
 
-    render(dt) {
-        this.ctx.fillStyle = '#000';
-        this.ctx.fillRect(0, 0, this.canvasEl.width, this.canvasEl.height);
-
-        this.ctx.fillStyle = "#ffcc88";
-        this.ctx.font = "20px monospace";
-        this.ctx.fillText("MEGADUNGEON", 20, 40);
-
-        this.ctx.fillStyle = "#00ff00";
-        this.ctx.fillText("Step 2.4 (TileMap) Verified.", 20, 80);
-
-        this.ctx.fillStyle = "#ccc";
-        this.ctx.fillText("Check the browser's developer console for TileMap verification logs.", 20, 120);
+    for (const monster of monsters) {
+      this._monsterTurn(monster, map);
     }
+  }
+
+  _monsterTurn(monster, map) {
+    const tile = map.get(monster.x, monster.y);
+    
+    // Only act if visible to player (in FOV) — prevents off-screen monster spam
+    if (!tile?.visible) return;
+
+    // Simple AI: move toward player, attack if adjacent
+    const dx = this.player.x - monster.x;
+    const dy = this.player.y - monster.y;
+    const dist = Math.abs(dx) + Math.abs(dy);
+
+    if (dist === 1 || (Math.abs(dx) === 1 && Math.abs(dy) === 1)) {
+      // Adjacent — attack
+      this._monsterAttacksPlayer(monster);
+      return;
+    }
+
+    // Move one step toward player (simple, non-pathfinding)
+    // Normalize direction
+    const stepX = dx === 0 ? 0 : (dx > 0 ? 1 : -1);
+    const stepY = dy === 0 ? 0 : (dy > 0 ? 1 : -1);
+
+    // Try primary direction, then fallbacks
+    const candidates = [
+      [stepX, stepY],
+      [stepX, 0],
+      [0, stepY],
+    ];
+
+    for (const [sx, sy] of candidates) {
+      if(sx === 0 && sy === 0) continue;
+      const nx = monster.x + sx;
+      const ny = monster.y + sy;
+      const occupied = map.getEntitiesAt(nx, ny).some(e => e.type !== 'item');
+      if (map.isWalkable(nx, ny) && !occupied) {
+        map.moveEntity(monster, nx, ny);
+        break;
+      }
+    }
+  }
+
+  // ---------------------------------------------------------------
+  // STAIRS
+
+  _tryDescend(map) {
+    const tile = map.get(this.player.x, this.player.y);
+    if (tile?.type === 'stair_down') {
+      this.log.add('You descend deeper into the dungeon.', 'important');
+      map.removeEntity(this.player);
+      this._enterLevel(this.currentLevel + 1);
+    } else {
+      this.log.add('There are no stairs going down here.', 'system');
+    }
+  }
+
+  _tryAscend(map) {
+    const tile = map.get(this.player.x, this.player.y);
+    if (tile?.type === 'stair_up' && this.currentLevel > 1) {
+      this.log.add('You ascend toward the surface.', 'important');
+      map.removeEntity(this.player);
+      this._enterLevel(this.currentLevel - 1);
+    } else if (this.currentLevel === 1) {
+      this.log.add('You are at the dungeon entrance. Return to town? (not yet implemented)', 'system');
+    } else {
+      this.log.add('There are no stairs going up here.', 'system');
+    }
+  }
+
+  // ---------------------------------------------------------------
+  // CAMERA
+
+  _updateCamera(map) {
+    const halfCols = Math.floor(this.renderer.VIEW_COLS / 2);
+    const halfRows = Math.floor(this.renderer.VIEW_ROWS / 2);
+    this.camera.x = Math.max(0, Math.min(this.player.x - halfCols, map.w - this.renderer.VIEW_COLS));
+    this.camera.y = Math.max(0, Math.min(this.player.y - halfRows, map.h - this.renderer.VIEW_ROWS));
+  }
+
+  // ---------------------------------------------------------------
+  // RENDER — called every frame
+
+  render(dt) {
+    switch (this.state) {
+      case STATE.TITLE:   this._renderTitle(); break;
+      case STATE.PLAYING: this._renderPlaying(); break;
+      case STATE.DEAD:    this._renderDead(); break;
+    }
+  }
+
+  _renderTitle() {
+    const ctx = this.renderer.ctx;
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, this.canvasEl.width, this.canvasEl.height);
+    ctx.fillStyle = '#cc4444';
+    ctx.font = 'bold 48px monospace';
+    ctx.textBaseline = 'top';
+    ctx.fillText('MEGADUNGEON', 180, 200);
+    ctx.fillStyle = '#888888';
+    ctx.font = '20px monospace';
+    ctx.fillText('A descent into the mythic underworld', 180, 270);
+    ctx.fillStyle = '#ffcc44';
+    ctx.fillText('Press ENTER to begin', 240, 360);
+    ctx.fillStyle = '#555555';
+    ctx.fillText('WASD / Arrow Keys to move   Bump enemies to attack', 150, 440);
+    ctx.fillText('> to descend stairs   < to ascend   M for map', 195, 470);
+  }
+
+  _renderPlaying() {
+    if (!this.player || !this.worldMap) return;
+    const map = this.worldMap.getLevel(this.currentLevel);
+    this.renderer.render(map, this.player, this.log, this.camera.x, this.camera.y);
+  }
+
+  _renderDead() {
+    const ctx = this.renderer.ctx;
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, this.canvasEl.width, this.canvasEl.height);
+    ctx.fillStyle = '#cc2222';
+    ctx.font = 'bold 48px monospace';
+    ctx.textBaseline = 'top';
+    ctx.fillText('YOU HAVE DIED', 220, 200);
+    ctx.fillStyle = '#888888';
+    ctx.font = '20px monospace';
+    ctx.fillText(`${this.player?.name ?? 'The adventurer'} reached depth ${this.player?.depth ?? 0}.`, 200, 290);
+    ctx.fillStyle = '#ffcc44';
+    ctx.fillText('Press ENTER or ESCAPE to return to title', 190, 380);
+  }
+
+  async _toggleMinimap() {
+    const mc = document.getElementById('minimap-canvas');
+    if (!mc) {
+        const newCanvas = document.createElement('canvas');
+        newCanvas.id = 'minimap-canvas';
+        newCanvas.style.position = 'absolute';
+        newCanvas.style.top = '50%';
+        newCanvas.style.left = '50%';
+        newCanvas.style.transform = 'translate(-50%, -50%)';
+        newCanvas.style.border = '2px solid #555';
+        newCanvas.style.display = 'none';
+        document.body.appendChild(newCanvas);
+    }
+    const newMc = document.getElementById('minimap-canvas');
+    if (newMc.style.display === 'none' || newMc.style.display === '') {
+      // Render and show minimap
+      const { Minimap } = await import('./ui/Minimap.js'); // lazy import
+      const map = this.worldMap.getLevel(this.currentLevel);
+      const mm = new Minimap(map, newMc);
+      mm.render(this.player.x, this.player.y);
+      newMc.style.display = 'block';
+    } else {
+      newMc.style.display = 'none';
+    }
+  }
 }
 
-// --- Entry Point ---
 window.addEventListener('DOMContentLoaded', () => {
-    const game = new Game();
-    game.init().catch(console.error);
+  const game = new Game();
+  game.init().catch(console.error);
 });

@@ -1,1 +1,301 @@
-// This file is a stub for the Renderer.
+// src/ui/Renderer.js
+
+export class Renderer {
+  constructor(canvasEl) {
+    this.canvas  = canvasEl;
+    this.ctx     = canvasEl.getContext('2d');
+    this.TILE_W  = 12;   // px per tile column
+    this.TILE_H  = 20;   // px per tile row
+    this.VIEW_COLS = 56; // Map viewport columns (leaves room for HUD panel)
+    this.VIEW_ROWS = 36; // Map viewport rows (leaves room for log)
+    this.HUD_X    = this.VIEW_COLS * this.TILE_W + 8; // HUD panel starts here
+    this.LOG_Y    = this.VIEW_ROWS * this.TILE_H + 4; // Log panel starts here
+    
+    // Set canvas size
+    canvasEl.width  = 80 * this.TILE_W;   // 960px
+    canvasEl.height = 40 * this.TILE_H;   // 800px
+    
+    this.ctx.font = `${this.TILE_H - 2}px monospace`;
+    this.ctx.textBaseline = 'top';
+  }
+
+  /**
+   * Master render call. Called every frame by Game.render().
+   * @param {TileMap}      map
+   * @param {Player}       player
+   * @param {MessageLog}   log
+   * @param {number}       cameraX  Top-left tile of viewport (for scrolling)
+   * @param {number}       cameraY
+   */
+  render(map, player, log, cameraX = 0, cameraY = 0) {
+    this._clear();
+    this._drawTileMap(map, cameraX, cameraY);
+    this._drawEntities(map, cameraX, cameraY);
+    this._drawPlayer(player, cameraX, cameraY);
+    this._drawHUD(player);
+    this._drawLog(log);
+  }
+
+  // ---------------------------------------------------------------
+  // PRIVATE METHODS — implement each:
+
+  _clear() {
+    this.ctx.fillStyle = '#000';
+    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+  }
+
+  /**
+   * Draw all tiles in the viewport area.
+   * For each visible column col in [0, VIEW_COLS) and row in [0, VIEW_ROWS):
+   *   1. Compute map coords: mx = cameraX + col, my = cameraY + row
+   *   2. If out of bounds: draw black
+   *   3. Get tile at (mx, my)
+   *   4. If !tile.explored: draw black
+   *   5. If tile.explored but !tile.visible: draw tile in "dim" colors
+   *      (multiply RGB by 0.4 — apply a '#333' overlay or use dimmed fg color)
+   *   6. If tile.visible: draw tile at full color
+   *   7. Draw background rect then character glyph:
+   *      ctx.fillStyle = tile.bg; ctx.fillRect(x, y, TILE_W, TILE_H);
+   *      ctx.fillStyle = tile.fg; ctx.fillText(glyphToChar(tile.glyph), x, y);
+   */
+    _drawTileMap(map, cameraX, cameraY) {
+        for (let row = 0; row < this.VIEW_ROWS; row++) {
+            for (let col = 0; col < this.VIEW_COLS; col++) {
+                const mx = cameraX + col;
+                const my = cameraY + row;
+                const x = col * this.TILE_W;
+                const y = row * this.TILE_H;
+
+                if (!map.inBounds(mx, my)) {
+                    this.ctx.fillStyle = '#000';
+                    this.ctx.fillRect(x, y, this.TILE_W, this.TILE_H);
+                    continue;
+                }
+
+                const tile = map.get(mx, my);
+                if (!tile.explored) {
+                    this.ctx.fillStyle = '#000';
+                    this.ctx.fillRect(x, y, this.TILE_W, this.TILE_H);
+                    continue;
+                }
+
+                const bg = tile.visible ? tile.bg : this._dimColor(tile.bg);
+                const fg = tile.visible ? tile.fg : this._dimColor(tile.fg);
+                
+                this.ctx.fillStyle = bg;
+                this.ctx.fillRect(x, y, this.TILE_W, this.TILE_H);
+
+                if (tile.glyph) {
+                    this.ctx.fillStyle = fg;
+                    this.ctx.fillText(glyphToChar(tile.glyph), x, y);
+                }
+            }
+        }
+    }
+
+    _dimColor(color) {
+        if (!color.startsWith('#')) return color;
+        const r = parseInt(color.slice(1, 3), 16);
+        const g = parseInt(color.slice(3, 5), 16);
+        const b = parseInt(color.slice(5, 7), 16);
+        const dimFactor = 0.4;
+        const dr = Math.floor(r * dimFactor);
+        const dg = Math.floor(g * dimFactor);
+        const db = Math.floor(b * dimFactor);
+        return `#${dr.toString(16).padStart(2, '0')}${dg.toString(16).padStart(2, '0')}${db.toString(16).padStart(2, '0')}`;
+    }
+
+  /**
+   * Draw entities (monsters, items) on the map.
+   * Iterate map.entities (Map of key → Entity[]).
+   * For each entity array:
+   *   1. Parse x,y from the key ("x,y")
+   *   2. Compute screen col/row relative to camera
+   *   3. Skip if outside viewport
+   *   4. Check if tile at (x,y) is visible — only draw if visible
+   *   5. Look up glyph and color from entity.def (for monsters) or entity data (for items)
+   *   6. Draw background then character
+   * 
+   * Monster glyph: entity.def.glyph (CP437 code → char via glyphToChar)
+   * Monster color: entity.def.color
+   */
+    _drawEntities(map, cameraX, cameraY) {
+        for (const [key, entityList] of map.entities) {
+            if (!entityList || entityList.length === 0) continue;
+            
+            const [mx, my] = key.split(',').map(Number);
+            
+            const col = mx - cameraX;
+            const row = my - cameraY;
+
+            if (col < 0 || col >= this.VIEW_COLS || row < 0 || row >= this.VIEW_ROWS) {
+                continue;
+            }
+
+            const tile = map.get(mx, my);
+            if (!tile || !tile.visible) {
+                continue;
+            }
+
+            const entityToDraw = entityList.find(e => e.type === 'monster') || entityList[0];
+            if(entityToDraw.type === 'player') continue;
+
+
+            const glyph = entityToDraw.def?.glyph ?? entityToDraw.glyph;
+            const color = entityToDraw.def?.color ?? entityToDraw.color;
+
+            const x = col * this.TILE_W;
+            const y = row * this.TILE_H;
+            
+            this.ctx.fillStyle = color;
+            this.ctx.fillText(glyphToChar(glyph), x, y);
+        }
+    }
+
+  /**
+   * Draw the player '@' glyph.
+   * Player is always in the center of the viewport (camera tracks player).
+   * Screen position = (VIEW_COLS/2, VIEW_ROWS/2) — but use actual camera offset.
+   * col = player.x - cameraX, row = player.y - cameraY
+   * Color: '#ffffff' always (player is always visible)
+   */
+    _drawPlayer(player, cameraX, cameraY) {
+        const col = player.x - cameraX;
+        const row = player.y - cameraY;
+        const x = col * this.TILE_W;
+        const y = row * this.TILE_H;
+
+        this.ctx.fillStyle = '#ffffff';
+        this.ctx.fillText('@', x, y);
+    }
+
+  /**
+   * Draw the HUD panel on the right side.
+   * Starting at pixel x = HUD_X, draw text lines top-to-bottom:
+   *   Line 0:  Player name (white)
+   *   Line 1:  "Class: {className}  L:{level}" (yellow)
+   *   Line 2:  "HP: {hp}/{hpMax}" — color green if >50%, yellow if >25%, red if lower
+   *   Line 3:  HP bar — draw filled rect for current HP ratio, empty for rest
+   *   Line 4:  "AC: {ac}" (white)
+   *   Line 5:  "STR:{str} DEX:{dex}" (gray)
+   *   Line 6:  "CON:{con} INT:{int}" (gray)
+   *   Line 7:  "WIS:{wis} CHA:{cha}" (gray)
+   *   Line 8:  "XP: {xp}" (cyan)
+   *   Line 9:  "Gold: {gold}gp" (yellow)
+   *   Line 10: "Depth: {depth}" (white)
+   * Use ctx.fillText() for all text in this panel.
+   * Draw a vertical separator line at HUD_X - 4px in dark gray.
+   */
+    _drawHUD(player) {
+        const x = this.HUD_X;
+        let y = 10;
+        const lineH = this.TILE_H;
+
+        // Separator
+        this.ctx.fillStyle = '#333333';
+        this.ctx.fillRect(x - 4, 0, 2, this.canvas.height);
+        
+        this.ctx.font = `16px monospace`;
+
+        // Line 0: Player name
+        this.ctx.fillStyle = '#ffffff';
+        this.ctx.fillText(player.name, x, y);
+        y += lineH;
+
+        // Line 1: Class and Level
+        this.ctx.fillStyle = '#ffff00';
+        this.ctx.fillText(`Class: ${player.className} L:${player.level}`, x, y);
+        y += lineH;
+
+        // Line 2: HP text
+        const hpRatio = player.hp / player.hpMax;
+        let hpColor = '#00ff00';
+        if (hpRatio <= 0.5) hpColor = '#ffff00';
+        if (hpRatio <= 0.25) hpColor = '#ff0000';
+        this.ctx.fillStyle = hpColor;
+        this.ctx.fillText(`HP: ${player.hp}/${player.hpMax}`, x, y);
+        y += lineH;
+
+        // Line 3: HP bar
+        const barWidth = 150;
+        this.ctx.fillStyle = '#440000';
+        this.ctx.fillRect(x, y, barWidth, lineH - 4);
+        this.ctx.fillStyle = hpColor;
+        this.ctx.fillRect(x, y, barWidth * hpRatio, lineH - 4);
+        y += lineH;
+
+        // Line 4: AC
+        this.ctx.fillStyle = '#ffffff';
+        this.ctx.fillText(`AC: ${player.ac}`, x, y);
+        y += lineH;
+        
+        // Line 5-7: Stats
+        this.ctx.fillStyle = '#888888';
+        this.ctx.fillText(`STR:${player.stats.str} DEX:${player.stats.dex}`, x, y);
+        y += lineH;
+        this.ctx.fillText(`CON:${player.stats.con} INT:${player.stats.int}`, x, y);
+        y += lineH;
+        this.ctx.fillText(`WIS:${player.stats.wis} CHA:${player.stats.cha}`, x, y);
+        y += lineH;
+
+        // Line 8: XP
+        this.ctx.fillStyle = '#00ffff';
+        this.ctx.fillText(`XP: ${player.xp}`, x, y);
+        y += lineH;
+
+        // Line 9: Gold
+        this.ctx.fillStyle = '#ffff00';
+        this.ctx.fillText(`Gold: ${player.gold}gp`, x, y);
+        y += lineH;
+
+        // Line 10: Depth
+        this.ctx.fillStyle = '#ffffff';
+        this.ctx.fillText(`Depth: ${player.depth}`, x, y);
+        
+        this.ctx.font = `${this.TILE_H - 2}px monospace`; // Reset font
+    }
+
+  /**
+   * Draw the message log at the bottom of the canvas.
+   * Get last 4 messages from log.getVisible(4).
+   * Draw each message line at LOG_Y + (lineIndex * TILE_H).
+   * Use the message's .color property for the text color.
+   * Draw a horizontal separator at LOG_Y - 4px.
+   */
+    _drawLog(log) {
+        const x = 10;
+        const y = this.LOG_Y;
+
+        // Separator
+        this.ctx.fillStyle = '#333333';
+        this.ctx.fillRect(0, y - 4, this.HUD_X - 8, 2);
+
+        const messages = log.getVisible(4);
+        messages.forEach((msg, i) => {
+            this.ctx.fillStyle = msg.color;
+            this.ctx.fillText(msg.text, x, y + i * (this.TILE_H - 4));
+        });
+    }
+}
+
+/**
+ * Convert a CP437 char code to a renderable character string.
+ * For MVP, handle the common cases. Unknown codes fall back to '?'.
+ */
+export function glyphToChar(code) {
+  // Direct ASCII range: just use String.fromCharCode
+  if (code >= 0x20 && code <= 0x7E) return String.fromCharCode(code);
+  
+  // Common CP437 non-ASCII glyphs used by the game:
+  const cp437Map = {
+    0x01: '☺', 0x02: '☻', 0x03: '♥', 0x04: '♦', 0x05: '♣', 0x06: '♠',
+    0x07: '•', 0x0F: '☼',
+    0xB0: '░', 0xB1: '▒', 0xB2: '▓', 0xDB: '█',
+    0xC4: '─', 0xB3: '│', 0xDA: '┌', 0xBF: '┐', 0xC0: '└', 0xD9: '┘',
+    0xC5: '┼', 0xC3: '├', 0xB4: '┤', 0xC1: '┴', 0xC2: '┬',
+    0xFA: '·', 0xF9: '∙',
+    0xAF: '»', 0xAD: '«',
+    0xF4: '⌠', 0xF5: '⌡',
+  };
+  return cp437Map[code] ?? '?';
+}

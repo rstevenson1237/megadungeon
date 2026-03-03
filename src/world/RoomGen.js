@@ -88,24 +88,33 @@ export class RoomGen {
     const groupTemplate = MonsterGroups.roll(this.level, this.theme, this.rng);
     for (const entry of groupTemplate.members) {
       const pos = this._randomFloorInRoom(map, room);
-      if (pos) {
+      if (!pos) {
+        // Room has no floor tiles yet — skip (shouldn't happen after Phase A)
+        continue;
+      }
+      // Don't place monster on top of another entity
+      const occupied = map.getEntitiesAt(pos.x, pos.y).length > 0;
+      if (!occupied) {
         const monster = Monster.create(entry.type, pos.x, pos.y, this.level);
         map.addEntity(monster);
       }
     }
-    // Roll for incidental treasure
     if (this.rng.chance(groupTemplate.treasureChance)) {
       this._placeTreasure(map, room, 'small');
     }
   }
 
   _placeTreasure(map, room, size = 'medium') {
-      const pos = this._randomFloorInRoom(map, room);
-      if (pos) {
-          const item = Item.create('gold_pile', { amount: this.rng.int(1, 10) });
-          map.addEntity(item);
-          bus.emit('log:message', { text: `You see a pile of gold.` });
-      }
+    const pos = this._randomFloorInRoom(map, room);
+    if (!pos) return;
+    try {
+      const item = Item.create('gold_pile');
+      item.x = pos.x;
+      item.y = pos.y;
+      map.addEntity(item);
+    } catch (e) {
+      // Silently skip if item creation fails during stub period
+    }
   }
 
   _placeTrap(map, room) {
