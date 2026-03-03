@@ -10,12 +10,12 @@ export const PUZZLES = {
   The Priest raises open palms toward heaven.
   The Mage's staff-cradle is carved but empty.`;
       if (state.warrior_given && state.priest_given && state.mage_given)
-        return base + '
+        return base + `
 
-All three statues now hold offerings. A hidden door grinds open.';
-      return base + '
+All three statues now hold offerings. A hidden door grinds open.`;
+      return base + `
 
-An inscription reads: GIVE EACH THEIR OWN.';
+An inscription reads: GIVE EACH THEIR OWN.`;
     },
     initialState: { warrior_given: false, priest_given: false, mage_given: false },
     interactions: [
