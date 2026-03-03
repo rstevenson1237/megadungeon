@@ -39,7 +39,18 @@ export const SPELLS = {
     effect: { type: 'sleep', hdLimit: '2d4', affectsUndead: false },
     classes: ['magic_user', 'illusionist', 'bard'],
     description: 'Targets up to 2d4 HD of creatures in the area, lowest HD first. Undead and constructs unaffected.',
-    flavorText: '"Useful in proportion to the user's willingness to follow through."',
+    flavorText: '"Useful in proportion to the user\'s willingness to follow through."',
+  },
+
+  light: {
+    key: 'light', name: 'Light',
+    school: 'evocation', type: 'arcane', level: 1, mpCost: 3,
+    range: 'touch', area: 'single', duration: 'level_minutes',
+    save: 'none', saveEffect: 'negate',
+    effect: { type: 'light', radius: 15, color: '#ffffaa' },
+    classes: ['magic_user', 'cleric', 'paladin'],
+    description: 'Causes an object to glow like a torch for a number of minutes equal to your level.',
+    flavorText: '"The smallest candle is a star against the dark."',
   },
 
   fireball: {
@@ -65,6 +76,28 @@ export const SPELLS = {
     flavorText: '"Even the gods have a price. This one is cheap."',
   },
 
+  detect_evil: {
+    key: 'detect_evil', name: 'Detect Evil',
+    school: 'divination', type: 'divine', level: 1, mpCost: 4,
+    range: 'self', area: 'burst:60ft', duration: 'concentration',
+    save: 'none', saveEffect: 'negate',
+    effect: { type: 'detect', target: 'evil' },
+    classes: ['cleric', 'paladin'],
+    description: 'For the duration, you sense the presence and location of any evil creature or object within range.',
+    flavorText: '"You can\'t hide from the light."',
+  },
+
+  bless: {
+    key: 'bless', name: 'Bless',
+    school: 'enchantment', type: 'divine', level: 1, mpCost: 6,
+    range: '30ft', area: 'all_allies_in_burst:15ft', duration: 'level_minutes',
+    save: 'none', saveEffect: 'negate',
+    effect: { type: 'buff', stat: 'attack', value: 1 },
+    classes: ['cleric', 'paladin'],
+    description: 'Allies in the area of effect gain a +1 bonus to their attack rolls for the duration.',
+    flavorText: '"May your sword strike true."',
+  },
+
   turn_undead: {
     key: 'turn_undead', name: 'Turn Undead',
     school: 'abjuration', type: 'divine', level: 1, mpCost: 0, // class ability, not MP
@@ -72,7 +105,7 @@ export const SPELLS = {
     save: 'death', saveEffect: 'negate',
     effect: { type: 'turn', hdTable: 'cleric_turn_table' },
     classes: ['cleric', 'paladin'],
-    description: 'Invoke divine authority to drive off or destroy undead based on the cleric's level vs undead HD.',
+    description: 'Invoke divine authority to drive off or destroy undead based on the cleric\'s level vs undead HD.',
     flavorText: '"Holy ground is wherever you stand."',
   },
 
