@@ -51,5 +51,23 @@ export const TRAPS = {
     hint: 'Faintly glowing sigils are barely visible on the floor.',
   },
 
+  gas_trap: {
+    key: 'gas_trap', name: 'Poison Gas Trap',
+    glyph: 0xB0, color: '#88cc88', detectDC: 15, disarmDC: 17, triggerChance: 0.9,
+    effect: { type: 'poison', damage: '1d6_per_turn', save: 'breath', saveType: 'negate', duration: '3_turns', area: 'burst:10ft', cloud: true },
+    habitat: ['catacomb', 'underhall', 'dwarven_deep'],
+    description: 'Vents in the floor are ready to release a cloud of noxious vapor.',
+    hint: 'The air smells faintly of almonds.',
+  },
+
+  teleport_trap: {
+    key: 'teleport_trap', name: 'Teleportation Trap',
+    glyph: 0xF9, color: '#8888ff', detectDC: 17, disarmDC: 19, triggerChance: 1.0,
+    effect: { type: 'teleport', special: 'random_location' },
+    habitat: ['elemental_grotto', 'void_passage', 'primordial_chaos'],
+    description: 'A shimmering instability in the air that yanks you through space.',
+    hint: 'The air ahead seems to waver and distort.',
+  },
+
   // +20 more trap types
 };
