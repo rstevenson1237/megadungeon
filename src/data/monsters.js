@@ -104,6 +104,51 @@ export const MONSTERS = {
     ai: { type: 'aggressive', usesBreathWeapon: true, breathCooldown: 3, hasBossPhases: false },
   },
 
+  orc: {
+    key: 'orc', name: 'Orc', plural: 'Orcs',
+    glyph: 0x6F, color: '#668866', // 'o'
+    hd: 2, hdType: 'd8', ac: 14, speed: 1,
+    attacks: [{ name: 'notched axe', numDice: 1, die: 8, dmgBonus: 1, special: null }],
+    specials: [],
+    morale: 8, alignment: 'chaotic', size: 'medium',
+    tags: ['humanoid', 'orcish'],
+    xpBase: 20, xpPerHD: 10,
+    loot: { table: 'humanoid_standard', chance: 0.5 },
+    habitat: ['dungeon_cellar', 'goblin_warren', 'abandoned_mine'],
+    description: 'Brutish and cruel, these hulking humanoids live for battle and plunder. Their green-grey skin is thick and tough.',
+    ai: { type: 'aggressive', packRadius: 5 },
+  },
+
+  zombie: {
+    key: 'zombie', name: 'Zombie', plural: 'Zombies',
+    glyph: 0x7A, color: '#4a694a', // 'z'
+    hd: 2, hdType: 'd8', ac: 11, speed: 0.5,
+    attacks: [{ name: 'slam', numDice: 1, die: 6, dmgBonus: 0, special: 'disease_10' }],
+    specials: ['immune_sleep', 'immune_charm'],
+    morale: 12, alignment: 'chaotic', size: 'medium',
+    tags: ['undead'],
+    xpBase: 25, xpPerHD: 5,
+    loot: { table: 'undead_common', chance: 0.1 },
+    habitat: ['catacomb', 'dungeon_cellar'],
+    description: 'A shambling corpse animated by foul necromancy. It moves with unnatural slowness and single-minded purpose.',
+    ai: { type: 'aggressive', turnable: true },
+  },
+
+  goblin_shaman: {
+    key: 'goblin_shaman', name: 'Goblin Shaman', plural: 'Goblin Shamans',
+    glyph: 0x67, color: '#88ee88', // 'g'
+    hd: 2, hdType: 'd6', ac: 12, speed: 1,
+    attacks: [{ name: 'ritual dagger', numDice: 1, die: 4, dmgBonus: 0, special: null }],
+    specials: ['light_sensitivity', 'cast_curse', 'cast_heal_self'],
+    morale: 7, alignment: 'chaotic', size: 'small',
+    tags: ['humanoid', 'goblinoid', 'magic_user'],
+    xpBase: 35, xpPerHD: 8,
+    loot: { table: 'humanoid_shamanistic', chance: 0.8 },
+    habitat: ['goblin_warren'],
+    description: 'Wiser and more cunning than their kin, these goblins wield crude but effective magic, often involving dung and bones.',
+    ai: { type: 'cautious', fleeThreshold: 0.4, castChance: 0.5 },
+  },
+
   // +80 more monsters across all depth bands
   // boss_variants for each major monster type
   // unique named monsters (procedurally named with title system)
