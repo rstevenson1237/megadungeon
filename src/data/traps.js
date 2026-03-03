@@ -38,7 +38,7 @@ export const TRAPS = {
     glyph: 0xAD, color: '#44aa44', detectDC: 16, disarmDC: 18, triggerChance: 1.0,
     effect: { type: 'poison', damage: '1d4', save: 'death', saveType: 'negate', duration: '10_turns', poisonType: 'paralytic' },
     habitat: ['dungeon_cellar', 'catacomb', 'underhall'],
-    description: 'Hidden in a lock, book spine, or drawer. A classic assassin's tool.',
+    description: 'Hidden in a lock, book spine, or drawer. A classic assassin\'s tool.',
     hint: 'A faint greenish stain marks the keyhole.',
   },
 
