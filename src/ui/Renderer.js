@@ -287,3 +287,30 @@ export function glyphToChar(code) {
   };
   return cp437Map[code] ?? '?';
 }
+
+/**
+ * Renders a subtle CRT scanline + vignette overlay on top of the game canvas.
+ * Implemented as a second canvas layered over the main canvas via CSS.
+ * Performance: Pre-rendered to an OffscreenCanvas, drawn once per frame.
+ */
+export function buildCRTOverlay(w, h) {
+  const canvas = (typeof OffscreenCanvas !== 'undefined') ? new OffscreenCanvas(w, h) : document.createElement('canvas');
+  if (canvas.tagName === 'CANVAS') {
+      canvas.width = w;
+      canvas.height = h;
+  }
+  const ctx = canvas.getContext('2d');
+
+  // Scanlines
+  ctx.fillStyle = 'rgba(0,0,0,0.08)';
+  for (let y = 0; y < h; y += 2) ctx.fillRect(0, y, w, 1);
+
+  // Vignette
+  const vignette = ctx.createRadialGradient(w/2, h/2, h*0.4, w/2, h/2, h*0.9);
+  vignette.addColorStop(0, 'rgba(0,0,0,0)');
+  vignette.addColorStop(1, 'rgba(0,0,0,0.55)');
+  ctx.fillStyle = vignette;
+  ctx.fillRect(0, 0, w, h);
+
+  return canvas;
+}

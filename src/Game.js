@@ -6,7 +6,7 @@ import { EventBus }      from './engine/EventBus.js';
 import { RNG }           from './engine/RNG.js';
 import { WorldMap }      from './world/WorldMap.js';
 import { Player }        from './entities/Player.js';
-import { Renderer, glyphToChar } from './ui/Renderer.js';
+import { Renderer, glyphToChar, buildCRTOverlay } from './ui/Renderer.js';
 import { MessageLog }    from './ui/HUD.js';
 import { CombatSystem }  from './systems/CombatSystem.js';
 import { MagicSystem } from './systems/MagicSystem.js';
@@ -69,6 +69,12 @@ class Game {
   async init() {
     // Start in TITLE state — the update loop handles transitions
     this.loop.start();
+    const crtCanvas = document.getElementById('crt-canvas');
+    const crtCtx = crtCanvas.getContext('2d');
+    crtCanvas.width = this.canvasEl.width;
+    crtCanvas.height = this.canvasEl.height;
+    const crtOverlay = buildCRTOverlay(crtCanvas.width, crtCanvas.height);
+    crtCtx.drawImage(crtOverlay, 0, 0);
   }
 
   // ---------------------------------------------------------------
