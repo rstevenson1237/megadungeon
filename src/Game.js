@@ -13,6 +13,7 @@ import { CombatSystem }  from './systems/CombatSystem.js';
 import { MagicSystem } from './systems/MagicSystem.js';
 import { PuzzleSystem } from './systems/PuzzleSystem.js';
 import { TrapSystem } from './systems/TrapSystem.js';
+import { StatusSystem } from './systems/StatusSystem.js';
 import { QuestSystem } from './systems/QuestSystem.js';
 import { SPELLS } from './data/spells.js';
 import { rollDiceStr } from './engine/rules.js';
@@ -204,6 +205,11 @@ if (this._handleMovement(action, map)) {
       map.computeFOV(this.player.x, this.player.y, PLAYER_FOV_RADIUS);
       this._updateCamera(map);
       this.bus.emit('turn:end', {});
+      // Tick player statuses
+      const expired = StatusSystem.tick(this.player);
+      for (const key of expired) {
+          this.log.add(`${key} has worn off.`, 'system');
+      }
     }
 
     // Non-movement actions (no turn cost for MVP):
@@ -293,7 +299,7 @@ if (this._handleMovement(action, map)) {
     if (!found) {
         this.log.add('There is nothing of interest here.', 'system');
     }
-},
+}
 
   // ---------------------------------------------------------------
   // MOVEMENT & BUMP COMBAT
