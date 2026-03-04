@@ -144,6 +144,55 @@ export class Player extends Entity {
     if (i >= 0) this.inventory.splice(i, 1);
   }
 
-  serialize() { /* JSON-safe snapshot */ }
-  static deserialize(data) { /* reconstruct */ }
+  serialize() {
+    return {
+        classKey: this.class.key,
+        name: this.name,
+        level: this.level,
+        xp: this.xp,
+        stats: { ...this.stats },
+        hp: this.hp, hpMax: this.hpMax,
+        mp: this.mp, mpMax: this.mpMax,
+        ac: this.ac,
+        gold: this.gold,
+        depth: this.depth,
+        x: this.x, y: this.y,
+        inventory: this.inventory.map(i => i.itemKey),
+        equipped: Object.fromEntries(
+            Object.entries(this.equipped).map(([slot, item]) => [slot, item?.itemKey ?? null])
+        ),
+        spellbook: [...this.spellbook],
+        skills: { ...this.skills },
+        statuses: [], // Statuses don't persist across save for now
+        scars: [...this.scars],
+    };
+}
+
+static deserialize(data) {
+    const player = new Player(data.classKey, data.name, data.stats);
+    player.level = data.level;
+    player.xp = data.xp;
+    player.hp = data.hp;
+    player.hpMax = data.hpMax;
+    player.mp = data.mp;
+    player.mpMax = data.mpMax;
+    player.ac = data.ac;
+    player.gold = data.gold;
+    player.depth = data.depth;
+    player.x = data.x;
+    player.y = data.y;
+    player.inventory = [];
+    for (const key of data.inventory) {
+        try { player.inventory.push(Item.create(key)); } catch(e) {}
+    }
+    for (const [slot, key] of Object.entries(data.equipped)) {
+        if (key) {
+            try { player.equipped[slot] = Item.create(key); } catch(e) {}
+        }
+    }
+    player.spellbook = data.spellbook;
+    player.skills = data.skills;
+    player.scars = data.scars ?? [];
+    return player;
+}
 }

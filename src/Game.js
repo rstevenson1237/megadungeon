@@ -7,11 +7,14 @@ import { RNG }           from './engine/RNG.js';
 import { WorldMap }      from './world/WorldMap.js';
 import { Player }        from './entities/Player.js';
 import { Renderer, glyphToChar, buildCRTOverlay } from './ui/Renderer.js';
+import { Menu }        from './ui/Menu.js';
 import { MessageLog }    from './ui/HUD.js';
 import { CombatSystem }  from './systems/CombatSystem.js';
 import { MagicSystem } from './systems/MagicSystem.js';
 import { PuzzleSystem } from './systems/PuzzleSystem.js';
 import { QuestSystem } from './systems/QuestSystem.js';
+import { SPELLS } from './data/spells.js';
+import { rollDiceStr } from './engine/rules.js';
 
 const PLAYER_FOV_RADIUS = 8;
 
@@ -22,6 +25,8 @@ const STATE = {
   PLAYING:     'playing',
   DEAD:        'dead',
   PUZZLE:      'puzzle',
+  TOWN:        'town',
+  MENU:        'menu',       // Generic menu overlay
 };
 
 class Game {
@@ -44,6 +49,8 @@ class Game {
     this.currentLevel = 1;
     this.camera       = { x: 0, y: 0 };
     this.activePuzzle = null;
+    this.activeMenu = null;
+    this._previousState = null;
 
     this._setupEventListeners();
     this._handleResize = () => {
@@ -138,6 +145,7 @@ class Game {
     switch (this.state) {
       case STATE.TITLE:       this._updateTitle(); break;
       case STATE.PLAYING:     this._updatePlaying(); break;
+      case STATE.MENU:        this._updateMenu(); break;
       case STATE.DEAD:        this._updateDead(); break;
       case STATE.PUZZLE:      this._updatePuzzle(); break;
     }
@@ -154,12 +162,41 @@ class Game {
 
     const map = this.worldMap.getLevel(this.currentLevel);
 
+    if(action === 'inventory') {
+        this._openInventoryMenu();
+        return;
+    }
+
     if(action === 'examine') {
         this._handleExamine();
         return;
     }
 
-    if (this._handleMovement(action, map)) {
+    if (action === 'cast') {
+    this._openCastMenu();
+    return;
+}
+
+if (action === 'drop') {
+    this._openDropMenu();
+    return;
+}
+
+if (action === 'pickup') {
+    this._handlePickup();
+    return;
+}
+
+if (action === 'save') {
+    this._quickSave();
+    return;
+}
+if (action === 'load') {
+    this._quickLoad();
+    return;
+}
+
+if (this._handleMovement(action, map)) {
       // Movement or attack consumed the turn — run monster AI
       this._runMonsterAI(map);
       map.computeFOV(this.player.x, this.player.y, PLAYER_FOV_RADIUS);
@@ -195,24 +232,66 @@ class Game {
       }
   }
 
-  _handleExamine() {
-      const map = this.worldMap.getLevel(this.currentLevel);
-      const tile = map.get(this.player.x, this.player.y);
-      const puzzle = tile.features.puzzle;
+  _updateMenu() {
+    const action = this.input.consumeAction();
+    if (!action) return;
+    this.activeMenu.handleAction(action);
+    if (this.activeMenu.closed) {
+        this.activeMenu = null;
+        this.state = this._previousState ?? STATE.PLAYING;
+    }
+}
 
-      if(puzzle) {
-          this.activePuzzle = puzzle;
-          const puzzleState = this.puzzles.examine(puzzle);
-          this.log.add(`-- ${puzzleState.name} --`, 'important');
-          this.log.add(puzzleState.description, 'puzzle');
-          puzzleState.interactions.forEach(int => {
-              this.log.add(`- ${int.label}`, 'puzzle-action');
-          });
-          this.state = STATE.PUZZLE;
-      } else {
-          this.log.add('There is nothing to examine here.', 'system');
-      }
-  }
+  _handleExamine() {
+    const map = this.worldMap.getLevel(this.currentLevel);
+    const tile = map.get(this.player.x, this.player.y);
+    const entities = map.getEntitiesAt(this.player.x, this.player.y);
+    
+    let found = false;
+    
+    // Check tile type
+    if (tile.type === 'stair_down') {
+        this.log.add('You see stairs descending into darkness.', 'system');
+        found = true;
+    } else if (tile.type === 'stair_up') {
+        this.log.add('You see stairs leading upward.', 'system');
+        found = true;
+    }
+    
+    // Check items on ground
+    const items = entities.filter(e => e.type === 'item');
+    for (const item of items) {
+        this.log.add(`You see: ${item.name} - ${item.description ?? 'nothing special.'}`, 'system');
+        found = true;
+    }
+    
+    // Check tile features
+    if (tile.features.puzzle) {
+        this.activePuzzle = tile.features.puzzle;
+        const puzzleState = this.puzzles.examine(tile.features.puzzle);
+        this.log.add(`-- ${puzzleState.name} --`, 'important');
+        this.log.add(puzzleState.description, 'puzzle');
+        this.state = STATE.PUZZLE;
+        found = true;
+    }
+    if (tile.features.trap) {
+        // Only show if player has detected it (thief skill or high INT)
+        this.log.add(`You notice: ${tile.features.trap.hint ?? 'Something seems off about this area.'}`, 'trap');
+        found = true;
+    }
+    if (tile.features.lore) {
+        this.log.add(tile.features.lore.message, 'lore');
+        found = true;
+    }
+    if (tile.features.shrine) {
+        this.log.add(tile.features.shrine.message, 'lore');
+        found = true;
+    }
+    
+    if (!found) {
+        this.log.add('There is nothing of interest here.', 'system');
+    }
+},
 
   // ---------------------------------------------------------------
   // MOVEMENT & BUMP COMBAT
@@ -395,6 +474,7 @@ class Game {
     switch (this.state) {
       case STATE.TITLE:   this._renderTitle(); break;
       case STATE.PLAYING: this._renderPlaying(); break;
+      case STATE.MENU:    this._renderMenu(); break;
       case STATE.PUZZLE:  this._renderPlaying(); break; // For now, just show the game screen
       case STATE.DEAD:    this._renderDead(); break;
     }
@@ -468,6 +548,32 @@ class Game {
     const startText = 'Press ENTER or ESCAPE to return to title';
     const startW = ctx.measureText(startText).width;
     ctx.fillText(startText, (w - startW) / 2, h * 0.55);
+  }
+
+  _renderMenu() {
+    // First render the underlying game state
+    if (this._previousState === STATE.PLAYING) this._renderPlaying();
+    else if (this._previousState === STATE.TOWN) this._renderTown();
+    
+    // Then overlay the menu
+    if (this.activeMenu) {
+        const r = this.renderer;
+        const menuW = Math.min(r.canvas.width - 40, 500);
+        const menuH = Math.min(r.canvas.height - 40, 600);
+        const mx = (r.canvas.width - menuW) / 2;
+        const my = (r.canvas.height - menuH) / 2;
+        this.activeMenu.render(r.ctx, mx, my, menuW, menuH, r.TILE_H);
+    }
+  }
+
+  _openMenu(menu) {
+    this._previousState = this.state;
+    this.state = STATE.MENU;
+    this.activeMenu = menu;
+  }
+  
+  _renderTown() {
+      // placeholder
   }
 
   async _toggleMinimap() {
