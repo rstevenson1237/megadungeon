@@ -12,6 +12,7 @@ import { MessageLog }    from './ui/HUD.js';
 import { CombatSystem }  from './systems/CombatSystem.js';
 import { MagicSystem } from './systems/MagicSystem.js';
 import { PuzzleSystem } from './systems/PuzzleSystem.js';
+import { TrapSystem } from './systems/TrapSystem.js';
 import { QuestSystem } from './systems/QuestSystem.js';
 import { SPELLS } from './data/spells.js';
 import { rollDiceStr } from './engine/rules.js';
@@ -41,6 +42,7 @@ class Game {
     this.combat    = new CombatSystem(this.bus);
     this.magic     = new MagicSystem(this.bus, this);
     this.puzzles   = new PuzzleSystem(this.bus, this);
+this.traps = new TrapSystem(this.bus);
 
     this.state        = STATE.TITLE;
     this.player       = null;
@@ -333,8 +335,19 @@ if (this._handleMovement(action, map)) {
 
     // Move player
     map.moveEntity(this.player, nx, ny);
-    return true;
-  }
+    
+    // After: map.moveEntity(this.player, nx, ny);
+    const newTile = map.get(nx, ny);
+    const trapResult = this.traps.checkTile(newTile, this.player);
+    if (trapResult?.teleport) {
+        // Teleport to random walkable tile
+        const floors = map.findTiles('floor');
+        if (floors.length > 0) {
+            const dest = this.rng.pick(floors);
+            map.moveEntity(this.player, dest.x, dest.y);
+        }
+    }
+    return true;  }
 
   _playerAttacks(monster) {
     const result = this.player.rollAttack(monster);
