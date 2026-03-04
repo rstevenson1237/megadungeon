@@ -402,21 +402,39 @@ class Game {
 
   _renderTitle() {
     const ctx = this.renderer.ctx;
+    const w = this.canvasEl.width;
+    const h = this.canvasEl.height;
     ctx.fillStyle = '#000';
-    ctx.fillRect(0, 0, this.canvasEl.width, this.canvasEl.height);
+    ctx.fillRect(0, 0, w, h);
+    
+    const titleSize = Math.max(24, Math.floor(w / 20));
     ctx.fillStyle = '#cc4444';
-    ctx.font = 'bold 48px monospace';
+    ctx.font = `bold ${titleSize}px monospace`;
     ctx.textBaseline = 'top';
-    ctx.fillText('MEGADUNGEON', 180, 200);
+    const titleText = 'MEGADUNGEON';
+    const titleW = ctx.measureText(titleText).width;
+    ctx.fillText(titleText, (w - titleW) / 2, h * 0.25);
+    
+    const subSize = Math.max(12, Math.floor(titleSize * 0.42));
     ctx.fillStyle = '#888888';
-    ctx.font = '20px monospace';
-    ctx.fillText('A descent into the mythic underworld', 180, 270);
+    ctx.font = `${subSize}px monospace`;
+    const subText = 'A descent into the mythic underworld';
+    const subW = ctx.measureText(subText).width;
+    ctx.fillText(subText, (w - subW) / 2, h * 0.25 + titleSize + 20);
+    
     ctx.fillStyle = '#ffcc44';
-    ctx.fillText('Press ENTER to begin', 240, 360);
+    const startText = 'Press ENTER to begin';
+    const startW = ctx.measureText(startText).width;
+    ctx.fillText(startText, (w - startW) / 2, h * 0.5);
+    
     ctx.fillStyle = '#555555';
-    ctx.fillText('WASD / Arrow Keys to move   Bump enemies to attack', 150, 440);
-    ctx.fillText('> to descend stairs   < to ascend   M for map', 195, 470);
-  }
+    const helpSize = Math.max(10, Math.floor(subSize * 0.85));
+    ctx.font = `${helpSize}px monospace`;
+    const help1 = 'WASD / Arrow Keys to move   Bump enemies to attack';
+    const help2 = '> descend   < ascend   I inventory   M map';
+    ctx.fillText(help1, (w - ctx.measureText(help1).width) / 2, h * 0.6);
+    ctx.fillText(help2, (w - ctx.measureText(help2).width) / 2, h * 0.6 + helpSize + 8);
+}
 
   _renderPlaying() {
     if (!this.player || !this.worldMap) return;
@@ -426,17 +444,30 @@ class Game {
 
   _renderDead() {
     const ctx = this.renderer.ctx;
+    const w = this.canvasEl.width;
+    const h = this.canvasEl.height;
     ctx.fillStyle = '#000';
-    ctx.fillRect(0, 0, this.canvasEl.width, this.canvasEl.height);
+    ctx.fillRect(0, 0, w, h);
+    
+    const titleSize = Math.max(24, Math.floor(w / 20));
     ctx.fillStyle = '#cc2222';
-    ctx.font = 'bold 48px monospace';
+    ctx.font = `bold ${titleSize}px monospace`;
     ctx.textBaseline = 'top';
-    ctx.fillText('YOU HAVE DIED', 220, 200);
+    const titleText = 'YOU HAVE DIED';
+    const titleW = ctx.measureText(titleText).width;
+    ctx.fillText(titleText, (w - titleW) / 2, h * 0.25);
+
+    const subSize = Math.max(12, Math.floor(titleSize * 0.42));
     ctx.fillStyle = '#888888';
-    ctx.font = '20px monospace';
-    ctx.fillText(`${this.player?.name ?? 'The adventurer'} reached depth ${this.player?.depth ?? 0}.`, 200, 290);
+    ctx.font = `${subSize}px monospace`;
+    const subText = `${this.player?.name ?? 'The adventurer'} reached depth ${this.player?.depth ?? 0}.`;
+    const subW = ctx.measureText(subText).width;
+    ctx.fillText(subText, (w - subW) / 2, h * 0.4);
+    
     ctx.fillStyle = '#ffcc44';
-    ctx.fillText('Press ENTER or ESCAPE to return to title', 190, 380);
+    const startText = 'Press ENTER or ESCAPE to return to title';
+    const startW = ctx.measureText(startText).width;
+    ctx.fillText(startText, (w - startW) / 2, h * 0.55);
   }
 
   async _toggleMinimap() {

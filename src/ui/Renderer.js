@@ -177,6 +177,11 @@ export class Renderer {
     }
 
     _drawHUD(player, theme) {
+        if (this.compactMode) {
+            this._drawCompactHUD(player, theme);
+            return;
+        }
+    
         const x = this.HUD_X;
         let y = 10;
         const lineH = this.TILE_H;
@@ -249,6 +254,44 @@ export class Renderer {
         y += lineH;
 
         this.ctx.font = `${this.fontSize}px monospace`; // Reset font
+    }
+
+    _drawCompactHUD(player, theme) {
+        // Draw a single status bar at the very top of the screen, overlaying the map
+        const y = 0;
+        const barH = this.TILE_H + 4;
+        
+        // Semi-transparent background
+        this.ctx.fillStyle = 'rgba(0,0,0,0.75)';
+        this.ctx.fillRect(0, y, this.canvas.width, barH);
+        
+        this.ctx.font = `${Math.max(10, this.fontSize - 2)}px monospace`;
+        
+        const hpRatio = player.hp / player.hpMax;
+        let hpColor = '#00ff00';
+        if (hpRatio <= 0.5) hpColor = '#ffff00';
+        if (hpRatio <= 0.25) hpColor = '#ff0000';
+        
+        // Compact: "Adventurer L1 Fighter | HP:20/20 | AC:6 | D:1"
+        const parts = [
+            { text: `${player.name} `, color: '#ffffff' },
+            { text: `L${player.level} ${player.class.name}`, color: '#ffff00' },
+            { text: ` | `, color: '#333333' },
+            { text: `HP:${player.hp}/${player.hpMax}`, color: hpColor },
+            { text: ` | `, color: '#333333' },
+            { text: `AC:${player.ac}`, color: '#ffffff' },
+            { text: ` | `, color: '#333333' },
+            { text: `D:${player.depth}`, color: '#888888' },
+        ];
+        
+        let x = 4;
+        for (const p of parts) {
+            this.ctx.fillStyle = p.color;
+            this.ctx.fillText(p.text, x, y + 2);
+            x += this.ctx.measureText(p.text).width;
+        }
+        
+        this.ctx.font = `${this.fontSize}px monospace`;
     }
 
     _drawLog(log) {
