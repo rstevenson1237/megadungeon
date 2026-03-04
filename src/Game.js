@@ -16,6 +16,7 @@ import { TrapSystem } from './systems/TrapSystem.js';
 import { StatusSystem } from './systems/StatusSystem.js';
 import { QuestSystem } from './systems/QuestSystem.js';
 import { SPELLS } from './data/spells.js';
+import { TOWN_LOCATIONS } from './data/town.js';
 import { rollDiceStr } from './engine/rules.js';
 
 const PLAYER_FOV_RADIUS = 8;
@@ -469,8 +470,13 @@ if (this._handleMovement(action, map)) {
       this.log.add('You ascend toward the surface.', 'important');
       map.removeEntity(this.player);
       this._enterLevel(this.currentLevel - 1);
-    } else if (this.currentLevel === 1) {
-      this.log.add('You are at the dungeon entrance. Return to town? (not yet implemented)', 'system');
+    } else if (this.currentLevel === 1 && tile?.type === 'stair_up') {
+      this.log.add('You emerge into the safety of town.', 'important');
+      const map = this.worldMap.getLevel(this.currentLevel);
+      map.removeEntity(this.player);
+      this.state = STATE.TOWN;
+      this.townLocation = null;
+      this._openTownOverview();
     } else {
       this.log.add('There are no stairs going up here.', 'system');
     }
@@ -494,6 +500,7 @@ if (this._handleMovement(action, map)) {
       case STATE.TITLE:   this._renderTitle(); break;
       case STATE.PLAYING: this._renderPlaying(); break;
       case STATE.MENU:    this._renderMenu(); break;
+      case STATE.TOWN:    this._renderTown(); break;
       case STATE.PUZZLE:  this._renderPlaying(); break; // For now, just show the game screen
       case STATE.DEAD:    this._renderDead(); break;
     }
@@ -590,10 +597,315 @@ if (this._handleMovement(action, map)) {
     this.state = STATE.MENU;
     this.activeMenu = menu;
   }
+
+  _openTownOverview() {
+    // Import TOWN_LOCATIONS at the top of Game.js
+    const locations = Object.values(TOWN_LOCATIONS).map(loc => ({
+        label: `${glyphToChar(loc.glyph)} ${loc.name}`,
+        color: loc.color,
+        data: loc,
+    }));
+    
+    locations.push({
+        label: '> Descend into the dungeon',
+        color: '#ff6666',
+        data: { key: 'dungeon_entrance' },
+    });
+    
+    const menu = new Menu('Town of Homestead', locations, {
+        onSelect: (selected) => {
+            if (selected.data.key === 'dungeon_entrance') {
+                this._enterDungeonFromTown();
+            } else {
+                this._enterTownLocation(selected.data);
+            }
+        },
+        onCancel: () => {
+            // Can't cancel out of town — must choose a location or enter dungeon
+            this._openTownOverview();
+        }
+    });
+    
+    this._previousState = STATE.TOWN;
+    this.state = STATE.MENU;
+    this.activeMenu = menu;
+}
+
+_enterDungeonFromTown() {
+    this.log.add('You descend into the dungeon once more...', 'important');
+    this._enterLevel(1);
+    this.state = STATE.PLAYING;
+}
+
+_enterTownLocation(location) {
+    this.townLocation = location;
+    
+    switch (location.key) {
+        case 'inn':           this._openInnMenu(location); break;
+        case 'general_store': this._openShopMenu(location); break;
+        case 'weapon_smith':  this._openShopMenu(location); break;
+        case 'temple':        this._openTempleMenu(location); break;
+        case 'arcane_shop':   this._openArcaneShopMenu(location); break;
+        case 'guild_board':   this._openGuildBoardMenu(location); break;
+        default:
+            this.log.add(`You visit ${location.name}.`, 'system');
+            this._openTownOverview();
+    }
+}
+
+_openInnMenu(location) {
+    const restCost = location.restCost(this.player.level);
+    const items = [
+        { label: `Rest for the night (${restCost} gold)`, color: '#66ff66',
+          enabled: this.player.gold >= restCost, data: 'rest' },
+        { label: 'Listen for rumors', color: '#ccccaa', data: 'rumors' },
+        { label: 'Back to town', color: '#888888', data: 'back' },
+    ];
+    
+    const menu = new Menu(location.name, items, {
+        onSelect: (selected) => {
+            switch (selected.data) {
+                case 'rest':
+                    this.player.gold -= restCost;
+                    this.player.hp = this.player.hpMax;
+                    this.player.mp = this.player.mpMax;
+                    this.player.statuses = [];
+                    this.log.add('You rest at the inn. HP and MP fully restored.', 'heal');
+                    this._openInnMenu(location);
+                    break;
+                case 'rumors':
+                    this.log.add("The barkeep says: 'I heard there's treasure on level 5!'", 'lore');
+                    this._openInnMenu(location);
+                    break;
+                case 'back':
+                    this.activeMenu.closed = true;
+                    this._openTownOverview();
+                    break;
+            }
+        },
+        onCancel: () => { this._openTownOverview(); }
+    });
+    this._previousState = STATE.TOWN;
+    this.state = STATE.MENU;
+    this.activeMenu = menu;
+}
+
+_openShopMenu(location) {
+    const items = [
+        { label: 'Buy', color: '#44ff44', data: 'buy' },
+        { label: 'Sell', color: '#ffcc44', data: 'sell' },
+        { label: 'Back to town', color: '#888888', data: 'back' },
+    ];
+    
+    const menu = new Menu(location.name, items, {
+        onSelect: (selected) => {
+            switch (selected.data) {
+                case 'buy':  this._openBuyMenu(location); break;
+                case 'sell': this._openSellMenu(location); break;
+                case 'back':
+                    this.activeMenu.closed = true;
+                    this._openTownOverview();
+                    break;
+            }
+        },
+        onCancel: () => { this._openTownOverview(); }
+    });
+    this._previousState = STATE.TOWN;
+    this.state = STATE.MENU;
+    this.activeMenu = menu;
+}
+
+_openBuyMenu(location) {
+    const markup = location.buyMarkup ?? 1.5;
+    const stock = (location.stock ?? []).map(key => {
+        try {
+            const item = Item.create(key);
+            const price = Math.ceil(item.value * markup);
+            return {
+                label: `${item.name} — ${price}g`,
+                color: this.player.gold >= price ? '#44ff44' : '#555555',
+                enabled: this.player.gold >= price,
+                data: { key, price },
+            };
+        } catch(e) { return null; }
+    }).filter(Boolean);
+    
+    stock.push({ label: 'Back', color: '#888888', data: { key: 'back' } });
+    
+    const menu = new Menu(`Buy (${this.player.gold}g)`, stock, {
+        onSelect: (selected) => {
+            if (selected.data.key === 'back') {
+                this._openShopMenu(location);
+                return;
+            }
+            if (this.player.gold >= selected.data.price) {
+                this.player.gold -= selected.data.price;
+                const item = Item.create(selected.data.key);
+                if (this.player.addToInventory(item)) {
+                    this.log.add(`Bought ${item.name} for ${selected.data.price}g.`, 'system');
+                } else {
+                    this.player.gold += selected.data.price; // Refund
+                    this.log.add('Inventory full!', 'important');
+                }
+            }
+            this._openBuyMenu(location); // Refresh menu
+        },
+        onCancel: () => { this._openShopMenu(location); }
+    });
+    this._previousState = STATE.TOWN;
+    this.state = STATE.MENU;
+    this.activeMenu = menu;
+}
+
+_openSellMenu(location) {
+    const markup = location.sellMarkup ?? 0.3;
+    const items = this.player.inventory.map((item, i) => {
+        const price = Math.floor(item.value * markup);
+        const isEquipped = Object.values(this.player.equipped).includes(item);
+        return {
+            label: `${item.name}${isEquipped ? ' [equipped]' : ''} — ${price}g`,
+            color: isEquipped ? '#555555' : '#ffcc44',
+            enabled: !isEquipped,
+            data: { item, price, index: i },
+        };
+    });
+    
+    items.push({ label: 'Back', color: '#888888', data: { item: null } });
+    
+    const menu = new Menu(`Sell (${this.player.gold}g)`, items, {
+        onSelect: (selected) => {
+            if (!selected.data.item) {
+                this._openShopMenu(location);
+                return;
+            }
+            this.player.gold += selected.data.price;
+            this.player.removeFromInventory(selected.data.item);
+            this.log.add(`Sold ${selected.data.item.name} for ${selected.data.price}g.`, 'system');
+            this._openSellMenu(location); // Refresh
+        },
+        onCancel: () => { this._openShopMenu(location); }
+    });
+    this._previousState = STATE.TOWN;
+    this.state = STATE.MENU;
+    this.activeMenu = menu;
+}
+
+_openTempleMenu(location) {
+    const costs = location.costs;
+    const items = [
+        { label: `Cure Disease (${costs.cure_disease}g)`, color: '#66ff66',
+          enabled: this.player.gold >= costs.cure_disease, data: 'cure_disease' },
+        { label: `Remove Curse (${costs.remove_curse}g)`, color: '#66ff66',
+          enabled: this.player.gold >= costs.remove_curse, data: 'remove_curse' },
+        { label: `Identify Item (${costs.identify}g)`, color: '#8888ff',
+          enabled: this.player.gold >= costs.identify, data: 'identify' },
+        { label: 'Back to town', color: '#888888', data: 'back' },
+    ];
+    
+    const menu = new Menu(location.name, items, {
+        onSelect: (selected) => {
+            const cost = costs[selected.data];
+            switch (selected.data) {
+                case 'cure_disease':
+                    this.player.gold -= cost;
+                    StatusSystem.remove(this.player, 'disease');
+                    StatusSystem.remove(this.player, 'poison');
+                    this.log.add('The priests cleanse your body of affliction.', 'heal');
+                    this._openTempleMenu(location);
+                    break;
+                case 'remove_curse':
+                    this.player.gold -= cost;
+                    // Unequip all cursed items
+                    for (const [slot, item] of Object.entries(this.player.equipped)) {
+                        if (item?.cursed) {
+                            this.player.equipped[slot] = null;
+                            this.log.add(`The ${item.name} falls away, its dark power broken.`, 'magic');
+                        }
+                    }
+                    this._openTempleMenu(location);
+                    break;
+                case 'identify':
+                    this.log.add('The priest examines your belongings. (Not yet fully implemented)', 'system');
+                    this._openTempleMenu(location);
+                    break;
+                case 'back':
+                    this.activeMenu.closed = true;
+                    this._openTownOverview();
+                    break;
+            }
+        },
+        onCancel: () => { this._openTownOverview(); }
+    });
+    this._previousState = STATE.TOWN;
+    this.state = STATE.MENU;
+    this.activeMenu = menu;
+}
+
+_openGuildBoardMenu(location) {
+    // Generate quests if the board is empty
+    if (!this.worldMap.townState.guild_board_quests?.length) {
+        this.quests.generateQuestBoard(this.player.level);
+    }
+    
+    const quests = this.worldMap.townState.guild_board_quests ?? [];
+    const activeIds = new Set(this.quests.active.map(q => q.title));
+    
+    const items = quests.map(q => ({
+        label: `${activeIds.has(q.title) ? '[ACTIVE] ' : ''}${q.title} (${q.reward.xp} XP, ${q.reward.gold ?? 0}g)`,
+        color: activeIds.has(q.title) ? '#ffcc44' : '#88aacc',
+        enabled: !activeIds.has(q.title),
+        data: q,
+    }));
+    
+    items.push({ label: 'Back to town', color: '#888888', data: null });
+    
+    const menu = new Menu("Adventurer's Guild Board", items, {
+        onSelect: (selected) => {
+            if (!selected.data) {
+                this.activeMenu.closed = true;
+                this._openTownOverview();
+                return;
+            }
+            this.quests.active.push(selected.data);
+            this.log.add(`Quest accepted: ${selected.data.title}`, 'important');
+            this._openGuildBoardMenu(location); // Refresh
+        },
+        onCancel: () => { this._openTownOverview(); }
+    });
+    this._previousState = STATE.TOWN;
+    this.state = STATE.MENU;
+    this.activeMenu = menu;
+}
   
   _renderTown() {
-      // placeholder
-  }
+    const ctx = this.renderer.ctx;
+    const w = this.canvasEl.width;
+    const h = this.canvasEl.height;
+    
+    ctx.fillStyle = '#0a0a14';
+    ctx.fillRect(0, 0, w, h);
+    
+    // Draw a simple ASCII art town scene
+    ctx.fillStyle = '#444444';
+    const fontSize = Math.max(12, Math.floor(w / 60));
+    ctx.font = `${fontSize}px monospace`;
+    
+    const townArt = [
+        '          /\\       /\\          /\\      ',
+        '         /  \\     /  \\        /  \\     ',
+        '    ____/    \\___/    \\______/    \\___ ',
+        '   |    |  []  |    |  []  |    |  [] |',
+        '   |    | ____ |    | ____ |    | ____|',
+        '   |____|/    \\|____|/    \\|____|/    |',
+        '========================================',
+        '     Town of Homestead                  ',
+    ];
+    
+    const startY = h * 0.1;
+    townArt.forEach((line, i) => {
+        ctx.fillText(line, (w - ctx.measureText(line).width) / 2, startY + i * (fontSize + 4));
+    });
+}
 
   async _toggleMinimap() {
     let mc = document.getElementById('minimap-canvas');
