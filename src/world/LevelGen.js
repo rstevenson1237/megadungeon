@@ -233,7 +233,7 @@ export class LevelGen {
   }
 
   static _placeStairs(map, rooms, rng, levelNumber) {
-    if (levelNumber > 1 && rooms.length > 0) {
+    if (rooms.length > 0) {
       const upRoom = rooms[0];
       const ux = upRoom.x + Math.floor(upRoom.w / 2);
       const uy = upRoom.y + Math.floor(upRoom.h / 2);

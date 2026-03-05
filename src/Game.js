@@ -125,14 +125,23 @@ this.traps = new TrapSystem(this.bus);
     this.log.add('You descend into the dungeon...', 'important');
   }
 
-  _enterLevel(levelNum) {
+  _enterLevel(levelNum, entryMethod = 'from_above') {
     this.currentLevel = levelNum;
     this.player.depth = Math.max(this.player.depth, levelNum);
     
     const map = this.worldMap.getLevel(levelNum);
     
-    // Place player at entry point
-    const entry = map.metadata.entry ?? { x: 5, y: 5 };
+    let entryPoint;
+    if (entryMethod === 'from_below') {
+        // Came from stairs up, should appear at stairs down
+        entryPoint = map.metadata.stairDown;
+    } else {
+        // Came from stairs down, should appear at stairs up (entry)
+        entryPoint = map.metadata.entry;
+    }
+
+    const entry = entryPoint ?? { x: 5, y: 5 }; // Fallback
+
     map.removeEntity(this.player); // In case re-entering
     this.player.x = entry.x;
     this.player.y = entry.y;
@@ -299,6 +308,27 @@ if (this._handleMovement(action, map)) {
     
     if (!found) {
         this.log.add('There is nothing of interest here.', 'system');
+    }
+}
+
+_handlePickup() {
+    const map = this.worldMap.getLevel(this.currentLevel);
+    const entities = map.getEntitiesAt(this.player.x, this.player.y);
+    const items = entities.filter(e => e.type === 'item');
+
+    if (items.length === 0) {
+      this.log.add('There is nothing here to pick up.', 'system');
+      return;
+    }
+
+    // For now, just pick up the first item found
+    const item = items[0];
+
+    if (this.player.addToInventory(item)) {
+      map.removeEntity(item);
+      this.log.add(`You pick up the ${item.name}.`, 'system');
+    } else {
+      this.log.add('Your inventory is full.', 'important');
     }
 }
 
@@ -469,7 +499,7 @@ if (this._handleMovement(action, map)) {
     if (tile?.type === 'stair_up' && this.currentLevel > 1) {
       this.log.add('You ascend toward the surface.', 'important');
       map.removeEntity(this.player);
-      this._enterLevel(this.currentLevel - 1);
+      this._enterLevel(this.currentLevel - 1, 'from_below');
     } else if (this.currentLevel === 1 && tile?.type === 'stair_up') {
       this.log.add('You emerge into the safety of town.', 'important');
       const map = this.worldMap.getLevel(this.currentLevel);
@@ -593,7 +623,9 @@ if (this._handleMovement(action, map)) {
   }
 
   _openMenu(menu) {
-    this._previousState = this.state;
+    if (this.state !== STATE.MENU) {
+        this._previousState = this.state;
+    }
     this.state = STATE.MENU;
     this.activeMenu = menu;
   }
@@ -841,6 +873,83 @@ _openTempleMenu(location) {
     this.activeMenu = menu;
 }
 
+_openArcaneShopMenu(location) {
+    const items = [
+        { label: 'Buy Spells', color: '#88aaff', data: 'buy_spells' },
+        { label: 'Sell Scrolls', color: '#ffcc44', data: 'sell_scrolls' },
+        { label: `Identify Magic Item (${location.identifyCost}g)`, color: '#8888ff', data: 'identify_magic' },
+        { label: 'Scribe Scroll', color: '#ffffff', data: 'scribe_scroll' },
+        { label: 'Back to town', color: '#888888', data: 'back' },
+    ];
+    
+    const menu = new Menu(location.name, items, {
+        onSelect: (selected) => {
+            switch (selected.data) {
+                case 'buy_spells':
+                    this._openBuySpellsMenu(location);
+                    break;
+                case 'sell_scrolls':
+                     this.log.add('Selling scrolls is not yet implemented.', 'system');
+                    this._openArcaneShopMenu(location); // Refresh
+                    break;
+                case 'identify_magic':
+                    this.log.add('Identifying magic is not yet implemented.', 'system');
+                    this._openArcaneShopMenu(location); // Refresh
+                    break;
+                case 'scribe_scroll':
+                    this.log.add('Scribing scrolls is not yet implemented.', 'system');
+                    this._openArcaneShopMenu(location); // Refresh
+                    break;
+                case 'back':
+                    this.activeMenu.closed = true;
+                    this._openTownOverview();
+                    break;
+            }
+        },
+        onCancel: () => { this._openTownOverview(); }
+    });
+    this._previousState = STATE.TOWN;
+    this.state = STATE.MENU;
+    this.activeMenu = menu;
+}
+
+_openBuySpellsMenu(location) {
+    const spells = location.spellsAvailable(this.worldMap.townState, this.rng);
+    
+    const items = spells.map(spell => {
+        const cost = (spell.level * 100) + 50; // Arbitrary cost
+        const alreadyKnown = this.player.spellbook.includes(spell.key);
+        return {
+            label: `${spell.name} (L${spell.level}) - ${cost}g`,
+            color: alreadyKnown ? '#555555' : (this.player.gold >= cost ? '#88aaff' : '#555555'),
+            enabled: !alreadyKnown && this.player.gold >= cost,
+            data: { spell, cost },
+        };
+    });
+
+    items.push({ label: 'Back', color: '#888888', data: null });
+
+    const menu = new Menu(`Buy Spells (${this.player.gold}g)`, items, {
+        onSelect: (selected) => {
+            if (!selected.data) {
+                this._openArcaneShopMenu(location);
+                return;
+            }
+            const { spell, cost } = selected.data;
+            if (this.player.gold >= cost) {
+                this.player.gold -= cost;
+                this.player.spellbook.push(spell.key);
+                this.log.add(`You have learned ${spell.name}!`, 'magic');
+            }
+            this._openBuySpellsMenu(location); // Refresh
+        },
+        onCancel: () => { this._openArcaneShopMenu(location); }
+    });
+    this._previousState = STATE.TOWN;
+    this.state = STATE.MENU;
+    this.activeMenu = menu;
+}
+
 _openGuildBoardMenu(location) {
     // Generate quests if the board is empty
     if (!this.worldMap.townState.guild_board_quests?.length) {
@@ -875,6 +984,284 @@ _openGuildBoardMenu(location) {
     this._previousState = STATE.TOWN;
     this.state = STATE.MENU;
     this.activeMenu = menu;
+}
+
+_openInventoryMenu() {
+    const items = this.player.inventory.map((item, i) => ({
+        label: `${item.name}${this._equippedTag(item)}`,
+        color: item.cursed ? '#ff4444' : (item.color ?? '#cccccc'),
+        enabled: true,
+        data: item,
+    }));
+    
+    if (items.length === 0) {
+        this.log.add('Your inventory is empty.', 'system');
+        return;
+    }
+    
+    const menu = new Menu('Inventory', items, {
+        onSelect: (selected) => {
+            this._openItemActionMenu(selected.data);
+        },
+        onCancel: () => {}
+    });
+    this._openMenu(menu);
+}
+
+_equippedTag(item) {
+    const slots = this.player.equipped;
+    for (const [slot, equipped] of Object.entries(slots)) {
+        if (equipped === item) return ` [${slot}]`;
+    }
+    return '';
+}
+
+_openItemActionMenu(item) {
+    const actions = [];
+    
+    if (item.category === 'weapon' || item.category === 'armor') {
+        const isEquipped = Object.values(this.player.equipped).includes(item);
+        if (isEquipped) {
+            actions.push({ label: 'Unequip', key: 'unequip', color: '#ffcc44', data: 'unequip' });
+        } else {
+            actions.push({ label: 'Equip', key: 'equip', color: '#44ff44', data: 'equip' });
+        }
+    }
+    if (item.category === 'potion') {
+        actions.push({ label: 'Drink', key: 'use', color: '#44ff44', data: 'use' });
+    }
+    if (item.category === 'scroll') {
+        actions.push({ label: 'Read', key: 'use', color: '#8844ff', data: 'use' });
+    }
+    if (item.category === 'food') {
+        actions.push({ label: 'Eat', key: 'use', color: '#44ff44', data: 'use' });
+    }
+    actions.push({ label: 'Drop', key: 'drop', color: '#ff4444', data: 'drop' });
+    actions.push({ label: 'Examine', key: 'examine', color: '#888888', data: 'examine' });
+    
+    const menu = new Menu(item.name, actions, {
+        onSelect: (selected) => {
+            this._executeItemAction(item, selected.data);
+            this.activeMenu.closed = true;
+        },
+        onCancel: () => {
+            this._openInventoryMenu(); // Return to inventory list
+        }
+    });
+    this._openMenu(menu);
+}
+
+_executeItemAction(item, action) {
+    switch (action) {
+        case 'equip': {
+            const slot = item.armor?.slot ?? (item.category === 'weapon' ? 'weapon' : null);
+            if (slot && this.player.equipped[slot]) {
+                // Unequip current first
+                const current = this.player.equipped[slot];
+                if (current.cursed) {
+                    this.log.add(`The ${current.name} is stuck to you! It seems to be cursed.`, 'danger');
+                    return;
+                }
+                this.player.equipped[slot] = null;
+            }
+            if (slot) {
+                this.player.equipped[slot] = item;
+                this.player.ac = this.player._computeAC();
+                this.log.add(`You equip the ${item.name}.`, 'system');
+            }
+            break;
+        }
+        case 'unequip': {
+            if (item.cursed) {
+                this.log.add(`You can't remove the ${item.name}! It's cursed!`, 'danger');
+                return;
+            }
+            for (const [slot, equipped] of Object.entries(this.player.equipped)) {
+                if (equipped === item) {
+                    this.player.equipped[slot] = null;
+                    this.player.ac = this.player._computeAC();
+                    this.log.add(`You remove the ${item.name}.`, 'system');
+                    break;
+                }
+            }
+            break;
+        }
+        case 'use': {
+            this._useItem(item);
+            break;
+        }
+        case 'drop': {
+            this.player.removeFromInventory(item);
+            item.x = this.player.x;
+            item.y = this.player.y;
+            const map = this.worldMap.getLevel(this.currentLevel);
+            map.addEntity(item);
+            this.log.add(`You drop the ${item.name}.`, 'system');
+            break;
+        }
+        case 'examine': {
+            this.log.add(item.description ?? 'You see nothing special.', 'lore');
+            break;
+        }
+    }
+}
+
+_useItem(item) {
+    if (item.potion) {
+        const effect = item.potion.effect;
+        if (effect === 'heal') {
+            const healed = rollDiceStr(item.potion.magnitude);
+            this.player.hp = Math.min(this.player.hp + healed, this.player.hpMax);
+            this.log.add(`You drink the ${item.name}. Healed ${healed} HP.`, 'heal');
+        } else if (effect === 'haste') {
+            // Apply status — requires StatusSystem to be implemented
+            this.log.add(`You drink the ${item.name}. You feel faster!`, 'magic');
+        }
+        this.player.removeFromInventory(item);
+    } else if (item.scroll) {
+        this.log.add(`You read the ${item.name}. The words vanish from the page.`, 'magic');
+        // Cast the scroll's spell at the scroll's caster level
+        // For MVP, auto-target nearest visible monster
+        this.player.removeFromInventory(item);
+    } else if (item.food) {
+        this.log.add(`You eat the ${item.name}. It sustains you.`, 'system');
+        this.player.removeFromInventory(item);
+    }
+}
+
+_openDropMenu() {
+    if (this.player.inventory.length === 0) {
+        this.log.add('You have nothing to drop.', 'system');
+        return;
+    }
+    const items = this.player.inventory.map(item => ({
+        label: item.name,
+        color: item.color ?? '#cccccc',
+        data: item,
+    }));
+    const menu = new Menu('Drop what?', items, {
+        onSelect: (selected) => {
+            const item = selected.data;
+            if (Object.values(this.player.equipped).includes(item)) {
+                this.log.add(`You must unequip the ${item.name} first.`, 'system');
+                return;
+            }
+            this.player.removeFromInventory(item);
+            item.x = this.player.x;
+            item.y = this.player.y;
+            const map = this.worldMap.getLevel(this.currentLevel);
+            map.addEntity(item);
+            this.log.add(`You drop the ${item.name}.`, 'system');
+            this.activeMenu.closed = true;
+        },
+        onCancel: () => {}
+    });
+    this._openMenu(menu);
+}
+
+_openCastMenu() {
+    if (this.player.spellbook.length === 0) {
+        this.log.add('You know no spells.', 'system');
+        return;
+    }
+    const spells = this.player.spellbook.map(key => {
+        const spell = SPELLS[key];
+        const canCast = this.player.mp >= (spell?.mpCost ?? 999);
+        return {
+            label: `${spell?.name ?? key} (${spell?.mpCost ?? '?'} MP)`,
+            color: canCast ? '#aa66ff' : '#555555',
+            enabled: canCast,
+            data: key,
+        };
+    });
+    const menu = new Menu(`Spellbook (MP: ${this.player.mp}/${this.player.mpMax})`, spells, {
+        onSelect: (selected) => {
+            // For MVP: auto-target nearest visible monster, or self for heals
+            const spell = SPELLS[selected.data];
+            let targetPos;
+            if (spell.range === 'self' || spell.range === 'touch') {
+                targetPos = { x: this.player.x, y: this.player.y };
+            } else {
+                targetPos = this._findNearestVisibleMonster();
+                if (!targetPos) {
+                    this.log.add('No valid target in sight.', 'system');
+                    return;
+                }
+            }
+            const result = this.magic.cast(this.player, selected.data, targetPos);
+            if (result.success) {
+                this.log.add(`You cast ${spell.name}!`, 'magic');
+            } else {
+                this.log.add(result.message, 'system');
+            }
+            this.activeMenu.closed = true;
+        },
+        onCancel: () => {}
+    });
+    this._openMenu(menu);
+}
+
+_findNearestVisibleMonster() {
+    const map = this.worldMap.getLevel(this.currentLevel);
+    let nearest = null;
+    let nearestDist = Infinity;
+    for (const entityList of map.entities.values()) {
+        for (const e of entityList) {
+            if (e.type !== 'monster') continue;
+            const tile = map.get(e.x, e.y);
+            if (!tile?.visible) continue;
+            const dist = Math.abs(e.x - this.player.x) + Math.abs(e.y - this.player.y);
+            if (dist < nearestDist) {
+                nearestDist = dist;
+                nearest = { x: e.x, y: e.y };
+            }
+        }
+    }
+    return nearest;
+}
+
+_quickSave() {
+    try {
+        const saveData = {
+            currentLevel: this.currentLevel,
+            player: this.player.serialize(),
+            worldMap: this.worldMap.serialize(),
+            log: this.log.messages.slice(-50), // Save last 50 messages
+        };
+        const serialized = JSON.stringify(saveData);
+        localStorage.setItem('megadungeon_save', serialized);
+        this.log.add('Game saved.', 'important');
+    } catch (e) {
+        this.log.add('Save failed!', 'danger');
+        console.error('Save failed:', e);
+    }
+}
+
+_quickLoad() {
+    try {
+        const raw = localStorage.getItem('megadungeon_save');
+        if (!raw) {
+            this.log.add('No save found.', 'system');
+            return;
+        }
+        const data = JSON.parse(raw);
+        this.worldMap = WorldMap.deserialize(data.worldMap);
+        this.player = Player.deserialize(data.player);
+        this.currentLevel = data.currentLevel;
+        this.quests = new QuestSystem(this.worldMap, this.rng);
+        
+        const map = this.worldMap.getLevel(this.currentLevel);
+        map.addEntity(this.player);
+        map.computeFOV(this.player.x, this.player.y, PLAYER_FOV_RADIUS);
+        this._updateCamera(map);
+        
+        this.log.messages = data.log ?? [];
+        this.log.add('Game loaded.', 'important');
+        this.state = STATE.PLAYING;
+    } catch (e) {
+        this.log.add('Load failed!', 'danger');
+        console.error('Load failed:', e);
+    }
 }
   
   _renderTown() {

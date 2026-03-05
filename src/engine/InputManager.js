@@ -44,13 +44,32 @@ export class InputManager {
 
   _onKeyDown(e) {
     this._pressed.add(e.code);
-    const modified = `${e.shiftKey ? 'Shift+' : ''}${e.code}`;
-    for (const [action, keys] of this._bindings) {
-      if (keys.has(e.code) || keys.has(modified)) {
-        this._queue.push(action);
+    let foundAction = null;
+
+    if (e.shiftKey) {
+        const modifiedKey = `Shift+${e.code}`;
+        for (const [action, keys] of this._bindings) {
+            if (keys.has(modifiedKey)) {
+                foundAction = action;
+                break;
+            }
+        }
+    }
+
+    if (!foundAction) {
+        for (const [action, keys] of this._bindings) {
+            if (keys.has(e.code)) {
+                if (!e.shiftKey) {
+                    foundAction = action;
+                    break;
+                }
+            }
+        }
+    }
+
+    if (foundAction) {
+        this._queue.push(foundAction);
         e.preventDefault();
-        break;
-      }
     }
   }
 
