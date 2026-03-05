@@ -3,6 +3,7 @@ import { TileMap } from './TileMap.js';
 import { THEMES } from '../data/themes.js';
 import { RNG } from '../engine/RNG.js';
 import { RoomGen } from './RoomGen.js';
+import { bus } from '../engine/EventBus.js';
 
 // Constants for map dimensions
 const MAP_W = 78;
@@ -270,6 +271,31 @@ export class LevelGen {
   }
 
   static _applyThemeDressing(map, rooms, rng, theme) {
+    const FEATURE_GLYPHS = {
+      torch:    { glyph: 0x21, fg: '#ffaa00' },  // '!'
+      barrel:   { glyph: 0x6F, fg: '#885533' },  // 'o'
+      rubble:   { glyph: 0x2C, fg: '#666666' },  // ','
+      bone_pile:{ glyph: 0x25, fg: '#ccccaa' },  // '%'
+      stain:    { glyph: 0x7E, fg: '#882222' },  // '~'
+    };
+    for (const room of rooms) {
+      const count = rng.int(1, 3);
+      for (let i = 0; i < count; i++) {
+        const feat = rng.pick(theme.dressingFeatures);
+        const def  = FEATURE_GLYPHS[feat];
+        if (!def) continue;
+        // pick random non-occupied floor tile
+        for (let attempt = 0; attempt < 8; attempt++) {
+          const tx = room.x + rng.int(0, room.w - 1);
+          const ty = room.y + rng.int(0, room.h - 1);
+          const tile = map.get(tx, ty);
+          if (!tile || tile.solid || tile.type !== 'floor') continue;
+          tile.glyph = def.glyph; tile.fg = def.fg;
+          tile.features.dressing = feat;
+          break;
+        }
+      }
+    }
   }
 
   static _pickTheme(levelNumber, rng) {
@@ -283,7 +309,7 @@ export class LevelGen {
   }
 
   static _populateRooms(map, rooms, rng, levelNumber, theme) {
-    const populator = new RoomGen(levelNumber, rng, theme);
+    const populator = new RoomGen(levelNumber, rng, theme, bus);
     if(rooms.length === 0) return;
     rooms[0].type = 'entry';
     if (levelNumber % 5 === 0 && rooms.length > 1) {

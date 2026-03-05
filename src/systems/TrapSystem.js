@@ -1,5 +1,6 @@
 // src/systems/TrapSystem.js
 import { rollDiceStr, rollDie, statModifier } from '../engine/rules.js';
+import { SkillSystem } from './SkillSystem.js';
 
 export class TrapSystem {
     constructor(eventBus) {
@@ -16,12 +17,8 @@ export class TrapSystem {
         const trap = tile.features?.trap;
         if (!trap || trap.triggered) return false;
         
-        // Detection check: Thief skill or INT-based
-        const detectSkill = player.skills.trap_handling ?? 0;
-        const intMod = statModifier(player.stats.int);
-        const detectRoll = rollDie(20) + detectSkill * 2 + intMod;
-        
-        if (detectRoll >= trap.detectDC) {
+        // Detection check
+        if (SkillSystem.check(player, "trap_handling", trap.detectDC, () => rollDie(20))) {
             this.bus.emit('log:message', {
                 text: `You notice a trap! ${trap.hint ?? 'Something is wrong here.'}`,
                 category: 'trap'
@@ -107,11 +104,7 @@ export class TrapSystem {
      * Attempt to disarm a detected trap.
      */
     disarm(trap, player) {
-        const skill = player.skills.trap_handling ?? 0;
-        const dexMod = statModifier(player.stats.dex);
-        const roll = rollDie(20) + skill * 2 + dexMod;
-        
-        if (roll >= trap.disarmDC) {
+        if (SkillSystem.check(player, "trap_handling", trap.disarmDC, () => rollDie(20))) {
             trap.triggered = true; // Mark as neutralized
             this.bus.emit('log:message', {
                 text: `You carefully disarm the ${trap.name}.`,

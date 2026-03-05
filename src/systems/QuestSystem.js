@@ -59,4 +59,18 @@ export class QuestSystem {
     this.active = this.active.filter(q => q !== quest);
     this.completed.push({ ...quest, completedAt: Date.now() });
   }
+
+  serialize() {
+    return {
+      active: this.active,
+      completed: this.completed,
+    };
+  }
+
+  static deserialize(data, worldMap, rng) {
+    const qs = new QuestSystem(worldMap, rng);
+    qs.active    = data?.active    ?? [];
+    qs.completed = data?.completed ?? [];
+    return qs;
+  }
 }
