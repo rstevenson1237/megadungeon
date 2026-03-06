@@ -64,14 +64,14 @@ this.traps = new TrapSystem(this.bus);
         this.renderer.resize(w, h);
         
         // Resize CRT overlay to match
-        const crtCanvas = document.getElementById('crt-canvas');
-        if (crtCanvas) {
-            crtCanvas.width = this.renderer.canvas.width;
-            crtCanvas.height = this.renderer.canvas.height;
-            const crtCtx = crtCanvas.getContext('2d');
-            const crtOverlay = buildCRTOverlay(crtCanvas.width, crtCanvas.height);
-            crtCtx.drawImage(crtOverlay, 0, 0);
-        }
+        // const crtCanvas = document.getElementById('crt-canvas');
+        // if (crtCanvas) {
+        //     crtCanvas.width = this.renderer.canvas.width;
+        //     crtCanvas.height = this.renderer.canvas.height;
+        //     const crtCtx = crtCanvas.getContext('2d');
+        //     const crtOverlay = buildCRTOverlay(crtCanvas.width, crtCanvas.height);
+        //     crtCtx.drawImage(crtOverlay, 0, 0);
+        // }
         
         // Recalculate camera
         if (this.worldMap && this.player) {
@@ -323,6 +323,20 @@ if (this._handleMovement(action, map)) {
     if (tile.features.shrine) {
         this.log.add(tile.features.shrine.message, 'lore');
         found = true;
+    }
+    
+    if (tile.features.dressing) {
+        const descriptions = {
+            'barrel': 'An old wooden barrel. It is empty.',
+            'rubble': 'A pile of rocks and debris from a past collapse.',
+            'bone_pile': 'A scattering of old, gnawed bones.',
+            'stain': 'A dark, sticky stain on the floor. Best not to think about it.'
+        };
+        const desc = descriptions[tile.features.dressing];
+        if (desc) {
+            this.log.add(desc, 'system');
+            found = true;
+        }
     }
     
     if (!found) {
@@ -1314,29 +1328,7 @@ _quickLoad() {
 }
 
   async _toggleMinimap() {
-    let mc = document.getElementById('minimap-canvas');
-    if (!mc) {
-        mc = document.createElement('canvas');
-        mc.id = 'minimap-canvas';
-        mc.style.position = 'absolute';
-        mc.style.top = '50%';
-        mc.style.left = '50%';
-        mc.style.transform = 'translate(-50%, -50%)';
-        mc.style.border = '2px solid #555';
-        mc.style.background = 'rgba(0,0,0,0.8)';
-        document.getElementById('game-wrapper').appendChild(mc);
-    }
-    
-    if (mc.style.display === 'none' || mc.style.display === '') {
-      // Render and show minimap
-      const { Minimap } = await import('./ui/Minimap.js'); // lazy import
-      const map = this.worldMap.getLevel(this.currentLevel);
-      const mm = new Minimap(map, mc);
-      mm.render(this.player.x, this.player.y);
-      mc.style.display = 'block';
-    } else {
-      mc.style.display = 'none';
-    }
+    // Minimap is currently disabled to improve visibility.
   }
 }
 

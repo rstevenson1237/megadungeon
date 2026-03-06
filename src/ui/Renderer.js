@@ -126,7 +126,7 @@ export class Renderer {
         const r = parseInt(color.slice(1, 3), 16);
         const g = parseInt(color.slice(3, 5), 16);
         const b = parseInt(color.slice(5, 7), 16);
-        const dimFactor = 0.4;
+        const dimFactor = 0.7;
         const dr = Math.floor(r * dimFactor);
         const dg = Math.floor(g * dimFactor);
         const db = Math.floor(b * dimFactor);
