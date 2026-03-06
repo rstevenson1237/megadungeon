@@ -2,9 +2,10 @@
 
 import { InputManager }  from './engine/InputManager.js';
 import { GameLoop }      from './engine/GameLoop.js';
-import { EventBus }      from './engine/EventBus.js';
+import { EventBus, bus }      from './engine/EventBus.js';
 import { RNG }           from './engine/RNG.js';
 import { WorldMap }      from './world/WorldMap.js';
+import { Pathfinder }    from './world/Pathfinder.js';
 import { Player }        from './entities/Player.js';
 import { Renderer, glyphToChar, buildCRTOverlay } from './ui/Renderer.js';
 import { Menu }        from './ui/Menu.js';
@@ -37,7 +38,7 @@ class Game {
     this.canvasEl  = document.getElementById('main-canvas');
     this.input     = new InputManager();
     this.loop      = new GameLoop(this.update.bind(this), this.render.bind(this));
-    this.bus       = new EventBus();
+    this.bus       = bus;
     this.rng       = new RNG(Date.now());
     this.renderer  = new Renderer(this.canvasEl);
     this.log       = new MessageLog(200);
@@ -158,9 +159,16 @@ this.traps = new TrapSystem(this.bus);
     switch (this.state) {
       case STATE.TITLE:       this._updateTitle(); break;
       case STATE.PLAYING:     this._updatePlaying(); break;
+      case STATE.TOWN:        this._updateTown(); break;
       case STATE.MENU:        this._updateMenu(); break;
       case STATE.DEAD:        this._updateDead(); break;
       case STATE.PUZZLE:      this._updatePuzzle(); break;
+    }
+  }
+
+  _updateTown() {
+    if (!this.activeMenu) {
+      this._openTownOverview();
     }
   }
 
@@ -174,6 +182,12 @@ this.traps = new TrapSystem(this.bus);
     if (!action) return; // Turn-based: only advance on input
 
     const map = this.worldMap.getLevel(this.currentLevel);
+
+    if (StatusSystem.has(this.player, 'sleep') || StatusSystem.has(this.player, 'paralysis')) {
+      this.log.add('You cannot move!', 'danger');
+      this._runMonsterAI(map); // Monsters still act
+      return;
+    }
 
     if(action === 'inventory') {
         this._openInventoryMenu();
@@ -206,6 +220,11 @@ if (action === 'save') {
 }
 if (action === 'load') {
     this._quickLoad();
+    return;
+}
+
+if (action === 'use') {
+    this._openUseMenu();
     return;
 }
 
@@ -332,6 +351,17 @@ _handlePickup() {
     }
 }
 
+_openUseMenu() {
+  const usable = this.player.inventory.filter(i => i.potion || i.scroll || i.food || i.wand);
+  if (usable.length === 0) { this.log.add('Nothing usable.', 'system'); return; }
+  const items = usable.map(item => ({ label: item.name, color: item.color, data: item }));
+  const menu = new Menu('Use what?', items, {
+    onSelect: (sel) => { this._useItem(sel.data); this.activeMenu.closed = true; },
+    onCancel: () => {}
+  });
+  this._openMenu(menu);
+}
+
   // ---------------------------------------------------------------
   // MOVEMENT & BUMP COMBAT
 
@@ -373,7 +403,6 @@ _handlePickup() {
     // Move player
     map.moveEntity(this.player, nx, ny);
     
-    // After: map.moveEntity(this.player, nx, ny);
     const newTile = map.get(nx, ny);
     const trapResult = this.traps.checkTile(newTile, this.player);
     if (trapResult?.teleport) {
@@ -445,6 +474,11 @@ _handlePickup() {
     // Only act if visible to player (in FOV) — prevents off-screen monster spam
     if (!tile?.visible) return;
 
+    if (StatusSystem.has(monster, 'sleep') || StatusSystem.has(monster, 'paralysis')) {
+      // Still tick duration — handled by end-of-turn StatusSystem.tick()
+      return; // Cannot act
+    }
+
     // Simple AI: move toward player, attack if adjacent
     const dx = this.player.x - monster.x;
     const dy = this.player.y - monster.y;
@@ -456,27 +490,11 @@ _handlePickup() {
       return;
     }
 
-    // Move one step toward player (simple, non-pathfinding)
-    // Normalize direction
-    const stepX = dx === 0 ? 0 : (dx > 0 ? 1 : -1);
-    const stepY = dy === 0 ? 0 : (dy > 0 ? 1 : -1);
-
-    // Try primary direction, then fallbacks
-    const candidates = [
-      [stepX, stepY],
-      [stepX, 0],
-      [0, stepY],
-    ];
-
-    for (const [sx, sy] of candidates) {
-      if(sx === 0 && sy === 0) continue;
-      const nx = monster.x + sx;
-      const ny = monster.y + sy;
-      const occupied = map.getEntitiesAt(nx, ny).some(e => e.type !== 'item');
-      if (map.isWalkable(nx, ny) && !occupied) {
-        map.moveEntity(monster, nx, ny);
-        break;
-      }
+    const path = Pathfinder.findPath(map, monster.x, monster.y, this.player.x, this.player.y);
+    if (path && path.length > 0) {
+      const next = path[0];
+      const occupied = map.getEntitiesAt(next.x, next.y).some(e => e.type !== "item");
+      if (!occupied) map.moveEntity(monster, next.x, next.y);
     }
   }
 
@@ -567,7 +585,7 @@ _handlePickup() {
     const helpSize = Math.max(10, Math.floor(subSize * 0.85));
     ctx.font = `${helpSize}px monospace`;
     const help1 = 'WASD / Arrow Keys to move   Bump enemies to attack';
-    const help2 = '> descend   < ascend   I inventory   M map';
+    const help2 = '  > descend   < ascend   I inventory   M map  ';
     ctx.fillText(help1, (w - ctx.measureText(help1).width) / 2, h * 0.6);
     ctx.fillText(help2, (w - ctx.measureText(help2).width) / 2, h * 0.6 + helpSize + 8);
 }
@@ -1226,6 +1244,7 @@ _quickSave() {
             currentLevel: this.currentLevel,
             player: this.player.serialize(),
             worldMap: this.worldMap.serialize(),
+            quests: this.quests.serialize(),
             log: this.log.messages.slice(-50), // Save last 50 messages
         };
         const serialized = JSON.stringify(saveData);
@@ -1248,7 +1267,7 @@ _quickLoad() {
         this.worldMap = WorldMap.deserialize(data.worldMap);
         this.player = Player.deserialize(data.player);
         this.currentLevel = data.currentLevel;
-        this.quests = new QuestSystem(this.worldMap, this.rng);
+        this.quests = QuestSystem.deserialize(data.quests, this.worldMap, this.rng);
         
         const map = this.worldMap.getLevel(this.currentLevel);
         map.addEntity(this.player);

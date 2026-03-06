@@ -2,17 +2,7 @@ import { Monster } from '../entities/Monster.js';
 import { Item } from '../entities/Item.js';
 import { TRAPS } from '../data/traps.js';
 import { PUZZLES } from '../data/puzzles.js';
-import { bus } from '../engine/EventBus.js';
-
-// Stub for MonsterGroups
-const MonsterGroups = {
-    roll: (level, theme, rng) => {
-        return {
-            members: [{ type: 'goblin' }],
-            treasureChance: 0.5
-        };
-    }
-};
+import { MonsterGroups } from './MonsterGroups.js';
 
 /**
  * Populates a room with content based on level depth, theme, and room type.
@@ -31,10 +21,11 @@ const MonsterGroups = {
  *   'hazard'       — Environmental danger (lava, gas, collapsing floor)
  */
 export class RoomGen {
-  constructor(levelNumber, rng, theme) {
+  constructor(levelNumber, rng, theme, eventBus) {
     this.level = levelNumber;
     this.rng   = rng;
     this.theme = theme;
+    this.bus = eventBus;
     this.difficulty = this._computeDifficulty(levelNumber);
   }
 
@@ -95,7 +86,7 @@ export class RoomGen {
       // Don't place monster on top of another entity
       const occupied = map.getEntitiesAt(pos.x, pos.y).length > 0;
       if (!occupied) {
-        const monster = Monster.create(entry.type, pos.x, pos.y, this.level);
+        const monster = Monster.create(entry.type, pos.x, pos.y, this.level, this.rng);
         map.addEntity(monster);
       }
     }
@@ -123,7 +114,7 @@ export class RoomGen {
           const trapKey = this.rng.pick(Object.keys(TRAPS));
           const trap = { ...TRAPS[trapKey] };
           map.get(pos.x, pos.y).features.trap = trap;
-          bus.emit('log:message', { text: `You sense danger.` });
+          this.bus.emit('log:message', { text: `You sense danger.` });
       }
   }
 
@@ -133,19 +124,21 @@ export class RoomGen {
           const puzzleKey = this.rng.pick(Object.keys(PUZZLES));
           const puzzle = { def: PUZZLES[puzzleKey], state: { ...PUZZLES[puzzleKey].initialState }, solved: false, location: { x: pos.x, y: pos.y, z: this.level } };
           map.get(pos.x, pos.y).features.puzzle = puzzle;
-          bus.emit('log:message', { text: `You see something interesting.` });
+          this.bus.emit('log:message', { text: `You see something interesting.` });
       }
   }
 
   _placeLore(map, room) {
         const pos = this._randomFloorInRoom(map, room);
         if(pos) {
+            const message = this.rng.pick(this.theme.ambientMessages)
+                ?? 'Strange markings cover the wall.';
             map.get(pos.x, pos.y).features.lore = {
-                glyph: 0x3F, // '?'
-                color: '#ffff00',
-                message: 'You see a strange inscription on the wall.'
+                glyph: 0x22, // "
+                color: '#aaaaff',
+                message,
             };
-            bus.emit('log:message', { text: 'You see a strange inscription on the wall.' });
+            this.bus.emit('log:message', { text: message });
         }
   }
 
@@ -157,7 +150,7 @@ export class RoomGen {
                 color: '#ffffff',
                 message: 'You see a holy shrine.'
             };
-            bus.emit('log:message', { text: 'You see a holy shrine.' });
+            this.bus.emit('log:message', { text: 'You see a holy shrine.' });
         }
     }
 
@@ -165,18 +158,18 @@ export class RoomGen {
         const pos = this._randomFloorInRoom(map, room);
         if (pos) {
             map.get(pos.x, pos.y).type = 'water';
-            bus.emit('log:message', { text: 'You see a pool of water.' });
+            this.bus.emit('log:message', { text: 'You see a pool of water.' });
         }
     }
 
     _dressRoom(map, room) {
-        bus.emit('log:message', { text: 'The room is empty.' });
+        this.bus.emit('log:message', { text: 'The room is empty.' });
     }
     
     populateBossRoom(map, room){
         const pos = this._randomFloorInRoom(map, room);
         if (pos) {
-            const monster = Monster.create('dragon_young_red', pos.x, pos.y, this.level);
+            const monster = Monster.create('dragon_young_red', pos.x, pos.y, this.level, this.rng);
             map.addEntity(monster);
         }
     }

@@ -1,5 +1,7 @@
 // megadungeon/src/world/TileMap.js
 import { Entity } from '../entities/Entity.js'; // Will be a stub
+import { Monster } from '../entities/Monster.js';
+import { Item } from '../entities/Item.js';
 
 // --- Helper for TileMap ---
 // The actual Tile definition
@@ -142,7 +144,16 @@ export class TileMap {
       w: this.w,
       h: this.h,
       tiles: this.tiles.map(tile => tile.explored ? tile : createVoidTile()),
-      entities: [...this.entities.entries()].map(([key, arr]) => [key, arr.map(e => e.id)]), // Only save entity IDs for now
+      entities: [...this.entities.entries()].map(([key, arr]) => [
+        key,
+        arr.map(e => ({
+          type: e.type,
+          defKey: e.defKey ?? null,    // Monster
+          itemKey: e.itemKey ?? null,  // Item
+          x: e.x, y: e.y,
+          hp: e.hp ?? null,
+        }))
+      ]),
       metadata: this.metadata,
     };
   }
@@ -152,7 +163,20 @@ export class TileMap {
     const map = new TileMap(data.w, data.h);
     map.tiles = data.tiles.map(t => ({...createVoidTile(), ...t})); // merge to ensure all props exist
     map.metadata = data.metadata;
-    // Entities would be deserialized here, using the IDs
+
+    for (const [key, arr] of data.entities) {
+      for (const ed of arr) {
+        let entity;
+        if (ed.type === "monster") entity = Monster.create(ed.defKey, ed.x, ed.y);
+        else if (ed.type === "item") entity = Item.create(ed.itemKey);
+        if (entity) {
+          entity.x = ed.x;
+          entity.y = ed.y;
+          if (ed.hp !== null) entity.hp = ed.hp;
+          map.addEntity(entity);
+        }
+      }
+    }
     return map;
   }
 }

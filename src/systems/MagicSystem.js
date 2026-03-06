@@ -111,7 +111,11 @@ export class MagicSystem {
         }
         if (saved && spell.saveEffect === 'half') dmg = Math.floor(dmg / 2);
         if (!saved || spell.saveEffect !== 'negate') {
-          target.hp = Math.max(0, target.hp - (target.resistance?.[effect.element] ?? 0));
+          target.hp = Math.max(0, target.hp - dmg);
+          if (target.hp === 0) {
+            this.bus.emit(target.type === 'player' ? 'player:death' : 'monster:death',
+              { entity: target, cause: spell.name });
+          }
         }
         return { target, effect: 'damage', value: dmg, saved };
       }
