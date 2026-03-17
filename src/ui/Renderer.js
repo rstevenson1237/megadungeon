@@ -308,6 +308,28 @@ export class Renderer {
             this.ctx.fillText(msg.text, x, y + i * this.TILE_H);
         });
     }
+
+    wrapText(text, maxWidth) {
+        if (!text) return [];
+        const words = text.split(' ');
+        const lines = [];
+        let currentLine = '';
+
+        for (const word of words) {
+            const testLine = currentLine.length > 0 ? `${currentLine} ${word}` : word;
+            const metrics = this.ctx.measureText(testLine);
+            if (metrics.width > maxWidth && currentLine.length > 0) {
+                lines.push(currentLine);
+                currentLine = word;
+            } else {
+                currentLine = testLine;
+            }
+        }
+        if (currentLine) {
+            lines.push(currentLine);
+        }
+        return lines;
+    }
 }
 
 export function glyphToChar(code) {

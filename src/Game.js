@@ -19,6 +19,7 @@ import { QuestSystem } from './systems/QuestSystem.js';
 import { SPELLS } from './data/spells.js';
 import { TOWN_LOCATIONS } from './data/town.js';
 import { rollDiceStr } from './engine/rules.js';
+import { CLASSES } from './data/classes.js';
 
 const PLAYER_FOV_RADIUS = 8;
 
@@ -109,21 +110,54 @@ this.traps = new TrapSystem(this.bus);
   // ---------------------------------------------------------------
   // STATE: TITLE
   // Show title screen. Press ENTER to start a new game.
-  // For MVP, skip character creation and auto-create a Fighter.
-
-  _startNewGame() {
+  
+  _startNewGame(classKey) {
     const seed = Date.now();
     this.rng.seed = seed;
     this.worldMap = new WorldMap(this.rng.seed);
     this.quests = new QuestSystem(this.worldMap, this.rng);
     
-    // Auto-create a level 1 Fighter for MVP (bypassing char creation)
-    const stats = { str: 16, dex: 12, con: 14, int: 9, wis: 11, cha: 10 };
-    this.player = new Player('fighter', 'Adventurer', stats);
+    // Create player with selected class
+    const stats = { str: 16, dex: 12, con: 14, int: 9, wis: 11, cha: 10 }; // TODO: Roll stats
+    this.player = new Player(classKey, 'Adventurer', stats);
     
     this._enterLevel(1);
     this.state = STATE.PLAYING;
     this.log.add('You descend into the dungeon...', 'important');
+  }
+
+  _enterCharCreate() {
+    const classItems = Object.values(CLASSES).map(c => ({
+        label: c.name,
+        color: c.color,
+        data: c.key,
+        description: c.description, // Pass description for the menu
+    }));
+
+    const menu = new Menu('Choose your class', classItems, {
+        onSelect: (selected) => {
+            this._startNewGame(selected.data);
+            if (this.activeMenu) this.activeMenu.closed = true;
+        },
+        onCancel: () => {
+            this.state = STATE.TITLE; // Go back to title screen
+        },
+        renderDescription: (ctx, item, x, y, w, h, tileH) => {
+            if (!item) return;
+            ctx.fillStyle = '#888';
+            ctx.font = `${tileH - 4}px monospace`;
+            
+            const descY = y + h - (tileH * 5);
+            ctx.strokeStyle = '#333';
+            ctx.strokeRect(x + 5, descY - 5, w - 10, (tileH * 5));
+
+            const lines = this.renderer.wrapText(item.description, Math.floor(w / (this.renderer.TILE_W*0.65)));
+            lines.forEach((line, i) => {
+                ctx.fillText(line, x + 15, descY + (i * (tileH - 2)));
+            });
+        }
+    });
+    this._openMenu(menu);
   }
 
   _enterLevel(levelNum, entryMethod = 'from_above') {
@@ -158,6 +192,7 @@ this.traps = new TrapSystem(this.bus);
   update(dt) {
     switch (this.state) {
       case STATE.TITLE:       this._updateTitle(); break;
+      case STATE.CHAR_CREATE: this._updateCharCreate(); break;
       case STATE.PLAYING:     this._updatePlaying(); break;
       case STATE.TOWN:        this._updateTown(); break;
       case STATE.MENU:        this._updateMenu(); break;
@@ -174,7 +209,18 @@ this.traps = new TrapSystem(this.bus);
 
   _updateTitle() {
     const action = this.input.consumeAction();
-    if (action === 'confirm') this._startNewGame();
+    if (action === 'confirm') {
+        this.state = STATE.CHAR_CREATE;
+        this._enterCharCreate();
+    }
+  }
+
+  _updateCharCreate() {
+      if (this.activeMenu) {
+          this._updateMenu();
+      } else if (this.state !== STATE.PLAYING) { // If a selection was made, state is already PLAYING
+          this.state = STATE.TITLE;
+      }
   }
 
   _updatePlaying() {
@@ -275,7 +321,9 @@ if (this._handleMovement(action, map)) {
     this.activeMenu.handleAction(action);
     if (this.activeMenu.closed) {
         this.activeMenu = null;
-        this.state = this._previousState ?? STATE.PLAYING;
+        if (this.state === STATE.MENU) {
+            this.state = this._previousState ?? STATE.PLAYING;
+        }
     }
 }
 
@@ -560,6 +608,7 @@ _openUseMenu() {
   render(dt) {
     switch (this.state) {
       case STATE.TITLE:   this._renderTitle(); break;
+      case STATE.CHAR_CREATE: this._renderMenu(); break;
       case STATE.PLAYING: this._renderPlaying(); break;
       case STATE.MENU:    this._renderMenu(); break;
       case STATE.TOWN:    this._renderTown(); break;

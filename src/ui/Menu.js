@@ -17,6 +17,7 @@ export class Menu {
     this.scroll = 0;
     this.onSelect = callbacks.onSelect ?? (() => {});
     this.onCancel = callbacks.onCancel ?? (() => {});
+    this.renderDescription = callbacks.renderDescription;
     this.closed = false;
     this.maxVisible = 20;
   }
@@ -27,15 +28,21 @@ export class Menu {
       this.onCancel();
       return;
     }
-    if (action === 'move:n' || action === 'move:w') {
+    if (action === 'move:n') {
       this.cursor = Math.max(0, this.cursor - 1);
       this._adjustScroll();
       return;
     }
-    if (action === 'move:s' || action === 'move:e') {
+    if (action === 'move:s') {
       this.cursor = Math.min(this.items.length - 1, this.cursor + 1);
       this._adjustScroll();
       return;
+    }
+    if (action === 'move:w') {
+        // For future use in multi-column menus
+    }
+    if (action === 'move:e') {
+        // For future use in multi-column menus
     }
     if (action === 'confirm') {
       if (this.items.length > 0 && this.items[this.cursor].enabled !== false) {
@@ -92,6 +99,12 @@ export class Menu {
       ctx.fillStyle = color;
       ctx.fillText(`${letter}) ${item.label}`, x + 8, iy);
     });
+
+    // Render description if callback is provided
+    if (this.renderDescription) {
+        const selectedItem = this.items[this.cursor];
+        this.renderDescription(ctx, selectedItem, x, y, w, h, tileH);
+    }
     
     // Footer hint
     ctx.fillStyle = '#555555';
