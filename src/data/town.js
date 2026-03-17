@@ -5,8 +5,19 @@ import { SPELLS } from './spells.js';
  * Town state persists across dungeon runs within the same world seed.
  */
 function generateRumors(worldState) {
-    // Stub
-    return ["I heard there's a great treasure on level 5!"];
+    const depth = worldState?.deepestLevel ?? 1;
+    const quests = worldState?.guild_board_quests ?? [];
+    const pool = [
+      `They say level ${depth + 1} is full of undead. Bring holy water.`,
+      `A merchant was lost near level ${Math.max(1, depth - 1)}. Brave soul.`,
+      `The deeper you go, the more the walls whisper.`,
+      `Old Kern found a cache of gold on level ${depth}. Didn't make it back.`,
+      `Whatever you do, don't split the party.`,
+    ];
+    if (quests.length > 0) {
+      pool.push(`The guild is offering good coin for clearing level ${quests[0]?.targetDepth ?? depth}.`);
+    }
+    return pool;
 }
 
 export const TOWN_LOCATIONS = {

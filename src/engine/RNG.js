@@ -26,8 +26,9 @@ export class RNG {
   /** Pick random element from array */
   pick(arr) { return arr[this.int(0, arr.length - 1)]; }
 
-  /** Shuffle array in place (Fisher-Yates) */
-  shuffle(arr) {
+  /** Shuffle array (Fisher-Yates) — returns a new array */
+  shuffle(array) {
+    const arr = [...array];
     for (let i = arr.length - 1; i > 0; i--) {
       const j = this.int(0, i);
       [arr[i], arr[j]] = [arr[j], arr[i]];

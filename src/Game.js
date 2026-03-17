@@ -161,6 +161,9 @@ this.traps = new TrapSystem(this.bus);
   }
 
   _enterLevel(levelNum, entryMethod = 'from_above') {
+    if (this.currentLevel < levelNum) {
+        this._updateQuestProgress('explore', { depth: levelNum });
+    }
     this.currentLevel = levelNum;
     this.player.depth = Math.max(this.player.depth, levelNum);
     
@@ -408,6 +411,7 @@ _handlePickup() {
     if (this.player.addToInventory(item)) {
       map.removeEntity(item);
       this.log.add(`You pick up the ${item.name}.`, 'system');
+      this._updateQuestProgress('fetch', { itemKey: item.itemKey });
     } else {
       this.log.add('Your inventory is full.', 'important');
     }
@@ -488,6 +492,7 @@ _openUseMenu() {
       if (monster.hp <= 0) {
         const xpResult = this.player.gainXP(monster.def.xpBase + monster.def.xpPerHD * monster.def.hd);
         this.bus.emit('monster:death', { entity: monster });
+        this._updateQuestProgress('kill', { monsterType: monster.def?.key ?? monster.name });
         if (xpResult.leveled) {
           this.log.add(`You feel more powerful! Level ${this.player.level}!`, 'important');
         }
@@ -756,7 +761,7 @@ _enterTownLocation(location) {
     switch (location.key) {
         case 'inn':           this._openInnMenu(location); break;
         case 'general_store': this._openShopMenu(location); break;
-        case 'weapon_smith':  this._openShopMenu(location); break;
+        case 'weapon_smith':  this._openWeaponSmithMenu(location); break;
         case 'temple':        this._openTempleMenu(location); break;
         case 'arcane_shop':   this._openArcaneShopMenu(location); break;
         case 'guild_board':   this._openGuildBoardMenu(location); break;
@@ -786,10 +791,13 @@ _openInnMenu(location) {
                     this.log.add('You rest at the inn. HP and MP fully restored.', 'heal');
                     this._openInnMenu(location);
                     break;
-                case 'rumors':
-                    this.log.add("The barkeep says: 'I heard there's treasure on level 5!'", 'lore');
+                case 'rumors': {
+                    const pool = location.rumors(this.worldMap.townState ?? {});
+                    const rumor = pool[Math.floor(Math.random() * pool.length)];
+                    this.log.add(`The barkeep leans in: "${rumor}"`, 'lore');
                     this._openInnMenu(location);
                     break;
+                }
                 case 'back':
                     this.activeMenu.closed = true;
                     this._openTownOverview();
@@ -801,6 +809,63 @@ _openInnMenu(location) {
     this._previousState = STATE.TOWN;
     this.state = STATE.MENU;
     this.activeMenu = menu;
+}
+
+_openWeaponSmithMenu(location) {
+  const items = [
+    { label: 'Buy Weapons', color: '#44ff44', data: 'buy' },
+    { label: 'Sell Items',  color: '#ffcc44', data: 'sell' },
+    { label: 'Repair Weapon', color: '#cc8844', data: 'repair' },
+    { label: 'Back to town', color: '#888888', data: 'back' },
+  ];
+  const menu = new Menu(location.name, items, {
+    onSelect: (selected) => {
+      switch (selected.data) {
+        case 'buy':    this._openBuyMenu(location); break;
+        case 'sell':   this._openSellMenu(location); break;
+        case 'repair': this._openRepairMenu(location); break;
+        case 'back':
+          this.activeMenu.closed = true;
+          this._openTownOverview(); break;
+      }
+    },
+    onCancel: () => { this._openTownOverview(); }
+  });
+  this._previousState = STATE.TOWN;
+  this.state = STATE.MENU;
+  this.activeMenu = menu;
+}
+
+_openRepairMenu(location) {
+  const repairable = this.player.inventory.filter(
+    i => i.category === 'weapon' || i.category === 'armor'
+  );
+  if (repairable.length === 0) {
+    this.log.add('You have no weapons or armor to repair.', 'system');
+    this._openWeaponSmithMenu(location); return;
+  }
+  const items = repairable.map(item => {
+    const cost = Math.floor(item.value * 0.2);
+    return {
+      label: `${item.name} — ${cost}g`,
+      color: this.player.gold >= cost ? '#cc8844' : '#555555',
+      enabled: this.player.gold >= cost,
+      data: { item, cost },
+    };
+  });
+  items.push({ label: 'Back', color: '#888888', data: null });
+  const menu = new Menu(`Repair (${this.player.gold}g)`, items, {
+    onSelect: (selected) => {
+      if (!selected.data) { this._openWeaponSmithMenu(location); return; }
+      this.player.gold -= selected.data.cost;
+      this.log.add(`Gareth repairs your ${selected.data.item.name}. Good as new.`, 'system');
+      this._openRepairMenu(location);
+    },
+    onCancel: () => { this._openWeaponSmithMenu(location); }
+  });
+  this._previousState = STATE.TOWN;
+  this.state = STATE.MENU;
+  this.activeMenu = menu;
 }
 
 _openShopMenu(location) {
@@ -938,8 +1003,11 @@ _openTempleMenu(location) {
                     this._openTempleMenu(location);
                     break;
                 case 'identify':
-                    this.log.add('The priest examines your belongings. (Not yet fully implemented)', 'system');
-                    this._openTempleMenu(location);
+                    this._openIdentifyMenu(
+                      location, costs.identify,
+                      item => !item.identified && item.genericName,
+                      () => this._openTempleMenu(location)
+                    );
                     break;
                 case 'back':
                     this.activeMenu.closed = true;
@@ -970,12 +1038,14 @@ _openArcaneShopMenu(location) {
                     this._openBuySpellsMenu(location);
                     break;
                 case 'sell_scrolls':
-                     this.log.add('Selling scrolls is not yet implemented.', 'system');
-                    this._openArcaneShopMenu(location); // Refresh
+                    this._openSellScrollsMenu(location);
                     break;
                 case 'identify_magic':
-                    this.log.add('Identifying magic is not yet implemented.', 'system');
-                    this._openArcaneShopMenu(location); // Refresh
+                    this._openIdentifyMenu(
+                      location, location.identifyCost,
+                      item => !item.identified && ['scroll','ring','wand','potion'].includes(item.category),
+                      () => this._openArcaneShopMenu(location)
+                    );
                     break;
                 case 'scribe_scroll':
                     this.log.add('Scribing scrolls is not yet implemented.', 'system');
@@ -992,6 +1062,62 @@ _openArcaneShopMenu(location) {
     this._previousState = STATE.TOWN;
     this.state = STATE.MENU;
     this.activeMenu = menu;
+}
+
+_openIdentifyMenu(location, cost, itemFilter, onDone) {
+  const candidates = this.player.inventory.filter(itemFilter);
+  if (candidates.length === 0) {
+    this.log.add('You have no items that need identification.', 'system');
+    onDone(); return;
+  }
+  const items = candidates.map(item => ({
+    label: `${item.genericName ?? item.name} — ${cost}g`,
+    color: this.player.gold >= cost ? '#8888ff' : '#555555',
+    enabled: this.player.gold >= cost,
+    data: item,
+  }));
+  items.push({ label: 'Back', color: '#888888', data: null });
+  const menu = new Menu(`Identify Item (${this.player.gold}g)`, items, {
+    onSelect: (selected) => {
+      if (!selected.data) { onDone(); return; }
+      this.player.gold -= cost;
+      selected.data.identified = true;
+      const reveal = selected.data.name;
+      this.log.add(`Identified: ${reveal}. ${selected.data.description ?? ''}`, 'magic');
+      this._openIdentifyMenu(location, cost, itemFilter, onDone); // Refresh
+    },
+    onCancel: onDone,
+  });
+  this._previousState = STATE.TOWN;
+  this.state = STATE.MENU;
+  this.activeMenu = menu;
+}
+
+_openSellScrollsMenu(location) {
+  const markup = 0.5; // Arcane shop pays 50% for scrolls
+  const scrolls = this.player.inventory.filter(i => i.category === 'scroll');
+  if (scrolls.length === 0) {
+    this.log.add('You have no scrolls to sell.', 'system');
+    this._openArcaneShopMenu(location); return;
+  }
+  const items = scrolls.map(item => {
+    const price = Math.floor(item.value * markup);
+    return { label: `${item.name} — ${price}g`, color: '#ffcc44', data: { item, price } };
+  });
+  items.push({ label: 'Back', color: '#888888', data: null });
+  const menu = new Menu(`Sell Scrolls (${this.player.gold}g)`, items, {
+    onSelect: (selected) => {
+      if (!selected.data) { this._openArcaneShopMenu(location); return; }
+      this.player.gold += selected.data.price;
+      this.player.removeFromInventory(selected.data.item);
+      this.log.add(`Sold ${selected.data.item.name} for ${selected.data.price}g.`, 'system');
+      this._openSellScrollsMenu(location);
+    },
+    onCancel: () => { this._openArcaneShopMenu(location); }
+  });
+  this._previousState = STATE.TOWN;
+  this.state = STATE.MENU;
+  this.activeMenu = menu;
 }
 
 _openBuySpellsMenu(location) {
@@ -1032,6 +1158,25 @@ _openBuySpellsMenu(location) {
 }
 
 _openGuildBoardMenu(location) {
+  const items = [
+    { label: 'View / Accept Quests', color: '#88aacc', data: 'view' },
+    { label: `Turn In Quest (${this.quests.active.length} active)`, color: '#44ff44', data: 'turnin' },
+    { label: 'Back to town', color: '#888888', data: null },
+  ];
+  const menu = new Menu("Adventurer's Guild Board", items, {
+    onSelect: (selected) => {
+      if (!selected.data) { this.activeMenu.closed = true; this._openTownOverview(); return; }
+      if (selected.data === 'view') this._openQuestViewMenu(location);
+      if (selected.data === 'turnin') this._openQuestTurnInMenu(location);
+    },
+    onCancel: () => { this._openTownOverview(); }
+  });
+  this._previousState = STATE.TOWN;
+  this.state = STATE.MENU;
+  this.activeMenu = menu;
+}
+
+_openQuestViewMenu(location) {
     // Generate quests if the board is empty
     if (!this.worldMap.townState.guild_board_quests?.length) {
         this.quests.generateQuestBoard(this.player.level);
@@ -1047,24 +1192,52 @@ _openGuildBoardMenu(location) {
         data: q,
     }));
     
-    items.push({ label: 'Back to town', color: '#888888', data: null });
+    items.push({ label: 'Back', color: '#888888', data: null });
     
-    const menu = new Menu("Adventurer's Guild Board", items, {
+    const menu = new Menu("Available Quests", items, {
         onSelect: (selected) => {
             if (!selected.data) {
-                this.activeMenu.closed = true;
-                this._openTownOverview();
+                this._openGuildBoardMenu(location);
                 return;
             }
             this.quests.active.push(selected.data);
             this.log.add(`Quest accepted: ${selected.data.title}`, 'important');
-            this._openGuildBoardMenu(location); // Refresh
+            this._openQuestViewMenu(location); // Refresh
         },
-        onCancel: () => { this._openTownOverview(); }
+        onCancel: () => { this._openGuildBoardMenu(location); }
     });
     this._previousState = STATE.TOWN;
     this.state = STATE.MENU;
     this.activeMenu = menu;
+}
+
+_openQuestTurnInMenu(location) {
+  const completable = this.quests.active.filter(q =>
+    this.quests.checkCompletion(q, this.player, this.worldMap)
+  );
+  if (completable.length === 0) {
+    this.log.add('You have no completed quests to turn in.', 'system');
+    this._openGuildBoardMenu(location);
+    return;
+  }
+  const items = completable.map(q => ({
+    label: `${q.title} — ${q.reward.xp} XP, ${q.reward.gold ?? 0}g`,
+    color: '#44ff44',
+    data: q,
+  }));
+  items.push({ label: 'Back', color: '#888888', data: null });
+  const menu = new Menu('Turn In Quests', items, {
+    onSelect: (selected) => {
+      if (!selected.data) { this._openGuildBoardMenu(location); return; }
+      this.quests.completeQuest(selected.data, this.player);
+      this.log.add(`Quest turned in: ${selected.data.title}. Rewards granted!`, 'important');
+      this._openQuestTurnInMenu(location); // Refresh
+    },
+    onCancel: () => { this._openGuildBoardMenu(location); }
+  });
+  this._previousState = STATE.TOWN;
+  this.state = STATE.MENU;
+  this.activeMenu = menu;
 }
 
 _openInventoryMenu() {
@@ -1282,6 +1455,31 @@ _openCastMenu() {
     this._openMenu(menu);
 }
 
+_updateQuestProgress(type, data) {
+    for (const quest of this.quests.active) {
+      if (quest.type === 'kill' && type === 'kill') {
+        if (quest.target === data.monsterType || quest.target === 'any') {
+          quest.state.killed = (quest.state.killed ?? 0) + 1;
+          const needed = quest.count;
+          this.log.add(`Quest: ${quest.title} — ${quest.state.killed}/${needed} killed.`, 'system');
+          if (this.quests.checkCompletion(quest, this.player, this.worldMap)) {
+            this.log.add(`Quest complete: ${quest.title}! Return to the Guild Board.`, 'important');
+          }
+        }
+      } else if (quest.type === 'explore' && type === 'explore') {
+        if (!quest.state.reached && data.depth >= quest.targetDepth) {
+          quest.state.reached = true;
+          this.log.add(`Quest complete: ${quest.title}! Return to the Guild Board.`, 'important');
+        }
+      } else if (quest.type === 'fetch' && type === 'fetch') {
+        if (!quest.state.recovered && data.itemKey === quest.target) {
+          quest.state.recovered = true;
+          this.log.add(`Quest complete: ${quest.title}! Return to the Guild Board.`, 'important');
+        }
+      }
+    }
+  }
+
 _findNearestVisibleMonster() {
     const map = this.worldMap.getLevel(this.currentLevel);
     let nearest = null;
@@ -1374,6 +1572,25 @@ _quickLoad() {
     townArt.forEach((line, i) => {
         ctx.fillText(line, (w - ctx.measureText(line).width) / 2, startY + i * (fontSize + 4));
     });
+
+    // Stat strip at bottom
+    if (this.player) {
+      const stripH = 36;
+      ctx.fillStyle = '#111122';
+      ctx.fillRect(0, h - stripH, w, stripH);
+      ctx.strokeStyle = '#2E75B6';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(0, h - stripH, w, stripH);
+      ctx.font = '14px monospace';
+      ctx.fillStyle = '#66ff66';
+      ctx.fillText(`HP: ${this.player.hp}/${this.player.hpMax}`, 12, h - stripH + 22);
+      ctx.fillStyle = '#4488ff';
+      ctx.fillText(`MP: ${this.player.mp}/${this.player.mpMax}`, 130, h - stripH + 22);
+      ctx.fillStyle = '#ffcc44';
+      ctx.fillText(`Gold: ${this.player.gold}`, 240, h - stripH + 22);
+      ctx.fillStyle = '#cccccc';
+      ctx.fillText(`${this.player.name}  Lv.${this.player.level}  ${this.player.class.name}`, 360, h - stripH + 22);
+    }
 }
 
   async _toggleMinimap() {

@@ -69,8 +69,33 @@ export class QuestSystem {
 
   static deserialize(data, worldMap, rng) {
     const qs = new QuestSystem(worldMap, rng);
-    qs.active    = data?.active    ?? [];
-    qs.completed = data?.completed ?? [];
+    qs.active    = (data?.active ?? []).map(q => qs._hydrateQuest(q));
+    qs.completed = (data?.completed ?? []).map(q => qs._hydrateQuest(q));
     return qs;
+  }
+
+  _hydrateQuest(questData) {
+    const template = QUEST_TEMPLATES[questData.type];
+    if (!template) return questData;
+
+    // We need a way to recreate the completionCondition.
+    // The easiest way is to re-run generate with the stored state,
+    // but generate currently creates new state.
+    // Alternatively, we can just attach the condition from a fresh template quest.
+
+    // Since our templates are now closure-based, we can't easily re-bind.
+    // Let's refactor QUEST_TEMPLATES slightly or just handle it here.
+
+    // Re-generating might change some random values if we're not careful.
+    // But for most quests, depth and count are what matter.
+
+    const dummyRng = { int: (a, b) => questData.count || a, pick: (arr) => questData.target || arr[0] };
+    const hydrated = template.generate(questData.targetDepth || 0, dummyRng);
+
+    return {
+      ...hydrated,
+      ...questData,
+      completionCondition: hydrated.completionCondition
+    };
   }
 }
