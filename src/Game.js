@@ -141,6 +141,7 @@ this.traps = new TrapSystem(this.bus);
         },
         onCancel: () => {
             this.state = STATE.TITLE; // Go back to title screen
+            if (this.activeMenu) this.activeMenu.closed = true;
         },
         renderDescription: (ctx, item, x, y, w, h, tileH) => {
             if (!item) return;
@@ -157,7 +158,7 @@ this.traps = new TrapSystem(this.bus);
             });
         }
     });
-    this._openMenu(menu);
+    this.activeMenu = menu;
   }
 
   _enterLevel(levelNum, entryMethod = 'from_above') {
@@ -214,15 +215,25 @@ this.traps = new TrapSystem(this.bus);
     const action = this.input.consumeAction();
     if (action === 'confirm') {
         this.state = STATE.CHAR_CREATE;
-        this._enterCharCreate();
     }
   }
 
   _updateCharCreate() {
-      if (this.activeMenu) {
-          this._updateMenu();
-      } else if (this.state !== STATE.PLAYING) { // If a selection was made, state is already PLAYING
-          this.state = STATE.TITLE;
+      if (!this.activeMenu) {
+          this._enterCharCreate();
+      }
+      
+      const action = this.input.consumeAction();
+      if (!action) return;
+      
+      this.activeMenu.handleAction(action);
+      
+      if (this.activeMenu.closed) {
+          this.activeMenu = null;
+          // Safeguard: if state hasn't changed, go back to title
+          if (this.state === STATE.CHAR_CREATE) {
+              this.state = STATE.TITLE;
+          }
       }
   }
 
