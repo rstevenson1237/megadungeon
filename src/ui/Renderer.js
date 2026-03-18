@@ -1,4 +1,5 @@
 // src/ui/Renderer.js
+import { XP_TABLE } from '../engine/rules.js';
 
 export class Renderer {
     constructor(canvasEl) {
@@ -216,6 +217,31 @@ export class Renderer {
         this.ctx.fillRect(x, y, barWidth * hpRatio, lineH - 4);
         y += lineH * 1.5;
 
+        // XP
+        const xpNeeded = XP_TABLE[player.level] || 999999;
+        const xpRatio = xpNeeded > 0 ? Math.min(player.xp / xpNeeded, 1) : 0;
+        this.ctx.fillStyle = '#888888';
+        this.ctx.fillText(`XP: ${player.xp}/${xpNeeded}`, x, y);
+        y += lineH;
+        this.ctx.fillStyle = '#222200';
+        this.ctx.fillRect(x, y, barWidth, lineH - 4);
+        this.ctx.fillStyle = '#aaaa00';
+        this.ctx.fillRect(x, y, barWidth * xpRatio, lineH - 4);
+        y += lineH * 1.5;
+
+        // MP
+        if (player.mpMax > 0) {
+            const mpRatio = player.mp / player.mpMax;
+            this.ctx.fillStyle = '#6666ff';
+            this.ctx.fillText(`MP: ${player.mp}/${player.mpMax}`, x, y);
+            y += lineH;
+            this.ctx.fillStyle = '#000033';
+            this.ctx.fillRect(x, y, barWidth, lineH - 4);
+            this.ctx.fillStyle = '#4444cc';
+            this.ctx.fillRect(x, y, barWidth * mpRatio, lineH - 4);
+            y += lineH * 1.5;
+        }
+
         // Stats
         this.ctx.fillStyle = '#888888';
         this.ctx.fillText(`STR:${player.stats.str} DEX:${player.stats.dex} CON:${player.stats.con}`, x, y);
@@ -278,11 +304,21 @@ export class Renderer {
             { text: `L${player.level} ${player.class.name}`, color: '#ffff00' },
             { text: ` | `, color: '#333333' },
             { text: `HP:${player.hp}/${player.hpMax}`, color: hpColor },
+        ];
+
+        if (player.mpMax > 0) {
+            parts.push({ text: ` | `, color: '#333333' });
+            parts.push({ text: `MP:${player.mp}/${player.mpMax}`, color: '#6666ff' });
+        }
+
+        parts.push(
+            { text: ` | `, color: '#333333' },
+            { text: `XP:${player.xp}`, color: '#888800' },
             { text: ` | `, color: '#333333' },
             { text: `AC:${player.ac}`, color: '#ffffff' },
             { text: ` | `, color: '#333333' },
-            { text: `D:${player.depth}`, color: '#888888' },
-        ];
+            { text: `D:${player.depth}`, color: '#888888' }
+        );
         
         let x = 4;
         for (const p of parts) {

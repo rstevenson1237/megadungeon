@@ -27,7 +27,8 @@ export class InputManager {
       'wait':        ['Period', 'Numpad5'],
       'inventory':   ['KeyI'],
       'pickup':      ['KeyG', 'Comma'],
-      'drop':        ['KeyQ'],
+      'drop':        ['KeyR'],
+      'reroll':      ['KeyR'],
       'cast':        ['KeyZ'],
       'use':         ['KeyU'],
       'examine':     ['KeyX'],
@@ -72,12 +73,20 @@ export class InputManager {
     if (foundAction) {
         this._queue.push(foundAction);
         e.preventDefault();
+    } else if (!e.ctrlKey && !e.altKey && !e.metaKey && e.key.length === 1 && e.key.match(/[a-z]/i)) {
+        // Handle letter keys for menu selection
+        this._queue.push(`select:${e.key.toLowerCase()}`);
+        e.preventDefault();
     }
   }
 
   /** Pop next action from queue. Returns null if empty. */
   consumeAction() {
     return this._queue.shift() ?? null;
+  }
+
+  clearQueue() {
+    this._queue = [];
   }
 
   bind(action, key) {

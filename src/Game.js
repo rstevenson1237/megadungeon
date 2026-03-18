@@ -40,6 +40,7 @@ const STATE = {
 
 class Game {
   constructor() {
+    window.game = this;
     this.canvasEl  = document.getElementById('main-canvas');
     this.input     = new InputManager();
     this.loop      = new GameLoop(this.update.bind(this), this.render.bind(this));
@@ -132,6 +133,7 @@ this.traps = new TrapSystem(this.bus);
   // Show title screen. Press ENTER to start a new game.
   
   _startNewGame(classKey, stats = null, name = 'Adventurer') {
+    this.input.clearQueue();
     const seed = Date.now();
     this.rng.seed = seed;
     this.worldMap = new WorldMap(this.rng.seed);
@@ -813,10 +815,15 @@ _openUseMenu() {
     ctx.fillStyle = '#555555';
     const helpSize = Math.max(10, Math.floor(subSize * 0.85));
     ctx.font = `${helpSize}px monospace`;
-    const help1 = 'WASD / Arrow Keys to move   Bump enemies to attack';
-    const help2 = '  > descend   < ascend   I inventory   M map  ';
-    ctx.fillText(help1, (w - ctx.measureText(help1).width) / 2, h * 0.6);
-    ctx.fillText(help2, (w - ctx.measureText(help2).width) / 2, h * 0.6 + helpSize + 8);
+    const helpLines = [
+        'WASD / Arrow Keys: Move  (Bump to attack)',
+        '>: Descend   <: Ascend   I: Inventory   M: Map',
+        'Z: Cast Spell   K: Spellbook   U: Use Ability   T: Skills',
+    ];
+
+    helpLines.forEach((line, i) => {
+        ctx.fillText(line, (w - ctx.measureText(line).width) / 2, h * 0.6 + i * (helpSize + 8));
+    });
 }
 
   _renderPlaying() {
@@ -873,7 +880,8 @@ _openUseMenu() {
     ctx.strokeRect(tw * 2, ctx.canvas.height / 2 - th, ctx.canvas.width - tw * 4, th * 2);
     ctx.fillStyle = '#ffcc44';
     ctx.font = `bold ${th * 1.5}px monospace`;
-    ctx.fillText((this.pendingName || '') + '_', tw * 3, ctx.canvas.height / 2 + th * 0.4);
+    ctx.textBaseline = 'middle';
+    ctx.fillText((this.pendingName || '') + '_', tw * 3, ctx.canvas.height / 2);
     ctx.fillStyle = '#888';
     ctx.font = `${th}px monospace`;
     ctx.fillText('[ENTER] Confirm  (leave blank for "Adventurer")', tw * 2, ctx.canvas.height / 2 + th * 2.5);
@@ -946,13 +954,13 @@ _openUseMenu() {
 
     lines.forEach(line => {
       ctx.fillText(line, w/2 - (subSize * 8), y);
-      y += subSize * 1.5;
+      y += subSize * 1.3;
     });
     
     ctx.fillStyle = '#ffcc44';
     const startText = 'Press ENTER or ESCAPE to return to title';
     const startW = ctx.measureText(startText).width;
-    ctx.fillText(startText, (w - startW) / 2, h * 0.7);
+    ctx.fillText(startText, (w - startW) / 2, h * 0.8);
   }
 
   _renderMenu() {
@@ -1633,6 +1641,7 @@ _handleUseAbility() {
       onSelect: (selected) => {
         if (!selected.data) return;
         menu.closed = true;
+        this.activeMenu = null;
         this.state = STATE.PLAYING;
 
         if (typeof selected.data === 'string') {
@@ -1798,6 +1807,7 @@ _openSpellMenu(readOnly = false) {
       onSelect: (selected) => {
         if (readOnly) return;
         menu.closed = true;
+        this.activeMenu = null;
         this.state = STATE.PLAYING;
 
         const spell = SPELLS[selected.data];

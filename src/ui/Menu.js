@@ -51,9 +51,18 @@ export class Menu {
       return;
     }
     
-    // Letter key selection: check if action corresponds to a-z
-    // The InputManager doesn't bind letter keys by default, so we check
-    // the raw key code from a separate mechanism. For now, use cursor + enter.
+    // Letter key selection
+    if (action.startsWith('select:')) {
+        const letter = action.split(':')[1];
+        const index = letter.charCodeAt(0) - 97;
+        if (index >= 0 && index < this.items.length) {
+            const item = this.items[index];
+            if (item.enabled !== false) {
+                this.cursor = index;
+                this.onSelect(item, index);
+            }
+        }
+    }
   }
 
   _adjustScroll() {
