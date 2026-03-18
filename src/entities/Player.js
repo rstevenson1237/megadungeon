@@ -30,6 +30,8 @@ export class Player extends Entity {
       body: null, boots: null, ring1: null, ring2: null, amulet: null
     };
     this.spellbook = [];      // Known spell keys
+    this.abilities = new Set(); // Unlocked ability keys
+    this.favoredEnemies = [];   // Selected monster types (for Ranger)
     this.skills    = {};      // skillKey → rank (0–5)
     this.statuses  = [];      // Active StatusEffect[]
     this.scars     = [];      // Permanent negative effects from near-deaths
@@ -73,8 +75,32 @@ export class Player extends Entity {
     for (const [skill, rank] of Object.entries(cls.startingSkills ?? {})) {
       this.skills[skill] = rank;
     }
+    // Auto-equip logical starting gear
+    const autoEquipMap = {
+      weapon: ['sword', 'axe', 'mace', 'dagger', 'bow', 'staff', 'wand'],
+      body:   ['mail', 'armor', 'robe', 'leather', 'plate'],
+      offhand:['shield'],
+      helmet: ['helm', 'cap', 'hat'],
+    };
     for (const itemKey of cls.startingItems ?? []) {
-      this.addToInventory(Item.create(itemKey));
+      let item;
+      try { item = Item.create(itemKey); } catch(e) { continue; }
+      let equipped = false;
+      for (const [slot, keywords] of Object.entries(autoEquipMap)) {
+        if (!this.equipped[slot] && keywords.some(kw => itemKey.includes(kw))) {
+          this.equipped[slot] = item;
+          equipped = true;
+          break;
+        }
+      }
+      if (!equipped) this.addToInventory(item);
+    }
+    this.ac = this._computeAC(); // Recompute now that equipment is set
+
+    // Grant starting level abilities
+    const startingAbilities = cls.abilitiesAtLevel?.[1] ?? [];
+    for (const ability of startingAbilities) {
+      this._grantAbility(ability);
     }
   }
 
@@ -105,9 +131,19 @@ export class Player extends Entity {
   }
 
   _grantAbility(abilityKey) {
-    // Stub for a future system to handle learning new abilities.
+    this.abilities.add(abilityKey);
+    // Passive stat bonuses applied immediately
+    const passiveEffects = {
+      weapon_specialization: () => { this._weaponSpecBonus = 2; },
+      extra_attack:          () => { this._extraAttacks = 1; },
+      woodland_stride:       () => { this._ignoreDifficultTerrain = true; },
+      aura_of_protection:    () => { /* Applied to allies in CombatSystem or StatusSystem */ },
+    };
+    passiveEffects[abilityKey]?.();
     console.log(`${this.name} has gained ability: ${abilityKey}!`);
   }
+
+  hasAbility(key) { return this.abilities.has(key); }
 
   /** Attack roll: d20 + THAC0-based modifier vs target AC */
   rollAttack(target) {
@@ -162,6 +198,8 @@ export class Player extends Entity {
             Object.entries(this.equipped).map(([slot, item]) => [slot, item?.itemKey ?? null])
         ),
         spellbook: [...this.spellbook],
+        abilities: [...this.abilities],
+        favoredEnemies: [...this.favoredEnemies],
         skills: { ...this.skills },
         statuses: [], // Statuses don't persist across save for now
         scars: [...this.scars],
@@ -191,6 +229,12 @@ static deserialize(data) {
         }
     }
     player.spellbook = data.spellbook;
+    player.abilities = new Set(data.abilities ?? []);
+    player.favoredEnemies = data.favoredEnemies ?? [];
+    // Re-apply passive ability effects
+    for (const ability of player.abilities) {
+      player._grantAbility(ability);
+    }
     player.skills = data.skills;
     player.scars = data.scars ?? [];
     return player;

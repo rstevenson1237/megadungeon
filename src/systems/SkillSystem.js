@@ -15,6 +15,23 @@ export class SkillSystem {
   }
 }
 SkillSystem.SKILL_STAT = {
-  trap_handling: "dex", athletics: "str", stealth: "dex",
-  persuasion: "cha", divine_lore: "wis", arcane_lore: "int",
+  // Existing
+  trap_handling:  'dex',
+  athletics:      'str',
+  stealth:        'dex',
+  persuasion:     'cha',
+  divine_lore:    'wis',
+  arcane_lore:    'int',
+  // New additions
+  weapon_mastery: 'str',
+  archery:        'dex',
+  survival:       'wis',
+  tracking:       'wis',
+  beast_lore:     'wis',
+  first_aid:      'wis',
+  lockpicking:    'dex',
+  pickpocket:     'dex',
+  acrobatics:     'dex',
+  intimidation:   'str',
+  deception:      'cha',
 };

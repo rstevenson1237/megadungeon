@@ -54,9 +54,16 @@ export class CombatSystem {
       return { hit: false, damage: 0, message: `${attacker.name} misses.` };
     }
 
-    let damage = this._rollDamage(attacker, weapon, critical);
+    let damage = this._rollDamage(attacker, weapon, critical, defender);
     damage     = this._applyResistances(damage, weapon, defender);
     damage     = Math.max(1, damage);
+
+    // Combat Surge: Double damage and consume
+    if (attacker.type === 'player' && attacker._combatSurgeActive) {
+      damage *= 2;
+      attacker._combatSurgeActive = false;
+      this.bus.emit('log:message', { text: 'Combat Surge! Double damage!', category: 'important' });
+    }
 
     const effects = this._resolveWeaponSpecials(weapon, defender);
     this._applyDamage(defender, damage);
@@ -80,6 +87,14 @@ export class CombatSystem {
     let bonus = attacker.class?.attackBonus[attacker.level] ?? 0;
     bonus += statModifier(attacker.stats?.str ?? 10);
     bonus += weapon?.weapon?.attackBonus ?? 0;
+
+    // Class Bonuses
+    if (attacker.type === 'player') {
+      if (attacker._weaponSpecBonus) bonus += attacker._weaponSpecBonus;
+      // Favored Enemy: +2 to attack
+      if (attacker.favoredEnemies?.includes(defender.def?.type)) bonus += 2;
+    }
+
     // Situational: flanking, high ground, darkness, status effects
     if (attacker.statuses?.some(s => s.key === 'blessed')) bonus += 1;
     if (attacker.statuses?.some(s => s.key === 'cursed'))  bonus -= 1;
@@ -94,13 +109,21 @@ export class CombatSystem {
     return ac;
   }
 
-  _rollDamage(attacker, weapon, critical) {
+  _rollDamage(attacker, weapon, critical, defender) {
     const [num, die] = weapon?.weapon?.damage ?? [1, 4];
     let dmg = 0;
     const rolls = critical ? num * 2 : num; // Double dice on crit
     for (let i = 0; i < rolls; i++) dmg += rollDie(die);
     dmg += statModifier(attacker.stats?.str ?? 10);
     dmg += weapon?.weapon?.damageMod ?? 0;
+
+    // Class Bonuses
+    if (attacker.type === 'player') {
+      if (attacker._weaponSpecBonus) dmg += attacker._weaponSpecBonus;
+      // Favored Enemy: +2 to damage
+      if (attacker.favoredEnemies?.includes(defender.def?.type)) dmg += 2;
+    }
+
     return dmg;
   }
 

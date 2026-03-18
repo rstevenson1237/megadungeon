@@ -18,7 +18,8 @@ import { StatusSystem } from './systems/StatusSystem.js';
 import { QuestSystem } from './systems/QuestSystem.js';
 import { SPELLS } from './data/spells.js';
 import { TOWN_LOCATIONS } from './data/town.js';
-import { rollDiceStr } from './engine/rules.js';
+import { rollDiceStr, statModifier } from './engine/rules.js';
+import { SkillSystem } from './systems/SkillSystem.js';
 import { CLASSES } from './data/classes.js';
 
 const PLAYER_FOV_RADIUS = 8;
@@ -27,11 +28,14 @@ const PLAYER_FOV_RADIUS = 8;
 const STATE = {
   TITLE:       'title',
   CHAR_CREATE: 'char_create',
+  STAT_ROLL:   'stat_roll',
+  NAME_ENTRY:  'name_entry',
   PLAYING:     'playing',
   DEAD:        'dead',
   PUZZLE:      'puzzle',
   TOWN:        'town',
   MENU:        'menu',       // Generic menu overlay
+  LEVEL_UP:    'level_up',
 };
 
 class Game {
@@ -88,8 +92,9 @@ this.traps = new TrapSystem(this.bus);
       this.log.add(text, category ?? 'system');
     });
 
-    this.bus.on('player:death', () => {
+    this.bus.on('player:death', ({ cause }) => {
       this.log.add('You have died!', 'danger');
+      if (this.player) this.player.causeOfDeath = cause ?? 'Unknown';
       this.state = STATE.DEAD;
     });
 
@@ -97,6 +102,21 @@ this.traps = new TrapSystem(this.bus);
       this.log.add(`${entity.name} is slain!`, 'combat');
       const map = this.worldMap.getLevel(this.currentLevel);
       map.removeEntity(entity);
+    });
+
+    this._rawKeys = [];
+    window.addEventListener('keydown', (e) => {
+      if (this.state === STATE.NAME_ENTRY) {
+        if (e.key === 'Backspace') {
+          this.pendingName = this.pendingName.slice(0, -1);
+        } else if (e.key === 'Enter') {
+          const name = this.pendingName.trim() || 'Adventurer';
+          this._startNewGame(this.pendingClassKey, this.pendingStats, name);
+        } else if (e.key.length === 1 && this.pendingName.length < 20) {
+          this.pendingName += e.key;
+        }
+        e.preventDefault();
+      }
     });
   }
 
@@ -111,19 +131,32 @@ this.traps = new TrapSystem(this.bus);
   // STATE: TITLE
   // Show title screen. Press ENTER to start a new game.
   
-  _startNewGame(classKey) {
+  _startNewGame(classKey, stats = null, name = 'Adventurer') {
     const seed = Date.now();
     this.rng.seed = seed;
     this.worldMap = new WorldMap(this.rng.seed);
     this.quests = new QuestSystem(this.worldMap, this.rng);
     
     // Create player with selected class
-    const stats = { str: 16, dex: 12, con: 14, int: 9, wis: 11, cha: 10 }; // TODO: Roll stats
-    this.player = new Player(classKey, 'Adventurer', stats);
+    const resolvedStats = stats ?? { str: 14, dex: 12, con: 13, int: 10, wis: 10, cha: 10 };
+    this.player = new Player(classKey, name, resolvedStats);
     
     this._enterLevel(1);
     this.state = STATE.PLAYING;
-    this.log.add('You descend into the dungeon...', 'important');
+    this.log.add(`${name} the ${CLASSES[classKey].name} descends into the dungeon...`, 'important');
+    this._checkFavoredEnemy();
+  }
+
+  _rollStatArray() {
+    // Classic 4d6 drop lowest, 6 times
+    const stats = ['str', 'dex', 'con', 'int', 'wis', 'cha'];
+    const rolled = {};
+    for (const stat of stats) {
+      const dice = [1,2,3,4].map(() => this.rng.int(1,6));
+      dice.sort((a,b) => a-b);
+      rolled[stat] = dice[1] + dice[2] + dice[3]; // Drop lowest
+    }
+    return rolled;
   }
 
   _enterCharCreate() {
@@ -136,8 +169,11 @@ this.traps = new TrapSystem(this.bus);
 
     const menu = new Menu('Choose your class', classItems, {
         onSelect: (selected) => {
-            this._startNewGame(selected.data);
-            if (this.activeMenu) this.activeMenu.closed = true;
+            this.pendingClassKey = selected.data;
+            this.pendingStats = this._rollStatArray();
+            this.rollRerolls = 3; // Player gets 3 rerolls
+            menu.closed = true;
+            this.state = STATE.STAT_ROLL;
         },
         onCancel: () => {
             this.state = STATE.TITLE; // Go back to title screen
@@ -145,17 +181,36 @@ this.traps = new TrapSystem(this.bus);
         },
         renderDescription: (ctx, item, x, y, w, h, tileH) => {
             if (!item) return;
-            ctx.fillStyle = '#888';
-            ctx.font = `${tileH - 4}px monospace`;
-            
-            const descY = y + h - (tileH * 5);
-            ctx.strokeStyle = '#333';
-            ctx.strokeRect(x + 5, descY - 5, w - 10, (tileH * 5));
+            const cls = CLASSES[item.data];
+            if (!cls) return;
 
-            const lines = this.renderer.wrapText(item.description, Math.floor(w / (this.renderer.TILE_W*0.65)));
-            lines.forEach((line, i) => {
-                ctx.fillText(line, x + 15, descY + (i * (tileH - 2)));
+            ctx.font = `${tileH - 4}px monospace`;
+            let dy = y + h - (tileH * 12);
+
+            // Description blurb
+            ctx.fillStyle = '#aaaaaa';
+            const descLines = this.renderer.wrapText(cls.description, w - 20);
+            descLines.forEach(line => { ctx.fillText(line, x + 10, dy); dy += tileH - 2; });
+            dy += 4;
+
+            // Hit die, prime stats
+            ctx.fillStyle = '#ffcc44';
+            ctx.fillText(`Hit Die: d${cls.hitDie}   Prime Stat: ${cls.primeStat.join(', ').toUpperCase()}`, x + 10, dy);
+            dy += tileH;
+
+            // Class features (first 3)
+            ctx.fillStyle = '#88ffaa';
+            cls.classFeatures.slice(0, 3).forEach(feat => {
+                ctx.fillText(`• ${feat}`, x + 10, dy);
+                dy += tileH - 2;
             });
+
+            // Abilities at levels
+            ctx.fillStyle = '#888888';
+            const abilKeys = Object.entries(cls.abilitiesAtLevel ?? {})
+                .map(([lvl, keys]) => `Lv${lvl}: ${keys.join(', ')}`)
+                .join('  ');
+            ctx.fillText(abilKeys, x + 10, dy);
         }
     });
     this.activeMenu = menu;
@@ -197,11 +252,14 @@ this.traps = new TrapSystem(this.bus);
     switch (this.state) {
       case STATE.TITLE:       this._updateTitle(); break;
       case STATE.CHAR_CREATE: this._updateCharCreate(); break;
+      case STATE.STAT_ROLL:   this._updateStatRoll(); break;
+      case STATE.NAME_ENTRY:  this._updateNameEntry(); break;
       case STATE.PLAYING:     this._updatePlaying(); break;
       case STATE.TOWN:        this._updateTown(); break;
       case STATE.MENU:        this._updateMenu(); break;
       case STATE.DEAD:        this._updateDead(); break;
       case STATE.PUZZLE:      this._updatePuzzle(); break;
+      case STATE.LEVEL_UP:    this._updateLevelUp(); break;
     }
   }
 
@@ -214,6 +272,7 @@ this.traps = new TrapSystem(this.bus);
   _updateTitle() {
     const action = this.input.consumeAction();
     if (action === 'confirm') {
+        this._previousState = STATE.TITLE;
         this.state = STATE.CHAR_CREATE;
     }
   }
@@ -234,6 +293,36 @@ this.traps = new TrapSystem(this.bus);
           if (this.state === STATE.CHAR_CREATE) {
               this.state = STATE.TITLE;
           }
+      }
+  }
+
+  _updateStatRoll() {
+    const action = this.input.consumeAction();
+    if (action === 'confirm') {
+      this.state = STATE.NAME_ENTRY;
+      this.pendingName = '';
+    }
+    // Bind 'R' key temporarily for reroll via drop action (since we moved drop to R)
+    if (action === 'drop') {
+      if (this.rollRerolls > 0) {
+        this.pendingStats = this._rollStatArray();
+        this.rollRerolls--;
+      }
+    }
+    if (action === 'cancel') {
+        this.state = STATE.CHAR_CREATE;
+    }
+  }
+
+  _updateNameEntry() {
+      // Input is handled by raw window listener
+  }
+
+  _updateLevelUp() {
+      const action = this.input.consumeAction();
+      if (action === 'confirm') {
+          this.state = STATE.PLAYING;
+          this.pendingLevelUp = null;
       }
   }
 
@@ -260,9 +349,27 @@ this.traps = new TrapSystem(this.bus);
     }
 
     if (action === 'cast') {
-    this._openCastMenu();
-    return;
-}
+        if (this.player.spellbook.length === 0) {
+          this.log.add('You have no spells.', 'system');
+        } else {
+          this._openSpellMenu();
+        }
+        return;
+    }
+
+    if (action === 'spellbook') {
+        if (this.player.spellbook.length === 0) {
+          this.log.add('You have no spells.', 'system');
+        } else {
+          this._openSpellMenu(true);
+        }
+        return;
+    }
+
+    if (action === 'traits') {
+        this._openSkillsMenu();
+        return;
+    }
 
 if (action === 'drop') {
     this._openDropMenu();
@@ -284,7 +391,7 @@ if (action === 'load') {
 }
 
 if (action === 'use') {
-    this._openUseMenu();
+    this._handleUseAbility();
     return;
 }
 
@@ -493,24 +600,60 @@ _openUseMenu() {
     return true;  }
 
   _playerAttacks(monster) {
-    const result = this.player.rollAttack(monster);
-    if (result.hit) {
-      monster.hp = Math.max(0, monster.hp - result.dmg);
-      const msg = result.critical
-        ? `CRITICAL HIT! You strike ${monster.name} for ${result.dmg} damage!`
-        : `You hit ${monster.name} for ${result.dmg} damage.`;
-      this.log.add(msg, 'combat');
-      if (monster.hp <= 0) {
-        const xpResult = this.player.gainXP(monster.def.xpBase + monster.def.xpPerHD * monster.def.hd);
-        this.bus.emit('monster:death', { entity: monster });
-        this._updateQuestProgress('kill', { monsterType: monster.def?.key ?? monster.name });
-        if (xpResult.leveled) {
-          this.log.add(`You feel more powerful! Level ${this.player.level}!`, 'important');
+    const attackCount = 1 + (this.player._extraAttacks ?? 0);
+    for (let i = 0; i < attackCount; i++) {
+        const result = this.combat.resolveAttack(this.player, monster, this.player.equipped.weapon);
+        this.log.add(result.message, result.hit ? 'combat' : 'system');
+
+        if (result.hit && monster.hp <= 0) {
+            const xpResult = this.player.gainXP(monster.def.xpBase + monster.def.xpPerHD * monster.def.hd);
+            this._updateQuestProgress('kill', { monsterType: monster.def?.key ?? monster.name });
+            if (xpResult.leveled) {
+              this.pendingLevelUp = xpResult;
+              this.state = STATE.LEVEL_UP;
+              this._checkFavoredEnemy();
+            }
+            break; // Monster dead, stop extra attacks
+        }
+    }
+  }
+
+  _checkFavoredEnemy() {
+    if (this.player.hasAbility('favored_enemy')) {
+      const neededCount = this.player.level >= 10 ? 3 : (this.player.level >= 5 ? 2 : 1);
+      if (this.player.favoredEnemies.length < neededCount) {
+        this._openFavoredEnemyMenu();
+      }
+    }
+  }
+
+  _openFavoredEnemyMenu() {
+    const options = [
+      { label: 'Humanoid', data: 'humanoid' },
+      { label: 'Undead',    data: 'undead' },
+      { label: 'Beast',     data: 'beast' },
+      { label: 'Dragon',    data: 'dragon' },
+      { label: 'Aberration', data: 'aberration' },
+    ].filter(opt => !this.player.favoredEnemies.includes(opt.data));
+
+    const menu = new Menu('Choose Favored Enemy', options, {
+      onSelect: (selected) => {
+        this.player.favoredEnemies.push(selected.data);
+        this.log.add(`You have chosen ${selected.data} as a favored enemy!`, 'important');
+        menu.closed = true;
+        this._checkFavoredEnemy(); // Check if more choices are needed
+      },
+      onCancel: () => {
+        // Must choose if possible
+        if (this.player.favoredEnemies.length === 0) {
+          this.log.add('You must choose a favored enemy.', 'system');
+          this._openFavoredEnemyMenu();
+        } else {
+           menu.closed = true;
         }
       }
-    } else {
-      this.log.add(`You miss ${monster.name}.`, 'combat');
-    }
+    });
+    this._openMenu(menu);
   }
 
   _monsterAttacksPlayer(monster) {
@@ -623,13 +766,17 @@ _openUseMenu() {
 
   render(dt) {
     switch (this.state) {
-      case STATE.TITLE:   this._renderTitle(); break;
+      case STATE.TITLE:       this._renderTitle(); break;
       case STATE.CHAR_CREATE: this._renderMenu(); break;
-      case STATE.PLAYING: this._renderPlaying(); break;
-      case STATE.MENU:    this._renderMenu(); break;
-      case STATE.TOWN:    this._renderTown(); break;
-      case STATE.PUZZLE:  this._renderPlaying(); break; // For now, just show the game screen
-      case STATE.DEAD:    this._renderDead(); break;
+      case STATE.MENU:        this._renderMenu(); break;
+      case STATE.STAT_ROLL:   this._renderStatRoll(this.renderer.ctx); break;
+      case STATE.NAME_ENTRY:  this._renderNameEntry(this.renderer.ctx); break;
+      case STATE.PLAYING:     this._renderPlaying(); break;
+      case STATE.MENU:        this._renderMenu(); break;
+      case STATE.TOWN:        this._renderTown(); break;
+      case STATE.PUZZLE:      this._renderPlaying(); break;
+      case STATE.DEAD:        this._renderDead(); break;
+      case STATE.LEVEL_UP:    this._renderLevelUp(this.renderer.ctx); break;
     }
   }
 
@@ -637,6 +784,9 @@ _openUseMenu() {
     const ctx = this.renderer.ctx;
     const w = this.canvasEl.width;
     const h = this.canvasEl.height;
+    const th = this.renderer.TILE_H;
+    const tw = this.renderer.TILE_W;
+
     ctx.fillStyle = '#000';
     ctx.fillRect(0, 0, w, h);
     
@@ -675,6 +825,95 @@ _openUseMenu() {
     this.renderer.render(map, this.player, this.log, this.camera.x, this.camera.y, map.metadata.theme);
   }
 
+  _renderStatRoll(ctx) {
+    const cls = CLASSES[this.pendingClassKey];
+    const stats = this.pendingStats;
+    const statNames = { str:'Strength', dex:'Dexterity', con:'Constitution',
+                         int:'Intelligence', wis:'Wisdom', cha:'Charisma' };
+    const tw = this.renderer.TILE_W;
+    const th = this.renderer.TILE_H;
+
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+    let y = th * 2;
+    ctx.fillStyle = cls.color;
+    ctx.font = `bold ${th + 4}px monospace`;
+    ctx.fillText(`${cls.name} — Ability Scores`, tw, y); y += th * 2;
+
+    ctx.font = `${th}px monospace`;
+    for (const [key, label] of Object.entries(statNames)) {
+      const val  = stats[key];
+      const mod  = Math.floor((val - 10) / 2);
+      const modStr = mod >= 0 ? `+${mod}` : `${mod}`;
+      const isPrime = cls.primeStat.includes(key);
+      ctx.fillStyle = isPrime ? '#ffcc44' : '#cccccc';
+      ctx.fillText(`${label.padEnd(14)} ${String(val).padStart(2)}  (${modStr})${isPrime ? ' ★' : ''}`, tw * 2, y);
+      y += th * 1.4;
+    }
+
+    y += th;
+    ctx.fillStyle = '#888888';
+    ctx.fillText(`Rerolls remaining: ${this.rollRerolls}`, tw * 2, y); y += th * 1.5;
+
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText('[R] Reroll   [ENTER] Accept & Name', tw * 2, y);
+  }
+
+  _renderNameEntry(ctx) {
+    const th = this.renderer.TILE_H;
+    const tw = this.renderer.TILE_W;
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    ctx.fillStyle = '#ffffff';
+    ctx.font = `${th * 1.5}px monospace`;
+    ctx.fillText('Name your adventurer:', tw * 2, ctx.canvas.height / 2 - th * 2);
+    // Input box
+    ctx.strokeStyle = '#ffcc44';
+    ctx.strokeRect(tw * 2, ctx.canvas.height / 2 - th, ctx.canvas.width - tw * 4, th * 2);
+    ctx.fillStyle = '#ffcc44';
+    ctx.font = `bold ${th * 1.5}px monospace`;
+    ctx.fillText((this.pendingName || '') + '_', tw * 3, ctx.canvas.height / 2 + th * 0.4);
+    ctx.fillStyle = '#888';
+    ctx.font = `${th}px monospace`;
+    ctx.fillText('[ENTER] Confirm  (leave blank for "Adventurer")', tw * 2, ctx.canvas.height / 2 + th * 2.5);
+  }
+
+  _renderLevelUp(ctx) {
+    this._renderPlaying(); // Background
+    const tw = this.renderer.TILE_W;
+    const th = this.renderer.TILE_H;
+    const w = ctx.canvas.width;
+    const h = ctx.canvas.height;
+
+    ctx.fillStyle = 'rgba(0,0,0,0.8)';
+    ctx.fillRect(w/4, h/4, w/2, h/2);
+    ctx.strokeStyle = '#ffcc44';
+    ctx.strokeRect(w/4, h/4, w/2, h/2);
+
+    let y = h/4 + th * 2;
+    ctx.fillStyle = '#ffcc44';
+    ctx.font = `bold ${th * 1.5}px monospace`;
+    ctx.fillText('*** LEVEL UP! ***', w/2 - (th*6), y); y += th * 2;
+
+    ctx.font = `${th}px monospace`;
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText(`You are now level ${this.player.level}!`, w/4 + tw * 2, y); y += th * 1.5;
+    ctx.fillText(`HP Gained: +${this.pendingLevelUp.hpGained}`, w/4 + tw * 2, y); y += th * 1.5;
+
+    if (this.pendingLevelUp.newAbilities.length > 0) {
+        ctx.fillStyle = '#88ffaa';
+        ctx.fillText('New Abilities:', w/4 + tw * 2, y); y += th;
+        for (const ability of this.pendingLevelUp.newAbilities) {
+            ctx.fillText(`• ${ability.replace(/_/g, ' ')}`, w/4 + tw * 4, y);
+            y += th;
+        }
+    }
+
+    ctx.fillStyle = '#888';
+    ctx.fillText('[ENTER] Continue', w/2 - (tw * 4), h/4 + h/2 - th * 2);
+  }
+
   _renderDead() {
     const ctx = this.renderer.ctx;
     const w = this.canvasEl.width;
@@ -688,25 +927,42 @@ _openUseMenu() {
     ctx.textBaseline = 'top';
     const titleText = 'YOU HAVE DIED';
     const titleW = ctx.measureText(titleText).width;
-    ctx.fillText(titleText, (w - titleW) / 2, h * 0.25);
+    ctx.fillText(titleText, (w - titleW) / 2, h * 0.15);
 
-    const subSize = Math.max(12, Math.floor(titleSize * 0.42));
-    ctx.fillStyle = '#888888';
+    const subSize = Math.max(14, Math.floor(titleSize * 0.5));
     ctx.font = `${subSize}px monospace`;
-    const subText = `${this.player?.name ?? 'The adventurer'} reached depth ${this.player?.depth ?? 0}.`;
-    const subW = ctx.measureText(subText).width;
-    ctx.fillText(subText, (w - subW) / 2, h * 0.4);
+    ctx.fillStyle = '#ffffff';
+
+    let y = h * 0.3;
+    const p = this.player;
+    const lines = [
+      `Name:   ${p?.name ?? 'Unknown'}`,
+      `Class:  ${p?.class?.name ?? 'Adventurer'}`,
+      `Level:  ${p?.level ?? 1}`,
+      `Depth:  ${p?.depth ?? 0}`,
+      `XP:     ${p?.xp ?? 0}`,
+      `Cause:  ${p?.causeOfDeath ?? 'Unknown'}`,
+    ];
+
+    lines.forEach(line => {
+      ctx.fillText(line, w/2 - (subSize * 8), y);
+      y += subSize * 1.5;
+    });
     
     ctx.fillStyle = '#ffcc44';
     const startText = 'Press ENTER or ESCAPE to return to title';
     const startW = ctx.measureText(startText).width;
-    ctx.fillText(startText, (w - startW) / 2, h * 0.55);
+    ctx.fillText(startText, (w - startW) / 2, h * 0.7);
   }
 
   _renderMenu() {
     // First render the underlying game state
     if (this._previousState === STATE.PLAYING) this._renderPlaying();
     else if (this._previousState === STATE.TOWN) this._renderTown();
+    else if (this._previousState === STATE.TITLE) this._renderTitle();
+    else {
+        this.renderer._clear();
+    }
     
     // Then overlay the menu
     if (this.activeMenu) {
@@ -1281,6 +1537,36 @@ _equippedTag(item) {
     return '';
 }
 
+  _openSkillsMenu() {
+    const skillItems = Object.entries(this.player.skills).map(([key, rank]) => {
+        const statKey = SkillSystem.SKILL_STAT[key] ?? 'int';
+        const statVal = this.player.stats[statKey] ?? 10;
+        const mod = statModifier(statVal);
+        const total = rank + mod;
+        const sign = total >= 0 ? '+' : '';
+
+        return {
+            label: `${key.replace(/_/g, ' ').toUpperCase().padEnd(16)} Rank:${rank}  (${statKey.toUpperCase()} ${sign}${mod})  Total:${sign}${total}`,
+            color: '#88ffaa',
+            data: key,
+        };
+    });
+
+    if (skillItems.length === 0) {
+        this.log.add('You have no specialized skills.', 'system');
+        return;
+    }
+
+    const menu = new Menu(`${this.player.name}'s Skills`, skillItems, {
+        onSelect: () => {}, // Read-only
+        onCancel: () => {
+            menu.closed = true;
+            this.state = STATE.PLAYING;
+        }
+    });
+    this._openMenu(menu);
+  }
+
 _openItemActionMenu(item) {
     const actions = [];
     
@@ -1315,6 +1601,78 @@ _openItemActionMenu(item) {
     });
     this._openMenu(menu);
 }
+
+_handleUseAbility() {
+    // Build a list of usable class abilities
+    const usable = [];
+    const activeAbilities = ['turn_undead', 'lay_on_hands', 'combat_surge', 'battle_cry'];
+
+    for (const key of this.player.abilities) {
+        if (activeAbilities.includes(key)) {
+            usable.push({
+                label: key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
+                data: key,
+                color: '#ffcc44',
+                enabled: true,
+            });
+        }
+    }
+
+    if (usable.length === 0) {
+      // If no class abilities, try standard item menu
+      this._openUseMenu();
+      return;
+    }
+
+    // Add option to use items as well
+    usable.push({ label: '--- Items ---', color: '#888', enabled: false, data: null });
+    const items = this.player.inventory.filter(i => i.potion || i.scroll || i.food || i.wand);
+    usable.push(...items.map(item => ({ label: item.name, color: item.color, data: item })));
+
+    const menu = new Menu('Use Ability or Item', usable, {
+      onSelect: (selected) => {
+        if (!selected.data) return;
+        menu.closed = true;
+        this.state = STATE.PLAYING;
+
+        if (typeof selected.data === 'string') {
+            this._activateAbility(selected.data);
+        } else {
+            this._useItem(selected.data);
+        }
+      },
+      onCancel: () => { menu.closed = true; this.activeMenu = null; this.state = STATE.PLAYING; },
+    });
+    this._openMenu(menu);
+  }
+
+  _activateAbility(abilityKey) {
+    switch (abilityKey) {
+      case 'turn_undead': {
+        const result = this.magic.cast(this.player, 'turn_undead', { x: this.player.x, y: this.player.y });
+        this.log.add(result.success ? 'You invoke divine authority against the undead!' : result.message, 'magic');
+        break;
+      }
+      case 'lay_on_hands': {
+        const heal = this.player.level * 2;
+        this.player.hp = Math.min(this.player.hp + heal, this.player.hpMax);
+        this.log.add(`You lay on hands, restoring ${heal} HP.`, 'heal');
+        break;
+      }
+      case 'combat_surge': {
+        this.player._combatSurgeActive = true;
+        this.log.add('You surge with combat fury! Next attack deals double damage.', 'combat');
+        break;
+      }
+      case 'battle_cry': {
+        this.log.add('You let out a battle cry! +1 attack for 3 turns.', 'combat');
+        // TODO: Apply buff to player via StatusSystem
+        break;
+      }
+      default:
+        this.log.add(`You use ${abilityKey.replace(/_/g, ' ')}.`, 'system');
+    }
+  }
 
 _executeItemAction(item, action) {
     switch (action) {
@@ -1424,47 +1782,71 @@ _openDropMenu() {
     this._openMenu(menu);
 }
 
-_openCastMenu() {
-    if (this.player.spellbook.length === 0) {
-        this.log.add('You know no spells.', 'system');
-        return;
-    }
-    const spells = this.player.spellbook.map(key => {
-        const spell = SPELLS[key];
-        const canCast = this.player.mp >= (spell?.mpCost ?? 999);
-        return {
-            label: `${spell?.name ?? key} (${spell?.mpCost ?? '?'} MP)`,
-            color: canCast ? '#aa66ff' : '#555555',
-            enabled: canCast,
-            data: key,
-        };
+_openSpellMenu(readOnly = false) {
+    const spellItems = this.player.spellbook.map(key => {
+      const spell = SPELLS[key];
+      return {
+        label: `${spell?.name ?? key}  [${spell?.mpCost ?? 0} MP]`,
+        color: '#aa66ff',
+        data: key,
+        enabled: readOnly ? true : (this.player.mp >= (spell?.mpCost ?? 0)),
+        description: spell?.description ?? '',
+      };
     });
-    const menu = new Menu(`Spellbook (MP: ${this.player.mp}/${this.player.mpMax})`, spells, {
-        onSelect: (selected) => {
-            // For MVP: auto-target nearest visible monster, or self for heals
-            const spell = SPELLS[selected.data];
-            let targetPos;
-            if (spell.range === 'self' || spell.range === 'touch') {
-                targetPos = { x: this.player.x, y: this.player.y };
-            } else {
-                targetPos = this._findNearestVisibleMonster();
-                if (!targetPos) {
-                    this.log.add('No valid target in sight.', 'system');
-                    return;
-                }
+
+    const menu = new Menu(readOnly ? 'Spellbook' : 'Cast Spell', spellItems, {
+      onSelect: (selected) => {
+        if (readOnly) return;
+        menu.closed = true;
+        this.state = STATE.PLAYING;
+
+        const spell = SPELLS[selected.data];
+        let targetPos;
+        if (spell.range === 'self' || spell.range === 'touch') {
+            targetPos = { x: this.player.x, y: this.player.y };
+        } else {
+            targetPos = this._findNearestVisibleMonster();
+            if (!targetPos) {
+                this.log.add('No valid target in sight.', 'system');
+                return;
             }
-            const result = this.magic.cast(this.player, selected.data, targetPos);
-            if (result.success) {
-                this.log.add(`You cast ${spell.name}!`, 'magic');
-            } else {
-                this.log.add(result.message, 'system');
-            }
-            this.activeMenu.closed = true;
-        },
-        onCancel: () => {}
+        }
+
+        const result = this.magic.cast(this.player, selected.data, targetPos);
+        if (result.success) {
+            this.log.add(`You cast ${spell.name}!`, 'magic');
+            result.results?.forEach(r => {
+              if (r.effect === 'damage') this.log.add(`Deals ${r.value} damage.`, 'magic');
+              if (r.effect === 'heal')   this.log.add(`Heals ${r.value} HP.`, 'heal');
+            });
+        } else {
+            this.log.add(result.message, 'system');
+        }
+      },
+      onCancel: () => {
+        menu.closed = true;
+        this.activeMenu = null;
+        this.state = STATE.PLAYING;
+      },
+      renderDescription: (ctx, item, x, y, w, h, tileH) => {
+        if (!item) return;
+        const spell = SPELLS[item.data];
+        if (!spell) return;
+        ctx.fillStyle = '#888';
+        ctx.font = `${tileH - 4}px monospace`;
+        const lines = [
+          spell.description,
+          `Cost: ${spell.mpCost} MP  |  Range: ${spell.range}  |  Area: ${spell.area}`,
+          `"${spell.flavorText ?? ''}"`,
+        ];
+        const descY = y + h - (tileH * 5);
+        lines.forEach((line, i) => {
+          ctx.fillText(line, x + 15, descY + i * (tileH - 2));
+        });
+      },
     });
     this._openMenu(menu);
-}
+  }
 
 _updateQuestProgress(type, data) {
     for (const quest of this.quests.active) {
