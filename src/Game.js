@@ -289,7 +289,7 @@ this.traps = new TrapSystem(this.bus);
       
       this.activeMenu.handleAction(action);
       
-      if (this.activeMenu.closed) {
+      if (this.activeMenu && this.activeMenu.closed) {
           this.activeMenu = null;
           // Safeguard: if state hasn't changed, go back to title
           if (this.state === STATE.CHAR_CREATE) {
@@ -442,7 +442,7 @@ if (this._handleMovement(action, map)) {
     const action = this.input.consumeAction();
     if (!action) return;
     this.activeMenu.handleAction(action);
-    if (this.activeMenu.closed) {
+    if (this.activeMenu && this.activeMenu.closed) {
         this.activeMenu = null;
         if (this.state === STATE.MENU) {
             this.state = this._previousState ?? STATE.PLAYING;
