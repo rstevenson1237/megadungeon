@@ -94,6 +94,7 @@ this.traps = new TrapSystem(this.bus);
     });
 
     this.bus.on('player:death', ({ cause }) => {
+      if (this.state === STATE.DEAD) return;
       this.log.add('You have died!', 'danger');
       if (this.player) this.player.causeOfDeath = cause ?? 'Unknown';
       this.state = STATE.DEAD;
@@ -135,6 +136,8 @@ this.traps = new TrapSystem(this.bus);
   _startNewGame(classKey, stats = null, name = 'Adventurer') {
     this.input.clearQueue();
     const seed = Date.now();
+    this.activeMenu = null;
+    this._previousState = null;
     this.rng.seed = seed;
     this.worldMap = new WorldMap(this.rng.seed);
     this.quests = new QuestSystem(this.worldMap, this.rng);
@@ -266,6 +269,10 @@ this.traps = new TrapSystem(this.bus);
   }
 
   _updateTown() {
+    if (this.player && this.player.hp <= 0) {
+        this.state = STATE.DEAD;
+        return;
+    }
     if (!this.activeMenu) {
       this._openTownOverview();
     }
@@ -329,6 +336,10 @@ this.traps = new TrapSystem(this.bus);
   }
 
   _updatePlaying() {
+    if (this.player && this.player.hp <= 0) {
+        this.state = STATE.DEAD;
+        return;
+    }
     const action = this.input.consumeAction();
     if (!action) return; // Turn-based: only advance on input
 
@@ -419,11 +430,14 @@ if (this._handleMovement(action, map)) {
   _updateDead() {
     const action = this.input.consumeAction();
     if (action === 'confirm' || action === 'cancel') {
+      this.input.clearQueue();
       // Reset to title
       this.state  = STATE.TITLE;
       this.player = null;
       this.worldMap = null;
       this.log.messages = [];
+      this.activeMenu = null;
+      this._previousState = null;
     }
   }
 
@@ -687,6 +701,7 @@ _openUseMenu() {
     }
 
     for (const monster of monsters) {
+      if (this.state === STATE.DEAD) break;
       this._monsterTurn(monster, map);
     }
   }
@@ -970,6 +985,7 @@ _openUseMenu() {
     else if (this._previousState === STATE.TITLE) this._renderTitle();
     else {
         this.renderer._clear();
+        if (this.state === STATE.CHAR_CREATE) this._renderTitle();
     }
     
     // Then overlay the menu
@@ -1028,6 +1044,8 @@ _enterDungeonFromTown() {
     this.log.add('You descend into the dungeon once more...', 'important');
     this._enterLevel(1);
     this.state = STATE.PLAYING;
+    this.activeMenu = null;
+    this._previousState = null;
 }
 
 _enterTownLocation(location) {
@@ -1941,6 +1959,8 @@ _quickLoad() {
         this.log.messages = data.log ?? [];
         this.log.add('Game loaded.', 'important');
         this.state = STATE.PLAYING;
+        this.activeMenu = null;
+        this._previousState = null;
     } catch (e) {
         this.log.add('Load failed!', 'danger');
         console.error('Load failed:', e);
