@@ -275,8 +275,7 @@ export class LootSystem {
       // ── DEFAULT FALLBACK ─────────────────────────────────────────────
       default:
         console.warn(`LootSystem: Unknown table "${tableName}" — using T4_warrior fallback`);
-        drops.push({ type: 'gold', amount: this.rng.int(1, 10) * lv });
-        break;
+        return this._resolveTable('T4_warrior', level);
     }
 
     return drops;

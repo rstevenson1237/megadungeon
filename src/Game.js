@@ -634,7 +634,14 @@ _interactWithDressing(tile, map) {
     if (foundSomething) return; // Skip the flavor switch — let the find speak for itself
 
     // ── No planted treasure — run normal dressing interaction ──────────
-    this.log.add(`You search the ${dressing.type.replace('_', ' ')}. It is empty.`, 'system');
+    const descriptions = {
+        'barrel': 'You search the wooden barrel. It is empty.',
+        'rubble': 'You sift through the rubble. Nothing but dust.',
+        'bone_pile': 'You poke through the bones. They are old and dry.',
+        'stain': 'You examine the stain. It is sticky and smells of old iron.'
+    };
+    const desc = descriptions[dressing.type] ?? `You search the ${dressing.type.replace('_', ' ')}. It is empty.`;
+    this.log.add(desc, 'system');
 }
 
 _handlePickup() {
@@ -650,10 +657,11 @@ _handlePickup() {
     // For now, just pick up the first item found
     const item = items[0];
 
-    // Special handling for gold_pile with custom goldAmount
-    if (item.itemKey === 'gold_pile' && item.goldAmount !== undefined) {
-        this.player.gold += item.goldAmount;
-        this.log.add(`You pick up ${item.goldAmount} gold coins.`, 'system');
+    // Special handling for gold_pile
+    if (item.itemKey === 'gold_pile') {
+        const amount = item.goldAmount ?? item.value ?? 1;
+        this.player.gold += amount;
+        this.log.add(`You pick up ${amount} gold coins.`, 'system');
         map.removeEntity(item);
         return;
     }
