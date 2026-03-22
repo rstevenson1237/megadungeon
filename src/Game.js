@@ -11,6 +11,7 @@ import { Renderer, glyphToChar, buildCRTOverlay } from './ui/Renderer.js';
 import { Menu }        from './ui/Menu.js';
 import { MessageLog }    from './ui/HUD.js';
 import { CombatSystem }  from './systems/CombatSystem.js';
+import { LootSystem } from './systems/LootSystem.js';
 import { MagicSystem } from './systems/MagicSystem.js';
 import { PuzzleSystem } from './systems/PuzzleSystem.js';
 import { TrapSystem } from './systems/TrapSystem.js';
@@ -49,6 +50,7 @@ class Game {
     this.renderer  = new Renderer(this.canvasEl);
     this.log       = new MessageLog(200);
     this.combat    = new CombatSystem(this.bus);
+    this.loot      = new LootSystem(this.rng);
     this.magic     = new MagicSystem(this.bus, this);
     this.puzzles   = new PuzzleSystem(this.bus, this);
 this.traps = new TrapSystem(this.bus);
@@ -103,6 +105,21 @@ this.traps = new TrapSystem(this.bus);
     this.bus.on('monster:death', ({ entity }) => {
       this.log.add(`${entity.name} is slain!`, 'combat');
       const map = this.worldMap.getLevel(this.currentLevel);
+
+      // Roll and spawn loot
+      if (this.loot && entity.def) {
+        const drops = this.loot.rollDrops(entity.def, this.currentLevel);
+        const { goldGained, itemsDropped } = this.loot.spawnDrops(drops, map, entity.x, entity.y);
+
+        if (goldGained > 0) {
+          this.player.gold += goldGained;
+          this.log.add(`You find ${goldGained} gold on the corpse.`, 'system');
+        }
+        itemsDropped.forEach(name => {
+          this.log.add(`${entity.name} dropped: ${name}`, 'important');
+        });
+      }
+
       map.removeEntity(entity);
     });
 
@@ -394,6 +411,11 @@ if (action === 'pickup') {
     return;
 }
 
+    if(action === 'confirm') {
+        this._handleInteract();
+        return;
+    }
+
 if (action === 'save') {
     this._quickSave();
     return;
@@ -511,16 +533,50 @@ if (this._handleMovement(action, map)) {
     }
     
     if (tile.features.dressing) {
+        const dressing = tile.features.dressing;
+        const type = typeof dressing === 'string' ? dressing : dressing.type;
         const descriptions = {
             'barrel': 'An old wooden barrel. It is empty.',
             'rubble': 'A pile of rocks and debris from a past collapse.',
             'bone_pile': 'A scattering of old, gnawed bones.',
             'stain': 'A dark, sticky stain on the floor. Best not to think about it.'
         };
-        const desc = descriptions[tile.features.dressing];
+        const desc = descriptions[type];
         if (desc) {
             this.log.add(desc, 'system');
             found = true;
+        }
+    }
+
+    // Check adjacent tiles for concealed loot (including current tile)
+    for (let dy = -1; dy <= 1; dy++) {
+        for (let dx = -1; dx <= 1; dx++) {
+            const tx = this.player.x + dx;
+            const ty = this.player.y + dy;
+            if (!map.inBounds(tx, ty)) continue;
+
+            const checkTile = map.get(tx, ty);
+            if (checkTile.features.concealedLoot && !checkTile.features.concealedLoot.found) {
+                checkTile.features.concealedLoot.found = true;
+                const loot = checkTile.features.concealedLoot;
+
+                this.log.add('Your eye catches something — a loose stone in the floor!', 'important');
+
+                if (loot.gold > 0) {
+                    this.player.gold += loot.gold;
+                    this.log.add(`Concealed beneath it: ${loot.gold} gold coins.`, 'system');
+                }
+                if (loot.itemKey) {
+                    try {
+                        const item = Item.create(loot.itemKey);
+                        item.x = tx;
+                        item.y = ty;
+                        map.addEntity(item);
+                        this.log.add(`You also find: ${item.name}!`, 'important');
+                    } catch (e) { /* skip */ }
+                }
+                found = true;
+            }
         }
     }
     
@@ -529,25 +585,85 @@ if (this._handleMovement(action, map)) {
     }
 }
 
+_handleInteract() {
+    const map = this.worldMap.getLevel(this.currentLevel);
+    const tile = map.get(this.player.x, this.player.y);
+
+    if (tile.features.dressing) {
+        this._interactWithDressing(tile, map);
+        return;
+    }
+
+    this.log.add('There is nothing here to interact with.', 'system');
+}
+
+_interactWithDressing(tile, map) {
+    const dressing = tile.features.dressing;
+    // Support both old string format and new object format
+    if (typeof dressing === 'string') {
+        tile.features.dressing = { type: dressing, searched: true };
+        this.log.add(`You search the ${dressing.replace('_', ' ')}. Nothing found.`, 'system');
+        return;
+    }
+
+    if (dressing.searched) {
+        this.log.add(`The ${dressing.type.replace('_', ' ')} has already been searched.`, 'system');
+        return;
+    }
+    dressing.searched = true;
+
+    // ── Check for hidden treasure first (placed by RoomGen) ────────────
+    let foundSomething = false;
+    if (dressing.hiddenGold > 0) {
+        this.player.gold += dressing.hiddenGold;
+        this.log.add(`Hidden inside: ${dressing.hiddenGold} gold coins!`, 'important');
+        dressing.hiddenGold = 0;
+        foundSomething = true;
+    }
+    if (dressing.hiddenItem) {
+        try {
+            const item = Item.create(dressing.hiddenItem);
+            item.x = this.player.x;
+            item.y = this.player.y;
+            map.addEntity(item);
+            this.log.add(`You find something hidden inside: ${item.name}!`, 'important');
+        } catch (e) { /* skip */ }
+        dressing.hiddenItem = null;
+        foundSomething = true;
+    }
+    if (foundSomething) return; // Skip the flavor switch — let the find speak for itself
+
+    // ── No planted treasure — run normal dressing interaction ──────────
+    this.log.add(`You search the ${dressing.type.replace('_', ' ')}. It is empty.`, 'system');
+}
+
 _handlePickup() {
     const map = this.worldMap.getLevel(this.currentLevel);
     const entities = map.getEntitiesAt(this.player.x, this.player.y);
     const items = entities.filter(e => e.type === 'item');
 
     if (items.length === 0) {
-      this.log.add('There is nothing here to pick up.', 'system');
-      return;
+        this.log.add('There is nothing here to pick up.', 'system');
+        return;
     }
 
     // For now, just pick up the first item found
     const item = items[0];
 
+    // Special handling for gold_pile with custom goldAmount
+    if (item.itemKey === 'gold_pile' && item.goldAmount !== undefined) {
+        this.player.gold += item.goldAmount;
+        this.log.add(`You pick up ${item.goldAmount} gold coins.`, 'system');
+        map.removeEntity(item);
+        return;
+    }
+
     if (this.player.addToInventory(item)) {
-      map.removeEntity(item);
-      this.log.add(`You pick up the ${item.name}.`, 'system');
-      this._updateQuestProgress('fetch', { itemKey: item.itemKey });
+        map.removeEntity(item);
+        this.log.add(`You pick up the ${item.name}.`, 'system');
+        this._updateQuestProgress('fetch', { itemKey: item.itemKey });
     } else {
-      this.log.add('Your inventory is full.', 'important');
+        this.log.add('Your inventory is full.', 'important');
     }
 }
 

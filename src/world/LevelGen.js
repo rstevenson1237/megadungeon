@@ -299,7 +299,7 @@ export class LevelGen {
               map.addEntity(item);
           } else {
               tile.glyph = def.glyph; tile.fg = def.fg;
-              tile.features.dressing = feat;
+              tile.features.dressing = { type: feat, searched: false };
           }
           break;
         }
