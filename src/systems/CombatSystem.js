@@ -35,8 +35,8 @@ export class CombatSystem {
    * Resolve a melee attack.
    * @returns {{ hit, critical, damage, effects, message }}
    */
-  resolveAttack(attacker, defender, weapon = null) {
-    const atkBonus = this._getAttackBonus(attacker, weapon, defender);
+  resolveAttack(attacker, defender, weapon = null, attackPenalty = 0) {
+    const atkBonus = this._getAttackBonus(attacker, weapon, defender) - attackPenalty;
     const roll     = rollDie(20);
     const total    = roll + atkBonus;
     const critical = roll === 20;
@@ -161,13 +161,12 @@ export class CombatSystem {
     return { hit: false, fumble: true, damage: 0, message: outcome.msg, effect: outcome.effect };
   }
 
-  /** Ranged attack: adds range penalty, cover modifiers */
+  /** Ranged attack: applies an accuracy penalty for targets beyond weapon range */
   resolveRangedAttack(attacker, defender, weapon) {
     const dist    = chebyshevDistance(attacker, defender);
     const range   = weapon?.weapon?.range ?? 3;
     const penalty = dist > range ? Math.floor((dist - range) / 2) : 0;
-    // TODO Phase 5: apply penalty to attack roll
-    return this.resolveAttack(attacker, defender, weapon);
+    return this.resolveAttack(attacker, defender, weapon, penalty);
   }
 
   /** Morale check for monsters — do they flee? */
