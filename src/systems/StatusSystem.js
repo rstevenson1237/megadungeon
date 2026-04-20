@@ -32,9 +32,10 @@ export class StatusSystem {
             case 'blessed':  status.attackMod = 1; break;
             case 'cursed':   status.attackMod = -1; break;
             case 'haste':    status.speedMod = 1; break;
-            case 'flee':     break;
-            case 'paralysis': status.acMod = 4; break;
-            case 'buff':     break;
+            case 'battle_cry': break; // attackMod supplied via options
+            case 'flee':       break;
+            case 'paralysis':  status.acMod = 4; break;
+            case 'buff':       break;
         }
         
         entity.statuses.push(status);

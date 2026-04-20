@@ -1694,8 +1694,8 @@ _handleUseAbility() {
         break;
       }
       case 'battle_cry': {
+        StatusSystem.apply(this.player, 'battle_cry', { attackMod: 1, duration: 3 });
         this.log.add('You let out a battle cry! +1 attack for 3 turns.', 'combat');
-        // TODO: Apply buff to player via StatusSystem
         break;
       }
       default:

@@ -95,10 +95,9 @@ export class CombatSystem {
       if (attacker.favoredEnemies?.includes(defender.def?.type)) bonus += 2;
     }
 
-    // Situational: flanking, high ground, darkness, status effects
-    if (attacker.statuses?.some(s => s.key === 'blessed')) bonus += 1;
-    if (attacker.statuses?.some(s => s.key === 'cursed'))  bonus -= 1;
-    if (defender.statuses?.some(s => s.key === 'prone'))   bonus += 2;
+    // Situational: status-based attack modifiers (blessed, cursed, battle_cry, etc.)
+    for (const status of attacker.statuses ?? []) bonus += status.attackMod ?? 0;
+    if (defender.statuses?.some(s => s.key === 'prone')) bonus += 2;
     return bonus;
   }
 
