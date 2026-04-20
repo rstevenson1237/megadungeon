@@ -9,6 +9,7 @@ import { Pathfinder }    from './world/Pathfinder.js';
 import { Player }        from './entities/Player.js';
 import { Renderer, glyphToChar, buildCRTOverlay } from './ui/Renderer.js';
 import { Menu }        from './ui/Menu.js';
+import { Tooltip }     from './ui/Tooltip.js';
 import { MessageLog }    from './ui/HUD.js';
 import { CombatSystem }  from './systems/CombatSystem.js';
 import { MagicSystem } from './systems/MagicSystem.js';
@@ -247,7 +248,7 @@ this.traps = new TrapSystem(this.bus);
     map.addEntity(this.player);
     
     // Compute initial FOV
-    map.computeFOV(this.player.x, this.player.y, PLAYER_FOV_RADIUS);
+    map.computeFOV(this.player.x, this.player.y, this._effectiveFovRadius());
     this._updateCamera(map);
   }
 
@@ -411,13 +412,17 @@ if (action === 'use') {
 if (this._handleMovement(action, map)) {
       // Movement or attack consumed the turn — run monster AI
       this._runMonsterAI(map);
-      map.computeFOV(this.player.x, this.player.y, PLAYER_FOV_RADIUS);
+      map.computeFOV(this.player.x, this.player.y, this._effectiveFovRadius());
       this._updateCamera(map);
       this.bus.emit('turn:end', {});
       // Tick player statuses
       const expired = StatusSystem.tick(this.player);
       for (const key of expired) {
-          this.log.add(`${key} has worn off.`, 'system');
+          const msg = key === 'light'      ? 'The magical light fades.'
+                    : key === 'battle_cry' ? 'The battle cry fades.'
+                    : key === 'blessed'    ? 'The blessing fades.'
+                    : `${key} has worn off.`;
+          this.log.add(msg, 'system');
       }
     }
 
@@ -1550,9 +1555,16 @@ _openInventoryMenu() {
         onSelect: (selected) => {
             this._openItemActionMenu(selected.data);
         },
-        onCancel: () => {}
+        onCancel: () => {},
+        renderDescription: Tooltip.forItem(),
     });
     this._openMenu(menu);
+}
+
+_effectiveFovRadius() {
+    const bonus = (this.player.statuses ?? [])
+        .reduce((sum, s) => sum + (s.fovBonus ?? 0), 0);
+    return PLAYER_FOV_RADIUS + bonus;
 }
 
 _equippedTag(item) {
@@ -1692,8 +1704,8 @@ _handleUseAbility() {
         break;
       }
       case 'battle_cry': {
+        StatusSystem.apply(this.player, 'battle_cry', { attackMod: 1, duration: 3 });
         this.log.add('You let out a battle cry! +1 attack for 3 turns.', 'combat');
-        // TODO: Apply buff to player via StatusSystem
         break;
       }
       default:
@@ -1856,22 +1868,7 @@ _openSpellMenu(readOnly = false) {
         this.activeMenu = null;
         this.state = STATE.PLAYING;
       },
-      renderDescription: (ctx, item, x, y, w, h, tileH) => {
-        if (!item) return;
-        const spell = SPELLS[item.data];
-        if (!spell) return;
-        ctx.fillStyle = '#888';
-        ctx.font = `${tileH - 4}px monospace`;
-        const lines = [
-          spell.description,
-          `Cost: ${spell.mpCost} MP  |  Range: ${spell.range}  |  Area: ${spell.area}`,
-          `"${spell.flavorText ?? ''}"`,
-        ];
-        const descY = y + h - (tileH * 5);
-        lines.forEach((line, i) => {
-          ctx.fillText(line, x + 15, descY + i * (tileH - 2));
-        });
-      },
+      renderDescription: Tooltip.forSpell(SPELLS),
     });
     this._openMenu(menu);
   }
@@ -1953,7 +1950,7 @@ _quickLoad() {
         
         const map = this.worldMap.getLevel(this.currentLevel);
         map.addEntity(this.player);
-        map.computeFOV(this.player.x, this.player.y, PLAYER_FOV_RADIUS);
+        map.computeFOV(this.player.x, this.player.y, this._effectiveFovRadius());
         this._updateCamera(map);
         
         this.log.messages = data.log ?? [];

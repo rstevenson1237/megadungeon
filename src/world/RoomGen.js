@@ -3,6 +3,7 @@ import { Item } from '../entities/Item.js';
 import { TRAPS } from '../data/traps.js';
 import { PUZZLES } from '../data/puzzles.js';
 import { MonsterGroups } from './MonsterGroups.js';
+import { LORE } from '../data/lore.js';
 
 /**
  * Populates a room with content based on level depth, theme, and room type.
@@ -129,17 +130,17 @@ export class RoomGen {
   }
 
   _placeLore(map, room) {
-        const pos = this._randomFloorInRoom(map, room);
-        if(pos) {
-            const message = this.rng.pick(this.theme.ambientMessages)
-                ?? 'Strange markings cover the wall.';
-            map.get(pos.x, pos.y).features.lore = {
-                glyph: 0x22, // "
-                color: '#aaaaff',
-                message,
-            };
-            this.bus.emit('log:message', { text: message });
-        }
+    const pos = this._randomFloorInRoom(map, room);
+    if (pos) {
+      const pool = LORE[this.theme.key] ?? LORE.generic;
+      const entry = this.rng.pick(pool) ?? { glyph: 0x22, color: '#aaaaff', message: 'Strange markings cover the wall.' };
+      map.get(pos.x, pos.y).features.lore = {
+        glyph: entry.glyph,
+        color: entry.color,
+        message: entry.message,
+      };
+      this.bus.emit('log:message', { text: entry.message });
+    }
   }
 
     _placeShrine(map, room) {
