@@ -38,6 +38,15 @@ export class MagicSystem {
     const targets = this._resolveTargets(caster, targetPos, spell, map);
     const results = targets.map(t => this._applyEffect(caster, t, spell));
 
+    // Summarise detect results now that all targets have been processed
+    if (results.some(r => r?.effect === 'detect')) {
+      const count = results.filter(r => r?.revealed).length;
+      const msg = count > 0
+        ? `You sense ${count} evil presence${count > 1 ? 's' : ''} nearby.`
+        : 'You sense no evil nearby.';
+      this.bus.emit('log:message', { text: msg });
+    }
+
     this.bus.emit('spell:cast', { caster, spell, targets, results });
     return { success: true, targets, results };
   }
@@ -137,14 +146,24 @@ export class MagicSystem {
         return { target, effect: 'turn', result: turnResult };
       }
       case 'light': {
-          // This would be handled by a system that applies light sources to the map
-          this.bus.emit('log:message', { text: 'A magical light begins to glow.'});
-          return {target, effect: 'light'};
+          const fovBonus = Math.floor((effect.radius ?? 15) / 5);
+          const duration = caster.level * 10;
+          StatusSystem.apply(target, 'light', { fovBonus, duration });
+          const who = target === caster ? 'You are' : `${target.name} is`;
+          this.bus.emit('log:message', { text: `${who} bathed in magical light (+${fovBonus} sight for ${duration} turns).` });
+          return { target, effect: 'light', fovBonus };
       }
       case 'detect': {
-          // This would be handled by a system that reveals entities on the map
-          this.bus.emit('log:message', { text: `You sense the presence of ${effect.target}.`});
-          return {target, effect: 'detect'};
+          const map = this.game.worldMap.getLevel(caster.depth);
+          const def  = target.def ?? {};
+          const isEvil = def.alignment === 'chaotic'
+              || def.tags?.includes('demon')
+              || def.tags?.includes('undead');
+          const revealed = effect.target === 'evil' ? isEvil : false;
+          if (revealed && map.inBounds(target.x, target.y)) {
+              map.get(target.x, target.y).explored = true;
+          }
+          return { target, effect: 'detect', revealed };
       }
       case 'buff': {
           StatusSystem.apply(target, 'buff', { stat: effect.stat, value: effect.value, duration: 10 /* temp */ });

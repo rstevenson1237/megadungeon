@@ -248,7 +248,7 @@ this.traps = new TrapSystem(this.bus);
     map.addEntity(this.player);
     
     // Compute initial FOV
-    map.computeFOV(this.player.x, this.player.y, PLAYER_FOV_RADIUS);
+    map.computeFOV(this.player.x, this.player.y, this._effectiveFovRadius());
     this._updateCamera(map);
   }
 
@@ -412,13 +412,17 @@ if (action === 'use') {
 if (this._handleMovement(action, map)) {
       // Movement or attack consumed the turn — run monster AI
       this._runMonsterAI(map);
-      map.computeFOV(this.player.x, this.player.y, PLAYER_FOV_RADIUS);
+      map.computeFOV(this.player.x, this.player.y, this._effectiveFovRadius());
       this._updateCamera(map);
       this.bus.emit('turn:end', {});
       // Tick player statuses
       const expired = StatusSystem.tick(this.player);
       for (const key of expired) {
-          this.log.add(`${key} has worn off.`, 'system');
+          const msg = key === 'light'      ? 'The magical light fades.'
+                    : key === 'battle_cry' ? 'The battle cry fades.'
+                    : key === 'blessed'    ? 'The blessing fades.'
+                    : `${key} has worn off.`;
+          this.log.add(msg, 'system');
       }
     }
 
@@ -1557,6 +1561,12 @@ _openInventoryMenu() {
     this._openMenu(menu);
 }
 
+_effectiveFovRadius() {
+    const bonus = (this.player.statuses ?? [])
+        .reduce((sum, s) => sum + (s.fovBonus ?? 0), 0);
+    return PLAYER_FOV_RADIUS + bonus;
+}
+
 _equippedTag(item) {
     const slots = this.player.equipped;
     for (const [slot, equipped] of Object.entries(slots)) {
@@ -1940,7 +1950,7 @@ _quickLoad() {
         
         const map = this.worldMap.getLevel(this.currentLevel);
         map.addEntity(this.player);
-        map.computeFOV(this.player.x, this.player.y, PLAYER_FOV_RADIUS);
+        map.computeFOV(this.player.x, this.player.y, this._effectiveFovRadius());
         this._updateCamera(map);
         
         this.log.messages = data.log ?? [];

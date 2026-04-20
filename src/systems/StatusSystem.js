@@ -20,6 +20,7 @@ export class StatusSystem {
             acMod: options.acMod ?? 0,
             attackMod: options.attackMod ?? 0,
             damageMod: options.damageMod ?? 0,
+            fovBonus: options.fovBonus ?? 0,
             stat: options.stat ?? null,
             value: options.value ?? 0,
         };
@@ -33,6 +34,7 @@ export class StatusSystem {
             case 'cursed':   status.attackMod = -1; break;
             case 'haste':    status.speedMod = 1; break;
             case 'battle_cry': break; // attackMod supplied via options
+            case 'light':      break; // fovBonus supplied via options
             case 'flee':       break;
             case 'paralysis':  status.acMod = 4; break;
             case 'buff':       break;
