@@ -3,6 +3,28 @@ import { TurnUndeadTable } from '../data/tables.js';
 import { rollDiceStr, rollDie } from '../engine/rules.js';
 import { StatusSystem } from './StatusSystem.js';
 
+/**
+ * Convert a spell duration string to a turn count.
+ * Patterns: 'instant', 'permanent', 'concentration',
+ *           'level_turns', 'level_minutes',
+ *           '1d6+2_turns', '1d4+level_minutes', etc.
+ * 1 minute = 10 turns.
+ */
+function parseDuration(durationStr, casterLevel) {
+  if (!durationStr
+    || durationStr === 'instant'
+    || durationStr === 'permanent'
+    || durationStr === 'concentration') return 0;
+
+  const s = durationStr.replace('level', String(casterLevel));
+  const turnMatch   = s.match(/^(.+)_turns$/);
+  const minuteMatch = s.match(/^(.+)_minutes$/);
+  const formula = turnMatch?.[1] ?? minuteMatch?.[1];
+  if (!formula) return 0;
+  const turns = /^\d+$/.test(formula) ? parseInt(formula, 10) : rollDiceStr(formula);
+  return minuteMatch ? turns * 10 : turns;
+}
+
 // Stub for rollSave, should be in rules.js or similar
 function rollSave(entity, saveType) {
   const threshold = entity.class?.savingThrows?.[saveType]
@@ -147,7 +169,7 @@ export class MagicSystem {
       }
       case 'light': {
           const fovBonus = Math.floor((effect.radius ?? 15) / 5);
-          const duration = caster.level * 10;
+          const duration = parseDuration(spell.duration, caster.level);
           StatusSystem.apply(target, 'light', { fovBonus, duration });
           const who = target === caster ? 'You are' : `${target.name} is`;
           this.bus.emit('log:message', { text: `${who} bathed in magical light (+${fovBonus} sight for ${duration} turns).` });
@@ -166,9 +188,10 @@ export class MagicSystem {
           return { target, effect: 'detect', revealed };
       }
       case 'buff': {
-          StatusSystem.apply(target, 'buff', { stat: effect.stat, value: effect.value, duration: 10 /* temp */ });
-          this.bus.emit('log:message', { text: `${target.name} feels blessed!`});
-          return {target, effect: 'buff'};
+          const duration = parseDuration(spell.duration, caster.level);
+          StatusSystem.apply(target, 'buff', { stat: effect.stat, value: effect.value, duration });
+          this.bus.emit('log:message', { text: `${target.name} feels blessed!` });
+          return { target, effect: 'buff', duration };
       }
     }
   }
