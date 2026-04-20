@@ -9,6 +9,7 @@ import { Pathfinder }    from './world/Pathfinder.js';
 import { Player }        from './entities/Player.js';
 import { Renderer, glyphToChar, buildCRTOverlay } from './ui/Renderer.js';
 import { Menu }        from './ui/Menu.js';
+import { Tooltip }     from './ui/Tooltip.js';
 import { MessageLog }    from './ui/HUD.js';
 import { CombatSystem }  from './systems/CombatSystem.js';
 import { MagicSystem } from './systems/MagicSystem.js';
@@ -1550,7 +1551,8 @@ _openInventoryMenu() {
         onSelect: (selected) => {
             this._openItemActionMenu(selected.data);
         },
-        onCancel: () => {}
+        onCancel: () => {},
+        renderDescription: Tooltip.forItem(),
     });
     this._openMenu(menu);
 }
@@ -1856,22 +1858,7 @@ _openSpellMenu(readOnly = false) {
         this.activeMenu = null;
         this.state = STATE.PLAYING;
       },
-      renderDescription: (ctx, item, x, y, w, h, tileH) => {
-        if (!item) return;
-        const spell = SPELLS[item.data];
-        if (!spell) return;
-        ctx.fillStyle = '#888';
-        ctx.font = `${tileH - 4}px monospace`;
-        const lines = [
-          spell.description,
-          `Cost: ${spell.mpCost} MP  |  Range: ${spell.range}  |  Area: ${spell.area}`,
-          `"${spell.flavorText ?? ''}"`,
-        ];
-        const descY = y + h - (tileH * 5);
-        lines.forEach((line, i) => {
-          ctx.fillText(line, x + 15, descY + i * (tileH - 2));
-        });
-      },
+      renderDescription: Tooltip.forSpell(SPELLS),
     });
     this._openMenu(menu);
   }
