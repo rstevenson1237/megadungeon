@@ -4,6 +4,7 @@ import { TRAPS } from '../data/traps.js';
 import { PUZZLES } from '../data/puzzles.js';
 import { MonsterGroups } from './MonsterGroups.js';
 import { LORE } from '../data/lore.js';
+import { getBand } from '../data/difficultyBands.js';
 
 /**
  * Populates a room with content based on level depth, theme, and room type.
@@ -27,7 +28,7 @@ export class RoomGen {
     this.rng   = rng;
     this.theme = theme;
     this.bus = eventBus;
-    this.difficulty = this._computeDifficulty(levelNumber);
+    this.band = getBand(levelNumber);
   }
 
   populate(map, room) {
@@ -46,23 +47,24 @@ export class RoomGen {
   }
 
   _rollCategory(room) {
-    // Weights shift with depth: more traps/hazards deeper, more lore/puzzles mid-range
     const weights = [
       { value: 'empty',    weight: 20 },
       { value: 'monsters', weight: 35 },
       { value: 'treasure', weight: 15 },
-      { value: 'trap',     weight: 10 + this.difficulty * 2 },
+      { value: 'trap',     weight: 10 + this.band.trapWeight },
       { value: 'puzzle',   weight: 8 },
       { value: 'lore',     weight: 7 },
       { value: 'shrine',   weight: 3 },
-      { value: 'hazard',   weight: 2 + this.difficulty },
+      { value: 'hazard',   weight: 2 + Math.floor(this.band.trapWeight / 2) },
     ];
+    if (this.band.specialRooms.includes('cursed_room')) {
+      weights.push({ value: 'cursed', weight: 5 });
+    }
+    if (this.band.specialRooms.includes('void_zone')) {
+      weights.push({ value: 'void_zone', weight: 4 });
+    }
     return this.rng.weightedPick(weights);
   }
-
-    _computeDifficulty(levelNumber) {
-        return Math.floor(levelNumber / 5);
-    }
 
     _randomFloorInRoom(map, room) {
         const floorTiles = [];
