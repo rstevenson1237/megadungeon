@@ -73,4 +73,70 @@ export const THEMES = {
       'Something moves behind the sealed sarcophagi.',
     ]
   },
+
+  dwarven_deep: {
+    name: 'Dwarven Deep',
+    description: 'Vast stonework halls carved by dwarven hands long since fled or slain — now haunted by their darker kin.',
+    minDepth: 25, maxDepth: 65, weight: 10,
+    floorGlyphs: [0x2E, 0xFA, 0xF9],  // . · ·
+    wallGlyph: 0xFE,                   // ■
+    floorFg: '#5a5040', floorBg: '#080604',
+    wallFg: '#776655',  wallBg: '#100c08',
+    corridorFg: '#5a5040', corridorBg: '#060402',
+    minRoomW: 5, maxRoomW: 14, minRoomH: 4, maxRoomH: 10,
+    monsterWeights: { duergar: 30, dark_dwarf_warrior: 25, cave_troll: 15, stone_golem: 10, iron_defender: 10, duergar_sorcerer: 10 },
+    itemWeights: { dwarven_ale: 15, iron_ingot: 15, runic_chisel: 10, deep_gem: 10, forge_hammer: 10, mithral_shard: 5, dwarven_bread: 15, war_axe: 10, chain_mail: 10 },
+    dressingFeatures: ['pillar', 'torch_sconce', 'statue', 'bookshelf', 'crate', 'throne', 'fountain', 'chest'],
+    ambientMessages: [
+      'Geometric carvings line every surface — dwarf-runes, worn but legible to those who know.',
+      'The forges have long gone cold. You can still smell the old soot.',
+      'Iron rails in the floor once guided ore carts. Something runs along them now.',
+      'A great hall stretches ahead, its vaulted ceiling lost in shadow.',
+      'The stonework is perfect. Not a single gap, not a single crack — until it was broken from within.',
+    ]
+  },
+
+  elemental_grotto: {
+    name: 'Elemental Grotto',
+    description: 'A rift in natural law, where elemental forces leak through from the inner planes into glittering caverns.',
+    minDepth: 40, maxDepth: 80, weight: 10,
+    floorGlyphs: [0x2E, 0x2C, 0x60],  // . , `
+    wallGlyph: 0xB1,                   // ▒
+    floorFg: '#3a5050', floorBg: '#020808',
+    wallFg: '#4488aa',  wallBg: '#031012',
+    corridorFg: '#2a4444', corridorBg: '#020606',
+    minRoomW: 5, maxRoomW: 13, minRoomH: 4, maxRoomH: 9,
+    monsterWeights: { fire_elemental: 20, water_elemental: 20, earth_elemental: 15, magma_sprite: 20, crystal_golem: 15, storm_wisp: 10 },
+    itemWeights: { elemental_shard: 20, fire_opal: 10, mana_crystal: 15, elemental_essence: 10, aquamarine: 10, lodestone: 10, prismatic_flask: 10, earth_heart: 5, storm_rune: 10 },
+    dressingFeatures: ['crystal_formation', 'fountain', 'transport_circle', 'chest'],
+    ambientMessages: [
+      'The air crackles with barely-contained energy. Your hair stands on end.',
+      'Crystals pulse with an inner light that shifts from blue to orange to green.',
+      'A rift in the stone weeps something that might be water — or might not be.',
+      'The temperature swings wildly between ice-cold and scalding as you move.',
+      'You hear singing. There are no voices — just the stone, vibrating at the edge of meaning.',
+    ]
+  },
+
+  void_passage: {
+    name: 'Void Passage',
+    description: 'Corridors between worlds — extradimensional channels through which things that should not exist freely travel.',
+    minDepth: 70, maxDepth: 99, weight: 10,
+    floorGlyphs: [0xFA, 0xF9, 0x2E],  // · · .
+    wallGlyph: 0xB0,                   // ░
+    floorFg: '#2a1a3a', floorBg: '#03010a',
+    wallFg: '#553366',  wallBg: '#0a0515',
+    corridorFg: '#1a0a2a', corridorBg: '#020008',
+    minRoomW: 4, maxRoomW: 11, minRoomH: 3, maxRoomH: 8,
+    monsterWeights: { shadow_demon: 25, void_wraith: 25, phase_spider: 20, void_hound: 15, rift_stalker: 15 },
+    itemWeights: { void_shard: 20, shadow_essence: 15, phase_blade: 5, dimensional_key: 10, null_stone: 10, rift_scroll: 15, planar_compass: 5, dark_pearl: 10, soul_candle: 10 },
+    dressingFeatures: ['crystal_formation', 'altar', 'transport_circle', 'chest'],
+    ambientMessages: [
+      'The walls are not walls. They are the absence of something that was once here.',
+      'Your footsteps make no sound. The silence is absolute and hungry.',
+      'Something passes through you — cold, vast, and utterly indifferent.',
+      'The runes on the floor spell words in no language, and yet you understand them: DO NOT STAY.',
+      'A figure stands at the far end of the passage. When you blink, it has not moved — but it is closer.',
+    ]
+  },
 };
