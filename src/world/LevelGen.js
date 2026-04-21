@@ -33,40 +33,43 @@ export class LevelGen {
   }
 
   static _placeStairs(map, rooms, rng, levelNumber) {
-    if (rooms.length > 0) {
-      const upRoom = rooms[0];
-      const ux = upRoom.x + Math.floor(upRoom.w / 2);
-      const uy = upRoom.y + Math.floor(upRoom.h / 2);
-      if (map.inBounds(ux, uy)) {
-        const t = map.get(ux, uy);
-        t.type  = 'stair_up';
-        t.glyph = 0x3C; // '<'
-        t.fg    = '#ffaaaa';
-        t.solid = false;
-      }
-    }
+    if (rooms.length === 0) return;
 
-    if (rooms.length > 1) {
-      const downRoom = rooms[rooms.length - 1];
-      const dx = downRoom.x + Math.floor(downRoom.w / 2);
-      const dy = downRoom.y + Math.floor(downRoom.h / 2);
-      if (map.inBounds(dx, dy)) {
-        const t = map.get(dx, dy);
-        t.type  = 'stair_down';
-        t.glyph = 0x3E; // '>'
-        t.fg    = '#aaffaa';
-        t.solid = false;
-        map.metadata.stairDown = { x: dx, y: dy };
-      }
-    }
+    const upRoom = rooms[0];
+    const ux = upRoom.x + Math.floor(upRoom.w / 2);
+    const uy = upRoom.y + Math.floor(upRoom.h / 2);
+    this._stampStair(map, ux, uy, 'up');
+    map.metadata.entry = { x: ux, y: uy };
 
-    if (rooms.length > 0) {
-      const r = rooms[0];
-      map.metadata.entry = {
-        x: r.x + Math.floor(r.w / 2),
-        y: r.y + Math.floor(r.h / 2)
-      };
+    if (levelNumber >= 100) return;
+
+    const eligible = rooms.slice(1).filter(r => {
+      if (r.type === 'boss') return false;
+      const cx = r.x + Math.floor(r.w / 2);
+      const cy = r.y + Math.floor(r.h / 2);
+      return Math.abs(cx - ux) + Math.abs(cy - uy) > 15;
+    });
+
+    const downRoom = eligible.length > 0 ? rng.pick(eligible) : rooms[rooms.length - 1];
+    const dx = downRoom.x + Math.floor(downRoom.w / 2);
+    const dy = downRoom.y + Math.floor(downRoom.h / 2);
+    this._stampStair(map, dx, dy, 'down');
+    map.metadata.stairDown = { x: dx, y: dy };
+  }
+
+  static _stampStair(map, x, y, direction) {
+    if (!map.inBounds(x, y)) return;
+    const t = map.get(x, y);
+    if (direction === 'up') {
+      t.type  = 'stair_up';
+      t.glyph = 0x3C;
+      t.fg    = '#ffaaaa';
+    } else {
+      t.type  = 'stair_down';
+      t.glyph = 0x3E;
+      t.fg    = '#aaffaa';
     }
+    t.solid = false;
   }
 
   static _populateRooms(map, rooms, rng, levelNumber, theme) {
