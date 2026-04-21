@@ -22,6 +22,9 @@ import { TOWN_LOCATIONS } from './data/town.js';
 import { rollDiceStr, statModifier } from './engine/rules.js';
 import { SkillSystem } from './systems/SkillSystem.js';
 import { CLASSES } from './data/classes.js';
+import { FEATURES } from './data/features.js';
+import { Item } from './entities/Item.js';
+import { Monster } from './entities/Monster.js';
 
 const PLAYER_FOV_RADIUS = 8;
 
@@ -409,6 +412,11 @@ if (action === 'use') {
     return;
 }
 
+if (action === 'interact') {
+    this._handleFeatureInteract();
+    return;
+}
+
 if (this._handleMovement(action, map)) {
       // Movement or attack consumed the turn — run monster AI
       this._runMonsterAI(map);
@@ -515,12 +523,22 @@ if (this._handleMovement(action, map)) {
         found = true;
     }
     
+    if (tile.features.dungeon) {
+        const def = FEATURES[tile.features.dungeon.key];
+        if (def?.description) {
+            const hint = def.tier !== 'dressing' && !tile.features.dungeon.used
+                ? ' [press F to interact]' : '';
+            this.log.add(def.description + hint, 'system');
+            found = true;
+        }
+    }
+
     if (tile.features.dressing) {
         const descriptions = {
-            'barrel': 'An old wooden barrel. It is empty.',
-            'rubble': 'A pile of rocks and debris from a past collapse.',
+            'barrel':    'An old wooden barrel. It is empty.',
+            'rubble':    'A pile of rocks and debris from a past collapse.',
             'bone_pile': 'A scattering of old, gnawed bones.',
-            'stain': 'A dark, sticky stain on the floor. Best not to think about it.'
+            'stain':     'A dark, sticky stain on the floor. Best not to think about it.',
         };
         const desc = descriptions[tile.features.dressing];
         if (desc) {
@@ -532,6 +550,232 @@ if (this._handleMovement(action, map)) {
     if (!found) {
         this.log.add('There is nothing of interest here.', 'system');
     }
+}
+
+_handleFeatureInteract() {
+    const map     = this.worldMap.getLevel(this.currentLevel);
+    const tile    = map.get(this.player.x, this.player.y);
+    const feature = tile?.features?.dungeon;
+    if (!feature) {
+        this.log.add('There is nothing here to interact with.', 'system');
+        return;
+    }
+    const def = FEATURES[feature.key];
+    if (!def) return;
+
+    if (feature.used && def.singleUse) {
+        this.log.add('Nothing happens. It has already been used.', 'system');
+        return;
+    }
+    if (def.tier === 'dressing') return;
+
+    if (def.tier === 'searchable') {
+        this._resolveSearch(tile, feature, def);
+        return;
+    }
+    if (def.tier === 'interactive' && def.onInteract?.autoTrigger) {
+        this._resolveAutoTrigger(tile, feature, def);
+        return;
+    }
+    if (def.tier === 'interactive') {
+        this._openFeatureMenu(tile, feature, def);
+    }
+}
+
+_resolveSearch(tile, feature, def) {
+    const outcomes = def.onSearch?.outcomes;
+    if (!outcomes?.length) return;
+
+    const outcome  = this.rng.weightedPick(outcomes.map(o => ({ value: o, weight: o.weight })));
+    const goldAmt  = this.rng.int(10, 50);
+    const msg = outcome.message
+        .replace('{lore_entry}', 'strange inscriptions line the page')
+        .replace('{item}',       'a dusty scroll')
+        .replace('{monster}',    'skeleton')
+        .replace('{gold}',       String(goldAmt))
+        .replace('{trap_effect}','a needle jabs your hand');
+
+    this.log.add(msg, 'lore');
+
+    switch (outcome.result) {
+        case 'item':
+        case 'treasure': {
+            const key = outcome.result === 'treasure' ? 'healing_potion' : 'old_scroll';
+            try {
+                const item = Item.create(key);
+                if (!this.player.addToInventory(item))
+                    this.log.add('Your pack is full.', 'system');
+            } catch (_) {}
+            break;
+        }
+        case 'gold':
+            this.player.gold = (this.player.gold ?? 0) + goldAmt;
+            break;
+        case 'trap':
+            this.player.hp = Math.max(1, this.player.hp - this.rng.int(1, 4));
+            this.log.add('You take damage!', 'danger');
+            break;
+        case 'undead':
+        case 'vermin': {
+            const map2 = this.worldMap.getLevel(this.currentLevel);
+            const pos  = this._findAdjacentFloor(map2);
+            if (pos) {
+                const mkey = outcome.result === 'undead' ? 'skeleton' : 'giant_rat';
+                try {
+                    const m = Monster.create(mkey, pos.x, pos.y, this.currentLevel, this.rng);
+                    map2.addEntity(m);
+                } catch (_) {}
+            }
+            break;
+        }
+        case 'curse':
+            StatusSystem.apply(this.player, 'cursed', { duration: 20 });
+            break;
+        case 'lore':
+        case 'empty':
+        default:
+            break;
+    }
+
+    feature.used = true;
+}
+
+_resolveAutoTrigger(tile, feature, def) {
+    const dest = feature.data?.pairedDest;
+    if (!dest) {
+        this.log.add('The circle hums but has no destination.', 'system');
+        return;
+    }
+    const map = this.worldMap.getLevel(this.currentLevel);
+    map.moveEntity(this.player, dest.x, dest.y);
+    map.computeFOV(this.player.x, this.player.y, this._effectiveFovRadius());
+    this._updateCamera(map);
+    this.log.add('The circle activates. In an instant you are elsewhere.', 'lore');
+}
+
+_openFeatureMenu(tile, feature, def) {
+    const menuItems = (def.onInteract.options ?? [])
+        .filter(o => o.action !== 'cancel')
+        .map(o => ({ label: o.label, data: o }));
+
+    const menu = new Menu(def.onInteract.prompt, menuItems, {
+        onSelect: (sel) => {
+            const opt = sel.data;
+
+            if (opt.cost?.gold) {
+                if ((this.player.gold ?? 0) < opt.cost.gold) {
+                    this.log.add("You don't have enough gold.", 'system');
+                    menu.closed = true;
+                    return;
+                }
+                this.player.gold -= opt.cost.gold;
+            }
+            if (opt.cost?.hp) {
+                this.player.hp = Math.max(1, this.player.hp - opt.cost.hp);
+            }
+
+            const table =
+                def.onInteract.outcomes?.[opt.action] ??
+                (opt.action === 'drink_fountain' ? def.onInteract.drinkOutcomes : null) ??
+                [];
+
+            if (table.length > 0) {
+                const outcome = this.rng.weightedPick(table.map(o => ({ value: o, weight: o.weight })));
+                this._applyFeatureEffect(outcome, tile, feature, def);
+            } else if (opt.action === 'fill_flask') {
+                this.log.add('You fill your flask with cool water.', 'system');
+            }
+
+            if (def.singleUse) feature.used = true;
+            menu.closed = true;
+        },
+        onCancel: () => {},
+    });
+    this._openMenu(menu);
+}
+
+_applyFeatureEffect(outcome, tile, feature, def) {
+    if (outcome.message) this.log.add(outcome.message, 'lore');
+
+    switch (outcome.effect) {
+        case 'heal': {
+            const amt = typeof outcome.value === 'string'
+                ? rollDiceStr(outcome.value) : (outcome.value ?? 4);
+            this.player.hp = Math.min(this.player.hpMax, this.player.hp + amt);
+            break;
+        }
+        case 'restore_mp': {
+            if (this.player.mp !== undefined) {
+                const amt = typeof outcome.value === 'string'
+                    ? rollDiceStr(outcome.value) : (outcome.value ?? 2);
+                this.player.mp = Math.min(this.player.mpMax ?? this.player.mp, this.player.mp + amt);
+            }
+            break;
+        }
+        case 'poison':
+            StatusSystem.apply(this.player, 'poison',  { duration: 10, damage: 1 });
+            break;
+        case 'bless':
+            StatusSystem.apply(this.player, 'blessed', { duration: outcome.value ?? 5 });
+            break;
+        case 'status':
+            StatusSystem.apply(this.player, outcome.value ?? 'blessed', { duration: 10 });
+            break;
+        case 'curse':
+            StatusSystem.apply(this.player, 'cursed',  { duration: 20 });
+            break;
+        case 'random_teleport': {
+            const map = this.worldMap.getLevel(this.currentLevel);
+            const floors = map.findTiles('floor');
+            if (floors.length > 0) {
+                const dest = this.rng.pick(floors);
+                map.moveEntity(this.player, dest.x, dest.y);
+                map.computeFOV(this.player.x, this.player.y, this._effectiveFovRadius());
+                this._updateCamera(map);
+            }
+            break;
+        }
+        case 'item': {
+            try {
+                const item = Item.create('healing_potion');
+                if (!this.player.addToInventory(item))
+                    this.log.add('Your pack is full — the item is lost.', 'system');
+            } catch (_) {}
+            break;
+        }
+        case 'spawn_guardian':
+        case 'animate': {
+            const map2 = this.worldMap.getLevel(this.currentLevel);
+            const pos  = this._findAdjacentFloor(map2);
+            if (pos) {
+                const mkey = def.key === 'statue'       ? 'stone_golem'
+                           : def.key === 'sarcophagus'  ? 'skeleton'
+                           : 'wight';
+                try {
+                    const m = Monster.create(mkey, pos.x, pos.y, this.currentLevel, this.rng);
+                    map2.addEntity(m);
+                } catch (_) {}
+            }
+            break;
+        }
+        case 'boon':
+            this.player.hp = Math.min(this.player.hpMax, this.player.hp + this.rng.int(4, 8));
+            break;
+        case 'lore':
+        case 'nothing':
+        default:
+            break;
+    }
+}
+
+_findAdjacentFloor(map) {
+    const shuffled = this.rng.shuffle([[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]]);
+    for (const [dx, dy] of shuffled) {
+        const nx = this.player.x + dx, ny = this.player.y + dy;
+        if (map.inBounds(nx, ny) && !map.get(nx, ny).solid && map.getEntitiesAt(nx, ny).length === 0)
+            return { x: nx, y: ny };
+    }
+    return null;
 }
 
 _handlePickup() {

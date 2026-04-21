@@ -39,6 +39,7 @@ export class InputManager {
       'load':        ['F8'],
       'traits':      ['KeyT'],
       'spellbook':   ['KeyK'],
+      'interact':    ['KeyF'],
     };
     for (const [action, keys] of Object.entries(defaults)) {
       this._bindings.set(action, new Set(keys));
