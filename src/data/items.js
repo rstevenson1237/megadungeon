@@ -50,6 +50,120 @@ export const ITEMS = {
   arrows_20:    { key: 'arrows_20',    name: '20 Arrows',      category: 'tool',    glyph: 0x7C, color: '#885533', weight: 2, value: 5,  stackable: true,  description: 'A quiver of wooden arrows.' },
   gold_pile:    { key: 'gold_pile',    name: 'Gold Coins',     category: 'treasure',glyph: 0x24, color: '#ffcc00', weight: 1, value: 1,  stackable: true,  description: 'A handful of gold coins.' },
 
+  // === TREASURE ITEMS — Tier 1 (5–30gp, common finds) ===
+
+  crude_trinket: {
+    key: 'crude_trinket', name: 'Crude Trinket', category: 'treasure',
+    glyph: 0x2A, color: '#996633', weight: 0, value: 8, stackable: false, sellable: true,
+    description: 'A rough carving of bone or painted clay. Crude workmanship, but oddly compelling.',
+  },
+
+  vermin_trophy: {
+    key: 'vermin_trophy', name: 'Vermin Trophy', category: 'treasure',
+    glyph: 0x2C, color: '#886644', weight: 0, value: 5, stackable: false, sellable: true,
+    description: 'A spider fang, rat skull, or similar — a curiosity for collectors of the grotesque.',
+  },
+
+  tattered_satchel: {
+    key: 'tattered_satchel', name: 'Tattered Satchel', category: 'treasure',
+    glyph: 0x26, color: '#886622', weight: 1, value: 15, stackable: false, sellable: true,
+    description: 'A worn leather satchel with a few coins and scraps still inside. The leather itself has some value.',
+  },
+
+  war_token: {
+    key: 'war_token', name: 'War Token', category: 'treasure',
+    glyph: 0x6F, color: '#aaaaaa', weight: 0, value: 12, stackable: false, sellable: true,
+    description: 'A stamped metal disc — a soldier\'s pay token or unit identifier. Worth little, but collectable.',
+  },
+
+  // === TREASURE ITEMS — Tier 2 (40–150gp, standard loot) ===
+
+  silver_candlestick: {
+    key: 'silver_candlestick', name: 'Silver Candlestick', category: 'treasure',
+    glyph: 0x21, color: '#cccccc', weight: 2, value: 55, stackable: false, sellable: true,
+    description: 'Tarnished silver, but still worth something to a merchant.',
+  },
+
+  ancient_coin_cache: {
+    key: 'ancient_coin_cache', name: 'Ancient Coin Cache', category: 'treasure',
+    glyph: 0x24, color: '#ccaa44', weight: 1, value: 70, stackable: false, sellable: true,
+    description: 'A handful of old coins from a forgotten kingdom. Numismatists in town pay well for these.',
+  },
+
+  bone_holy_symbol: {
+    key: 'bone_holy_symbol', name: 'Bone Holy Symbol', category: 'treasure',
+    glyph: 0x2B, color: '#ccccaa', weight: 0, value: 45, stackable: false, sellable: true,
+    description: 'A ritual symbol carved from human bone. A priest might want this — or want to destroy it.',
+  },
+
+  merchant_seal: {
+    key: 'merchant_seal', name: 'Merchant\'s Seal', category: 'treasure',
+    glyph: 0x40, color: '#cc8844', weight: 0, value: 60, stackable: false, sellable: true,
+    description: 'A brass stamp seal bearing a guild mark. A fence or the guild itself will pay for its return.',
+  },
+
+  spell_component_pouch: {
+    key: 'spell_component_pouch', name: 'Spell Component Pouch', category: 'treasure',
+    glyph: 0x26, color: '#8888ff', weight: 1, value: 90, stackable: false, sellable: true,
+    description: 'A small pouch of rare spell components — eye of newt, powdered moonstone, dried herbs. The wizard in town will buy these.',
+  },
+
+  // === TREASURE ITEMS — Tier 3 (150–500gp, valuable finds) ===
+
+  jeweled_brooch: {
+    key: 'jeweled_brooch', name: 'Jeweled Brooch', category: 'treasure',
+    glyph: 0x2A, color: '#ff88ff', weight: 0, value: 130, stackable: false, sellable: true,
+    description: 'A brooch set with pale amethysts. Lovely — but you need coin more than beauty.',
+  },
+
+  funeral_mask: {
+    key: 'funeral_mask', name: 'Funeral Mask', category: 'treasure',
+    glyph: 0x01, color: '#ddbb77', weight: 2, value: 220, stackable: false, sellable: true,
+    description: 'A gilded death mask, probably removed from a sarcophagus. Unsettling, but very valuable.',
+  },
+
+  warrior_signet: {
+    key: 'warrior_signet', name: 'Warrior\'s Signet Ring', category: 'treasure',
+    glyph: 0xB0, color: '#cc8844', weight: 0, value: 185, stackable: false, sellable: true,
+    description: 'A heavy gold signet ring bearing a military crest. Proof of rank from a fallen soldier of standing.',
+  },
+
+  golden_idol: {
+    key: 'golden_idol', name: 'Golden Idol', category: 'treasure',
+    glyph: 0x26, color: '#ffcc00', weight: 3, value: 280, stackable: false, sellable: true,
+    description: 'A small golden idol of forgotten make. Worth a fortune if you can find a buyer.',
+  },
+
+  // === TREASURE ITEMS — Tier 4 (500gp+, exceptional or magical) ===
+
+  enchanted_gem: {
+    key: 'enchanted_gem', name: 'Enchanted Gem', category: 'treasure',
+    glyph: 0xF9, color: '#44ffff', weight: 0, value: 500, stackable: false, sellable: true,
+    magical: true,
+    description: 'A translucent gem that hums faintly. Its magic is latent — only a wizard could unlock it. Worth a great deal at the right shop.',
+  },
+
+  cursed_idol: {
+    key: 'cursed_idol', name: 'Cursed Idol', category: 'treasure',
+    glyph: 0x26, color: '#884444', weight: 2, value: 90, stackable: false, sellable: true,
+    cursed: true,
+    description: 'Something feels deeply wrong about this idol. Still, someone in town might take it off your hands — for a price.',
+  },
+
+  dragon_scale: {
+    key: 'dragon_scale', name: 'Dragon Scale', category: 'treasure',
+    glyph: 0x5E, color: '#ff4400', weight: 3, value: 650, stackable: false, sellable: true,
+    magical: true,
+    description: 'A single scale from a true dragon — near-indestructible and worth a small fortune to armorsmiths and mages alike.',
+  },
+
+  ancient_relic: {
+    key: 'ancient_relic', name: 'Ancient Relic', category: 'treasure',
+    glyph: 0x09, color: '#ffffaa', weight: 1, value: 800, stackable: false, sellable: true,
+    magical: true,
+    description: 'An object of obvious antiquity and strange craftsmanship. Scholars and collectors would compete to own this.',
+  },
+
   // === POTIONS (unidentified until tested or ID'd) ===
   healing_potion: {
     key: 'healing_potion', name: 'Potion of Healing', genericName: 'Red Potion', category: 'potion',
