@@ -17,6 +17,7 @@ export const THEMES = {
   dungeon_cellar: {
     name: 'Dungeon Cellar',
     description: 'Stone-cut vaults beneath a keep, damp with mildew and old blood.',
+    minDepth: 1, maxDepth: 25, weight: 10,
     floorGlyphs: [0x2E, 0x2C, 0xFA], // . , ·
     wallGlyph: 0x23,                  // #
     floorFg: '#5a5a5a', floorBg: '#0a0a0a',
@@ -36,6 +37,7 @@ export const THEMES = {
   goblin_warren: {
     name: 'Goblin Warren',
     description: 'Cramped tunnels dug by many hands, reeking of offal and cookfires.',
+    minDepth: 1, maxDepth: 20, weight: 10,
     floorGlyphs: [0x2E, 0x60, 0x27],
     wallGlyph: 0x25,
     floorFg: '#4a3a1a', floorBg: '#080800',
@@ -55,6 +57,7 @@ export const THEMES = {
   catacomb: {
     name: 'Catacomb',
     description: 'Miles of bone-lined passages, the honored dead disturbed from their rest.',
+    minDepth: 10, maxDepth: 45, weight: 10,
     floorGlyphs: [0x2E, 0xF9, 0xFA],
     wallGlyph: 0xDB,
     floorFg: '#3a3a4a', floorBg: '#05050a',

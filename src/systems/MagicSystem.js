@@ -3,6 +3,28 @@ import { TurnUndeadTable } from '../data/tables.js';
 import { rollDiceStr, rollDie } from '../engine/rules.js';
 import { StatusSystem } from './StatusSystem.js';
 
+/**
+ * Convert a spell duration string to a turn count.
+ * Patterns: 'instant', 'permanent', 'concentration',
+ *           'level_turns', 'level_minutes',
+ *           '1d6+2_turns', '1d4+level_minutes', etc.
+ * 1 minute = 10 turns.
+ */
+function parseDuration(durationStr, casterLevel) {
+  if (!durationStr
+    || durationStr === 'instant'
+    || durationStr === 'permanent'
+    || durationStr === 'concentration') return 0;
+
+  const s = durationStr.replace('level', String(casterLevel));
+  const turnMatch   = s.match(/^(.+)_turns$/);
+  const minuteMatch = s.match(/^(.+)_minutes$/);
+  const formula = turnMatch?.[1] ?? minuteMatch?.[1];
+  if (!formula) return 0;
+  const turns = /^\d+$/.test(formula) ? parseInt(formula, 10) : rollDiceStr(formula);
+  return minuteMatch ? turns * 10 : turns;
+}
+
 // Stub for rollSave, should be in rules.js or similar
 function rollSave(entity, saveType) {
   const threshold = entity.class?.savingThrows?.[saveType]
@@ -37,6 +59,15 @@ export class MagicSystem {
     caster.mp -= spell.mpCost;
     const targets = this._resolveTargets(caster, targetPos, spell, map);
     const results = targets.map(t => this._applyEffect(caster, t, spell));
+
+    // Summarise detect results now that all targets have been processed
+    if (results.some(r => r?.effect === 'detect')) {
+      const count = results.filter(r => r?.revealed).length;
+      const msg = count > 0
+        ? `You sense ${count} evil presence${count > 1 ? 's' : ''} nearby.`
+        : 'You sense no evil nearby.';
+      this.bus.emit('log:message', { text: msg });
+    }
 
     this.bus.emit('spell:cast', { caster, spell, targets, results });
     return { success: true, targets, results };
@@ -137,19 +168,30 @@ export class MagicSystem {
         return { target, effect: 'turn', result: turnResult };
       }
       case 'light': {
-          // This would be handled by a system that applies light sources to the map
-          this.bus.emit('log:message', { text: 'A magical light begins to glow.'});
-          return {target, effect: 'light'};
+          const fovBonus = Math.floor((effect.radius ?? 15) / 5);
+          const duration = parseDuration(spell.duration, caster.level);
+          StatusSystem.apply(target, 'light', { fovBonus, duration });
+          const who = target === caster ? 'You are' : `${target.name} is`;
+          this.bus.emit('log:message', { text: `${who} bathed in magical light (+${fovBonus} sight for ${duration} turns).` });
+          return { target, effect: 'light', fovBonus };
       }
       case 'detect': {
-          // This would be handled by a system that reveals entities on the map
-          this.bus.emit('log:message', { text: `You sense the presence of ${effect.target}.`});
-          return {target, effect: 'detect'};
+          const map = this.game.worldMap.getLevel(caster.depth);
+          const def  = target.def ?? {};
+          const isEvil = def.alignment === 'chaotic'
+              || def.tags?.includes('demon')
+              || def.tags?.includes('undead');
+          const revealed = effect.target === 'evil' ? isEvil : false;
+          if (revealed && map.inBounds(target.x, target.y)) {
+              map.get(target.x, target.y).explored = true;
+          }
+          return { target, effect: 'detect', revealed };
       }
       case 'buff': {
-          StatusSystem.apply(target, 'buff', { stat: effect.stat, value: effect.value, duration: 10 /* temp */ });
-          this.bus.emit('log:message', { text: `${target.name} feels blessed!`});
-          return {target, effect: 'buff'};
+          const duration = parseDuration(spell.duration, caster.level);
+          StatusSystem.apply(target, 'buff', { stat: effect.stat, value: effect.value, duration });
+          this.bus.emit('log:message', { text: `${target.name} feels blessed!` });
+          return { target, effect: 'buff', duration };
       }
     }
   }
