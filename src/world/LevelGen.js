@@ -1,6 +1,6 @@
 // megadungeon/src/world/LevelGen.js
 import { TileMap } from './TileMap.js';
-import { THEMES } from '../data/themes.js';
+import { pickTheme } from '../data/themeRegistry.js';
 import { RNG } from '../engine/RNG.js';
 import { RoomGen } from './RoomGen.js';
 import { bus } from '../engine/EventBus.js';
@@ -308,13 +308,7 @@ export class LevelGen {
   }
 
   static _pickTheme(levelNumber, rng) {
-    const bands = [
-      { min: 1,  max: 5,  pool: ['dungeon_cellar', 'goblin_warren'] },
-      { min: 6,  max: 20, pool: ['catacomb'] },
-    ];
-    const band = bands.find(b => levelNumber >= b.min && levelNumber <= b.max) ?? bands[0];
-    const key  = rng.pick(band.pool);
-    return { ...THEMES[key], key };
+    return pickTheme(levelNumber, rng);  // imported from themeRegistry.js
   }
 
   static _populateRooms(map, rooms, rng, levelNumber, theme) {

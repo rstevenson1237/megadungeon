@@ -18,6 +18,7 @@ export function pickTheme(levelNumber, rng) {
 
   if (eligible.length === 0) {
     const fallbackKey = Object.keys(THEMES)[0];
+    console.warn(`pickTheme: no theme covers depth ${levelNumber}, falling back to '${fallbackKey}'`);
     return { ...THEMES[fallbackKey], key: fallbackKey };
   }
 
