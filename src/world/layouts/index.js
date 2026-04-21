@@ -1,54 +1,94 @@
 // src/world/layouts/index.js
+import { generate as bspRooms }      from './BspRooms.js';
+import { generate as caveNetwork }   from './CaveNetwork.js';
+import { generate as labyrinth }     from './Labyrinth.js';
+import { generate as townRuin }      from './TownRuin.js';
+import { generate as greatHall }     from './GreatHall.js';
+import { generate as vaultNetwork }  from './VaultNetwork.js';
+import { generate as riverCrossing } from './RiverCrossing.js';
+import { generate as cryptRows }     from './CryptRows.js';
+import { generate as delveShaft }    from './DelveShaft.js';
+import { generate as voidLattice }   from './VoidLattice.js';
 
 /**
- * Layout registry. Add entries here as layout modules are implemented.
- *
+ * Layout registry.
  * Each entry:
- *   generate      — function(map, rng, theme, levelNumber) → Room[]
- *   defaultWeight — base selection weight when theme provides no override
- *   minDepth      — first level this layout is eligible on
- *   maxDepth      — last level this layout is eligible on (Infinity = no cap)
- *
- * Room shape returned by every generate():
- *   { x, y, w, h, type: 'normal', content: null, explored: false, id: number }
- *
- * @type {Object.<string, { generate: Function, defaultWeight: number, minDepth: number, maxDepth: number }>}
+ *   key        — unique identifier
+ *   generate   — layout function
+ *   themeWeights — { themeKey: weight }. Themes not listed get weight 0 (never selected).
+ *                  Use '*' as a key for a default weight applied to all unlisted themes.
  */
-export const LAYOUTS = {
-  // Populated in subsequent steps (BSP, Arena, Linear, Cavern, …)
-};
+export const LAYOUTS = [
+  {
+    key: 'bsp_rooms',
+    generate: bspRooms,
+    themeWeights: { '*': 10 },
+  },
+  {
+    key: 'cave_network',
+    generate: caveNetwork,
+    themeWeights: { goblin_warren: 20, elemental_grotto: 18, '*': 3 },
+  },
+  {
+    key: 'labyrinth',
+    generate: labyrinth,
+    themeWeights: { catacomb: 15, void_passage: 12, '*': 4 },
+  },
+  {
+    key: 'town_ruin',
+    generate: townRuin,
+    themeWeights: { dungeon_cellar: 12, dwarven_deep: 8, '*': 2 },
+  },
+  {
+    key: 'great_hall',
+    generate: greatHall,
+    themeWeights: { dwarven_deep: 14, dungeon_cellar: 8, '*': 3 },
+  },
+  {
+    key: 'vault_network',
+    generate: vaultNetwork,
+    themeWeights: { dwarven_deep: 18, '*': 3 },
+  },
+  {
+    key: 'river_crossing',
+    generate: riverCrossing,
+    themeWeights: { elemental_grotto: 14, goblin_warren: 6, '*': 3 },
+  },
+  {
+    key: 'crypt_rows',
+    generate: cryptRows,
+    themeWeights: { catacomb: 22, '*': 2 },
+  },
+  {
+    key: 'delve_shaft',
+    generate: delveShaft,
+    themeWeights: { dwarven_deep: 20, '*': 2 },
+  },
+  {
+    key: 'void_lattice',
+    generate: voidLattice,
+    themeWeights: { void_passage: 25, '*': 0 },
+  },
+];
 
 /**
- * Selects a layout generator for the given theme and level number.
+ * Picks a layout for the given theme using per-theme weights.
+ * Layouts with weight 0 for this theme (or '*' = 0) are excluded.
  *
- * Selection weight for each candidate:
- *   theme.layoutWeights[key] if present, otherwise layout.defaultWeight.
- * Entries with weight 0 are excluded, allowing themes to suppress layouts.
- *
- * Falls back to the first registered layout if no entry is eligible for
- * levelNumber — logs a warning so depth-range gaps are visible in dev.
- *
- * @param {Object} theme        — full theme object (may contain layoutWeights)
- * @param {number} levelNumber
- * @param {RNG}    rng
- * @returns {Function}          — generate(map, rng, theme, levelNumber) → Room[]
+ * @param {string} themeKey
+ * @param {RNG} rng
+ * @returns {Object} layout entry from LAYOUTS
  */
-export function pickLayout(theme, levelNumber, rng) {
-  const candidates = Object.entries(LAYOUTS)
-    .filter(([, l]) => levelNumber >= l.minDepth && levelNumber <= l.maxDepth)
-    .map(([key, l]) => ({
-      value:  key,
-      weight: theme.layoutWeights?.[key] ?? l.defaultWeight,
-    }))
+export function pickLayout(themeKey, rng) {
+  const candidates = LAYOUTS
+    .map(layout => {
+      const w = layout.themeWeights[themeKey] ?? layout.themeWeights['*'] ?? 0;
+      return { layout, weight: w };
+    })
     .filter(c => c.weight > 0);
 
   if (candidates.length === 0) {
-    const fallbackKey = Object.keys(LAYOUTS)[0];
-    if (!fallbackKey) throw new Error('pickLayout: no layouts registered');
-    console.warn(`pickLayout: no layout eligible for depth ${levelNumber}, falling back to '${fallbackKey}'`);
-    return LAYOUTS[fallbackKey].generate;
+    return LAYOUTS[0]; // bsp_rooms as fallback
   }
-
-  const key = rng.weightedPick(candidates);
-  return LAYOUTS[key].generate;
+  return rng.weightedPick(candidates.map(c => ({ value: c.layout, weight: c.weight }))) ?? LAYOUTS[0];
 }
