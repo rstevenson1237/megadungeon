@@ -51,6 +51,10 @@ export class QuestSystem {
     return quest.completionCondition(quest.state, player, worldState);
   }
 
+  abandonQuest(quest) {
+    this.active = this.active.filter(q => q !== quest);
+  }
+
   completeQuest(quest, player) {
     if(!quest) return;
     player.gainXP(quest.reward.xp || 0);

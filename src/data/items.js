@@ -73,6 +73,13 @@ export const ITEMS = {
     description: 'Barely legible runes flare as your eyes trace the words of power.',
   },
 
+  scroll_template: {
+    key: 'scroll_template', name: 'Scroll', genericName: 'Rolled Parchment',
+    category: 'scroll', glyph: 0x3F, color: '#ffffcc', weight: 0, value: 50, stackable: false,
+    scroll: { spellKey: 'magic_missile', casterLevel: 1 },
+    description: 'A hand-scribed magical scroll.',
+  },
+
   // === MAGICAL ITEMS ===
   ring_of_protection: {
     key: 'ring_of_protection', name: 'Ring of Protection +1', genericName: 'Plain Ring',

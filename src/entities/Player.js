@@ -36,8 +36,9 @@ export class Player extends Entity {
     this.statuses  = [];      // Active StatusEffect[]
     this.scars     = [];      // Permanent negative effects from near-deaths
 
-    this.hpMax  = this._rollHP();
-    this.hp     = this.hpMax;
+    this.hpMax     = this._rollHP();
+    this.hp        = this.hpMax;
+    this.hpMaxBase = this.hpMax; // Tracks undrained max HP for Restore Vitality
     this.mpMax  = this._rollMP();
     this.mp     = this.mpMax;
     this.ac     = this._computeAC();
@@ -187,7 +188,7 @@ export class Player extends Entity {
         level: this.level,
         xp: this.xp,
         stats: { ...this.stats },
-        hp: this.hp, hpMax: this.hpMax,
+        hp: this.hp, hpMax: this.hpMax, hpMaxBase: this.hpMaxBase,
         mp: this.mp, mpMax: this.mpMax,
         ac: this.ac,
         gold: this.gold,
@@ -212,6 +213,7 @@ static deserialize(data) {
     player.xp = data.xp;
     player.hp = data.hp;
     player.hpMax = data.hpMax;
+    player.hpMaxBase = data.hpMaxBase ?? data.hpMax;
     player.mp = data.mp;
     player.mpMax = data.mpMax;
     player.ac = data.ac;
