@@ -651,6 +651,24 @@ _resolveSearch(tile, feature, def) {
     const outcomes = def.onSearch?.outcomes;
     if (!outcomes?.length) return;
 
+    if (def.onSearch?.requiresKey && !feature.data?.unlocked) {
+        const keyItem = this.player.inventory.find(i => i.itemKey === 'iron_key' || i.itemKey === 'dimensional_key');
+        const hasTools = this.player.inventory.some(i => i.itemKey === 'thieves_tools');
+        const lockpick = this.player.skills?.lockpick ?? 0;
+        const canPick = hasTools && (lockpick >= 1 || (this.rng.int(1, 20) + lockpick) >= 18);
+        if (keyItem) {
+            this.player.removeFromInventory(keyItem);
+            this.log.add('You use your key to unlock it.', 'system');
+            feature.data = { ...(feature.data ?? {}), unlocked: true };
+        } else if (canPick) {
+            this.log.add('You pick the lock with your thieves\' tools.', 'system');
+            feature.data = { ...(feature.data ?? {}), unlocked: true };
+        } else {
+            this.log.add('It is locked. You need a key or skilled hands.', 'system');
+            return;
+        }
+    }
+
     const outcome  = this.rng.weightedPick(outcomes.map(o => ({ value: o, weight: o.weight })));
     const goldAmt  = this.rng.int(10, 50);
     const msg = outcome.message
@@ -665,12 +683,18 @@ _resolveSearch(tile, feature, def) {
     switch (outcome.result) {
         case 'item':
         case 'treasure': {
-            const key = outcome.result === 'treasure' ? 'healing_potion' : 'old_scroll';
-            try {
-                const item = Item.create(key);
-                if (!this.player.addToInventory(item))
-                    this.log.add('Your pack is full.', 'system');
-            } catch (_) {}
+            const tableName = this.currentLevel <= 15 ? 'humanoid'
+                            : this.currentLevel <= 40 ? 'humanoid_warrior'
+                            : this.currentLevel <= 65 ? 'undead_ancient'
+                            : 'legendary';
+            const key = rollLootTable(tableName, this.rng);
+            if (key) {
+                try {
+                    const item = Item.create(key);
+                    if (!this.player.addToInventory(item))
+                        this.log.add('Your pack is full.', 'system');
+                } catch (_) {}
+            }
             break;
         }
         case 'gold':
@@ -1082,10 +1106,17 @@ _openUseMenu() {
         break;
       case 'energy': // energy_drain_N
         if (special.startsWith('energy_drain')) {
-          const drainN = n || 1;
-          this.player.hpMax = Math.max(1, this.player.hpMax - drainN * 4);
-          this.player.hp = Math.min(this.player.hp, this.player.hpMax);
-          this.log.add(`${monster.name} drains your life force! Max HP reduced by ${drainN * 4}.`, 'danger');
+          const immune = ['ring1', 'ring2', 'amulet'].some(s =>
+            this.player.equipped[s]?.effects?.some(e => e.type === 'immune' && e.value === 'energy_drain')
+          );
+          if (immune) {
+            this.log.add('The amulet flares — your life force is protected!', 'magic');
+          } else {
+            const drainN = n || 1;
+            this.player.hpMax = Math.max(1, this.player.hpMax - drainN * 4);
+            this.player.hp = Math.min(this.player.hp, this.player.hpMax);
+            this.log.add(`${monster.name} drains your life force! Max HP reduced by ${drainN * 4}.`, 'danger');
+          }
         }
         break;
       case 'knockback': {
@@ -2325,13 +2356,16 @@ _equippedTag(item) {
 _openItemActionMenu(item) {
     const actions = [];
     
-    if (item.category === 'weapon' || item.category === 'armor') {
+    if (['weapon', 'armor', 'ring', 'amulet', 'wand'].includes(item.category)) {
         const isEquipped = Object.values(this.player.equipped).includes(item);
         if (isEquipped) {
             actions.push({ label: 'Unequip', key: 'unequip', color: '#ffcc44', data: 'unequip' });
         } else {
             actions.push({ label: 'Equip', key: 'equip', color: '#44ff44', data: 'equip' });
         }
+    }
+    if (item.category === 'wand') {
+        actions.push({ label: 'Zap', key: 'use', color: '#aa44ff', data: 'use' });
     }
     if (item.category === 'potion') {
         actions.push({ label: 'Drink', key: 'use', color: '#44ff44', data: 'use' });
@@ -2433,7 +2467,12 @@ _handleUseAbility() {
 _executeItemAction(item, action) {
     switch (action) {
         case 'equip': {
-            const slot = item.armor?.slot ?? (item.category === 'weapon' ? 'weapon' : null);
+            const slot = item.armor?.slot
+                      ?? (item.category === 'weapon' ? 'weapon'
+                        : item.category === 'wand'   ? 'weapon'
+                        : item.category === 'ring'   ? (!this.player.equipped.ring1 ? 'ring1' : 'ring2')
+                        : item.category === 'amulet' ? 'amulet'
+                        : null);
             if (slot && this.player.equipped[slot]) {
                 // Unequip current first
                 const current = this.player.equipped[slot];
@@ -2493,15 +2532,109 @@ _useItem(item) {
             this.player.hp = Math.min(this.player.hp + healed, this.player.hpMax);
             this.log.add(`You drink the ${item.name}. Healed ${healed} HP.`, 'heal');
         } else if (effect === 'haste') {
-            // Apply status — requires StatusSystem to be implemented
-            this.log.add(`You drink the ${item.name}. You feel faster!`, 'magic');
+            StatusSystem.apply(this.player, 'haste', {
+                duration: item.potion.duration ?? 20,
+                speedMod: item.potion.magnitude ?? 1,
+            });
+            this.log.add(`You drink the ${item.name}. The world slows around you!`, 'magic');
+        } else if (effect === 'str_boost') {
+            StatusSystem.apply(this.player, 'str_boost', {
+                duration: item.potion.duration ?? 15,
+                strMod: item.potion.magnitude ?? 4,
+            });
+            this.log.add(`You drink the ${item.name}. Your muscles surge with power!`, 'magic');
+        } else if (effect === 'invisible') {
+            StatusSystem.apply(this.player, 'invisible', {
+                duration: item.potion.duration ?? 10,
+            });
+            this.log.add(`You drink the ${item.name}. You fade from sight!`, 'magic');
+        } else if (effect === 'cure_poison') {
+            this.player.statuses = (this.player.statuses ?? []).filter(s => s.key !== 'poison');
+            this.log.add(`You drink the ${item.name}. The poison clears from your blood.`, 'heal');
+        } else if (effect === 'fire_resist') {
+            StatusSystem.apply(this.player, 'fire_resist', {
+                duration: item.potion.duration ?? 20,
+            });
+            this.log.add(`You drink the ${item.name}. Heat no longer bothers you.`, 'magic');
+        } else if (effect === 'damage') {
+            const dmg = rollDiceStr(item.potion.magnitude ?? '1d6');
+            this.player.hp = Math.max(1, this.player.hp - dmg);
+            this.log.add(`You drink the ${item.name}. It burns going down! ${dmg} damage.`, 'danger');
+        } else {
+            this.log.add(`You drink the ${item.name}.`, 'system');
         }
         this.player.removeFromInventory(item);
     } else if (item.scroll) {
-        this.log.add(`You read the ${item.name}. The words vanish from the page.`, 'magic');
-        // Cast the scroll's spell at the scroll's caster level
-        // For MVP, auto-target nearest visible monster
+        const spellKey = item.scroll.spellKey;
+        const spell = SPELLS[spellKey];
+        if (!spell) {
+            this.log.add('The scroll crumbles unreadably.', 'system');
+        } else {
+            this.log.add(`You read the ${item.name}. The words vanish from the page.`, 'magic');
+            let targetPos;
+            if (spell.range === 'self' || spell.range === 'touch') {
+                targetPos = { x: this.player.x, y: this.player.y };
+            } else {
+                targetPos = this._findNearestVisibleMonster();
+                if (!targetPos) {
+                    this.log.add('No valid target in sight.', 'system');
+                    this.player.removeFromInventory(item);
+                    return;
+                }
+            }
+            const savedLevel = this.player.level;
+            const savedMp = this.player.mp;
+            this.player.level = item.scroll.casterLevel ?? savedLevel;
+            this.player.mp = Math.max(this.player.mp, spell.mpCost ?? 0);
+            const result = this.magic.cast(this.player, spellKey, targetPos);
+            this.player.level = savedLevel;
+            this.player.mp = savedMp;
+            if (result.success) {
+                result.results?.forEach(r => {
+                    if (r.effect === 'damage') this.log.add(`Deals ${r.value} damage.`, 'magic');
+                    if (r.effect === 'heal')   this.log.add(`Heals ${r.value} HP.`, 'heal');
+                });
+            }
+        }
         this.player.removeFromInventory(item);
+    } else if (item.wand) {
+        if ((item.wand.charges ?? 0) <= 0) {
+            this.log.add(`The ${item.name} is spent.`, 'system');
+            return;
+        }
+        const spellKey = item.wand.spellKey;
+        const spell = SPELLS[spellKey];
+        if (spell) {
+            let targetPos;
+            if (spell.range === 'self' || spell.range === 'touch') {
+                targetPos = { x: this.player.x, y: this.player.y };
+            } else {
+                targetPos = this._findNearestVisibleMonster();
+                if (!targetPos) {
+                    this.log.add('No valid target in sight.', 'system');
+                    return;
+                }
+            }
+            const savedLevel = this.player.level;
+            const savedMp = this.player.mp;
+            this.player.level = item.wand.casterLevel ?? 5;
+            this.player.mp = Math.max(this.player.mp, spell.mpCost ?? 0);
+            const result = this.magic.cast(this.player, spellKey, targetPos);
+            this.player.level = savedLevel;
+            this.player.mp = savedMp;
+            if (result.success) {
+                item.wand.charges--;
+                this.log.add(`The wand has ${item.wand.charges} charge${item.wand.charges !== 1 ? 's' : ''} remaining.`, 'magic');
+                result.results?.forEach(r => {
+                    if (r.effect === 'damage') this.log.add(`Deals ${r.value} damage.`, 'magic');
+                    if (r.effect === 'heal')   this.log.add(`Heals ${r.value} HP.`, 'heal');
+                });
+                if (item.wand.charges <= 0) {
+                    this.log.add(`The ${item.name} crumbles to dust.`, 'system');
+                    this.player.removeFromInventory(item);
+                }
+            }
+        }
     } else if (item.food) {
         this.log.add(`You eat the ${item.name}. It sustains you.`, 'system');
         this.player.removeFromInventory(item);

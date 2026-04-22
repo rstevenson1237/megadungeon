@@ -52,7 +52,7 @@ export const TOWN_LOCATIONS = {
     name: 'Aldric\'s Provisions',
     glyph: 0x24, color: '#ccaa44',
     services: ['buy', 'sell'],
-    stock: ['torch', 'ration', 'rope', 'arrows_20', 'thieves_tools', 'inkpot'],
+    stock: ['torch', 'ration', 'rope', 'arrows_20', 'thieves_tools', 'inkpot', 'iron_key', 'antidote', 'mead_skin', 'dwarven_bread'],
     buyMarkup:  1.5,   // Sells at 150% list price
     sellMarkup: 0.3,   // Buys at 30% list price
   },
@@ -75,7 +75,10 @@ export const TOWN_LOCATIONS = {
     key: 'arcane_shop',
     name: 'Mira\'s Curiosities & Curios',
     glyph: 0x2A, color: '#cc44cc',
-    services: ['buy_spells', 'sell_scrolls', 'identify_magic', 'scribe_scroll'],
+    services: ['buy_spells', 'sell_scrolls', 'identify_magic', 'scribe_scroll', 'buy'],
+    stock: ['healing_potion', 'potion_of_speed', 'potion_of_strength', 'potion_of_invisibility', 'potion_of_fire_resist', 'antidote', 'scroll_magic_missile', 'scroll_of_fireball', 'scroll_of_sleep', 'scroll_of_detect_traps', 'wand_of_magic_missile', 'wand_of_frost', 'wand_of_healing'],
+    buyMarkup: 2.0,
+    sellMarkup: 0.4,
     spellsAvailable: (worldState, rng) => {
       const pool = Object.values(SPELLS).filter(s => s.type === 'arcane' && s.level <= 4);
       return rng.shuffle(pool).slice(0, 6);
@@ -88,7 +91,7 @@ export const TOWN_LOCATIONS = {
     name: 'Gareth Ironhand, Smith',
     glyph: 0x21, color: '#cc4444',
     services: ['buy', 'sell', 'repair', 'enchant'],
-    stock: ['short_sword', 'long_sword', 'dagger', 'mace', 'staff', 'short_bow'],
+    stock: ['short_sword', 'long_sword', 'dagger', 'mace', 'staff', 'short_bow', 'battle_axe', 'great_sword', 'hand_crossbow', 'leather_armor', 'studded_leather', 'chain_mail', 'shield', 'iron_helm', 'great_helm'],
     buyMarkup:  1.5,
     sellMarkup: 0.4,
     repairCost: (item) => Math.floor(item.value * 0.2),
