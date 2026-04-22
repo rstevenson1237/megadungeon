@@ -25,6 +25,7 @@ import { CLASSES } from './data/classes.js';
 import { FEATURES } from './data/features.js';
 import { Item } from './entities/Item.js';
 import { Monster } from './entities/Monster.js';
+import { recordVictory, computeScore, getLeaderboard } from './data/leaderboard.js';
 
 const PLAYER_FOV_RADIUS = 8;
 
@@ -40,6 +41,7 @@ const STATE = {
   TOWN:        'town',
   MENU:        'menu',       // Generic menu overlay
   LEVEL_UP:    'level_up',
+  VICTORY:     'victory',
 };
 
 class Game {
@@ -101,6 +103,7 @@ this.traps = new TrapSystem(this.bus);
       if (this.state === STATE.DEAD) return;
       this.log.add('You have died!', 'danger');
       if (this.player) this.player.causeOfDeath = cause ?? 'Unknown';
+      this._deathCount = (this._deathCount ?? 0) + 1;
       this.state = STATE.DEAD;
     });
 
@@ -108,6 +111,45 @@ this.traps = new TrapSystem(this.bus);
       this.log.add(`${entity.name} is slain!`, 'combat');
       const map = this.worldMap.getLevel(this.currentLevel);
       map.removeEntity(entity);
+      // Victory: last monster on level 100 cleared
+      if (this.currentLevel === 100 && this.state === STATE.PLAYING) {
+        let anyMonster = false;
+        for (const list of map.entities.values()) {
+          if (list.some(e => e.type === 'monster')) { anyMonster = true; break; }
+        }
+        if (!anyMonster) {
+          this.bus.emit('game:victory', { player: this.player, runStats: this._buildRunStats() });
+        }
+      }
+    });
+
+    this.bus.on('game:victory', ({ player, runStats }) => {
+      const score = computeScore(runStats);
+      const entry = {
+        name:           player.name,
+        characterClass: player.classKey ?? player.class?.key ?? 'unknown',
+        score,
+        deepestDeath:   player.depth,
+        runTimeMs:      Date.now() - (this._runStartTime ?? Date.now()),
+        seed:           String(this.worldMap?.masterSeed ?? 0),
+        date:           new Date().toISOString(),
+      };
+      recordVictory(entry);
+      this._victoryScore = score;
+      this.state = STATE.VICTORY;
+    });
+
+    this.bus.on('game:reset', () => {
+      this.input.clearQueue();
+      this.state          = STATE.TITLE;
+      this.player         = null;
+      this.worldMap       = null;
+      this.log.messages   = [];
+      this.activeMenu     = null;
+      this._previousState = null;
+      this._deathCount    = 0;
+      this._runStartTime  = null;
+      this._victoryScore  = null;
     });
 
     this._rawKeys = [];
@@ -140,8 +182,11 @@ this.traps = new TrapSystem(this.bus);
   _startNewGame(classKey, stats = null, name = 'Adventurer') {
     this.input.clearQueue();
     const seed = Date.now();
-    this.activeMenu = null;
+    this.activeMenu     = null;
     this._previousState = null;
+    this._deathCount    = 0;
+    this._runStartTime  = Date.now();
+    this._victoryScore  = null;
     this.rng.seed = seed;
     this.worldMap = new WorldMap(this.rng.seed);
     this.quests = new QuestSystem(this.worldMap, this.rng);
@@ -269,6 +314,7 @@ this.traps = new TrapSystem(this.bus);
       case STATE.DEAD:        this._updateDead(); break;
       case STATE.PUZZLE:      this._updatePuzzle(); break;
       case STATE.LEVEL_UP:    this._updateLevelUp(); break;
+      case STATE.VICTORY:     this._updateVictory(); break;
     }
   }
 
@@ -871,6 +917,7 @@ _openUseMenu() {
         this.log.add(result.message, result.hit ? 'combat' : 'system');
 
         if (result.hit && monster.hp <= 0) {
+            this.player.monstersKilled = (this.player.monstersKilled ?? 0) + 1;
             const xpResult = this.player.gainXP(monster.def.xpBase + monster.def.xpPerHD * monster.def.hd);
             this._updateQuestProgress('kill', { monsterType: monster.def?.key ?? monster.name });
             if (xpResult.leveled) {
@@ -1043,7 +1090,87 @@ _openUseMenu() {
       case STATE.PUZZLE:      this._renderPlaying(); break;
       case STATE.DEAD:        this._renderDead(); break;
       case STATE.LEVEL_UP:    this._renderLevelUp(this.renderer.ctx); break;
+      case STATE.VICTORY:     this._renderVictory(); break;
     }
+  }
+
+  _buildRunStats() {
+    return {
+      level:          this.player?.level          ?? 1,
+      gold:           this.player?.gold           ?? 0,
+      monstersKilled: this.player?.monstersKilled ?? 0,
+      deathCount:     this._deathCount            ?? 0,
+    };
+  }
+
+  _updateVictory() {
+    const action = this.input.consumeAction();
+    if (action === 'confirm' || action === 'cancel') {
+      this.bus.emit('game:reset');
+    }
+  }
+
+  _renderVictory() {
+    const ctx = this.renderer.ctx;
+    const w   = this.canvasEl.width;
+    const h   = this.canvasEl.height;
+    const th  = this.renderer.TILE_H;
+
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, w, h);
+
+    const titleSize = Math.max(24, Math.floor(w / 18));
+    ctx.fillStyle   = '#ffcc00';
+    ctx.font        = `bold ${titleSize}px monospace`;
+    ctx.textBaseline = 'top';
+    const title  = 'VICTORY';
+    ctx.fillText(title, (w - ctx.measureText(title).width) / 2, h * 0.08);
+
+    const subSize = Math.max(13, Math.floor(titleSize * 0.45));
+    ctx.font      = `${subSize}px monospace`;
+    ctx.fillStyle = '#cccccc';
+    const sub = 'You have conquered the Megadungeon.';
+    ctx.fillText(sub, (w - ctx.measureText(sub).width) / 2, h * 0.08 + titleSize + 12);
+
+    let y = h * 0.25;
+    const p = this.player;
+    const stats = [
+      `Name:     ${p?.name ?? 'Unknown'}`,
+      `Class:    ${p?.class?.name ?? 'Adventurer'}`,
+      `Level:    ${p?.level ?? 1}`,
+      `Depth:    ${p?.depth ?? 100}`,
+      `Gold:     ${p?.gold ?? 0}`,
+      `Kills:    ${p?.monstersKilled ?? 0}`,
+      `Score:    ${this._victoryScore ?? 0}`,
+    ];
+
+    ctx.font      = `${subSize}px monospace`;
+    for (const line of stats) {
+      ctx.fillStyle = '#ffffff';
+      ctx.fillText(line, w / 2 - subSize * 7, y);
+      y += subSize * 1.5;
+    }
+
+    // Top 5 leaderboard
+    const board = getLeaderboard().slice(0, 5);
+    if (board.length > 0) {
+      y += subSize;
+      ctx.fillStyle = '#ffcc00';
+      const hdr = '— Hall of Heroes —';
+      ctx.fillText(hdr, (w - ctx.measureText(hdr).width) / 2, y);
+      y += subSize * 1.8;
+      board.forEach((e, i) => {
+        ctx.fillStyle = i === 0 ? '#ffcc00' : '#888888';
+        const row = `${String(i + 1).padStart(2)}. ${e.name.padEnd(16)} ${String(e.score).padStart(8)}`;
+        ctx.fillText(row, (w - ctx.measureText(row).width) / 2, y);
+        y += subSize * 1.4;
+      });
+    }
+
+    ctx.fillStyle = '#888888';
+    ctx.font      = `${Math.max(11, subSize - 2)}px monospace`;
+    const prompt  = '[ENTER] Return to title';
+    ctx.fillText(prompt, (w - ctx.measureText(prompt).width) / 2, h * 0.9);
   }
 
   _renderTitle() {
@@ -1088,6 +1215,25 @@ _openUseMenu() {
     helpLines.forEach((line, i) => {
         ctx.fillText(line, (w - ctx.measureText(line).width) / 2, h * 0.6 + i * (helpSize + 8));
     });
+
+    // Leaderboard — top 10
+    const board = getLeaderboard().slice(0, 10);
+    if (board.length > 0) {
+      const lbSize = Math.max(10, Math.floor(helpSize * 0.85));
+      ctx.font      = `${lbSize}px monospace`;
+      let ly = h * 0.75;
+      ctx.fillStyle = '#ffcc44';
+      const hdr = '— Hall of Heroes —';
+      ctx.fillText(hdr, (w - ctx.measureText(hdr).width) / 2, ly);
+      ly += lbSize + 6;
+      board.forEach((e, i) => {
+        ctx.fillStyle = i === 0 ? '#ffcc44' : '#555555';
+        const date = e.date ? e.date.slice(0, 10) : '';
+        const row  = `${String(i + 1).padStart(2)}. ${(e.name ?? '?').padEnd(14)} ${String(e.score).padStart(8)}  ${date}`;
+        ctx.fillText(row, (w - ctx.measureText(row).width) / 2, ly);
+        ly += lbSize + 4;
+      });
+    }
 }
 
   _renderPlaying() {
