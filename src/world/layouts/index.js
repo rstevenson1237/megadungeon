@@ -9,6 +9,7 @@ import { generate as riverCrossing } from './RiverCrossing.js';
 import { generate as cryptRows }     from './CryptRows.js';
 import { generate as delveShaft }    from './DelveShaft.js';
 import { generate as voidLattice }   from './VoidLattice.js';
+import { generate as finalDescent }  from './FinalDescent.js';
 
 /**
  * Layout registry.
@@ -68,6 +69,11 @@ export const LAYOUTS = [
     key: 'void_lattice',
     generate: voidLattice,
     themeWeights: { void_passage: 25, '*': 0 },
+  },
+  {
+    key: 'final_descent',
+    generate: finalDescent,
+    themeWeights: { final_descent: 999, '*': 0 },
   },
 ];
 
