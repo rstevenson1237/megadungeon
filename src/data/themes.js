@@ -118,6 +118,26 @@ export const THEMES = {
     ]
   },
 
+  final_descent: {
+    name: 'The Final Descent',
+    description: 'The lowest point of all things. An arena at the bottom of the world.',
+    floorGlyphs: [0x2E, 0xF9],
+    wallGlyph: 0xDB,               // █
+    floorFg: '#222222', floorBg: '#000000',
+    wallFg:  '#cc0000', wallBg:  '#0a0000',
+    corridorFg: '#1a1a1a', corridorBg: '#000000',
+    minRoomW: 10, maxRoomW: 30, minRoomH: 8, maxRoomH: 20,
+    minDepth: 100, maxDepth: 100, weight: 999,
+    monsterWeights: { abyssal_throne: 100 },
+    itemWeights: {},
+    dressingFeatures: ['altar', 'statue'],
+    ambientMessages: [
+      'This is the end of the world.',
+      'The air is perfectly still.',
+      'You have come further than any before you.',
+    ],
+  },
+
   void_passage: {
     name: 'Void Passage',
     description: 'Corridors between worlds — extradimensional channels through which things that should not exist freely travel.',
