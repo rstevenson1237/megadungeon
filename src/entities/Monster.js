@@ -25,16 +25,19 @@ export class Monster extends Entity {
   }
 
   _rollHP() {
-    const rollFn = this._rng
-      ? (sides) => this._rng.int(1, sides)
-      : (sides) => Math.floor(Math.random() * sides) + 1;
     const hd = this.def.hd;
     const dieSize = parseInt(this.def.hdType.replace('d', ''));
     let total = 0;
     for (let i = 0; i < hd; i++) {
-      total += rollFn(dieSize);
+      total += this._roll(dieSize);
     }
     return Math.max(1, total);
+  }
+
+  _roll(sides) {
+    return this._rng
+      ? this._rng.int(1, sides)
+      : Math.floor(Math.random() * sides) + 1;
   }
 
   /**
@@ -64,7 +67,7 @@ export class Monster extends Entity {
   rollDamage(attack) {
     let dmg = 0;
     for (let i = 0; i < attack.numDice; i++) {
-      dmg += Math.floor(Math.random() * attack.die) + 1;
+      dmg += this._roll(attack.die);
     }
     return Math.max(0, dmg + (attack.dmgBonus ?? 0));
   }

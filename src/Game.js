@@ -9,6 +9,7 @@ import { Pathfinder }    from './world/Pathfinder.js';
 import { Player }        from './entities/Player.js';
 import { Renderer, glyphToChar, buildCRTOverlay } from './ui/Renderer.js';
 import { Menu }        from './ui/Menu.js';
+import { Tooltip }     from './ui/Tooltip.js';
 import { MessageLog }    from './ui/HUD.js';
 import { CombatSystem }  from './systems/CombatSystem.js';
 import { MagicSystem } from './systems/MagicSystem.js';
@@ -21,6 +22,11 @@ import { TOWN_LOCATIONS } from './data/town.js';
 import { rollDiceStr, statModifier } from './engine/rules.js';
 import { SkillSystem } from './systems/SkillSystem.js';
 import { CLASSES } from './data/classes.js';
+import { FEATURES } from './data/features.js';
+import { Item } from './entities/Item.js';
+import { Monster } from './entities/Monster.js';
+import { recordVictory, computeScore, getLeaderboard } from './data/leaderboard.js';
+import { rollLootTable } from './data/lootTables.js';
 
 const PLAYER_FOV_RADIUS = 8;
 
@@ -36,6 +42,7 @@ const STATE = {
   TOWN:        'town',
   MENU:        'menu',       // Generic menu overlay
   LEVEL_UP:    'level_up',
+  VICTORY:     'victory',
 };
 
 class Game {
@@ -97,13 +104,61 @@ this.traps = new TrapSystem(this.bus);
       if (this.state === STATE.DEAD) return;
       this.log.add('You have died!', 'danger');
       if (this.player) this.player.causeOfDeath = cause ?? 'Unknown';
+      this._deathCount = (this._deathCount ?? 0) + 1;
       this.state = STATE.DEAD;
     });
 
     this.bus.on('monster:death', ({ entity }) => {
-      this.log.add(`${entity.name} is slain!`, 'combat');
+      // Track consecutive kills of the same type to use plural in messages
+      const killKey = entity.def?.key;
+      if (killKey !== this._lastKillKey) { this._lastKillKey = killKey; this._killStreak = 0; }
+      this._killStreak = (this._killStreak ?? 0) + 1;
+      const useGroup = this._killStreak >= 3 && entity.def?.plural;
+      this.log.add(
+        useGroup ? `${entity.def.plural} fall!` : `${entity.name} is slain!`,
+        'combat'
+      );
       const map = this.worldMap.getLevel(this.currentLevel);
       map.removeEntity(entity);
+      // Victory: last monster on level 100 cleared
+      if (this.currentLevel === 100 && this.state === STATE.PLAYING) {
+        let anyMonster = false;
+        for (const list of map.entities.values()) {
+          if (list.some(e => e.type === 'monster')) { anyMonster = true; break; }
+        }
+        if (!anyMonster) {
+          this.bus.emit('game:victory', { player: this.player, runStats: this._buildRunStats() });
+        }
+      }
+    });
+
+    this.bus.on('game:victory', ({ player, runStats }) => {
+      const score = computeScore(runStats);
+      const entry = {
+        name:           player.name,
+        characterClass: player.classKey ?? player.class?.key ?? 'unknown',
+        score,
+        deepestDeath:   player.depth,
+        runTimeMs:      Date.now() - (this._runStartTime ?? Date.now()),
+        seed:           String(this.worldMap?.masterSeed ?? 0),
+        date:           new Date().toISOString(),
+      };
+      recordVictory(entry);
+      this._victoryScore = score;
+      this.state = STATE.VICTORY;
+    });
+
+    this.bus.on('game:reset', () => {
+      this.input.clearQueue();
+      this.state          = STATE.TITLE;
+      this.player         = null;
+      this.worldMap       = null;
+      this.log.messages   = [];
+      this.activeMenu     = null;
+      this._previousState = null;
+      this._deathCount    = 0;
+      this._runStartTime  = null;
+      this._victoryScore  = null;
     });
 
     this._rawKeys = [];
@@ -136,8 +191,11 @@ this.traps = new TrapSystem(this.bus);
   _startNewGame(classKey, stats = null, name = 'Adventurer') {
     this.input.clearQueue();
     const seed = Date.now();
-    this.activeMenu = null;
+    this.activeMenu     = null;
     this._previousState = null;
+    this._deathCount    = 0;
+    this._runStartTime  = Date.now();
+    this._victoryScore  = null;
     this.rng.seed = seed;
     this.worldMap = new WorldMap(this.rng.seed);
     this.quests = new QuestSystem(this.worldMap, this.rng);
@@ -247,7 +305,7 @@ this.traps = new TrapSystem(this.bus);
     map.addEntity(this.player);
     
     // Compute initial FOV
-    map.computeFOV(this.player.x, this.player.y, PLAYER_FOV_RADIUS);
+    map.computeFOV(this.player.x, this.player.y, this._effectiveFovRadius());
     this._updateCamera(map);
   }
 
@@ -265,6 +323,7 @@ this.traps = new TrapSystem(this.bus);
       case STATE.DEAD:        this._updateDead(); break;
       case STATE.PUZZLE:      this._updatePuzzle(); break;
       case STATE.LEVEL_UP:    this._updateLevelUp(); break;
+      case STATE.VICTORY:     this._updateVictory(); break;
     }
   }
 
@@ -408,16 +467,25 @@ if (action === 'use') {
     return;
 }
 
+if (action === 'interact') {
+    this._handleFeatureInteract();
+    return;
+}
+
 if (this._handleMovement(action, map)) {
       // Movement or attack consumed the turn — run monster AI
       this._runMonsterAI(map);
-      map.computeFOV(this.player.x, this.player.y, PLAYER_FOV_RADIUS);
+      map.computeFOV(this.player.x, this.player.y, this._effectiveFovRadius());
       this._updateCamera(map);
       this.bus.emit('turn:end', {});
       // Tick player statuses
       const expired = StatusSystem.tick(this.player);
       for (const key of expired) {
-          this.log.add(`${key} has worn off.`, 'system');
+          const msg = key === 'light'      ? 'The magical light fades.'
+                    : key === 'battle_cry' ? 'The battle cry fades.'
+                    : key === 'blessed'    ? 'The blessing fades.'
+                    : `${key} has worn off.`;
+          this.log.add(msg, 'system');
       }
     }
 
@@ -480,6 +548,15 @@ if (this._handleMovement(action, map)) {
         found = true;
     }
     
+    // Check monsters on tile
+    const monsters = entities.filter(e => e.type === 'monster');
+    for (const m of monsters) {
+      const hpPct = Math.round((m.hp / m.hpMax) * 100);
+      this.log.add(`${m.name} — HP ${hpPct}%`, 'system');
+      if (m.def.description) this.log.add(m.def.description, 'lore');
+      found = true;
+    }
+
     // Check items on ground
     const items = entities.filter(e => e.type === 'item');
     for (const item of items) {
@@ -510,12 +587,22 @@ if (this._handleMovement(action, map)) {
         found = true;
     }
     
+    if (tile.features.dungeon) {
+        const def = FEATURES[tile.features.dungeon.key];
+        if (def?.description) {
+            const hint = def.tier !== 'dressing' && !tile.features.dungeon.used
+                ? ' [press F to interact]' : '';
+            this.log.add(def.description + hint, 'system');
+            found = true;
+        }
+    }
+
     if (tile.features.dressing) {
         const descriptions = {
-            'barrel': 'An old wooden barrel. It is empty.',
-            'rubble': 'A pile of rocks and debris from a past collapse.',
+            'barrel':    'An old wooden barrel. It is empty.',
+            'rubble':    'A pile of rocks and debris from a past collapse.',
             'bone_pile': 'A scattering of old, gnawed bones.',
-            'stain': 'A dark, sticky stain on the floor. Best not to think about it.'
+            'stain':     'A dark, sticky stain on the floor. Best not to think about it.',
         };
         const desc = descriptions[tile.features.dressing];
         if (desc) {
@@ -527,6 +614,232 @@ if (this._handleMovement(action, map)) {
     if (!found) {
         this.log.add('There is nothing of interest here.', 'system');
     }
+}
+
+_handleFeatureInteract() {
+    const map     = this.worldMap.getLevel(this.currentLevel);
+    const tile    = map.get(this.player.x, this.player.y);
+    const feature = tile?.features?.dungeon;
+    if (!feature) {
+        this.log.add('There is nothing here to interact with.', 'system');
+        return;
+    }
+    const def = FEATURES[feature.key];
+    if (!def) return;
+
+    if (feature.used && def.singleUse) {
+        this.log.add('Nothing happens. It has already been used.', 'system');
+        return;
+    }
+    if (def.tier === 'dressing') return;
+
+    if (def.tier === 'searchable') {
+        this._resolveSearch(tile, feature, def);
+        return;
+    }
+    if (def.tier === 'interactive' && def.onInteract?.autoTrigger) {
+        this._resolveAutoTrigger(tile, feature, def);
+        return;
+    }
+    if (def.tier === 'interactive') {
+        this._openFeatureMenu(tile, feature, def);
+    }
+}
+
+_resolveSearch(tile, feature, def) {
+    const outcomes = def.onSearch?.outcomes;
+    if (!outcomes?.length) return;
+
+    const outcome  = this.rng.weightedPick(outcomes.map(o => ({ value: o, weight: o.weight })));
+    const goldAmt  = this.rng.int(10, 50);
+    const msg = outcome.message
+        .replace('{lore_entry}', 'strange inscriptions line the page')
+        .replace('{item}',       'a dusty scroll')
+        .replace('{monster}',    'skeleton')
+        .replace('{gold}',       String(goldAmt))
+        .replace('{trap_effect}','a needle jabs your hand');
+
+    this.log.add(msg, 'lore');
+
+    switch (outcome.result) {
+        case 'item':
+        case 'treasure': {
+            const key = outcome.result === 'treasure' ? 'healing_potion' : 'old_scroll';
+            try {
+                const item = Item.create(key);
+                if (!this.player.addToInventory(item))
+                    this.log.add('Your pack is full.', 'system');
+            } catch (_) {}
+            break;
+        }
+        case 'gold':
+            this.player.gold = (this.player.gold ?? 0) + goldAmt;
+            break;
+        case 'trap':
+            this.player.hp = Math.max(1, this.player.hp - this.rng.int(1, 4));
+            this.log.add('You take damage!', 'danger');
+            break;
+        case 'undead':
+        case 'vermin': {
+            const map2 = this.worldMap.getLevel(this.currentLevel);
+            const pos  = this._findAdjacentFloor(map2);
+            if (pos) {
+                const mkey = outcome.result === 'undead' ? 'skeleton' : 'giant_rat';
+                try {
+                    const m = Monster.create(mkey, pos.x, pos.y, this.currentLevel, this.rng);
+                    map2.addEntity(m);
+                } catch (_) {}
+            }
+            break;
+        }
+        case 'curse':
+            StatusSystem.apply(this.player, 'cursed', { duration: 20 });
+            break;
+        case 'lore':
+        case 'empty':
+        default:
+            break;
+    }
+
+    feature.used = true;
+}
+
+_resolveAutoTrigger(tile, feature, def) {
+    const dest = feature.data?.pairedDest;
+    if (!dest) {
+        this.log.add('The circle hums but has no destination.', 'system');
+        return;
+    }
+    const map = this.worldMap.getLevel(this.currentLevel);
+    map.moveEntity(this.player, dest.x, dest.y);
+    map.computeFOV(this.player.x, this.player.y, this._effectiveFovRadius());
+    this._updateCamera(map);
+    this.log.add('The circle activates. In an instant you are elsewhere.', 'lore');
+}
+
+_openFeatureMenu(tile, feature, def) {
+    const menuItems = (def.onInteract.options ?? [])
+        .filter(o => o.action !== 'cancel')
+        .map(o => ({ label: o.label, data: o }));
+
+    const menu = new Menu(def.onInteract.prompt, menuItems, {
+        onSelect: (sel) => {
+            const opt = sel.data;
+
+            if (opt.cost?.gold) {
+                if ((this.player.gold ?? 0) < opt.cost.gold) {
+                    this.log.add("You don't have enough gold.", 'system');
+                    menu.closed = true;
+                    return;
+                }
+                this.player.gold -= opt.cost.gold;
+            }
+            if (opt.cost?.hp) {
+                this.player.hp = Math.max(1, this.player.hp - opt.cost.hp);
+            }
+
+            const table =
+                def.onInteract.outcomes?.[opt.action] ??
+                (opt.action === 'drink_fountain' ? def.onInteract.drinkOutcomes : null) ??
+                [];
+
+            if (table.length > 0) {
+                const outcome = this.rng.weightedPick(table.map(o => ({ value: o, weight: o.weight })));
+                this._applyFeatureEffect(outcome, tile, feature, def);
+            } else if (opt.action === 'fill_flask') {
+                this.log.add('You fill your flask with cool water.', 'system');
+            }
+
+            if (def.singleUse) feature.used = true;
+            menu.closed = true;
+        },
+        onCancel: () => {},
+    });
+    this._openMenu(menu);
+}
+
+_applyFeatureEffect(outcome, tile, feature, def) {
+    if (outcome.message) this.log.add(outcome.message, 'lore');
+
+    switch (outcome.effect) {
+        case 'heal': {
+            const amt = typeof outcome.value === 'string'
+                ? rollDiceStr(outcome.value) : (outcome.value ?? 4);
+            this.player.hp = Math.min(this.player.hpMax, this.player.hp + amt);
+            break;
+        }
+        case 'restore_mp': {
+            if (this.player.mp !== undefined) {
+                const amt = typeof outcome.value === 'string'
+                    ? rollDiceStr(outcome.value) : (outcome.value ?? 2);
+                this.player.mp = Math.min(this.player.mpMax ?? this.player.mp, this.player.mp + amt);
+            }
+            break;
+        }
+        case 'poison':
+            StatusSystem.apply(this.player, 'poison',  { duration: 10, damage: 1 });
+            break;
+        case 'bless':
+            StatusSystem.apply(this.player, 'blessed', { duration: outcome.value ?? 5 });
+            break;
+        case 'status':
+            StatusSystem.apply(this.player, outcome.value ?? 'blessed', { duration: 10 });
+            break;
+        case 'curse':
+            StatusSystem.apply(this.player, 'cursed',  { duration: 20 });
+            break;
+        case 'random_teleport': {
+            const map = this.worldMap.getLevel(this.currentLevel);
+            const floors = map.findTiles('floor');
+            if (floors.length > 0) {
+                const dest = this.rng.pick(floors);
+                map.moveEntity(this.player, dest.x, dest.y);
+                map.computeFOV(this.player.x, this.player.y, this._effectiveFovRadius());
+                this._updateCamera(map);
+            }
+            break;
+        }
+        case 'item': {
+            try {
+                const item = Item.create('healing_potion');
+                if (!this.player.addToInventory(item))
+                    this.log.add('Your pack is full — the item is lost.', 'system');
+            } catch (_) {}
+            break;
+        }
+        case 'spawn_guardian':
+        case 'animate': {
+            const map2 = this.worldMap.getLevel(this.currentLevel);
+            const pos  = this._findAdjacentFloor(map2);
+            if (pos) {
+                const mkey = def.key === 'statue'       ? 'stone_golem'
+                           : def.key === 'sarcophagus'  ? 'skeleton'
+                           : 'wight';
+                try {
+                    const m = Monster.create(mkey, pos.x, pos.y, this.currentLevel, this.rng);
+                    map2.addEntity(m);
+                } catch (_) {}
+            }
+            break;
+        }
+        case 'boon':
+            this.player.hp = Math.min(this.player.hpMax, this.player.hp + this.rng.int(4, 8));
+            break;
+        case 'lore':
+        case 'nothing':
+        default:
+            break;
+    }
+}
+
+_findAdjacentFloor(map) {
+    const shuffled = this.rng.shuffle([[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]]);
+    for (const [dx, dy] of shuffled) {
+        const nx = this.player.x + dx, ny = this.player.y + dy;
+        if (map.inBounds(nx, ny) && !map.get(nx, ny).solid && map.getEntitiesAt(nx, ny).length === 0)
+            return { x: nx, y: ny };
+    }
+    return null;
 }
 
 _handlePickup() {
@@ -616,20 +929,37 @@ _openUseMenu() {
     return true;  }
 
   _playerAttacks(monster) {
+    // Show description on first engagement
+    if (!monster._described && monster.def.description) {
+      monster._described = true;
+      this.log.add(monster.def.description, 'lore');
+    }
     const attackCount = 1 + (this.player._extraAttacks ?? 0);
     for (let i = 0; i < attackCount; i++) {
         const result = this.combat.resolveAttack(this.player, monster, this.player.equipped.weapon);
         this.log.add(result.message, result.hit ? 'combat' : 'system');
 
-        if (result.hit && monster.hp <= 0) {
+        if (result.hit) {
+          if (monster.hp <= 0) {
+            this.player.monstersKilled = (this.player.monstersKilled ?? 0) + 1;
             const xpResult = this.player.gainXP(monster.def.xpBase + monster.def.xpPerHD * monster.def.hd);
             this._updateQuestProgress('kill', { monsterType: monster.def?.key ?? monster.name });
+            this._rollMonsterLoot(monster);
             if (xpResult.leveled) {
               this.pendingLevelUp = xpResult;
               this.state = STATE.LEVEL_UP;
               this._checkFavoredEnemy();
             }
             break; // Monster dead, stop extra attacks
+          }
+          // Morale check when monster first drops below 50% HP
+          if (!monster.moraleChecked && monster.hp < monster.hpMax * 0.5) {
+            monster.moraleChecked = true;
+            if (!this.combat.checkMorale(monster)) {
+              monster.aiState = 'fleeing';
+              this.log.add(`${monster.name} turns to flee!`, 'combat');
+            }
+          }
         }
     }
   }
@@ -672,6 +1002,28 @@ _openUseMenu() {
     this._openMenu(menu);
   }
 
+  _currentMap() {
+    return this.worldMap?.getLevel(this.currentLevel) ?? null;
+  }
+
+  _rollMonsterLoot(monster) {
+    const loot = monster.def.loot;
+    if (!loot) return;
+    if (this.rng.float() > loot.chance) return;
+    const itemKey = rollLootTable(loot.table, this.rng);
+    if (!itemKey) return;
+    try {
+      const item = Item.create(itemKey);
+      item.x = monster.x;
+      item.y = monster.y;
+      const map = this._currentMap();
+      if (map) {
+        map.addEntity(item);
+        this.log.add(`${monster.name} drops ${item.name}.`, 'loot');
+      }
+    } catch (_) { /* unknown item key — silently skip */ }
+  }
+
   _monsterAttacksPlayer(monster) {
     const attack = monster.getPrimaryAttack();
     // Simple THAC0 roll: d20 vs player AC
@@ -681,11 +1033,73 @@ _openUseMenu() {
       const dmg = Math.max(1, monster.rollDamage(attack));
       this.player.hp = Math.max(0, this.player.hp - dmg);
       this.log.add(`${monster.name} hits you for ${dmg} damage.`, 'danger');
+      if (attack.special) this._applyAttackSpecial(attack.special, monster);
       if (this.player.hp <= 0) {
         this.bus.emit('player:death', { cause: monster.name });
       }
     } else {
       this.log.add(`${monster.name} misses you.`, 'combat');
+    }
+  }
+
+  _applyAttackSpecial(special, monster) {
+    const [type, param] = special.split('_');
+    const n = parseInt(param) || 0;
+    const saveRoll = () => this.rng.int(1, 20) >= 15;
+
+    switch (type) {
+      case 'disease':
+        if (this.rng.int(1, 100) <= (n || 10)) {
+          StatusSystem.apply(this.player, { key: 'disease', duration: 20 });
+          this.log.add('You have been infected with disease!', 'danger');
+        }
+        break;
+      case 'poison':
+        if (!saveRoll()) {
+          StatusSystem.apply(this.player, { key: 'poison', duration: 6, dmgPerTurn: 1 });
+          this.log.add('You are poisoned!', 'danger');
+        }
+        break;
+      case 'paralysis':
+        if (!saveRoll()) {
+          StatusSystem.apply(this.player, { key: 'paralysis', duration: n || 4 });
+          this.log.add(`You are paralyzed! (${n || 4} turns)`, 'danger');
+        }
+        break;
+      case 'energy': // energy_drain_N
+        if (special.startsWith('energy_drain')) {
+          const drainN = n || 1;
+          this.player.hpMax = Math.max(1, this.player.hpMax - drainN * 4);
+          this.player.hp = Math.min(this.player.hp, this.player.hpMax);
+          this.log.add(`${monster.name} drains your life force! Max HP reduced by ${drainN * 4}.`, 'danger');
+        }
+        break;
+      case 'knockback': {
+        const dx = Math.sign(this.player.x - monster.x);
+        const dy = Math.sign(this.player.y - monster.y);
+        const nx = this.player.x + dx;
+        const ny = this.player.y + dy;
+        const map = this._currentMap();
+        if (map && map.isWalkable?.(nx, ny)) {
+          map.moveEntity(this.player, nx, ny);
+          this.log.add('You are knocked back!', 'combat');
+        }
+        break;
+      }
+      case 'fear':
+        if (!saveRoll()) {
+          StatusSystem.apply(this.player, { key: 'fear', duration: n || 3 });
+          this.log.add(`You are overcome with fear! (${n || 3} turns)`, 'danger');
+        }
+        break;
+      case 'slow':
+        StatusSystem.apply(this.player, { key: 'slow', duration: 4, acMod: -2 });
+        this.log.add('You feel sluggish!', 'combat');
+        break;
+      case 'ignite':
+        StatusSystem.apply(this.player, { key: 'burning', duration: 3, dmgPerTurn: 2 });
+        this.log.add('You are set on fire!', 'danger');
+        break;
     }
   }
 
@@ -702,7 +1116,24 @@ _openUseMenu() {
 
     for (const monster of monsters) {
       if (this.state === STATE.DEAD) break;
-      this._monsterTurn(monster, map);
+
+      // Speed: accumulate energy each turn; only act when >= 1.0
+      monster.moveEnergy = (monster.moveEnergy ?? 0) + (monster.def.speed ?? 1);
+      if (monster.moveEnergy >= 1.0) {
+        monster.moveEnergy -= 1.0;
+        this._monsterTurn(monster, map);
+      }
+
+      // Regeneration: heal N HP if specials contain 'regenerate_N'
+      if (monster.hp > 0) {
+        for (const s of monster.def.specials ?? []) {
+          if (s.startsWith('regenerate_')) {
+            const n = parseInt(s.split('_')[1]) || 1;
+            monster.hp = Math.min(monster.hpMax, monster.hp + n);
+            break;
+          }
+        }
+      }
     }
   }
 
@@ -717,13 +1148,21 @@ _openUseMenu() {
       return; // Cannot act
     }
 
-    // Simple AI: move toward player, attack if adjacent
     const dx = this.player.x - monster.x;
     const dy = this.player.y - monster.y;
     const dist = Math.abs(dx) + Math.abs(dy);
 
+    // Fleeing: move away from player
+    if (monster.aiState === 'fleeing') {
+      const fx = monster.x - Math.sign(dx);
+      const fy = monster.y - Math.sign(dy);
+      const occupied = map.getEntitiesAt(fx, fy).some(e => e.type !== 'item');
+      if (!occupied && map.isWalkable?.(fx, fy)) map.moveEntity(monster, fx, fy);
+      return;
+    }
+
+    // Simple AI: move toward player, attack if adjacent
     if (dist === 1 || (Math.abs(dx) === 1 && Math.abs(dy) === 1)) {
-      // Adjacent — attack
       this._monsterAttacksPlayer(monster);
       return;
     }
@@ -794,7 +1233,87 @@ _openUseMenu() {
       case STATE.PUZZLE:      this._renderPlaying(); break;
       case STATE.DEAD:        this._renderDead(); break;
       case STATE.LEVEL_UP:    this._renderLevelUp(this.renderer.ctx); break;
+      case STATE.VICTORY:     this._renderVictory(); break;
     }
+  }
+
+  _buildRunStats() {
+    return {
+      level:          this.player?.level          ?? 1,
+      gold:           this.player?.gold           ?? 0,
+      monstersKilled: this.player?.monstersKilled ?? 0,
+      deathCount:     this._deathCount            ?? 0,
+    };
+  }
+
+  _updateVictory() {
+    const action = this.input.consumeAction();
+    if (action === 'confirm' || action === 'cancel') {
+      this.bus.emit('game:reset');
+    }
+  }
+
+  _renderVictory() {
+    const ctx = this.renderer.ctx;
+    const w   = this.canvasEl.width;
+    const h   = this.canvasEl.height;
+    const th  = this.renderer.TILE_H;
+
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, w, h);
+
+    const titleSize = Math.max(24, Math.floor(w / 18));
+    ctx.fillStyle   = '#ffcc00';
+    ctx.font        = `bold ${titleSize}px monospace`;
+    ctx.textBaseline = 'top';
+    const title  = 'VICTORY';
+    ctx.fillText(title, (w - ctx.measureText(title).width) / 2, h * 0.08);
+
+    const subSize = Math.max(13, Math.floor(titleSize * 0.45));
+    ctx.font      = `${subSize}px monospace`;
+    ctx.fillStyle = '#cccccc';
+    const sub = 'You have conquered the Megadungeon.';
+    ctx.fillText(sub, (w - ctx.measureText(sub).width) / 2, h * 0.08 + titleSize + 12);
+
+    let y = h * 0.25;
+    const p = this.player;
+    const stats = [
+      `Name:     ${p?.name ?? 'Unknown'}`,
+      `Class:    ${p?.class?.name ?? 'Adventurer'}`,
+      `Level:    ${p?.level ?? 1}`,
+      `Depth:    ${p?.depth ?? 100}`,
+      `Gold:     ${p?.gold ?? 0}`,
+      `Kills:    ${p?.monstersKilled ?? 0}`,
+      `Score:    ${this._victoryScore ?? 0}`,
+    ];
+
+    ctx.font      = `${subSize}px monospace`;
+    for (const line of stats) {
+      ctx.fillStyle = '#ffffff';
+      ctx.fillText(line, w / 2 - subSize * 7, y);
+      y += subSize * 1.5;
+    }
+
+    // Top 5 leaderboard
+    const board = getLeaderboard().slice(0, 5);
+    if (board.length > 0) {
+      y += subSize;
+      ctx.fillStyle = '#ffcc00';
+      const hdr = '— Hall of Heroes —';
+      ctx.fillText(hdr, (w - ctx.measureText(hdr).width) / 2, y);
+      y += subSize * 1.8;
+      board.forEach((e, i) => {
+        ctx.fillStyle = i === 0 ? '#ffcc00' : '#888888';
+        const row = `${String(i + 1).padStart(2)}. ${e.name.padEnd(16)} ${String(e.score).padStart(8)}`;
+        ctx.fillText(row, (w - ctx.measureText(row).width) / 2, y);
+        y += subSize * 1.4;
+      });
+    }
+
+    ctx.fillStyle = '#888888';
+    ctx.font      = `${Math.max(11, subSize - 2)}px monospace`;
+    const prompt  = '[ENTER] Return to title';
+    ctx.fillText(prompt, (w - ctx.measureText(prompt).width) / 2, h * 0.9);
   }
 
   _renderTitle() {
@@ -839,6 +1358,25 @@ _openUseMenu() {
     helpLines.forEach((line, i) => {
         ctx.fillText(line, (w - ctx.measureText(line).width) / 2, h * 0.6 + i * (helpSize + 8));
     });
+
+    // Leaderboard — top 10
+    const board = getLeaderboard().slice(0, 10);
+    if (board.length > 0) {
+      const lbSize = Math.max(10, Math.floor(helpSize * 0.85));
+      ctx.font      = `${lbSize}px monospace`;
+      let ly = h * 0.75;
+      ctx.fillStyle = '#ffcc44';
+      const hdr = '— Hall of Heroes —';
+      ctx.fillText(hdr, (w - ctx.measureText(hdr).width) / 2, ly);
+      ly += lbSize + 6;
+      board.forEach((e, i) => {
+        ctx.fillStyle = i === 0 ? '#ffcc44' : '#555555';
+        const date = e.date ? e.date.slice(0, 10) : '';
+        const row  = `${String(i + 1).padStart(2)}. ${(e.name ?? '?').padEnd(14)} ${String(e.score).padStart(8)}  ${date}`;
+        ctx.fillText(row, (w - ctx.measureText(row).width) / 2, ly);
+        ly += lbSize + 4;
+      });
+    }
 }
 
   _renderPlaying() {
@@ -1550,9 +2088,16 @@ _openInventoryMenu() {
         onSelect: (selected) => {
             this._openItemActionMenu(selected.data);
         },
-        onCancel: () => {}
+        onCancel: () => {},
+        renderDescription: Tooltip.forItem(),
     });
     this._openMenu(menu);
+}
+
+_effectiveFovRadius() {
+    const bonus = (this.player.statuses ?? [])
+        .reduce((sum, s) => sum + (s.fovBonus ?? 0), 0);
+    return PLAYER_FOV_RADIUS + bonus;
 }
 
 _equippedTag(item) {
@@ -1692,8 +2237,8 @@ _handleUseAbility() {
         break;
       }
       case 'battle_cry': {
+        StatusSystem.apply(this.player, 'battle_cry', { attackMod: 1, duration: 3 });
         this.log.add('You let out a battle cry! +1 attack for 3 turns.', 'combat');
-        // TODO: Apply buff to player via StatusSystem
         break;
       }
       default:
@@ -1856,22 +2401,7 @@ _openSpellMenu(readOnly = false) {
         this.activeMenu = null;
         this.state = STATE.PLAYING;
       },
-      renderDescription: (ctx, item, x, y, w, h, tileH) => {
-        if (!item) return;
-        const spell = SPELLS[item.data];
-        if (!spell) return;
-        ctx.fillStyle = '#888';
-        ctx.font = `${tileH - 4}px monospace`;
-        const lines = [
-          spell.description,
-          `Cost: ${spell.mpCost} MP  |  Range: ${spell.range}  |  Area: ${spell.area}`,
-          `"${spell.flavorText ?? ''}"`,
-        ];
-        const descY = y + h - (tileH * 5);
-        lines.forEach((line, i) => {
-          ctx.fillText(line, x + 15, descY + i * (tileH - 2));
-        });
-      },
+      renderDescription: Tooltip.forSpell(SPELLS),
     });
     this._openMenu(menu);
   }
@@ -1953,7 +2483,7 @@ _quickLoad() {
         
         const map = this.worldMap.getLevel(this.currentLevel);
         map.addEntity(this.player);
-        map.computeFOV(this.player.x, this.player.y, PLAYER_FOV_RADIUS);
+        map.computeFOV(this.player.x, this.player.y, this._effectiveFovRadius());
         this._updateCamera(map);
         
         this.log.messages = data.log ?? [];
