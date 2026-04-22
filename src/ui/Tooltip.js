@@ -25,6 +25,13 @@ export class Tooltip {
       _renderSpellPanel(ctx, spell, x, y, w, h, tileH);
     };
   }
+
+  static forMonster() {
+    return (ctx, menuItem, x, y, w, h, tileH) => {
+      if (!menuItem?.data) return;
+      _renderMonsterPanel(ctx, menuItem.data, x, y, w, h, tileH);
+    };
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -164,6 +171,38 @@ function _renderSpellPanel(ctx, spell, x, y, w, h, tileH) {
 
   if (spell.flavorText) {
     lines.push({ text: `"${spell.flavorText}"`, color: '#555577' });
+  }
+
+  _drawPanel(ctx, lines, x, y, w, h, lineH, panelX, small);
+}
+
+function _renderMonsterPanel(ctx, def, x, y, w, h, tileH) {
+  const lineH  = tileH - 1;
+  const panelX = x + 8;
+  const panelW = w - 16;
+  const small  = `${Math.max(9, tileH - 4)}px monospace`;
+  const boldF  = `bold ${Math.max(9, tileH - 4)}px monospace`;
+
+  ctx.font = small;
+
+  const alignColor = { lawful: '#88aaff', neutral: '#aaaaaa', chaotic: '#ff8888' };
+  const lines = [
+    { text: def.name, color: def.color ?? '#cccccc', font: boldF },
+    { text: `HD ${def.hd}${def.hdType}  AC ${def.ac}  Size: ${_cap(def.size)}`, color: '#aaaaaa' },
+    { text: `Alignment: ${_cap(def.alignment ?? 'neutral')}  Morale: ${def.morale}`,
+      color: alignColor[def.alignment] ?? '#aaaaaa' },
+    { text: `XP: ${def.xpBase + def.xpPerHD * def.hd}  Speed: ${def.speed ?? 1}`, color: '#ffcc44' },
+  ];
+
+  if (def.specials?.length) {
+    lines.push({ text: def.specials.slice(0, 3).map(_cap).join(', '), color: '#ff9966' });
+  }
+
+  if (def.description) {
+    ctx.font = small;
+    _wrapText(ctx, def.description, panelW).slice(0, 3).forEach(line =>
+      lines.push({ text: line, color: '#aaaaaa' })
+    );
   }
 
   _drawPanel(ctx, lines, x, y, w, h, lineH, panelX, small);

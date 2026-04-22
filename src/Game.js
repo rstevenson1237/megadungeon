@@ -26,6 +26,7 @@ import { FEATURES } from './data/features.js';
 import { Item } from './entities/Item.js';
 import { Monster } from './entities/Monster.js';
 import { recordVictory, computeScore, getLeaderboard } from './data/leaderboard.js';
+import { rollLootTable } from './data/lootTables.js';
 
 const PLAYER_FOV_RADIUS = 8;
 
@@ -108,7 +109,15 @@ this.traps = new TrapSystem(this.bus);
     });
 
     this.bus.on('monster:death', ({ entity }) => {
-      this.log.add(`${entity.name} is slain!`, 'combat');
+      // Track consecutive kills of the same type to use plural in messages
+      const killKey = entity.def?.key;
+      if (killKey !== this._lastKillKey) { this._lastKillKey = killKey; this._killStreak = 0; }
+      this._killStreak = (this._killStreak ?? 0) + 1;
+      const useGroup = this._killStreak >= 3 && entity.def?.plural;
+      this.log.add(
+        useGroup ? `${entity.def.plural} fall!` : `${entity.name} is slain!`,
+        'combat'
+      );
       const map = this.worldMap.getLevel(this.currentLevel);
       map.removeEntity(entity);
       // Victory: last monster on level 100 cleared
@@ -539,6 +548,15 @@ if (this._handleMovement(action, map)) {
         found = true;
     }
     
+    // Check monsters on tile
+    const monsters = entities.filter(e => e.type === 'monster');
+    for (const m of monsters) {
+      const hpPct = Math.round((m.hp / m.hpMax) * 100);
+      this.log.add(`${m.name} — HP ${hpPct}%`, 'system');
+      if (m.def.description) this.log.add(m.def.description, 'lore');
+      found = true;
+    }
+
     // Check items on ground
     const items = entities.filter(e => e.type === 'item');
     for (const item of items) {
@@ -911,21 +929,37 @@ _openUseMenu() {
     return true;  }
 
   _playerAttacks(monster) {
+    // Show description on first engagement
+    if (!monster._described && monster.def.description) {
+      monster._described = true;
+      this.log.add(monster.def.description, 'lore');
+    }
     const attackCount = 1 + (this.player._extraAttacks ?? 0);
     for (let i = 0; i < attackCount; i++) {
         const result = this.combat.resolveAttack(this.player, monster, this.player.equipped.weapon);
         this.log.add(result.message, result.hit ? 'combat' : 'system');
 
-        if (result.hit && monster.hp <= 0) {
+        if (result.hit) {
+          if (monster.hp <= 0) {
             this.player.monstersKilled = (this.player.monstersKilled ?? 0) + 1;
             const xpResult = this.player.gainXP(monster.def.xpBase + monster.def.xpPerHD * monster.def.hd);
             this._updateQuestProgress('kill', { monsterType: monster.def?.key ?? monster.name });
+            this._rollMonsterLoot(monster);
             if (xpResult.leveled) {
               this.pendingLevelUp = xpResult;
               this.state = STATE.LEVEL_UP;
               this._checkFavoredEnemy();
             }
             break; // Monster dead, stop extra attacks
+          }
+          // Morale check when monster first drops below 50% HP
+          if (!monster.moraleChecked && monster.hp < monster.hpMax * 0.5) {
+            monster.moraleChecked = true;
+            if (!this.combat.checkMorale(monster)) {
+              monster.aiState = 'fleeing';
+              this.log.add(`${monster.name} turns to flee!`, 'combat');
+            }
+          }
         }
     }
   }
@@ -968,6 +1002,28 @@ _openUseMenu() {
     this._openMenu(menu);
   }
 
+  _currentMap() {
+    return this.worldMap?.getLevel(this.currentLevel) ?? null;
+  }
+
+  _rollMonsterLoot(monster) {
+    const loot = monster.def.loot;
+    if (!loot) return;
+    if (this.rng.float() > loot.chance) return;
+    const itemKey = rollLootTable(loot.table, this.rng);
+    if (!itemKey) return;
+    try {
+      const item = Item.create(itemKey);
+      item.x = monster.x;
+      item.y = monster.y;
+      const map = this._currentMap();
+      if (map) {
+        map.addEntity(item);
+        this.log.add(`${monster.name} drops ${item.name}.`, 'loot');
+      }
+    } catch (_) { /* unknown item key — silently skip */ }
+  }
+
   _monsterAttacksPlayer(monster) {
     const attack = monster.getPrimaryAttack();
     // Simple THAC0 roll: d20 vs player AC
@@ -977,11 +1033,73 @@ _openUseMenu() {
       const dmg = Math.max(1, monster.rollDamage(attack));
       this.player.hp = Math.max(0, this.player.hp - dmg);
       this.log.add(`${monster.name} hits you for ${dmg} damage.`, 'danger');
+      if (attack.special) this._applyAttackSpecial(attack.special, monster);
       if (this.player.hp <= 0) {
         this.bus.emit('player:death', { cause: monster.name });
       }
     } else {
       this.log.add(`${monster.name} misses you.`, 'combat');
+    }
+  }
+
+  _applyAttackSpecial(special, monster) {
+    const [type, param] = special.split('_');
+    const n = parseInt(param) || 0;
+    const saveRoll = () => this.rng.int(1, 20) >= 15;
+
+    switch (type) {
+      case 'disease':
+        if (this.rng.int(1, 100) <= (n || 10)) {
+          StatusSystem.apply(this.player, { key: 'disease', duration: 20 });
+          this.log.add('You have been infected with disease!', 'danger');
+        }
+        break;
+      case 'poison':
+        if (!saveRoll()) {
+          StatusSystem.apply(this.player, { key: 'poison', duration: 6, dmgPerTurn: 1 });
+          this.log.add('You are poisoned!', 'danger');
+        }
+        break;
+      case 'paralysis':
+        if (!saveRoll()) {
+          StatusSystem.apply(this.player, { key: 'paralysis', duration: n || 4 });
+          this.log.add(`You are paralyzed! (${n || 4} turns)`, 'danger');
+        }
+        break;
+      case 'energy': // energy_drain_N
+        if (special.startsWith('energy_drain')) {
+          const drainN = n || 1;
+          this.player.hpMax = Math.max(1, this.player.hpMax - drainN * 4);
+          this.player.hp = Math.min(this.player.hp, this.player.hpMax);
+          this.log.add(`${monster.name} drains your life force! Max HP reduced by ${drainN * 4}.`, 'danger');
+        }
+        break;
+      case 'knockback': {
+        const dx = Math.sign(this.player.x - monster.x);
+        const dy = Math.sign(this.player.y - monster.y);
+        const nx = this.player.x + dx;
+        const ny = this.player.y + dy;
+        const map = this._currentMap();
+        if (map && map.isWalkable?.(nx, ny)) {
+          map.moveEntity(this.player, nx, ny);
+          this.log.add('You are knocked back!', 'combat');
+        }
+        break;
+      }
+      case 'fear':
+        if (!saveRoll()) {
+          StatusSystem.apply(this.player, { key: 'fear', duration: n || 3 });
+          this.log.add(`You are overcome with fear! (${n || 3} turns)`, 'danger');
+        }
+        break;
+      case 'slow':
+        StatusSystem.apply(this.player, { key: 'slow', duration: 4, acMod: -2 });
+        this.log.add('You feel sluggish!', 'combat');
+        break;
+      case 'ignite':
+        StatusSystem.apply(this.player, { key: 'burning', duration: 3, dmgPerTurn: 2 });
+        this.log.add('You are set on fire!', 'danger');
+        break;
     }
   }
 
@@ -998,7 +1116,24 @@ _openUseMenu() {
 
     for (const monster of monsters) {
       if (this.state === STATE.DEAD) break;
-      this._monsterTurn(monster, map);
+
+      // Speed: accumulate energy each turn; only act when >= 1.0
+      monster.moveEnergy = (monster.moveEnergy ?? 0) + (monster.def.speed ?? 1);
+      if (monster.moveEnergy >= 1.0) {
+        monster.moveEnergy -= 1.0;
+        this._monsterTurn(monster, map);
+      }
+
+      // Regeneration: heal N HP if specials contain 'regenerate_N'
+      if (monster.hp > 0) {
+        for (const s of monster.def.specials ?? []) {
+          if (s.startsWith('regenerate_')) {
+            const n = parseInt(s.split('_')[1]) || 1;
+            monster.hp = Math.min(monster.hpMax, monster.hp + n);
+            break;
+          }
+        }
+      }
     }
   }
 
@@ -1013,13 +1148,21 @@ _openUseMenu() {
       return; // Cannot act
     }
 
-    // Simple AI: move toward player, attack if adjacent
     const dx = this.player.x - monster.x;
     const dy = this.player.y - monster.y;
     const dist = Math.abs(dx) + Math.abs(dy);
 
+    // Fleeing: move away from player
+    if (monster.aiState === 'fleeing') {
+      const fx = monster.x - Math.sign(dx);
+      const fy = monster.y - Math.sign(dy);
+      const occupied = map.getEntitiesAt(fx, fy).some(e => e.type !== 'item');
+      if (!occupied && map.isWalkable?.(fx, fy)) map.moveEntity(monster, fx, fy);
+      return;
+    }
+
+    // Simple AI: move toward player, attack if adjacent
     if (dist === 1 || (Math.abs(dx) === 1 && Math.abs(dy) === 1)) {
-      // Adjacent — attack
       this._monsterAttacksPlayer(monster);
       return;
     }

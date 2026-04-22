@@ -106,7 +106,7 @@ export const THEMES = {
     wallFg: '#4488aa',  wallBg: '#031012',
     corridorFg: '#2a4444', corridorBg: '#020606',
     minRoomW: 5, maxRoomW: 13, minRoomH: 4, maxRoomH: 9,
-    monsterWeights: { fire_elemental: 20, water_elemental: 20, earth_elemental: 15, magma_sprite: 20, crystal_golem: 15, storm_wisp: 10 },
+    monsterWeights: { fire_elemental: 20, water_elemental: 20, earth_elemental: 15, magma_sprite: 20, crystal_golem: 15, storm_wisp: 10, dragon_young_red: 5 },
     itemWeights: { elemental_shard: 20, fire_opal: 10, mana_crystal: 15, elemental_essence: 10, aquamarine: 10, lodestone: 10, prismatic_flask: 10, earth_heart: 5, storm_rune: 10 },
     dressingFeatures: ['crystal_formation', 'fountain', 'transport_circle', 'chest'],
     ambientMessages: [
