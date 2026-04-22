@@ -63,11 +63,27 @@ export class Player extends Entity {
   _computeAC() {
     let ac = 10;
     ac -= statModifier(this.stats.dex);
-    if (this.equipped.body)   ac -= this.equipped.body.armor?.acBonus   ?? 0;
-    if (this.equipped.helmet) ac -= this.equipped.helmet.armor?.acBonus ?? 0;
-    if (this.equipped.boots)  ac -= this.equipped.boots.armor?.acBonus  ?? 0;
+    if (this.equipped.body)    ac -= this.equipped.body.armor?.acBonus    ?? 0;
+    if (this.equipped.helmet)  ac -= this.equipped.helmet.armor?.acBonus  ?? 0;
+    if (this.equipped.offhand) ac -= this.equipped.offhand.armor?.acBonus ?? 0;
+    if (this.equipped.boots)   ac -= this.equipped.boots.armor?.acBonus   ?? 0;
+    for (const slot of ['ring1', 'ring2', 'amulet']) {
+      for (const eff of (this.equipped[slot]?.effects ?? [])) {
+        if (eff.type === 'ac') ac -= eff.value;
+      }
+    }
     for (const status of this.statuses) ac += status.acMod ?? 0;
     return ac;
+  }
+
+  getEquippedEffectValue(type) {
+    let total = 0;
+    for (const slot of ['ring1', 'ring2', 'amulet']) {
+      for (const eff of (this.equipped[slot]?.effects ?? [])) {
+        if (eff.type === type) total += eff.value;
+      }
+    }
+    return total;
   }
 
   _initClass() {

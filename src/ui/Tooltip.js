@@ -82,8 +82,9 @@ function _renderItemPanel(ctx, item, x, y, w, h, tileH) {
     const atk = wp.attackBonus ? `  Atk ${_sign(wp.attackBonus)}` : '';
     const dmg = wp.damageMod   ? `  Dmg ${_sign(wp.damageMod)}`   : '';
     const rng = wp.range > 1   ? `  Range: ${wp.range}` : '';
+    const [numDice, die] = Array.isArray(wp.damage) ? wp.damage : [wp.numDice ?? 1, wp.die ?? 6];
     lines.push({
-      text:  `Dmg: ${wp.numDice ?? 1}d${wp.die ?? 6}${atk}${dmg}${rng}`,
+      text:  `Dmg: ${numDice}d${die}${atk}${dmg}${rng}`,
       color: '#ff9966',
     });
   }
@@ -112,6 +113,16 @@ function _renderItemPanel(ctx, item, x, y, w, h, tileH) {
       text:  `Spell: ${sc.spellKey.replace(/_/g, ' ')}  Caster Level: ${sc.casterLevel}`,
       color: '#aa88ff',
     });
+  }
+
+  if (item.wand) {
+    const wd = item.wand;
+    const chargeBar = '█'.repeat(wd.charges) + '░'.repeat(Math.max(0, (wd.maxCharges ?? wd.charges) - wd.charges));
+    lines.push({
+      text:  `Spell: ${wd.spellKey.replace(/_/g, ' ')}  Charges: ${wd.charges}/${wd.maxCharges ?? wd.charges}`,
+      color: '#aa88ff',
+    });
+    lines.push({ text: chargeBar, color: wd.charges > 0 ? '#aa44ff' : '#444444' });
   }
 
   if (item.food) {
