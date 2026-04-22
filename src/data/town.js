@@ -8,11 +8,26 @@ function generateRumors(worldState) {
     const depth = worldState?.deepestLevel ?? 1;
     const quests = worldState?.guild_board_quests ?? [];
     const pool = [
-      `They say level ${depth + 1} is full of undead. Bring holy water.`,
+      `They say level ${depth + 1} is crawling with something worse than goblins. Go prepared.`,
       `A merchant was lost near level ${Math.max(1, depth - 1)}. Brave soul.`,
       `The deeper you go, the more the walls whisper.`,
       `Old Kern found a cache of gold on level ${depth}. Didn't make it back.`,
       `Whatever you do, don't split the party.`,
+      `I heard trolls regenerate unless you hit them with fire or acid.`,
+      `The void levels — they say the walls breathe there.`,
+      `A wight's touch drains the very life from your body. Permanently.`,
+      `Golems don't sleep and don't feel pain. Magic mostly bounces right off 'em.`,
+      `Someone claimed level ${Math.min(depth + 2, 100)} has a dragon. I didn't believe them either.`,
+      `There's a smith in town who can make your blade sharper than it ever was. Worth the coin.`,
+      `The temple priests can restore what the undead take from you. Costs a fortune, but it works.`,
+      `You can learn spells at Mira's shop. She charges through the nose, but they're real.`,
+      `Never fight a ghost with an iron blade. You may as well spit at it.`,
+      `I saw a survivor come back from level ${depth}. She didn't speak for three days.`,
+      `Hire yourself a henchman at the inn before you go down. Cheap insurance.`,
+      `Poison from a giant spider lingers. The temple can fix it, but not for free.`,
+      `Skeletons feel no fear. Don't bother trying to scare them off.`,
+      `The barkeep says someone brought back a map to level ${Math.max(1, depth - 2)}. Sold it for a hundred gold.`,
+      `If you can't see it, it can still see you. The dark things down there have other senses.`,
     ];
     if (quests.length > 0) {
       pool.push(`The guild is offering good coin for clearing level ${quests[0]?.targetDepth ?? depth}.`);
@@ -74,6 +89,8 @@ export const TOWN_LOCATIONS = {
     glyph: 0x21, color: '#cc4444',
     services: ['buy', 'sell', 'repair', 'enchant'],
     stock: ['short_sword', 'long_sword', 'dagger', 'mace', 'staff', 'short_bow'],
+    buyMarkup:  1.5,
+    sellMarkup: 0.4,
     repairCost: (item) => Math.floor(item.value * 0.2),
     enchantCost: (item, bonus) => item.value * (bonus * 10),
   },

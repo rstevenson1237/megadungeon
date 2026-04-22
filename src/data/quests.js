@@ -5,12 +5,19 @@
 export const QUEST_TEMPLATES = {
     kill: {
         generate: (depth, rng) => {
+            const monstersByDepth = depth <= 10  ? ['goblin', 'giant_rat', 'skeleton']
+                                  : depth <= 25  ? ['orc', 'zombie', 'hobgoblin', 'warg']
+                                  : depth <= 45  ? ['ghoul', 'wight', 'wraith', 'vampire_spawn']
+                                  : depth <= 65  ? ['duergar', 'dark_dwarf_warrior', 'cave_troll']
+                                  : depth <= 80  ? ['fire_elemental', 'shadow_demon', 'crystal_golem']
+                                  :               ['void_wraith', 'phase_spider', 'rift_stalker'];
+            const target = rng.pick(monstersByDepth);
             const count = rng.int(5, 10);
-            const target = 'goblin';
+            const targetName = target.replace(/_/g, ' ');
             return {
                 type: 'kill',
-                title: `Slay the Goblins on Level ${depth}`,
-                description: `A group of goblins has been causing trouble on level ${depth}. Clear them out.`,
+                title: `Slay ${count} ${targetName}s on Level ${depth}`,
+                description: `A group of ${targetName}s has been causing trouble on level ${depth}. Clear them out.`,
                 target,
                 count,
                 state: { killed: 0 },
@@ -21,14 +28,18 @@ export const QUEST_TEMPLATES = {
     },
     fetch: {
         generate: (depth, rng) => {
-            const target = 'ancient_key';
+            const fetchItems = depth <= 15 ? ['healing_potion', 'holy_symbol', 'torch']
+                             : depth <= 40 ? ['potion_of_speed', 'scroll_magic_missile', 'ring_of_protection']
+                             :               ['amulet_of_life_protection', 'ring_of_protection'];
+            const target = rng.pick(fetchItems);
+            const targetName = target.replace(/_/g, ' ');
             return {
                 type: 'fetch',
-                title: `Recover the Lost Artifact`,
-                description: `A valuable artifact was lost on level ${depth}. Find it and bring it back.`,
+                title: `Recover the ${targetName}`,
+                description: `A ${targetName} was lost on level ${depth}. Find one and bring it back.`,
                 target,
                 state: { recovered: false },
-                reward: { xp: 150 * depth, gold: 75 * depth },
+                reward: { xp: 150 * depth, gold: 75 * depth, item: 'healing_potion' },
                 completionCondition: (state, player, world) => state.recovered,
             };
         },
@@ -67,14 +78,14 @@ export const QUEST_TEMPLATES = {
     },
     rescue: {
         generate: (depth, rng) => {
-            const targetNPC = 'lost_merchant';
+            const targetDepth = depth;
             return {
                 type: 'rescue',
-                title: `Rescue the Captive`,
-                description: `A merchant was taken to level ${depth}. Find them and bring them back to the surface.`,
-                targetNPC,
+                title: `Rescue the Captive on Level ${depth}`,
+                description: `A merchant was taken to level ${depth}. Search the area and return to the surface safely.`,
+                targetDepth,
                 state: { found: false, returned: false },
-                reward: { xp: 400 * depth, gold: 200 * depth },
+                reward: { xp: 400 * depth, gold: 200 * depth, item: 'ring_of_protection' },
                 completionCondition: (state, player, world) => state.returned,
             };
         },

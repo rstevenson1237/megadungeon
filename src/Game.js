@@ -120,6 +120,7 @@ this.traps = new TrapSystem(this.bus);
       );
       const map = this.worldMap.getLevel(this.currentLevel);
       map.removeEntity(entity);
+      this._updateQuestProgress('clear', {});
       // Victory: last monster on level 100 cleared
       if (this.currentLevel === 100 && this.state === STATE.PLAYING) {
         let anyMonster = false;
@@ -859,6 +860,7 @@ _handlePickup() {
       map.removeEntity(item);
       this.log.add(`You pick up the ${item.name}.`, 'system');
       this._updateQuestProgress('fetch', { itemKey: item.itemKey });
+      this._updateQuestProgress('rescue_found', {});
     } else {
       this.log.add('Your inventory is full.', 'important');
     }
@@ -1026,9 +1028,21 @@ _openUseMenu() {
 
   _monsterAttacksPlayer(monster) {
     const attack = monster.getPrimaryAttack();
-    // Simple THAC0 roll: d20 vs player AC
     const roll = this.rng.int(1, 20);
     const hit  = roll >= (20 - this.player.ac);
+
+    // Henchman intercept: 30% chance to halve damage when active
+    if (hit && this.player.henchman?.turnsRemaining > 0) {
+      this.player.henchman.turnsRemaining--;
+      if (this.rng.int(1, 100) <= 30) {
+        const dmg = Math.max(1, Math.floor(monster.rollDamage(attack) / 2));
+        this.player.hp = Math.max(0, this.player.hp - dmg);
+        this.log.add(`Your henchman takes the blow! You take only ${dmg} damage.`, 'combat');
+        if (this.player.hp <= 0) this.bus.emit('player:death', { cause: monster.name });
+        return;
+      }
+    }
+
     if (hit) {
       const dmg = Math.max(1, monster.rollDamage(attack));
       this.player.hp = Math.max(0, this.player.hp - dmg);
@@ -1199,6 +1213,7 @@ _openUseMenu() {
       this.log.add('You emerge into the safety of town.', 'important');
       const map = this.worldMap.getLevel(this.currentLevel);
       map.removeEntity(this.player);
+      this._updateQuestProgress('rescue_returned', {});
       this.state = STATE.TOWN;
       this.townLocation = null;
       this._openTownOverview();
@@ -1604,13 +1619,21 @@ _enterTownLocation(location) {
 
 _openInnMenu(location) {
     const restCost = location.restCost(this.player.level);
+    const henchCost = this.player.level * 100;
+    const hasHenchman = this.player.henchman?.turnsRemaining > 0;
     const items = [
         { label: `Rest for the night (${restCost} gold)`, color: '#66ff66',
           enabled: this.player.gold >= restCost, data: 'rest' },
         { label: 'Listen for rumors', color: '#ccccaa', data: 'rumors' },
+        { label: hasHenchman
+            ? `Henchman (${this.player.henchman.turnsRemaining} turns remaining)`
+            : `Hire a Henchman (${henchCost} gold)`,
+          color: hasHenchman ? '#888888' : '#ffcc44',
+          enabled: !hasHenchman && this.player.gold >= henchCost,
+          data: 'henchman' },
         { label: 'Back to town', color: '#888888', data: 'back' },
     ];
-    
+
     const menu = new Menu(location.name, items, {
         onSelect: (selected) => {
             switch (selected.data) {
@@ -1624,11 +1647,17 @@ _openInnMenu(location) {
                     break;
                 case 'rumors': {
                     const pool = location.rumors(this.worldMap.townState ?? {});
-                    const rumor = pool[Math.floor(Math.random() * pool.length)];
+                    const rumor = pool[this.rng.int(0, pool.length - 1)];
                     this.log.add(`The barkeep leans in: "${rumor}"`, 'lore');
                     this._openInnMenu(location);
                     break;
                 }
+                case 'henchman':
+                    this.player.gold -= henchCost;
+                    this.player.henchman = { turnsRemaining: 50, bonus: 1 };
+                    this.log.add('A sell-sword agrees to accompany you into the dungeon.', 'system');
+                    this._openInnMenu(location);
+                    break;
                 case 'back':
                     this.activeMenu.closed = true;
                     this._openTownOverview();
@@ -1644,17 +1673,19 @@ _openInnMenu(location) {
 
 _openWeaponSmithMenu(location) {
   const items = [
-    { label: 'Buy Weapons', color: '#44ff44', data: 'buy' },
-    { label: 'Sell Items',  color: '#ffcc44', data: 'sell' },
+    { label: 'Buy Weapons',   color: '#44ff44', data: 'buy' },
+    { label: 'Sell Items',    color: '#ffcc44', data: 'sell' },
     { label: 'Repair Weapon', color: '#cc8844', data: 'repair' },
-    { label: 'Back to town', color: '#888888', data: 'back' },
+    { label: 'Enchant Item',  color: '#88aaff', data: 'enchant' },
+    { label: 'Back to town',  color: '#888888', data: 'back' },
   ];
   const menu = new Menu(location.name, items, {
     onSelect: (selected) => {
       switch (selected.data) {
-        case 'buy':    this._openBuyMenu(location); break;
-        case 'sell':   this._openSellMenu(location); break;
-        case 'repair': this._openRepairMenu(location); break;
+        case 'buy':     this._openBuyMenu(location); break;
+        case 'sell':    this._openSellMenu(location); break;
+        case 'repair':  this._openRepairMenu(location); break;
+        case 'enchant': this._openEnchantMenu(location); break;
         case 'back':
           this.activeMenu.closed = true;
           this._openTownOverview(); break;
@@ -1691,6 +1722,50 @@ _openRepairMenu(location) {
       this.player.gold -= selected.data.cost;
       this.log.add(`Gareth repairs your ${selected.data.item.name}. Good as new.`, 'system');
       this._openRepairMenu(location);
+    },
+    onCancel: () => { this._openWeaponSmithMenu(location); }
+  });
+  this._previousState = STATE.TOWN;
+  this.state = STATE.MENU;
+  this.activeMenu = menu;
+}
+
+_openEnchantMenu(location) {
+  const enchantable = this.player.inventory.filter(
+    i => (i.weapon || i.armor) && !i.cursed && (i._enchantLevel ?? 0) < 3
+  );
+  if (enchantable.length === 0) {
+    this.log.add('Nothing to enchant, or all items are already at max enchantment (+3).', 'system');
+    this._openWeaponSmithMenu(location); return;
+  }
+  const items = enchantable.map(item => {
+    const nextLevel = (item._enchantLevel ?? 0) + 1;
+    const cost = location.enchantCost(item, nextLevel);
+    return {
+      label: `${item.name} → +${nextLevel} — ${cost}g`,
+      color: this.player.gold >= cost ? '#88aaff' : '#555555',
+      enabled: this.player.gold >= cost,
+      data: { item, cost, nextLevel },
+    };
+  });
+  items.push({ label: 'Back', color: '#888888', data: null });
+  const menu = new Menu(`Enchant Item (${this.player.gold}g)`, items, {
+    onSelect: (selected) => {
+      if (!selected.data) { this._openWeaponSmithMenu(location); return; }
+      const { item, cost, nextLevel } = selected.data;
+      this.player.gold -= cost;
+      item._baseName = item._baseName ?? item.name.replace(/ \+\d$/, '');
+      item._enchantLevel = nextLevel;
+      item.name = `${item._baseName} +${nextLevel}`;
+      if (item.weapon) {
+        item.weapon.attackBonus = (item.weapon.attackBonus ?? 0) + 1;
+        item.weapon.damageMod   = (item.weapon.damageMod   ?? 0) + 1;
+      } else if (item.armor) {
+        item.armor.acBonus = (item.armor.acBonus ?? 0) + 1;
+        this.player.ac = this.player._computeAC();
+      }
+      this.log.add(`Gareth works the metal. ${item.name} hums with power.`, 'magic');
+      this._openEnchantMenu(location);
     },
     onCancel: () => { this._openWeaponSmithMenu(location); }
   });
@@ -1801,19 +1876,28 @@ _openSellMenu(location) {
 
 _openTempleMenu(location) {
     const costs = location.costs;
+    const restoreCost = costs.raise_dead(this.player.level);
+    const drainedHP = (this.player.hpMaxBase ?? this.player.hpMax) - this.player.hpMax;
     const items = [
         { label: `Cure Disease (${costs.cure_disease}g)`, color: '#66ff66',
           enabled: this.player.gold >= costs.cure_disease, data: 'cure_disease' },
         { label: `Remove Curse (${costs.remove_curse}g)`, color: '#66ff66',
           enabled: this.player.gold >= costs.remove_curse, data: 'remove_curse' },
+        { label: `Restore Vitality (${restoreCost}g)${drainedHP > 0 ? ` — +${drainedHP} max HP` : ' — no drain'}`,
+          color: drainedHP > 0 ? '#ff9966' : '#555555',
+          enabled: drainedHP > 0 && this.player.gold >= restoreCost, data: 'raise_dead' },
+        { label: `Atonement (${costs.atonement}g) — cleanse all afflictions`, color: '#ffffaa',
+          enabled: this.player.gold >= costs.atonement, data: 'atonement' },
         { label: `Identify Item (${costs.identify}g)`, color: '#8888ff',
           enabled: this.player.gold >= costs.identify, data: 'identify' },
         { label: 'Back to town', color: '#888888', data: 'back' },
     ];
-    
+
     const menu = new Menu(location.name, items, {
         onSelect: (selected) => {
-            const cost = costs[selected.data];
+            const cost = typeof costs[selected.data] === 'function'
+                ? costs[selected.data](this.player.level)
+                : costs[selected.data];
             switch (selected.data) {
                 case 'cure_disease':
                     this.player.gold -= cost;
@@ -1824,7 +1908,6 @@ _openTempleMenu(location) {
                     break;
                 case 'remove_curse':
                     this.player.gold -= cost;
-                    // Unequip all cursed items
                     for (const [slot, item] of Object.entries(this.player.equipped)) {
                         if (item?.cursed) {
                             this.player.equipped[slot] = null;
@@ -1833,6 +1916,36 @@ _openTempleMenu(location) {
                     }
                     this._openTempleMenu(location);
                     break;
+                case 'raise_dead': {
+                    this.player.gold -= cost;
+                    const base = this.player.hpMaxBase ?? this.player.hpMax;
+                    const restored = base - this.player.hpMax;
+                    if (restored > 0) {
+                        this.player.hpMax = base;
+                        this.player.hp = Math.min(this.player.hp + restored, this.player.hpMax);
+                        this.log.add(`The priests restore your life force. Max HP recovered by ${restored}.`, 'heal');
+                    } else {
+                        this.log.add('The priests bless you, but your vitality is already whole.', 'heal');
+                        this.player.gold += cost;
+                    }
+                    this._openTempleMenu(location);
+                    break;
+                }
+                case 'atonement': {
+                    this.player.gold -= cost;
+                    const negatives = ['cursed', 'fear', 'disease', 'poison', 'burning', 'slow', 'paralysis'];
+                    const before = (this.player.statuses ?? []).length;
+                    this.player.statuses = (this.player.statuses ?? []).filter(s => !negatives.includes(s.key));
+                    const cleared = before - this.player.statuses.length;
+                    this.log.add(
+                        cleared > 0
+                            ? `The priests absolve you. ${cleared} affliction(s) cleansed.`
+                            : 'The priests bless you. Your soul is already unburdened.',
+                        'heal'
+                    );
+                    this._openTempleMenu(location);
+                    break;
+                }
                 case 'identify':
                     this._openIdentifyMenu(
                       location, costs.identify,
@@ -1879,8 +1992,7 @@ _openArcaneShopMenu(location) {
                     );
                     break;
                 case 'scribe_scroll':
-                    this.log.add('Scribing scrolls is not yet implemented.', 'system');
-                    this._openArcaneShopMenu(location); // Refresh
+                    this._openScribeScrollMenu(location);
                     break;
                 case 'back':
                     this.activeMenu.closed = true;
@@ -1951,6 +2063,50 @@ _openSellScrollsMenu(location) {
   this.activeMenu = menu;
 }
 
+_openScribeScrollMenu(location) {
+  const inkpot = this.player.inventory.find(i => i.itemKey === 'inkpot');
+  if (!inkpot) {
+    this.log.add('You need an inkpot to scribe scrolls. Buy one from Aldric\'s Provisions.', 'system');
+    this._openArcaneShopMenu(location); return;
+  }
+  const known = this.player.spellbook
+    .map(k => SPELLS[k])
+    .filter(s => s?.type === 'arcane');
+  if (known.length === 0) {
+    this.log.add('You know no arcane spells to scribe.', 'system');
+    this._openArcaneShopMenu(location); return;
+  }
+  const items = known.map(spell => {
+    const cost = spell.level * 50;
+    return {
+      label: `${spell.name} (L${spell.level}) — ${cost}g`,
+      color: this.player.gold >= cost ? '#ffffcc' : '#555555',
+      enabled: this.player.gold >= cost,
+      data: { spell, cost },
+    };
+  });
+  items.push({ label: 'Back', color: '#888888', data: null });
+  const menu = new Menu(`Scribe Scroll (have inkpot, ${this.player.gold}g)`, items, {
+    onSelect: (selected) => {
+      if (!selected.data) { this._openArcaneShopMenu(location); return; }
+      const { spell, cost } = selected.data;
+      this.player.gold -= cost;
+      this.player.removeFromInventory(inkpot);
+      const scroll = Item.create('scroll_template');
+      scroll.name = `Scroll of ${spell.name}`;
+      scroll.scroll = { spellKey: spell.key, casterLevel: this.player.level };
+      if (this.player.addToInventory(scroll)) {
+        this.log.add(`You carefully scribe a Scroll of ${spell.name}.`, 'magic');
+      }
+      this._openArcaneShopMenu(location);
+    },
+    onCancel: () => { this._openArcaneShopMenu(location); }
+  });
+  this._previousState = STATE.TOWN;
+  this.state = STATE.MENU;
+  this.activeMenu = menu;
+}
+
 _openBuySpellsMenu(location) {
     const spells = location.spellsAvailable(this.worldMap.townState, this.rng);
     
@@ -1992,13 +2148,16 @@ _openGuildBoardMenu(location) {
   const items = [
     { label: 'View / Accept Quests', color: '#88aacc', data: 'view' },
     { label: `Turn In Quest (${this.quests.active.length} active)`, color: '#44ff44', data: 'turnin' },
+    { label: `Abandon a Quest`, color: '#ff6666',
+      enabled: this.quests.active.length > 0, data: 'abandon' },
     { label: 'Back to town', color: '#888888', data: null },
   ];
   const menu = new Menu("Adventurer's Guild Board", items, {
     onSelect: (selected) => {
       if (!selected.data) { this.activeMenu.closed = true; this._openTownOverview(); return; }
-      if (selected.data === 'view') this._openQuestViewMenu(location);
-      if (selected.data === 'turnin') this._openQuestTurnInMenu(location);
+      if (selected.data === 'view')    this._openQuestViewMenu(location);
+      if (selected.data === 'turnin')  this._openQuestTurnInMenu(location);
+      if (selected.data === 'abandon') this._openAbandonQuestMenu(location);
     },
     onCancel: () => { this._openTownOverview(); }
   });
@@ -2063,6 +2222,31 @@ _openQuestTurnInMenu(location) {
       this.quests.completeQuest(selected.data, this.player);
       this.log.add(`Quest turned in: ${selected.data.title}. Rewards granted!`, 'important');
       this._openQuestTurnInMenu(location); // Refresh
+    },
+    onCancel: () => { this._openGuildBoardMenu(location); }
+  });
+  this._previousState = STATE.TOWN;
+  this.state = STATE.MENU;
+  this.activeMenu = menu;
+}
+
+_openAbandonQuestMenu(location) {
+  if (this.quests.active.length === 0) {
+    this.log.add('You have no active quests to abandon.', 'system');
+    this._openGuildBoardMenu(location); return;
+  }
+  const items = this.quests.active.map(q => ({
+    label: `${q.title}`,
+    color: '#ff6666',
+    data: q,
+  }));
+  items.push({ label: 'Back', color: '#888888', data: null });
+  const menu = new Menu('Abandon Quest', items, {
+    onSelect: (selected) => {
+      if (!selected.data) { this._openGuildBoardMenu(location); return; }
+      this.quests.abandonQuest(selected.data);
+      this.log.add(`Abandoned: ${selected.data.title}.`, 'system');
+      this._openGuildBoardMenu(location);
     },
     onCancel: () => { this._openGuildBoardMenu(location); }
   });
@@ -2425,6 +2609,21 @@ _updateQuestProgress(type, data) {
       } else if (quest.type === 'fetch' && type === 'fetch') {
         if (!quest.state.recovered && data.itemKey === quest.target) {
           quest.state.recovered = true;
+          this.log.add(`Quest complete: ${quest.title}! Return to the Guild Board.`, 'important');
+        }
+      } else if (quest.type === 'clear' && type === 'clear') {
+        if (!quest.state.cleared && this.quests.checkCompletion(quest, this.player, this.worldMap)) {
+          quest.state.cleared = true;
+          this.log.add(`Quest complete: ${quest.title}! Return to the Guild Board.`, 'important');
+        }
+      } else if (quest.type === 'rescue' && type === 'rescue_found') {
+        if (!quest.state.found && this.currentLevel === quest.targetDepth) {
+          quest.state.found = true;
+          this.log.add(`You find signs of the captive on level ${quest.targetDepth}. Get back to town!`, 'important');
+        }
+      } else if (quest.type === 'rescue' && type === 'rescue_returned') {
+        if (quest.state.found && !quest.state.returned) {
+          quest.state.returned = true;
           this.log.add(`Quest complete: ${quest.title}! Return to the Guild Board.`, 'important');
         }
       }
