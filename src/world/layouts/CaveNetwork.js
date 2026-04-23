@@ -6,11 +6,11 @@ function makeRoom(x, y, w, h, id) {
   return { x, y, w, h, type: 'normal', content: null, explored: false, id };
 }
 
-function setFloor(map, x, y, theme) {
+function setFloor(map, x, y, theme, rng) {
   if (!map.inBounds(x, y)) return;
   const t = map.get(x, y);
   t.type = 'floor'; t.solid = false; t.opaque = false;
-  t.glyph = theme.floorGlyphs[0]; t.fg = theme.floorFg; t.bg = theme.floorBg;
+  t.glyph = rng.pick(theme.floorGlyphs); t.fg = theme.floorFg; t.bg = theme.floorBg;
 }
 
 function setWall(map, x, y, theme) {
@@ -95,7 +95,7 @@ export function generate(map, rng, theme, levelNumber) {
   // Apply floor tiles
   for (let y = 1; y < H - 1; y++)
     for (let x = 1; x < W - 1; x++)
-      if (grid[y * W + x]) setFloor(map, x, y, theme);
+      if (grid[y * W + x]) setFloor(map, x, y, theme, rng);
 
   // 5. Extract rooms: divide into 4×3 zones; zones with ≥16 floor tiles → room (bounding box)
   const COLS = 4, ROWS = 3;

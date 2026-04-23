@@ -47,7 +47,7 @@ class BSP {
   }
 }
 
-function carveRoom(map, room, theme) {
+function carveRoom(map, room, theme, rng) {
   map.metadata.rooms = map.metadata.rooms || [];
   map.metadata.rooms.push(room);
 
@@ -58,7 +58,7 @@ function carveRoom(map, room, theme) {
         tile.type   = 'floor';
         tile.solid  = false;
         tile.opaque = false;
-        tile.glyph  = theme.floorGlyphs[0];
+        tile.glyph  = rng.pick(theme.floorGlyphs);
         tile.fg     = theme.floorFg;
         tile.bg     = theme.floorBg;
         tile.roomId = room.id;
@@ -96,7 +96,7 @@ function primMST(centers) {
   return mstEdges;
 }
 
-function carveLCorridor(map, roomA, roomB, theme) {
+function carveLCorridor(map, roomA, roomB, theme, rng) {
   const ax = roomA.x + Math.floor(roomA.w / 2);
   const ay = roomA.y + Math.floor(roomA.h / 2);
   const bx = roomB.x + Math.floor(roomB.w / 2);
@@ -108,7 +108,7 @@ function carveLCorridor(map, roomA, roomB, theme) {
       tile.type    = 'floor';
       tile.solid   = false;
       tile.opaque  = false;
-      tile.glyph   = theme.floorGlyphs[0];
+      tile.glyph   = rng.pick(theme.floorGlyphs);
       tile.fg      = theme.corridorFg || theme.floorFg;
       tile.bg      = theme.corridorBg || theme.floorBg;
     }
@@ -119,14 +119,14 @@ function carveLCorridor(map, roomA, roomB, theme) {
       tile.type    = 'floor';
       tile.solid   = false;
       tile.opaque  = false;
-      tile.glyph   = theme.floorGlyphs[0];
+      tile.glyph   = rng.pick(theme.floorGlyphs);
       tile.fg      = theme.corridorFg || theme.floorFg;
       tile.bg      = theme.corridorBg || theme.floorBg;
     }
   }
 }
 
-function carveZCorridor(map, roomA, roomB, theme) {
+function carveZCorridor(map, roomA, roomB, theme, rng) {
   const ax = roomA.x + Math.floor(roomA.w / 2);
   const ay = roomA.y + Math.floor(roomA.h / 2);
   const bx = roomB.x + Math.floor(roomB.w / 2);
@@ -138,7 +138,7 @@ function carveZCorridor(map, roomA, roomB, theme) {
       tile.type    = 'floor';
       tile.solid   = false;
       tile.opaque  = false;
-      tile.glyph   = theme.floorGlyphs[0];
+      tile.glyph   = rng.pick(theme.floorGlyphs);
       tile.fg      = theme.corridorFg || theme.floorFg;
       tile.bg      = theme.corridorBg || theme.floorBg;
     }
@@ -149,7 +149,7 @@ function carveZCorridor(map, roomA, roomB, theme) {
       tile.type    = 'floor';
       tile.solid   = false;
       tile.opaque  = false;
-      tile.glyph   = theme.floorGlyphs[0];
+      tile.glyph   = rng.pick(theme.floorGlyphs);
       tile.fg      = theme.corridorFg || theme.floorFg;
       tile.bg      = theme.corridorBg || theme.floorBg;
     }
@@ -188,7 +188,7 @@ export function generate(map, rng, theme, levelNumber) {
       explored: false,
       id: rooms.length,
     };
-    carveRoom(map, room, theme);
+    carveRoom(map, room, theme, rng);
     rooms.push(room);
   }
 
@@ -196,13 +196,13 @@ export function generate(map, rng, theme, levelNumber) {
     const centers = rooms.map(r => ({ x: r.x + (r.w >> 1), y: r.y + (r.h >> 1), room: r }));
     const mst = primMST(centers);
     for (const [a, b] of mst) {
-      if (rng.chance(0.5)) carveLCorridor(map, a.room, b.room, theme);
-      else                  carveZCorridor(map, a.room, b.room, theme);
+      if (rng.chance(0.5)) carveLCorridor(map, a.room, b.room, theme, rng);
+      else                  carveZCorridor(map, a.room, b.room, theme, rng);
     }
     const extras = Math.floor(rooms.length * 0.2);
     for (let i = 0; i < extras; i++) {
       const [a, b] = [rng.pick(centers), rng.pick(centers)];
-      if (a.room !== b.room) carveLCorridor(map, a.room, b.room, theme);
+      if (a.room !== b.room) carveLCorridor(map, a.room, b.room, theme, rng);
     }
   }
 

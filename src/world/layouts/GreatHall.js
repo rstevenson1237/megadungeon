@@ -6,17 +6,17 @@ function makeRoom(x, y, w, h, id) {
   return { x, y, w, h, type: 'normal', content: null, explored: false, id };
 }
 
-function setFloor(map, x, y, theme) {
+function setFloor(map, x, y, theme, rng) {
   if (!map.inBounds(x, y)) return;
   const t = map.get(x, y);
   t.type = 'floor'; t.solid = false; t.opaque = false;
-  t.glyph = theme.floorGlyphs[0]; t.fg = theme.floorFg; t.bg = theme.floorBg;
+  t.glyph = rng.pick(theme.floorGlyphs); t.fg = theme.floorFg; t.bg = theme.floorBg;
 }
 
 function carveRect(map, rx, ry, rw, rh, theme) {
   for (let dy = 0; dy < rh; dy++)
     for (let dx = 0; dx < rw; dx++)
-      setFloor(map, rx + dx, ry + dy, theme);
+      setFloor(map, rx + dx, ry + dy, theme, rng);
 }
 
 /**
@@ -78,7 +78,7 @@ export function generate(map, rng, theme, levelNumber) {
     if (rx < 1 || ry < 1 || rx + sw >= W - 1 || ry + sh >= H - 1) continue;
 
     carveRect(map, rx, ry, sw, sh, theme);
-    setFloor(map, doorX, doorY, theme); // 1-tile doorway
+    setFloor(map, doorX, doorY, theme, rng); // 1-tile doorway
     rooms.push(makeRoom(rx, ry, sw, sh, rooms.length));
   }
 

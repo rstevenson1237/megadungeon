@@ -27,6 +27,8 @@ export class Item extends Entity {
     if (!itemData) {
       throw new Error(`Unknown item key: ${itemKey}`);
     }
-    return new Item(itemKey, itemData);
+    const item = new Item(itemKey, itemData);
+    if (item.stackable) item.quantity = 1;
+    return item;
   }
 }

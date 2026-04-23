@@ -6,11 +6,11 @@ function makeRoom(x, y, w, h, id) {
   return { x, y, w, h, type: 'normal', content: null, explored: false, id };
 }
 
-function setFloor(map, x, y, theme) {
+function setFloor(map, x, y, theme, rng) {
   if (!map.inBounds(x, y)) return;
   const t = map.get(x, y);
   t.type = 'floor'; t.solid = false; t.opaque = false;
-  t.glyph = theme.floorGlyphs[0]; t.fg = theme.floorFg; t.bg = theme.floorBg;
+  t.glyph = rng.pick(theme.floorGlyphs); t.fg = theme.floorFg; t.bg = theme.floorBg;
 }
 
 /**
@@ -37,7 +37,7 @@ export function generate(map, rng, theme, levelNumber) {
 
     for (let dy = 0; dy < ph; dy++)
       for (let dx = 0; dx < pw; dx++)
-        setFloor(map, px + dx, py + dy, theme);
+        setFloor(map, px + dx, py + dy, theme, rng);
 
     rooms.push(makeRoom(px, py, pw, ph, rooms.length));
   }
@@ -54,9 +54,9 @@ export function generate(map, rng, theme, levelNumber) {
       // No horizontal overlap: bridge at lower room level then drop
       shaftX = upper.x + (upper.w >> 1);
       const lx = lower.x + (lower.w >> 1);
-      for (let x = Math.min(shaftX, lx); x <= Math.max(shaftX, lx); x++) setFloor(map, x, lower.y, theme);
+      for (let x = Math.min(shaftX, lx); x <= Math.max(shaftX, lx); x++) setFloor(map, x, lower.y, theme, rng);
     }
-    for (let y = upper.y + upper.h; y <= lower.y; y++) setFloor(map, shaftX, y, theme);
+    for (let y = upper.y + upper.h; y <= lower.y; y++) setFloor(map, shaftX, y, theme, rng);
   }
 
   if (rooms.length < 2) {

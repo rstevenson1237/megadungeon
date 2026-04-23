@@ -1,5 +1,6 @@
 // src/ui/Renderer.js
 import { XP_TABLE } from '../engine/rules.js';
+import { SkillSystem } from '../systems/SkillSystem.js';
 
 export class Renderer {
     constructor(canvasEl) {
@@ -343,6 +344,125 @@ export class Renderer {
             this.ctx.fillStyle = msg.color;
             this.ctx.fillText(msg.text, x, y + i * this.TILE_H);
         });
+    }
+
+    drawTargetingCursor(ctx, cursor, player, cameraX, cameraY, map) {
+        const col = cursor.x - cameraX;
+        const row = cursor.y - cameraY;
+        if (col < 0 || col >= this.VIEW_COLS || row < 0 || row >= this.VIEW_ROWS) return;
+
+        const x = col * this.TILE_W;
+        const y = row * this.TILE_H;
+        const tile = map?.get(cursor.x, cursor.y);
+        const valid = tile?.visible ?? false;
+
+        ctx.fillStyle = valid ? 'rgba(255,255,0,0.35)' : 'rgba(255,0,0,0.35)';
+        ctx.fillRect(x, y, this.TILE_W, this.TILE_H);
+
+        // Dashed line from player to cursor
+        const px = (player.x - cameraX) * this.TILE_W + this.TILE_W / 2;
+        const py = (player.y - cameraY) * this.TILE_H + this.TILE_H / 2;
+        const cx = x + this.TILE_W / 2;
+        const cy = y + this.TILE_H / 2;
+        ctx.strokeStyle = valid ? 'rgba(255,255,0,0.5)' : 'rgba(255,80,80,0.5)';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([3, 3]);
+        ctx.beginPath();
+        ctx.moveTo(px, py);
+        ctx.lineTo(cx, cy);
+        ctx.stroke();
+        ctx.setLineDash([]);
+    }
+
+    drawCharacterSheet(ctx, player) {
+        const tw = this.TILE_W;
+        const th = this.TILE_H;
+
+        ctx.fillStyle = '#000';
+        ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+        ctx.font = `${th}px monospace`;
+
+        const col1 = tw;
+        const col2 = tw * 28;
+        let y = th;
+
+        // Header
+        ctx.fillStyle = player.class.color ?? '#ffff00';
+        ctx.font = `bold ${th + 2}px monospace`;
+        ctx.fillText(`${player.name}  —  Level ${player.level} ${player.class.name}`, col1, y);
+        y += th * 1.5;
+        ctx.font = `${th}px monospace`;
+
+        // XP
+        ctx.fillStyle = '#aaaaaa';
+        const nextXP = XP_TABLE[player.level] ?? 0;
+        ctx.fillText(`XP: ${player.xp}  /  ${nextXP > 0 ? nextXP : 'MAX'}`, col1, y);
+        y += th * 1.5;
+
+        // Stats
+        ctx.fillStyle = '#ffff88';
+        ctx.fillText('— ATTRIBUTES —', col1, y); y += th;
+        const statNames = { str:'Strength', dex:'Dexterity', con:'Constitution',
+                            int:'Intelligence', wis:'Wisdom', cha:'Charisma' };
+        for (const [key, label] of Object.entries(statNames)) {
+            const val = player.stats[key] ?? 10;
+            const mod = Math.floor((val - 10) / 2);
+            const modStr = mod >= 0 ? `+${mod}` : `${mod}`;
+            ctx.fillStyle = '#cccccc';
+            ctx.fillText(`${label.padEnd(14)} ${String(val).padStart(2)}  (${modStr})`, col1, y);
+            y += th;
+        }
+        y += th * 0.5;
+
+        // Combat
+        ctx.fillStyle = '#ffff88';
+        ctx.fillText('— COMBAT —', col1, y); y += th;
+        ctx.fillStyle = '#cccccc';
+        const atkBonus = player.class.attackBonus?.[player.level] ?? 0;
+        ctx.fillText(`HP: ${player.hp} / ${player.hpMax}`, col1, y); y += th;
+        if (player.mpMax > 0) { ctx.fillText(`MP: ${player.mp} / ${player.mpMax}`, col1, y); y += th; }
+        ctx.fillText(`AC: ${player.ac}`, col1, y); y += th;
+        ctx.fillText(`Attack Bonus: +${atkBonus}`, col1, y); y += th * 1.5;
+
+        // Abilities
+        if (player.abilities.size > 0) {
+            ctx.fillStyle = '#ffff88';
+            ctx.fillText('— ABILITIES —', col1, y); y += th;
+            for (const ab of player.abilities) {
+                ctx.fillStyle = '#aaffaa';
+                ctx.fillText(`  ${ab.replace(/_/g,' ')}`, col1, y); y += th;
+            }
+            y += th * 0.5;
+        }
+
+        // Skills (second column)
+        let sy = th * 3;
+        ctx.fillStyle = '#ffff88';
+        ctx.fillText('— SKILLS —', col2, sy); sy += th;
+        for (const [key, rank] of Object.entries(player.skills)) {
+            const statKey = SkillSystem.SKILL_STAT[key] ?? 'int';
+            const mod = Math.floor(((player.stats[statKey] ?? 10) - 10) / 2);
+            const total = rank + mod;
+            const sign = total >= 0 ? '+' : '';
+            ctx.fillStyle = rank > 0 ? '#ccffcc' : '#666666';
+            ctx.fillText(`${key.replace(/_/g,' ').padEnd(16)} ${sign}${total}`, col2, sy);
+            sy += th;
+        }
+
+        // Favored Enemies
+        if (player.favoredEnemies?.length > 0) {
+            sy += th * 0.5;
+            ctx.fillStyle = '#ffff88';
+            ctx.fillText('— FAVORED ENEMIES —', col2, sy); sy += th;
+            for (const fe of player.favoredEnemies) {
+                ctx.fillStyle = '#ffaaaa';
+                ctx.fillText(`  ${fe}`, col2, sy); sy += th;
+            }
+        }
+
+        // Footer hint
+        ctx.fillStyle = '#555555';
+        ctx.fillText('[Esc / C to close]', col1, ctx.canvas.height - th * 2);
     }
 
     wrapText(text, maxWidth) {

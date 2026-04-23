@@ -44,6 +44,17 @@ export function rollDiceStr(diceStr) {
 }
 
 /**
+ * Rolls a saving throw for the given entity and save type.
+ * Returns true if the save succeeds.
+ */
+export function rollSave(entity, saveType) {
+  const threshold = entity.class?.savingThrows?.[saveType]
+    ?? entity.def?.savingThrows?.[saveType]
+    ?? 15;
+  return rollDie(20) >= threshold;
+}
+
+/**
  * The maximum level a player can attain.
  */
 export const MAX_LEVEL = 20;

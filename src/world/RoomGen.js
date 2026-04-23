@@ -165,9 +165,7 @@ export class RoomGen {
         }
     }
 
-    _dressRoom(map, room) {
-        this.bus.emit('log:message', { text: 'The room is empty.' });
-    }
+    _dressRoom(map, room) {}
     
     populateBossRoom(map, room){
         const pos = this._randomFloorInRoom(map, room);

@@ -29,7 +29,7 @@ export class InputManager {
       'pickup':      ['KeyG', 'Comma'],
       'drop':        ['KeyR'],
       'reroll':      ['KeyR'],
-      'cast':        ['KeyZ'],
+      'cast':        ['KeyY'],
       'use':         ['KeyU'],
       'examine':     ['KeyX'],
       'map':         ['KeyM'],
@@ -40,6 +40,8 @@ export class InputManager {
       'traits':      ['KeyT'],
       'spellbook':   ['KeyK'],
       'interact':    ['KeyF'],
+      'fire':        ['KeyT'],
+      'sheet':       ['KeyC'],
     };
     for (const [action, keys] of Object.entries(defaults)) {
       this._bindings.set(action, new Set(keys));
