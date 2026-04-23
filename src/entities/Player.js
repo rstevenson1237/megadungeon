@@ -162,31 +162,14 @@ export class Player extends Entity {
 
   hasAbility(key) { return this.abilities.has(key); }
 
-  /** Attack roll: d20 + THAC0-based modifier vs target AC */
-  rollAttack(target) {
-    const roll = rollDie(20) + this._attackBonus();
-    const hit  = roll >= (20 - target.ac); // THAC0 system
-    const dmg  = hit ? this._rollDamage() : 0;
-    return { hit, roll, dmg, critical: roll === 20 };
-  }
-
-  _attackBonus() {
-    const base  = this.class.attackBonus[this.level] ?? 0;
-    const strMod = statModifier(this.stats.str);
-    const wpnMod = this.equipped.weapon?.attackBonus ?? 0;
-    return base + strMod + wpnMod;
-  }
-
-  _rollDamage() {
-    const weapon = this.equipped.weapon;
-    const [num, die] = weapon ? weapon.weapon.damage : [1, 4]; // unarmed = 1d4
-    let dmg = 0;
-    for (let i = 0; i < num; i++) dmg += rollDie(die);
-    dmg += statModifier(this.stats.str) + (weapon?.damageMod ?? 0);
-    return Math.max(1, dmg);
-  }
-
   addToInventory(item) {
+    if (item.stackable) {
+        const existing = this.inventory.find(i => i.itemKey === item.itemKey);
+        if (existing) {
+            existing.quantity = (existing.quantity ?? 1) + (item.quantity ?? 1);
+            return true;
+        }
+    }
     if (this.inventory.length >= 26) return false;
     this.inventory.push(item);
     return true;

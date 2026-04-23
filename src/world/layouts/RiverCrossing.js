@@ -6,11 +6,11 @@ function makeRoom(x, y, w, h, id) {
   return { x, y, w, h, type: 'normal', content: null, explored: false, id };
 }
 
-function setFloor(map, x, y, theme) {
+function setFloor(map, x, y, theme, rng) {
   if (!map.inBounds(x, y)) return;
   const t = map.get(x, y);
   t.type = 'floor'; t.solid = false; t.opaque = false;
-  t.glyph = theme.floorGlyphs[0]; t.fg = theme.floorFg; t.bg = theme.floorBg;
+  t.glyph = rng.pick(theme.floorGlyphs); t.fg = theme.floorFg; t.bg = theme.floorBg;
 }
 
 function connectRooms(map, roomList, theme) {
@@ -18,8 +18,8 @@ function connectRooms(map, roomList, theme) {
     const a = roomList[i], b = roomList[i + 1];
     const ax = a.x + (a.w >> 1), ay = a.y + (a.h >> 1);
     const bx = b.x + (b.w >> 1), by = b.y + (b.h >> 1);
-    for (let x = Math.min(ax, bx); x <= Math.max(ax, bx); x++) setFloor(map, x, ay, theme);
-    for (let y = Math.min(ay, by); y <= Math.max(ay, by); y++) setFloor(map, bx, y, theme);
+    for (let x = Math.min(ax, bx); x <= Math.max(ax, bx); x++) setFloor(map, x, ay, theme, rng);
+    for (let y = Math.min(ay, by); y <= Math.max(ay, by); y++) setFloor(map, bx, y, theme, rng);
   }
 }
 
@@ -71,7 +71,7 @@ export function generate(map, rng, theme, levelNumber) {
 
       for (let dy = 0; dy < rh; dy++)
         for (let dx = 0; dx < rw; dx++)
-          setFloor(map, rx + dx, room_y + dy, theme);
+          setFloor(map, rx + dx, room_y + dy, theme, rng);
 
       rooms.push(makeRoom(rx, room_y, rw, rh, rooms.length));
     }
@@ -91,7 +91,7 @@ export function generate(map, rng, theme, levelNumber) {
     const bx = rng.int(5, W - 6);
     if (usedX.has(bx)) continue;
     usedX.add(bx);
-    for (let y = midY - 1; y <= midY + riverWidth + 1; y++) setFloor(map, bx, y, theme);
+    for (let y = midY - 1; y <= midY + riverWidth + 1; y++) setFloor(map, bx, y, theme, rng);
   }
 
   if (rooms.length < 2) {

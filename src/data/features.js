@@ -44,8 +44,7 @@ export const FEATURES = {
     tier: 'dressing',
     themes: ['dungeon_cellar', 'dwarven_deep', 'goblin_warren'],
     weight: 12,
-    lightRadius: 3,
-    description: 'A torch mounted in an iron sconce. Extends the room\'s light.',
+    description: 'A torch mounted in an iron sconce.',
   },
 
   crystal_formation: {

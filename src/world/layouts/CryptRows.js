@@ -6,11 +6,11 @@ function makeRoom(x, y, w, h, id) {
   return { x, y, w, h, type: 'normal', content: null, explored: false, id };
 }
 
-function setFloor(map, x, y, theme) {
+function setFloor(map, x, y, theme, rng) {
   if (!map.inBounds(x, y)) return;
   const t = map.get(x, y);
   t.type = 'floor'; t.solid = false; t.opaque = false;
-  t.glyph = theme.floorGlyphs[0]; t.fg = theme.floorFg; t.bg = theme.floorBg;
+  t.glyph = rng.pick(theme.floorGlyphs); t.fg = theme.floorFg; t.bg = theme.floorBg;
 }
 
 /**
@@ -34,7 +34,7 @@ export function generate(map, rng, theme, levelNumber) {
   // 1. Carve horizontal corridors
   for (const cy of corridorYs)
     for (let x = corridorX; x < corridorX + corridorLen; x++)
-      setFloor(map, x, cy, theme);
+      setFloor(map, x, cy, theme, rng);
 
   // 2. Alcove niches: 3×2, every 5 tiles, alternating above/below each corridor
   const rooms = [];
@@ -47,7 +47,7 @@ export function generate(map, rng, theme, levelNumber) {
 
       for (let dy = 0; dy < 2; dy++)
         for (let dx = 0; dx < 3; dx++)
-          setFloor(map, x + dx, ay + dy, theme);
+          setFloor(map, x + dx, ay + dy, theme, rng);
 
       // The alcove row adjacent to the corridor is already adjacent — naturally connected
       rooms.push(makeRoom(x, ay, 3, 2, rooms.length));
@@ -60,8 +60,8 @@ export function generate(map, rng, theme, levelNumber) {
   const rightX = corridorX + corridorLen - 1;
   for (let i = 0; i < corridorYs.length - 1; i++) {
     for (let y = corridorYs[i]; y <= corridorYs[i + 1]; y++) {
-      setFloor(map, leftX,  y, theme);
-      setFloor(map, rightX, y, theme);
+      setFloor(map, leftX,  y, theme, rng);
+      setFloor(map, rightX, y, theme, rng);
     }
   }
 

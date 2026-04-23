@@ -20,7 +20,6 @@ import { QuestSystem } from './systems/QuestSystem.js';
 import { SPELLS } from './data/spells.js';
 import { TOWN_LOCATIONS } from './data/town.js';
 import { rollDiceStr, statModifier } from './engine/rules.js';
-import { SkillSystem } from './systems/SkillSystem.js';
 import { CLASSES } from './data/classes.js';
 import { FEATURES } from './data/features.js';
 import { Item } from './entities/Item.js';
@@ -32,17 +31,19 @@ const PLAYER_FOV_RADIUS = 8;
 
 // Game states
 const STATE = {
-  TITLE:       'title',
-  CHAR_CREATE: 'char_create',
-  STAT_ROLL:   'stat_roll',
-  NAME_ENTRY:  'name_entry',
-  PLAYING:     'playing',
-  DEAD:        'dead',
-  PUZZLE:      'puzzle',
-  TOWN:        'town',
-  MENU:        'menu',       // Generic menu overlay
-  LEVEL_UP:    'level_up',
-  VICTORY:     'victory',
+  TITLE:            'title',
+  CHAR_CREATE:      'char_create',
+  STAT_ROLL:        'stat_roll',
+  NAME_ENTRY:       'name_entry',
+  PLAYING:          'playing',
+  DEAD:             'dead',
+  PUZZLE:           'puzzle',
+  TOWN:             'town',
+  MENU:             'menu',
+  LEVEL_UP:         'level_up',
+  VICTORY:          'victory',
+  TARGETING:        'targeting',
+  CHARACTER_SHEET:  'character_sheet',
 };
 
 class Game {
@@ -69,6 +70,7 @@ this.traps = new TrapSystem(this.bus);
     this.activePuzzle = null;
     this.activeMenu = null;
     this._previousState = null;
+    this.targeting = null; // { type: 'spell'|'ranged', data, cursor: {x,y} }
 
     this._setupEventListeners();
     this._handleResize = () => {
@@ -318,13 +320,15 @@ this.traps = new TrapSystem(this.bus);
       case STATE.CHAR_CREATE: this._updateCharCreate(); break;
       case STATE.STAT_ROLL:   this._updateStatRoll(); break;
       case STATE.NAME_ENTRY:  this._updateNameEntry(); break;
-      case STATE.PLAYING:     this._updatePlaying(); break;
-      case STATE.TOWN:        this._updateTown(); break;
-      case STATE.MENU:        this._updateMenu(); break;
-      case STATE.DEAD:        this._updateDead(); break;
-      case STATE.PUZZLE:      this._updatePuzzle(); break;
-      case STATE.LEVEL_UP:    this._updateLevelUp(); break;
-      case STATE.VICTORY:     this._updateVictory(); break;
+      case STATE.PLAYING:          this._updatePlaying(); break;
+      case STATE.TOWN:             this._updateTown(); break;
+      case STATE.MENU:             this._updateMenu(); break;
+      case STATE.DEAD:             this._updateDead(); break;
+      case STATE.PUZZLE:           this._updatePuzzle(); break;
+      case STATE.LEVEL_UP:         this._updateLevelUp(); break;
+      case STATE.VICTORY:          this._updateVictory(); break;
+      case STATE.TARGETING:        this._updateTargeting(); break;
+      case STATE.CHARACTER_SHEET:  this._updateCharacterSheet(); break;
     }
   }
 
@@ -439,8 +443,18 @@ this.traps = new TrapSystem(this.bus);
         return;
     }
 
-    if (action === 'traits') {
-        this._openSkillsMenu();
+    if (action === 'traits' || action === 'sheet') {
+        this.state = STATE.CHARACTER_SHEET;
+        return;
+    }
+
+    if (action === 'fire') {
+        const weapon = this.player.equipped.weapon;
+        if (weapon?.weapon?.range > 1) {
+            this._enterTargeting('ranged', null);
+        } else {
+            this.log.add('You have no ranged weapon equipped.', 'system');
+        }
         return;
     }
 
@@ -533,6 +547,20 @@ if (this._handleMovement(action, map)) {
     }
 }
 
+  // Returns the first nearby tile (current + 4 cardinals) that has an actionable feature.
+  _findInteractableTile(map) {
+    const offsets = [[0,0],[0,-1],[0,1],[-1,0],[1,0]];
+    for (const [dx, dy] of offsets) {
+        const x = this.player.x + dx;
+        const y = this.player.y + dy;
+        const t = map.get(x, y);
+        if (!t) continue;
+        if (t.features.puzzle || t.features.lore || t.features.shrine || t.features.dungeon)
+            return { tile: t, x, y };
+    }
+    return null;
+  }
+
   _handleExamine() {
     const map = this.worldMap.getLevel(this.currentLevel);
     const tile = map.get(this.player.x, this.player.y);
@@ -549,13 +577,19 @@ if (this._handleMovement(action, map)) {
         found = true;
     }
     
-    // Check monsters on tile
+    // Check monsters on tile — open stat tooltip for first visible monster
     const monsters = entities.filter(e => e.type === 'monster');
-    for (const m of monsters) {
-      const hpPct = Math.round((m.hp / m.hpMax) * 100);
-      this.log.add(`${m.name} — HP ${hpPct}%`, 'system');
-      if (m.def.description) this.log.add(m.def.description, 'lore');
-      found = true;
+    if (monsters.length > 0) {
+        const m = monsters[0];
+        const hpPct = Math.round((m.hp / m.hpMax) * 100);
+        this.log.add(`${m.name} — HP ${hpPct}%`, 'system');
+        const menu = new Menu(m.name, [{ label: m.name, data: m }], {
+            onSelect: () => { menu.closed = true; this.activeMenu = null; this.state = STATE.PLAYING; },
+            onCancel: () => { menu.closed = true; this.activeMenu = null; this.state = STATE.PLAYING; },
+            renderDescription: Tooltip.forMonster(),
+        });
+        this._openMenu(menu);
+        found = true;
     }
 
     // Check items on ground
@@ -565,66 +599,93 @@ if (this._handleMovement(action, map)) {
         found = true;
     }
     
-    // Check tile features
-    if (tile.features.puzzle) {
-        this.activePuzzle = tile.features.puzzle;
-        const puzzleState = this.puzzles.examine(tile.features.puzzle);
-        this.log.add(`-- ${puzzleState.name} --`, 'important');
-        this.log.add(puzzleState.description, 'puzzle');
-        this.state = STATE.PUZZLE;
-        found = true;
+    // Check tile features — current tile first, then adjacent
+    const tilesToCheck = [];
+    const offsets = [[0,0],[0,-1],[0,1],[-1,0],[1,0]];
+    for (const [dx, dy] of offsets) {
+        const t = map.get(this.player.x + dx, this.player.y + dy);
+        if (t) tilesToCheck.push(t);
     }
-    if (tile.features.trap) {
-        // Only show if player has detected it (thief skill or high INT)
-        this.log.add(`You notice: ${tile.features.trap.hint ?? 'Something seems off about this area.'}`, 'trap');
-        found = true;
-    }
-    if (tile.features.lore) {
-        this.log.add(tile.features.lore.message, 'lore');
-        found = true;
-    }
-    if (tile.features.shrine) {
-        this.log.add(tile.features.shrine.message, 'lore');
-        found = true;
-    }
-    
-    if (tile.features.dungeon) {
-        const def = FEATURES[tile.features.dungeon.key];
-        if (def?.description) {
-            const hint = def.tier !== 'dressing' && !tile.features.dungeon.used
-                ? ' [press F to interact]' : '';
-            this.log.add(def.description + hint, 'system');
+
+    for (const t of tilesToCheck) {
+        if (t.features.puzzle && !found) {
+            const puzzleState = this.puzzles.examine(t.features.puzzle);
+            this.log.add(`-- ${puzzleState.name} --`, 'important');
+            this.log.add(puzzleState.description + ' [press F to interact]', 'puzzle');
             found = true;
+        }
+        if (t.features.trap) {
+            this.log.add(`You notice: ${t.features.trap.hint ?? 'Something seems off about this area.'}`, 'trap');
+            found = true;
+        }
+        if (t.features.lore) {
+            this.log.add(t.features.lore.message, 'lore');
+            found = true;
+        }
+        if (t.features.shrine) {
+            this.log.add(t.features.shrine.message + ' [press F to pray]', 'lore');
+            found = true;
+        }
+        if (t.features.dungeon) {
+            const def = FEATURES[t.features.dungeon.key];
+            if (def?.description) {
+                const hint = def.tier !== 'dressing' && !t.features.dungeon.used
+                    ? ' [press F to interact]' : '';
+                this.log.add(def.description + hint, 'system');
+                found = true;
+            }
+        }
+        if (t === tile && t.features.dressing) {
+            const descriptions = {
+                'barrel':    'An old wooden barrel. It is empty.',
+                'rubble':    'A pile of rocks and debris from a past collapse.',
+                'bone_pile': 'A scattering of old, gnawed bones.',
+                'stain':     'A dark, sticky stain on the floor. Best not to think about it.',
+            };
+            const desc = descriptions[t.features.dressing];
+            if (desc) { this.log.add(desc, 'system'); found = true; }
         }
     }
 
-    if (tile.features.dressing) {
-        const descriptions = {
-            'barrel':    'An old wooden barrel. It is empty.',
-            'rubble':    'A pile of rocks and debris from a past collapse.',
-            'bone_pile': 'A scattering of old, gnawed bones.',
-            'stain':     'A dark, sticky stain on the floor. Best not to think about it.',
-        };
-        const desc = descriptions[tile.features.dressing];
-        if (desc) {
-            this.log.add(desc, 'system');
-            found = true;
-        }
-    }
-    
     if (!found) {
         this.log.add('There is nothing of interest here.', 'system');
     }
 }
 
 _handleFeatureInteract() {
-    const map     = this.worldMap.getLevel(this.currentLevel);
-    const tile    = map.get(this.player.x, this.player.y);
-    const feature = tile?.features?.dungeon;
-    if (!feature) {
+    const map = this.worldMap.getLevel(this.currentLevel);
+    const result = this._findInteractableTile(map);
+    if (!result) {
         this.log.add('There is nothing here to interact with.', 'system');
         return;
     }
+    const { tile } = result;
+
+    // Puzzle takes priority
+    if (tile.features.puzzle) {
+        this.activePuzzle = tile.features.puzzle;
+        const puzzleState = this.puzzles.examine(tile.features.puzzle);
+        this.log.add(`-- ${puzzleState.name} --`, 'important');
+        this.log.add(puzzleState.description, 'puzzle');
+        this.state = STATE.PUZZLE;
+        return;
+    }
+
+    // Lore tile
+    if (tile.features.lore) {
+        this.log.add(tile.features.lore.message, 'lore');
+        return;
+    }
+
+    // Shrine tile
+    if (tile.features.shrine) {
+        this._interactWithShrine(tile);
+        return;
+    }
+
+    // Dungeon feature
+    const feature = tile.features.dungeon;
+    if (!feature) return;
     const def = FEATURES[feature.key];
     if (!def) return;
 
@@ -645,6 +706,37 @@ _handleFeatureInteract() {
     if (def.tier === 'interactive') {
         this._openFeatureMenu(tile, feature, def);
     }
+}
+
+_interactWithShrine(tile) {
+    const shrine = tile.features.shrine;
+    if (shrine.used) {
+        this.log.add('The shrine has already been offered to.', 'system');
+        return;
+    }
+    const alreadyBlessed = StatusSystem.has(this.player, 'blessed');
+    const menu = new Menu('Pray at the Shrine?', [
+        { label: 'Yes, pray', key: 'y', color: '#ffff88', data: 'pray' },
+        { label: 'No, leave it', key: 'n', color: '#888888', data: 'cancel' },
+    ], {
+        onSelect: (selected) => {
+            menu.closed = true;
+            this.activeMenu = null;
+            this.state = STATE.PLAYING;
+            if (selected.data !== 'pray') return;
+            shrine.used = true;
+            if (alreadyBlessed) {
+                const healed = Math.min(this.player.level * 2, this.player.hpMax - this.player.hp);
+                this.player.hp = Math.min(this.player.hp + healed, this.player.hpMax);
+                this.log.add(`The shrine glows warmly. Healed ${healed} HP.`, 'heal');
+            } else {
+                StatusSystem.apply(this.player, 'blessed', { attackMod: 1, duration: 20 });
+                this.log.add('The shrine glows. You feel blessed! (+1 attack for 20 turns)', 'magic');
+            }
+        },
+        onCancel: () => { menu.closed = true; this.activeMenu = null; this.state = STATE.PLAYING; },
+    });
+    this._openMenu(menu);
 }
 
 _resolveSearch(tile, feature, def) {
@@ -1268,18 +1360,19 @@ _openUseMenu() {
 
   render(dt) {
     switch (this.state) {
-      case STATE.TITLE:       this._renderTitle(); break;
-      case STATE.CHAR_CREATE: this._renderMenu(); break;
-      case STATE.MENU:        this._renderMenu(); break;
-      case STATE.STAT_ROLL:   this._renderStatRoll(this.renderer.ctx); break;
-      case STATE.NAME_ENTRY:  this._renderNameEntry(this.renderer.ctx); break;
-      case STATE.PLAYING:     this._renderPlaying(); break;
-      case STATE.MENU:        this._renderMenu(); break;
-      case STATE.TOWN:        this._renderTown(); break;
-      case STATE.PUZZLE:      this._renderPlaying(); break;
-      case STATE.DEAD:        this._renderDead(); break;
-      case STATE.LEVEL_UP:    this._renderLevelUp(this.renderer.ctx); break;
-      case STATE.VICTORY:     this._renderVictory(); break;
+      case STATE.TITLE:            this._renderTitle(); break;
+      case STATE.CHAR_CREATE:      this._renderMenu(); break;
+      case STATE.MENU:             this._renderMenu(); break;
+      case STATE.STAT_ROLL:        this._renderStatRoll(this.renderer.ctx); break;
+      case STATE.NAME_ENTRY:       this._renderNameEntry(this.renderer.ctx); break;
+      case STATE.PLAYING:          this._renderPlaying(); break;
+      case STATE.TOWN:             this._renderTown(); break;
+      case STATE.PUZZLE:           this._renderPlaying(); break;
+      case STATE.DEAD:             this._renderDead(); break;
+      case STATE.LEVEL_UP:         this._renderLevelUp(this.renderer.ctx); break;
+      case STATE.VICTORY:          this._renderVictory(); break;
+      case STATE.TARGETING:        this._renderTargeting(); break;
+      case STATE.CHARACTER_SHEET:  this._renderCharacterSheet(); break;
     }
   }
 
@@ -2287,12 +2380,15 @@ _openAbandonQuestMenu(location) {
 }
 
 _openInventoryMenu() {
-    const items = this.player.inventory.map((item, i) => ({
-        label: `${item.name}${this._equippedTag(item)}`,
-        color: item.cursed ? '#ff4444' : (item.color ?? '#cccccc'),
-        enabled: true,
-        data: item,
-    }));
+    const items = this.player.inventory.map((item, i) => {
+        const qty = item.stackable && (item.quantity ?? 1) > 1 ? ` ×${item.quantity}` : '';
+        return {
+            label: `${item.name}${qty}${this._equippedTag(item)}`,
+            color: item.cursed ? '#ff4444' : (item.color ?? '#cccccc'),
+            enabled: true,
+            data: item,
+        };
+    });
     
     if (items.length === 0) {
         this.log.add('Your inventory is empty.', 'system');
@@ -2323,35 +2419,6 @@ _equippedTag(item) {
     return '';
 }
 
-  _openSkillsMenu() {
-    const skillItems = Object.entries(this.player.skills).map(([key, rank]) => {
-        const statKey = SkillSystem.SKILL_STAT[key] ?? 'int';
-        const statVal = this.player.stats[statKey] ?? 10;
-        const mod = statModifier(statVal);
-        const total = rank + mod;
-        const sign = total >= 0 ? '+' : '';
-
-        return {
-            label: `${key.replace(/_/g, ' ').toUpperCase().padEnd(16)} Rank:${rank}  (${statKey.toUpperCase()} ${sign}${mod})  Total:${sign}${total}`,
-            color: '#88ffaa',
-            data: key,
-        };
-    });
-
-    if (skillItems.length === 0) {
-        this.log.add('You have no specialized skills.', 'system');
-        return;
-    }
-
-    const menu = new Menu(`${this.player.name}'s Skills`, skillItems, {
-        onSelect: () => {}, // Read-only
-        onCancel: () => {
-            menu.closed = true;
-            this.state = STATE.PLAYING;
-        }
-    });
-    this._openMenu(menu);
-  }
 
 _openItemActionMenu(item) {
     const actions = [];
@@ -2467,6 +2534,10 @@ _handleUseAbility() {
 _executeItemAction(item, action) {
     switch (action) {
         case 'equip': {
+            if (!this._classCanEquip(item)) {
+                this.log.add(`${this.player.class.name}s cannot use ${item.name}.`, 'system');
+                return;
+            }
             const slot = item.armor?.slot
                       ?? (item.category === 'weapon' ? 'weapon'
                         : item.category === 'wand'   ? 'weapon'
@@ -2691,26 +2762,19 @@ _openSpellMenu(readOnly = false) {
         this.state = STATE.PLAYING;
 
         const spell = SPELLS[selected.data];
-        let targetPos;
         if (spell.range === 'self' || spell.range === 'touch') {
-            targetPos = { x: this.player.x, y: this.player.y };
-        } else {
-            targetPos = this._findNearestVisibleMonster();
-            if (!targetPos) {
-                this.log.add('No valid target in sight.', 'system');
-                return;
+            const result = this.magic.cast(this.player, selected.data, { x: this.player.x, y: this.player.y });
+            if (result.success) {
+                this.log.add(`You cast ${spell.name}!`, 'magic');
+                result.results?.forEach(r => {
+                    if (r.effect === 'damage') this.log.add(`Deals ${r.value} damage.`, 'magic');
+                    if (r.effect === 'heal')   this.log.add(`Heals ${r.value} HP.`, 'heal');
+                });
+            } else {
+                this.log.add(result.message, 'system');
             }
-        }
-
-        const result = this.magic.cast(this.player, selected.data, targetPos);
-        if (result.success) {
-            this.log.add(`You cast ${spell.name}!`, 'magic');
-            result.results?.forEach(r => {
-              if (r.effect === 'damage') this.log.add(`Deals ${r.value} damage.`, 'magic');
-              if (r.effect === 'heal')   this.log.add(`Heals ${r.value} HP.`, 'heal');
-            });
         } else {
-            this.log.add(result.message, 'system');
+            this._enterTargeting('spell', selected.data);
         }
       },
       onCancel: () => {
@@ -2780,6 +2844,190 @@ _findNearestVisibleMonster() {
         }
     }
     return nearest;
+}
+
+// ---------------------------------------------------------------
+// CLASS EQUIPMENT RESTRICTIONS
+
+_classCanEquip(item) {
+    const cls = this.player.class;
+    const ARMOR_CATS = {
+        leather_armor: 'leather', studded_leather: 'leather',
+        chain_mail: 'chain', plate_mail: 'plate', half_plate: 'plate',
+        shield: 'shield',
+        iron_helm: 'helmet', great_helm: 'helmet',
+    };
+    const WEAPON_CATS = {
+        dagger: ['dagger','simple','light_martial'],
+        crude_dagger: ['dagger','simple','light_martial'],
+        short_sword: ['simple','light_martial','martial'],
+        long_sword: ['martial'],
+        mace: ['blunt','simple'],
+        staff: ['staff','simple','blunt'],
+        short_bow: ['bow','martial'],
+        hand_crossbow: ['crossbow','martial'],
+        battle_axe: ['martial'],
+        great_sword: ['martial'],
+        war_axe: ['martial'],
+        forge_hammer: ['blunt','martial'],
+        phase_blade: ['martial'],
+    };
+    if (item.category === 'armor') {
+        const allowed = cls.armorAllowed;
+        if (!allowed || allowed.length === 0) return false;
+        if (allowed.includes('all')) return true;
+        const cat = ARMOR_CATS[item.itemKey];
+        return !cat || allowed.includes(cat);
+    }
+    if (item.category === 'weapon') {
+        const allowed = cls.weaponsAllowed;
+        if (!allowed || allowed.includes('all')) return true;
+        const cats = WEAPON_CATS[item.itemKey] ?? ['martial'];
+        return cats.some(c => allowed.includes(c));
+    }
+    return true;
+}
+
+// ---------------------------------------------------------------
+// TARGETING SYSTEM
+
+_enterTargeting(type, data) {
+    const nearest = this._findNearestVisibleMonster();
+    const cursor = nearest ?? { x: this.player.x, y: this.player.y };
+    this.targeting = { type, data, cursor: { x: cursor.x, y: cursor.y } };
+    this.state = STATE.TARGETING;
+    this.log.add('Select target (arrows to move, Enter to fire, Esc to cancel).', 'system');
+}
+
+_updateTargeting() {
+    const action = this.input.consumeAction();
+    if (!action) return;
+
+    if (action === 'cancel') {
+        this.targeting = null;
+        this.state = STATE.PLAYING;
+        this.log.add('Cancelled.', 'system');
+        return;
+    }
+
+    if (action === 'confirm') {
+        this._fireTargeted();
+        return;
+    }
+
+    const DIR = {
+        'move:n': [0,-1], 'move:s': [0,1],
+        'move:e': [1,0],  'move:w': [-1,0],
+        'move:ne': [1,-1], 'move:nw': [-1,-1],
+        'move:se': [1,1],  'move:sw': [-1,1],
+    };
+    const dir = DIR[action];
+    if (dir) {
+        this.targeting.cursor.x += dir[0];
+        this.targeting.cursor.y += dir[1];
+    }
+}
+
+_fireTargeted() {
+    const { type, data, cursor } = this.targeting;
+    const map = this.worldMap.getLevel(this.currentLevel);
+    this.targeting = null;
+    this.state = STATE.PLAYING;
+
+    if (type === 'spell') {
+        const spell = SPELLS[data];
+        const result = this.magic.cast(this.player, data, cursor);
+        if (result.success) {
+            this.log.add(`You cast ${spell.name}!`, 'magic');
+            result.results?.forEach(r => {
+                if (r.effect === 'damage') this.log.add(`Deals ${r.value} damage.`, 'magic');
+                if (r.effect === 'heal')   this.log.add(`Heals ${r.value} HP.`, 'heal');
+            });
+        } else {
+            this.log.add(result.message, 'system');
+            return;
+        }
+    } else if (type === 'ranged') {
+        const weapon = this.player.equipped.weapon;
+        if (!weapon?.weapon?.range || weapon.weapon.range <= 1) {
+            this.log.add('You have no ranged weapon equipped.', 'system');
+            return;
+        }
+        const arrows = this.player.inventory.find(i => i.itemKey === 'arrows_20');
+        if (!arrows) {
+            this.log.add('You have no arrows.', 'system');
+            return;
+        }
+        const entitiesAtCursor = map.getEntitiesAt(cursor.x, cursor.y);
+        const target = entitiesAtCursor.find(e => e.type === 'monster');
+        if (!target) {
+            this.log.add('No target there.', 'system');
+            return;
+        }
+        const result = this.combat.resolveRangedAttack(this.player, target, weapon);
+        this.log.add(result.message, result.hit ? 'combat' : 'system');
+        if (result.hit && target.hp <= 0) {
+            this.player.monstersKilled = (this.player.monstersKilled ?? 0) + 1;
+            const xpResult = this.player.gainXP(target.def.xpBase + target.def.xpPerHD * target.def.hd);
+            this._updateQuestProgress('kill', { monsterType: target.def?.key ?? target.name });
+            this._rollMonsterLoot(target);
+            if (xpResult.leveled) {
+                this.pendingLevelUp = xpResult;
+                this.state = STATE.LEVEL_UP;
+                this._checkFavoredEnemy();
+                return;
+            }
+        }
+        arrows.quantity = (arrows.quantity ?? 20) - 1;
+        if (arrows.quantity <= 0) {
+            this.player.removeFromInventory(arrows);
+            this.log.add('Your quiver is empty.', 'system');
+        }
+    }
+
+    // Consume a turn
+    this._runMonsterAI(map);
+    map.computeFOV(this.player.x, this.player.y, this._effectiveFovRadius());
+    this._updateCamera(map);
+    this.bus.emit('turn:end', {});
+    const expired = StatusSystem.tick(this.player);
+    for (const key of expired) {
+        const msg = key === 'light'      ? 'The magical light fades.'
+                  : key === 'battle_cry' ? 'The battle cry fades.'
+                  : key === 'blessed'    ? 'The blessing fades.'
+                  : `${key} has worn off.`;
+        this.log.add(msg, 'system');
+    }
+}
+
+_renderTargeting() {
+    this._renderPlaying();
+    if (this.targeting?.cursor) {
+        const map = this.worldMap.getLevel(this.currentLevel);
+        this.renderer.drawTargetingCursor(
+            this.renderer.ctx,
+            this.targeting.cursor,
+            this.player,
+            this.camera.x,
+            this.camera.y,
+            map
+        );
+    }
+}
+
+// ---------------------------------------------------------------
+// CHARACTER SHEET
+
+_updateCharacterSheet() {
+    const action = this.input.consumeAction();
+    if (action === 'cancel' || action === 'sheet' || action === 'traits' || action === 'confirm') {
+        this.state = STATE.PLAYING;
+    }
+}
+
+_renderCharacterSheet() {
+    if (!this.player) return;
+    this.renderer.drawCharacterSheet(this.renderer.ctx, this.player);
 }
 
 _quickSave() {

@@ -1,18 +1,9 @@
-import { rollDie, statModifier } from '../engine/rules.js';
+import { rollDie, statModifier, rollSave } from '../engine/rules.js';
 import { RNG } from '../engine/RNG.js';
 
 // Local RNG for fumble resolution (not seeded — that's acceptable for fumble flavor)
 const rng = new RNG(Date.now());
 
-// Stub for rollSave — implement properly in Phase 5
-function rollSave(entity, saveType) {
-  const threshold = entity.class?.savingThrows?.[saveType]
-    ?? entity.def?.savingThrows?.[saveType]
-    ?? 15;
-  return rollDie(20) >= threshold;
-}
-
-// Stub for chebyshevDistance
 function chebyshevDistance(a, b) {
   return Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y));
 }
@@ -85,7 +76,11 @@ export class CombatSystem {
 
   _getAttackBonus(attacker, weapon, defender) {
     let bonus = attacker.class?.attackBonus[attacker.level] ?? 0;
-    bonus += statModifier(attacker.stats?.str ?? 10);
+    const isRanged = (weapon?.weapon?.range ?? 1) > 1;
+    bonus += isRanged
+        ? statModifier(attacker.stats?.dex ?? 10)
+        : statModifier(attacker.stats?.str ?? 10);
+    if (isRanged) bonus += attacker.skills?.archery ?? 0;
     bonus += weapon?.weapon?.attackBonus ?? 0;
 
     // Class Bonuses

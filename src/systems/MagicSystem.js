@@ -1,6 +1,6 @@
 import { SPELLS } from '../data/spells.js';
 import { TurnUndeadTable } from '../data/tables.js';
-import { rollDiceStr, rollDie } from '../engine/rules.js';
+import { rollDiceStr, rollDie, rollSave } from '../engine/rules.js';
 import { StatusSystem } from './StatusSystem.js';
 
 /**
@@ -25,13 +25,6 @@ function parseDuration(durationStr, casterLevel) {
   return minuteMatch ? turns * 10 : turns;
 }
 
-// Stub for rollSave, should be in rules.js or similar
-function rollSave(entity, saveType) {
-  const threshold = entity.class?.savingThrows?.[saveType]
-    ?? entity.def?.savingThrows?.[saveType]
-    ?? 15;
-  return rollDie(20) >= threshold;
-}
 
 /**
  * Resolves spell casting and effects.

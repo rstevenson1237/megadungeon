@@ -6,11 +6,11 @@ function makeRoom(x, y, w, h, id) {
   return { x, y, w, h, type: 'normal', content: null, explored: false, id };
 }
 
-function setFloor(map, x, y, theme) {
+function setFloor(map, x, y, theme, rng) {
   if (!map.inBounds(x, y)) return;
   const t = map.get(x, y);
   t.type = 'floor'; t.solid = false; t.opaque = false; t.lethal = false;
-  t.glyph = theme.floorGlyphs[0]; t.fg = theme.floorFg; t.bg = theme.floorBg;
+  t.glyph = rng.pick(theme.floorGlyphs); t.fg = theme.floorFg; t.bg = theme.floorBg;
 }
 
 /**
@@ -56,7 +56,7 @@ export function generate(map, rng, theme, levelNumber) {
 
     for (let dy = 0; dy < ih; dy++)
       for (let dx = 0; dx < iw; dx++)
-        setFloor(map, ix + dx, iy + dy, theme);
+        setFloor(map, ix + dx, iy + dy, theme, rng);
 
     islands.push(makeRoom(ix, iy, iw, ih, islands.length));
   }
@@ -78,8 +78,8 @@ export function generate(map, rng, theme, levelNumber) {
       }
       if (!best.from) break;
       const ca = center(best.from), cb = center(best.to);
-      for (let x = Math.min(ca.x, cb.x); x <= Math.max(ca.x, cb.x); x++) setFloor(map, x, ca.y, theme);
-      for (let y = Math.min(ca.y, cb.y); y <= Math.max(ca.y, cb.y); y++) setFloor(map, cb.x, y, theme);
+      for (let x = Math.min(ca.x, cb.x); x <= Math.max(ca.x, cb.x); x++) setFloor(map, x, ca.y, theme, rng);
+      for (let y = Math.min(ca.y, cb.y); y <= Math.max(ca.y, cb.y); y++) setFloor(map, cb.x, y, theme, rng);
       inTree.push(best.to);
       notInTree.splice(notInTree.indexOf(best.to), 1);
     }

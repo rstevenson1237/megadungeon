@@ -6,11 +6,11 @@ function makeRoom(x, y, w, h, id) {
   return { x, y, w, h, type: 'normal', content: null, explored: false, id };
 }
 
-function setFloor(map, x, y, theme) {
+function setFloor(map, x, y, theme, rng) {
   if (!map.inBounds(x, y)) return;
   const t = map.get(x, y);
   t.type = 'floor'; t.solid = false; t.opaque = false;
-  t.glyph = theme.floorGlyphs[0]; t.fg = theme.floorFg; t.bg = theme.floorBg;
+  t.glyph = rng.pick(theme.floorGlyphs); t.fg = theme.floorFg; t.bg = theme.floorBg;
 }
 
 /**
@@ -45,7 +45,7 @@ export function generate(map, rng, theme, levelNumber) {
 
       for (let dy = 0; dy < rh; dy++)
         for (let dx = 0; dx < rw; dx++)
-          setFloor(map, rx + dx, ry + dy, theme);
+          setFloor(map, rx + dx, ry + dy, theme, rng);
 
       rooms.push(makeRoom(rx, ry, rw, rh, rooms.length));
     }
@@ -65,8 +65,8 @@ export function generate(map, rng, theme, levelNumber) {
         const east = rooms[idx + 1];
         const ex = east.x;
         for (let x = r.x + r.w; x < ex; x++) {
-          setFloor(map, x, cy,     theme);
-          setFloor(map, x, cy + 1, theme);
+          setFloor(map, x, cy,     theme, rng);
+          setFloor(map, x, cy + 1, theme, rng);
         }
       }
       // South neighbour
@@ -74,8 +74,8 @@ export function generate(map, rng, theme, levelNumber) {
         const south = rooms[idx + COLS];
         const sy = south.y;
         for (let y = r.y + r.h; y < sy; y++) {
-          setFloor(map, cx,     y, theme);
-          setFloor(map, cx + 1, y, theme);
+          setFloor(map, cx,     y, theme, rng);
+          setFloor(map, cx + 1, y, theme, rng);
         }
       }
     }

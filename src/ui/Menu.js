@@ -38,12 +38,6 @@ export class Menu {
       this._adjustScroll();
       return;
     }
-    if (action === 'move:w') {
-        // For future use in multi-column menus
-    }
-    if (action === 'move:e') {
-        // For future use in multi-column menus
-    }
     if (action === 'confirm') {
       if (this.items.length > 0 && this.items[this.cursor].enabled !== false) {
         this.onSelect(this.items[this.cursor], this.cursor);

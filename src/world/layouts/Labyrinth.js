@@ -6,11 +6,11 @@ function makeRoom(x, y, w, h, id) {
   return { x, y, w, h, type: 'normal', content: null, explored: false, id };
 }
 
-function setFloor(map, x, y, theme) {
+function setFloor(map, x, y, theme, rng) {
   if (!map.inBounds(x, y)) return;
   const t = map.get(x, y);
   t.type = 'floor'; t.solid = false; t.opaque = false;
-  t.glyph = theme.floorGlyphs[0]; t.fg = theme.floorFg; t.bg = theme.floorBg;
+  t.glyph = rng.pick(theme.floorGlyphs); t.fg = theme.floorFg; t.bg = theme.floorBg;
 }
 
 /**
@@ -41,7 +41,7 @@ export function generate(map, rng, theme, levelNumber) {
 
   const stack = [[0, 0]];
   visited[0] = 1;
-  setFloor(map, 1, 1, theme);
+  setFloor(map, 1, 1, theme, rng);
 
   while (stack.length) {
     const [mx, my] = stack[stack.length - 1];
@@ -52,9 +52,9 @@ export function generate(map, rng, theme, levelNumber) {
       if (nx < 0 || nx >= mazeW || ny < 0 || ny >= mazeH || visited[ny * mazeW + nx]) continue;
       visited[ny * mazeW + nx] = 1;
       // Carve current cell, wall between, and next cell
-      setFloor(map, 1 + mx * 2,      1 + my * 2,      theme);
-      setFloor(map, 1 + mx * 2 + dx, 1 + my * 2 + dy, theme);
-      setFloor(map, 1 + nx * 2,      1 + ny * 2,      theme);
+      setFloor(map, 1 + mx * 2,      1 + my * 2,      theme, rng);
+      setFloor(map, 1 + mx * 2 + dx, 1 + my * 2 + dy, theme, rng);
+      setFloor(map, 1 + nx * 2,      1 + ny * 2,      theme, rng);
       stack.push([nx, ny]);
       moved = true;
       break;
@@ -87,7 +87,7 @@ export function generate(map, rng, theme, levelNumber) {
     const rx = cx - 1, ry = cy - 1;
     for (let dy = 0; dy < 3; dy++)
       for (let dx = 0; dx < 3; dx++)
-        setFloor(map, rx + dx, ry + dy, theme);
+        setFloor(map, rx + dx, ry + dy, theme, rng);
     if (map.inBounds(rx, ry) && map.inBounds(rx + 2, ry + 2))
       rooms.push(makeRoom(rx, ry, 3, 3, rooms.length));
   }
