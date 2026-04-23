@@ -71,8 +71,8 @@ function _renderItemPanel(ctx, item, x, y, w, h, tileH) {
   const flags = [];
   if (item.cursed)                   flags.push('CURSED');
   if (item.weapon?.twoHanded)        flags.push('Two-Handed');
-  if (item.tags?.includes('holy'))   flags.push('Holy');
-  if (item.tags?.includes('silver')) flags.push('Silver');
+  if (item.hasTag?.('holy'))         flags.push('Holy');
+  if (item.hasTag?.('silver'))       flags.push('Silver');
   const flagStr = flags.length ? `  [${flags.join(', ')}]` : '';
   lines.push({ text: `${_cap(item.category)}${flagStr}`, color: '#777777' });
 

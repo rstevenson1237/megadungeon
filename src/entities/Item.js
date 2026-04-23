@@ -13,7 +13,11 @@ export class Item extends Entity {
 
     // Copy all properties from the data definition to this object
     for (const [key, value] of Object.entries(itemData)) {
-      this[key] = value;
+      if (key === 'tags' && Array.isArray(value)) {
+        for (const tag of value) this.tags.add(tag);
+      } else {
+        this[key] = value;
+      }
     }
   }
 

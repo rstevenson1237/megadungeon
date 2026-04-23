@@ -40,7 +40,7 @@ An inscription reads: GIVE EACH THEIR OWN.`;
         key: 'offer_priest', label: 'Offer holy item to priest',
         available: (s) => !s.priest_given,
         resolve: (state, player, { item }) => {
-          if (!item || !item.tags?.includes('holy'))
+          if (!item || !item.hasTag?.('holy'))
             return { success: false, message: 'The priest tilts its carved head, unimpressed.' };
           player.removeFromInventory(item);
           return { success: true, message: 'The holy symbol rises from your hand into the statue\'s palms.', stateChanges: { priest_given: true } };
