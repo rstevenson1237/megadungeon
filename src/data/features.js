@@ -13,7 +13,7 @@ export const FEATURES = {
 
   pillar: {
     key: 'pillar',
-    glyph: 0xBA,   // ║
+    glyph: 0x7C,   // |
     fg: '#888888',
     solid: true,
     opaque: true,
@@ -37,7 +37,7 @@ export const FEATURES = {
 
   torch_sconce: {
     key: 'torch_sconce',
-    glyph: 0x0F,   // ☼
+    glyph: 0x21,   // !
     fg: '#ffaa00',
     solid: false,
     opaque: false,
@@ -49,7 +49,7 @@ export const FEATURES = {
 
   crystal_formation: {
     key: 'crystal_formation',
-    glyph: 0x04,   // ♦
+    glyph: 0x2A,   // *
     fg: '#88aacc',
     solid: true,
     opaque: false,
@@ -61,7 +61,7 @@ export const FEATURES = {
 
   bone_pile: {
     key: 'bone_pile',
-    glyph: 0xB0,   // ░
+    glyph: 0x25,   // %
     fg: '#ccccaa',
     solid: false,
     opaque: false,
@@ -75,7 +75,7 @@ export const FEATURES = {
 
   bookshelf: {
     key: 'bookshelf',
-    glyph: 0xCD,   // ═
+    glyph: 0x3D,   // =
     fg: '#886644',
     solid: true,
     opaque: false,
@@ -95,7 +95,7 @@ export const FEATURES = {
 
   chest: {
     key: 'chest',
-    glyph: 0xFE,   // ■
+    glyph: 0x2B,   // +
     fg: '#aa8844',
     solid: false,
     opaque: false,
@@ -116,7 +116,7 @@ export const FEATURES = {
 
   sarcophagus: {
     key: 'sarcophagus',
-    glyph: 0xDC,   // ▄
+    glyph: 0x5B,   // [
     fg: '#aaaaaa',
     solid: true,
     opaque: false,
@@ -136,7 +136,7 @@ export const FEATURES = {
 
   crate: {
     key: 'crate',
-    glyph: 0x7B,   // {
+    glyph: 0x6F,   // o
     fg: '#885533',
     solid: false,
     opaque: false,
@@ -157,7 +157,7 @@ export const FEATURES = {
 
   fountain: {
     key: 'fountain',
-    glyph: 0xF7,   // ≈
+    glyph: 0x7E,   // ~
     fg: '#4488cc',
     solid: false,
     opaque: false,
@@ -186,7 +186,7 @@ export const FEATURES = {
 
   altar: {
     key: 'altar',
-    glyph: 0xCE,   // ╬
+    glyph: 0x5E,   // ^
     fg: '#ddddaa',
     solid: false,
     opaque: false,
@@ -219,7 +219,7 @@ export const FEATURES = {
 
   statue: {
     key: 'statue',
-    glyph: 0x02,   // ☻
+    glyph: 0x26,   // &
     fg: '#aaaaaa',
     solid: true,
     opaque: false,
@@ -250,7 +250,7 @@ export const FEATURES = {
 
   throne: {
     key: 'throne',
-    glyph: 0x1E,   // ▲
+    glyph: 0x54,   // T
     fg: '#cc9900',
     solid: true,
     opaque: false,
@@ -278,7 +278,7 @@ export const FEATURES = {
 
   transport_circle: {
     key: 'transport_circle',
-    glyph: 0x09,   // ○
+    glyph: 0x4F,   // O
     fg: '#6644cc',
     solid: false,
     opaque: false,
