@@ -67,6 +67,7 @@ export class Menu {
   }
 
   render(ctx, x, y, w, h, tileH) {
+    ctx.textBaseline = 'top';
     const lineH = tileH;
     this.maxVisible = Math.floor((h - lineH * 3) / lineH);
     

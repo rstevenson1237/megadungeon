@@ -11,6 +11,8 @@
  * @property {Object}   itemWeights
  * @property {string[]} dressingFeatures ['pool','pillar','rubble','torch','altar',...]
  * @property {string[]} ambientMessages  Flavor messages shown when entering
+ * @property {string[]} mapSizes         Allowed sizes: 'tiny'|'small'|'medium'|'large'|'huge'
+ *                                       Matched to MAP_SIZES in LevelGen.js
  */
 
 export const THEMES = {
@@ -18,6 +20,7 @@ export const THEMES = {
     name: 'Dungeon Cellar',
     description: 'Stone-cut vaults beneath a keep, damp with mildew and old blood.',
     minDepth: 1, maxDepth: 25, weight: 10,
+    mapSizes: ['small', 'medium'],
     floorGlyphs: [0x2E, 0x2C, 0xFA], // . , ·
     wallGlyph: 0x23,                  // #
     floorFg: '#5a5a5a', floorBg: '#0a0a0a',
@@ -38,6 +41,7 @@ export const THEMES = {
     name: 'Goblin Warren',
     description: 'Cramped tunnels dug by many hands, reeking of offal and cookfires.',
     minDepth: 1, maxDepth: 20, weight: 10,
+    mapSizes: ['tiny', 'small'],
     floorGlyphs: [0x2E, 0x60, 0x27],
     wallGlyph: 0x25,
     floorFg: '#4a3a1a', floorBg: '#080800',
@@ -58,6 +62,7 @@ export const THEMES = {
     name: 'Catacomb',
     description: 'Miles of bone-lined passages, the honored dead disturbed from their rest.',
     minDepth: 10, maxDepth: 45, weight: 10,
+    mapSizes: ['small', 'medium'],
     floorGlyphs: [0x2E, 0xF9, 0xFA],
     wallGlyph: 0xDB,
     floorFg: '#3a3a4a', floorBg: '#05050a',
@@ -78,6 +83,7 @@ export const THEMES = {
     name: 'Dwarven Deep',
     description: 'Vast stonework halls carved by dwarven hands long since fled or slain — now haunted by their darker kin.',
     minDepth: 25, maxDepth: 65, weight: 10,
+    mapSizes: ['medium', 'large'],
     floorGlyphs: [0x2E, 0xFA, 0xF9],  // . · ·
     wallGlyph: 0xFE,                   // ■
     floorFg: '#5a5040', floorBg: '#080604',
@@ -100,6 +106,7 @@ export const THEMES = {
     name: 'Elemental Grotto',
     description: 'A rift in natural law, where elemental forces leak through from the inner planes into glittering caverns.',
     minDepth: 40, maxDepth: 80, weight: 10,
+    mapSizes: ['medium', 'large'],
     floorGlyphs: [0x2E, 0x2C, 0x60],  // . , `
     wallGlyph: 0xB1,                   // ▒
     floorFg: '#3a5050', floorBg: '#020808',
@@ -121,6 +128,7 @@ export const THEMES = {
   final_descent: {
     name: 'The Final Descent',
     description: 'The lowest point of all things. An arena at the bottom of the world.',
+    mapSizes: ['huge'],
     floorGlyphs: [0x2E, 0xF9],
     wallGlyph: 0xDB,               // █
     floorFg: '#222222', floorBg: '#000000',
@@ -142,6 +150,7 @@ export const THEMES = {
     name: 'Void Passage',
     description: 'Corridors between worlds — extradimensional channels through which things that should not exist freely travel.',
     minDepth: 70, maxDepth: 99, weight: 10,
+    mapSizes: ['large', 'huge'],
     floorGlyphs: [0xFA, 0xF9, 0x2E],  // · · .
     wallGlyph: 0xB0,                   // ░
     floorFg: '#2a1a3a', floorBg: '#03010a',
