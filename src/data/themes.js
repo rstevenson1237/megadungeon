@@ -23,8 +23,8 @@ export const THEMES = {
     mapSizes: ['small', 'medium'],
     floorGlyphs: [0x2E, 0x2C, 0xFA], // . , ·
     wallGlyph: 0x23,                  // #
-    floorFg: '#5a5a5a', floorBg: '#0a0a0a',
-    wallFg: '#888888',  wallBg: '#111111',
+    floorFg: '#7a6a50', floorBg: '#0d0a06',
+    wallFg:  '#9a8060', wallBg:  '#130e08',
     minRoomW: 4, maxRoomW: 10, minRoomH: 3, maxRoomH: 8,
     monsterWeights: { giant_rat: 30, goblin: 25, orc: 15, zombie: 15, skeleton: 10, giant_spider: 5 },
     itemWeights: { torch: 20, ration: 15, iron_key: 10, healing_potion: 15, short_sword: 10, leather_armor: 10, old_scroll: 20 },
@@ -44,8 +44,8 @@ export const THEMES = {
     mapSizes: ['tiny', 'small'],
     floorGlyphs: [0x2E, 0x60, 0x27],
     wallGlyph: 0x25,
-    floorFg: '#4a3a1a', floorBg: '#080800',
-    wallFg: '#6b5a3a',  wallBg: '#100e00',
+    floorFg: '#5a4828', floorBg: '#09080a',
+    wallFg:  '#7a6840', wallBg:  '#12100a',
     minRoomW: 3, maxRoomW: 7, minRoomH: 3, maxRoomH: 6,
     monsterWeights: { goblin: 45, goblin_shaman: 15, hobgoblin: 20, warg: 10, orc: 10 },
     itemWeights: { stolen_coin_purse: 20, crude_dagger: 15, goblin_idol: 10, mead_skin: 10, net: 10, torch: 20, bone_wand: 5, ration: 10 },
@@ -65,8 +65,8 @@ export const THEMES = {
     mapSizes: ['small', 'medium'],
     floorGlyphs: [0x2E, 0xF9, 0xFA],
     wallGlyph: 0xDB,
-    floorFg: '#3a3a4a', floorBg: '#05050a',
-    wallFg: '#aaaacc',  wallBg: '#0a0a14',
+    floorFg: '#707080', floorBg: '#06060c',
+    wallFg:  '#c0c0d0', wallBg:  '#0e0e18',
     minRoomW: 4, maxRoomW: 9, minRoomH: 3, maxRoomH: 7,
     monsterWeights: { skeleton: 30, zombie: 25, ghoul: 20, wight: 10, wraith: 10, vampire_spawn: 5 },
     itemWeights: { burial_urn: 20, ancient_coin: 15, bone_holy_symbol: 15, scroll_of_turning: 10, grave_dust: 10, embalming_kit: 5, unholy_water: 10, antique_ring: 15 },
@@ -86,9 +86,9 @@ export const THEMES = {
     mapSizes: ['medium', 'large'],
     floorGlyphs: [0x2E, 0xFA, 0xF9],  // . · ·
     wallGlyph: 0xFE,                   // ■
-    floorFg: '#5a5040', floorBg: '#080604',
-    wallFg: '#776655',  wallBg: '#100c08',
-    corridorFg: '#5a5040', corridorBg: '#060402',
+    floorFg: '#706050', floorBg: '#0a0804',
+    wallFg:  '#908060', wallBg:  '#140e08',
+    corridorFg: '#604a38', corridorBg: '#060402',
     minRoomW: 5, maxRoomW: 14, minRoomH: 4, maxRoomH: 10,
     monsterWeights: { duergar: 30, dark_dwarf_warrior: 25, cave_troll: 15, stone_golem: 10, iron_defender: 10, duergar_sorcerer: 10 },
     itemWeights: { dwarven_ale: 15, iron_ingot: 15, runic_chisel: 10, deep_gem: 10, forge_hammer: 10, mithral_shard: 5, dwarven_bread: 15, war_axe: 10, chain_mail: 10 },
@@ -109,9 +109,9 @@ export const THEMES = {
     mapSizes: ['medium', 'large'],
     floorGlyphs: [0x2E, 0x2C, 0x60],  // . , `
     wallGlyph: 0xB1,                   // ▒
-    floorFg: '#3a5050', floorBg: '#020808',
-    wallFg: '#4488aa',  wallBg: '#031012',
-    corridorFg: '#2a4444', corridorBg: '#020606',
+    floorFg: '#507878', floorBg: '#020e0e',
+    wallFg:  '#60a0c0', wallBg:  '#041618',
+    corridorFg: '#3a6060', corridorBg: '#010a0a',
     minRoomW: 5, maxRoomW: 13, minRoomH: 4, maxRoomH: 9,
     monsterWeights: { fire_elemental: 20, water_elemental: 20, earth_elemental: 15, magma_sprite: 20, crystal_golem: 15, storm_wisp: 10, dragon_young_red: 5 },
     itemWeights: { elemental_shard: 20, fire_opal: 10, mana_crystal: 15, elemental_essence: 10, aquamarine: 10, lodestone: 10, prismatic_flask: 10, earth_heart: 5, storm_rune: 10 },
@@ -153,9 +153,9 @@ export const THEMES = {
     mapSizes: ['large', 'huge'],
     floorGlyphs: [0xFA, 0xF9, 0x2E],  // · · .
     wallGlyph: 0xB0,                   // ░
-    floorFg: '#2a1a3a', floorBg: '#03010a',
-    wallFg: '#553366',  wallBg: '#0a0515',
-    corridorFg: '#1a0a2a', corridorBg: '#020008',
+    floorFg: '#503058', floorBg: '#040108',
+    wallFg:  '#8855aa', wallBg:  '#0e0618',
+    corridorFg: '#301830', corridorBg: '#020006',
     minRoomW: 4, maxRoomW: 11, minRoomH: 3, maxRoomH: 8,
     monsterWeights: { shadow_demon: 25, void_wraith: 25, phase_spider: 20, void_hound: 15, rift_stalker: 15 },
     itemWeights: { void_shard: 20, shadow_essence: 15, phase_blade: 5, dimensional_key: 10, null_stone: 10, rift_scroll: 15, planar_compass: 5, dark_pearl: 10, soul_candle: 10 },
