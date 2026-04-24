@@ -6,18 +6,26 @@ import { RoomGen } from './RoomGen.js';
 import { bus } from '../engine/EventBus.js';
 import { FeaturePlacer } from './FeaturePlacer.js';
 
-// Constants for map dimensions
-const MAP_W = 78;
-const MAP_H = 38;
+// Named map sizes — layouts use map.w/map.h internally so all scale automatically.
+const MAP_SIZES = {
+  tiny:   { w: 40,  h: 20 },
+  small:  { w: 56,  h: 28 },
+  medium: { w: 78,  h: 38 },
+  large:  { w: 104, h: 52 },
+  huge:   { w: 130, h: 65 },
+};
 
 // --- LevelGen Implementation ---
 export class LevelGen {
   static generate(levelNumber, rng) {
-    const theme  = pickTheme(levelNumber, rng);       // themeRegistry
-    const layout = pickLayout(theme.key, rng);        // layouts/index
-    const map    = new TileMap(MAP_W, MAP_H);
-    map.metadata.theme  = theme;
-    map.metadata.layout = layout.key;
+    const theme   = pickTheme(levelNumber, rng);       // themeRegistry
+    const layout  = pickLayout(theme.key, rng);        // layouts/index
+    const sizeKey = rng.pick(theme.mapSizes ?? ['medium']);
+    const { w, h } = MAP_SIZES[sizeKey] ?? MAP_SIZES.medium;
+    const map     = new TileMap(w, h);
+    map.metadata.theme   = theme;
+    map.metadata.layout  = layout.key;
+    map.metadata.sizeKey = sizeKey;
 
     const rooms = layout.generate(map, rng, theme, levelNumber);
 

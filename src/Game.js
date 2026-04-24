@@ -8,6 +8,7 @@ import { WorldMap }      from './world/WorldMap.js';
 import { Pathfinder }    from './world/Pathfinder.js';
 import { Player }        from './entities/Player.js';
 import { Renderer, glyphToChar, buildCRTOverlay } from './ui/Renderer.js';
+import { Minimap } from './ui/Minimap.js';
 import { Menu }        from './ui/Menu.js';
 import { Tooltip }     from './ui/Tooltip.js';
 import { MessageLog }    from './ui/HUD.js';
@@ -250,7 +251,13 @@ this.traps = new TrapSystem(this.bus);
             const cls = CLASSES[item.data];
             if (!cls) return;
 
+            ctx.save();
+            ctx.beginPath();
+            ctx.rect(x, y, w, h);
+            ctx.clip();
+
             ctx.font = `${tileH - 4}px monospace`;
+            ctx.textBaseline = 'top';
             let dy = y + h - (tileH * 12);
 
             // Description blurb
@@ -277,6 +284,8 @@ this.traps = new TrapSystem(this.bus);
                 .map(([lvl, keys]) => `Lv${lvl}: ${keys.join(', ')}`)
                 .join('  ');
             ctx.fillText(abilKeys, x + 10, dy);
+
+            ctx.restore();
         }
     });
     this.activeMenu = menu;
@@ -443,7 +452,7 @@ this.traps = new TrapSystem(this.bus);
         return;
     }
 
-    if (action === 'traits' || action === 'sheet') {
+    if (action === 'sheet') {
         this.state = STATE.CHARACTER_SHEET;
         return;
     }
@@ -547,27 +556,42 @@ if (this._handleMovement(action, map)) {
     }
 }
 
-  // Returns the first nearby tile (current + 4 cardinals) that has an actionable feature.
-  _findInteractableTile(map) {
-    const offsets = [[0,0],[0,-1],[0,1],[-1,0],[1,0]];
+  // Direction label lookup used by examine and interact
+  static _DIR_LABEL(dx, dy) {
+    if (dx ===  0 && dy ===  0) return '';
+    if (dx ===  0 && dy === -1) return 'N';
+    if (dx ===  0 && dy ===  1) return 'S';
+    if (dx === -1 && dy ===  0) return 'W';
+    if (dx ===  1 && dy ===  0) return 'E';
+    if (dx === -1 && dy === -1) return 'NW';
+    if (dx ===  1 && dy === -1) return 'NE';
+    if (dx === -1 && dy ===  1) return 'SW';
+    if (dx ===  1 && dy ===  1) return 'SE';
+    return '';
+  }
+
+  // Returns all nearby tiles (current + 8 directions) that have an actionable feature.
+  _findAllInteractableTiles(map) {
+    const offsets = [[0,0],[0,-1],[0,1],[-1,0],[1,0],[-1,-1],[1,-1],[-1,1],[1,1]];
+    const results = [];
     for (const [dx, dy] of offsets) {
         const x = this.player.x + dx;
         const y = this.player.y + dy;
         const t = map.get(x, y);
         if (!t) continue;
         if (t.features.puzzle || t.features.lore || t.features.shrine || t.features.dungeon)
-            return { tile: t, x, y };
+            results.push({ tile: t, x, y, dx, dy });
     }
-    return null;
+    return results;
   }
 
   _handleExamine() {
     const map = this.worldMap.getLevel(this.currentLevel);
     const tile = map.get(this.player.x, this.player.y);
     const entities = map.getEntitiesAt(this.player.x, this.player.y);
-    
+
     let found = false;
-    
+
     // Check tile type
     if (tile.type === 'stair_down') {
         this.log.add('You see stairs descending into darkness.', 'system');
@@ -576,7 +600,7 @@ if (this._handleMovement(action, map)) {
         this.log.add('You see stairs leading upward.', 'system');
         found = true;
     }
-    
+
     // Check monsters on tile — open stat tooltip for first visible monster
     const monsters = entities.filter(e => e.type === 'monster');
     if (monsters.length > 0) {
@@ -598,32 +622,31 @@ if (this._handleMovement(action, map)) {
         this.log.add(`You see: ${item.name} - ${item.description ?? 'nothing special.'}`, 'system');
         found = true;
     }
-    
-    // Check tile features — current tile first, then adjacent
-    const tilesToCheck = [];
-    const offsets = [[0,0],[0,-1],[0,1],[-1,0],[1,0]];
+
+    // Check tile features — current tile + all 8 directions
+    const offsets = [[0,0],[0,-1],[0,1],[-1,0],[1,0],[-1,-1],[1,-1],[-1,1],[1,1]];
     for (const [dx, dy] of offsets) {
         const t = map.get(this.player.x + dx, this.player.y + dy);
-        if (t) tilesToCheck.push(t);
-    }
+        if (!t) continue;
+        const dir = Game._DIR_LABEL(dx, dy);
+        const prefix = dir ? `${dir}: ` : '';
 
-    for (const t of tilesToCheck) {
         if (t.features.puzzle && !found) {
             const puzzleState = this.puzzles.examine(t.features.puzzle);
             this.log.add(`-- ${puzzleState.name} --`, 'important');
-            this.log.add(puzzleState.description + ' [press F to interact]', 'puzzle');
+            this.log.add(`${prefix}${puzzleState.description} [press F to interact]`, 'puzzle');
             found = true;
         }
         if (t.features.trap) {
-            this.log.add(`You notice: ${t.features.trap.hint ?? 'Something seems off about this area.'}`, 'trap');
+            this.log.add(`${prefix}${t.features.trap.hint ?? 'Something seems off about this area.'}`, 'trap');
             found = true;
         }
         if (t.features.lore) {
-            this.log.add(t.features.lore.message, 'lore');
+            this.log.add(`${prefix}${t.features.lore.message}`, 'lore');
             found = true;
         }
         if (t.features.shrine) {
-            this.log.add(t.features.shrine.message + ' [press F to pray]', 'lore');
+            this.log.add(`${prefix}${t.features.shrine.message} [press F to pray]`, 'lore');
             found = true;
         }
         if (t.features.dungeon) {
@@ -631,7 +654,11 @@ if (this._handleMovement(action, map)) {
             if (def?.description) {
                 const hint = def.tier !== 'dressing' && !t.features.dungeon.used
                     ? ' [press F to interact]' : '';
-                this.log.add(def.description + hint, 'system');
+                // For locked chest, hint about lockpicking
+                const lockHint = def.onSearch?.requiresKey && !t.features.dungeon.data?.unlocked &&
+                    this.player.inventory.some(i => i.itemKey === 'thieves_tools')
+                    ? ' [F: attempt to pick lock]' : '';
+                this.log.add(`${prefix}${def.description}${hint}${lockHint}`, 'system');
                 found = true;
             }
         }
@@ -654,13 +681,47 @@ if (this._handleMovement(action, map)) {
 
 _handleFeatureInteract() {
     const map = this.worldMap.getLevel(this.currentLevel);
-    const result = this._findInteractableTile(map);
-    if (!result) {
+    const results = this._findAllInteractableTiles(map);
+    if (results.length === 0) {
         this.log.add('There is nothing here to interact with.', 'system');
         return;
     }
-    const { tile } = result;
 
+    if (results.length === 1) {
+        this._executeFeatureInteract(results[0].tile);
+        return;
+    }
+
+    // Multiple features adjacent — show disambiguation menu
+    const menuItems = results.map(r => {
+        const dir = Game._DIR_LABEL(r.dx, r.dy);
+        let label = dir ? `${dir}: ` : 'Here: ';
+        if (r.tile.features.dungeon) {
+            const def = FEATURES[r.tile.features.dungeon.key];
+            label += def?.key?.replace(/_/g, ' ') ?? 'feature';
+        } else if (r.tile.features.shrine) {
+            label += 'shrine';
+        } else if (r.tile.features.lore) {
+            label += 'inscription';
+        } else if (r.tile.features.puzzle) {
+            label += 'puzzle';
+        }
+        return { label, data: r.tile };
+    });
+
+    const menu = new Menu('Interact with what?', menuItems, {
+        onSelect: (selected) => {
+            menu.closed = true;
+            this.activeMenu = null;
+            this.state = STATE.PLAYING;
+            this._executeFeatureInteract(selected.data);
+        },
+        onCancel: () => {},
+    });
+    this._openMenu(menu);
+}
+
+_executeFeatureInteract(tile) {
     // Puzzle takes priority
     if (tile.features.puzzle) {
         this.activePuzzle = tile.features.puzzle;
@@ -746,7 +807,7 @@ _resolveSearch(tile, feature, def) {
     if (def.onSearch?.requiresKey && !feature.data?.unlocked) {
         const keyItem = this.player.inventory.find(i => i.itemKey === 'iron_key' || i.itemKey === 'dimensional_key');
         const hasTools = this.player.inventory.some(i => i.itemKey === 'thieves_tools');
-        const lockpick = this.player.skills?.lockpick ?? 0;
+        const lockpick = this.player.skills?.lockpicking ?? 0;
         const canPick = hasTools && (lockpick >= 1 || (this.rng.int(1, 20) + lockpick) >= 18);
         if (keyItem) {
             this.player.removeFromInventory(keyItem);
@@ -919,7 +980,9 @@ _applyFeatureEffect(outcome, tile, feature, def) {
         case 'item': {
             try {
                 const item = Item.create('healing_potion');
-                if (!this.player.addToInventory(item))
+                if (this.player.addToInventory(item))
+                    this.log.add(`You find a ${item.name}.`, 'lore');
+                else
                     this.log.add('Your pack is full — the item is lost.', 'system');
             } catch (_) {}
             break;
@@ -1489,9 +1552,9 @@ _openUseMenu() {
     const helpSize = Math.max(10, Math.floor(subSize * 0.85));
     ctx.font = `${helpSize}px monospace`;
     const helpLines = [
-        'WASD / Arrow Keys: Move  (Bump to attack)',
-        '>: Descend   <: Ascend   I: Inventory   M: Map',
-        'Z: Cast Spell   K: Spellbook   U: Use Ability   T: Skills',
+        'WASD / Arrows / Numpad: Move   Q/E/Z: Diagonals   Bump: Attack',
+        '>/<: Stairs   I: Inventory   G: Pick up   X: Examine   F: Interact',
+        'Y: Cast Spell   K: Spellbook   V: Fire Ranged   U: Ability/Item   T: Character Sheet   M: Map',
     ];
 
     helpLines.forEach((line, i) => {
@@ -1522,6 +1585,27 @@ _openUseMenu() {
     if (!this.player || !this.worldMap) return;
     const map = this.worldMap.getLevel(this.currentLevel);
     this.renderer.render(map, this.player, this.log, this.camera.x, this.camera.y, map.metadata.theme);
+
+    if (this._minimapVisible) {
+      if (!this._minimap) {
+        const mmCanvas = document.createElement('canvas');
+        this._minimap = new Minimap(map, mmCanvas);
+      } else {
+        this._minimap.tileMap = map;
+      }
+      this._minimap.render(this.player.x, this.player.y);
+      const ctx = this.renderer.ctx;
+      const mmCanvas = this._minimap.canvas;
+      const pad = 8;
+      const mx = ctx.canvas.width - mmCanvas.width - pad;
+      const my = pad;
+      ctx.fillStyle = 'rgba(0,0,0,0.7)';
+      ctx.fillRect(mx - 2, my - 2, mmCanvas.width + 4, mmCanvas.height + 4);
+      ctx.drawImage(mmCanvas, mx, my);
+      ctx.strokeStyle = '#555555';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(mx - 2, my - 2, mmCanvas.width + 4, mmCanvas.height + 4);
+    }
   }
 
   _renderStatRoll(ctx) {
@@ -2762,7 +2846,8 @@ _openSpellMenu(readOnly = false) {
         this.state = STATE.PLAYING;
 
         const spell = SPELLS[selected.data];
-        if (spell.range === 'self' || spell.range === 'touch') {
+        const spellMode = this._resolveModeForSpell(spell);
+        if (spellMode === 'self') {
             const result = this.magic.cast(this.player, selected.data, { x: this.player.x, y: this.player.y });
             if (result.success) {
                 this.log.add(`You cast ${spell.name}!`, 'magic');
@@ -2774,7 +2859,7 @@ _openSpellMenu(readOnly = false) {
                 this.log.add(result.message, 'system');
             }
         } else {
-            this._enterTargeting('spell', selected.data);
+            this._enterTargeting('spell', selected.data, spellMode, 'magic');
         }
       },
       onCancel: () => {
@@ -2890,13 +2975,90 @@ _classCanEquip(item) {
 
 // ---------------------------------------------------------------
 // TARGETING SYSTEM
+//
+// Five modes:
+//   'ranged_cycle'  — Tab cycles through visible monsters closest→farthest
+//   'cursor_view'   — Arrow keys move cursor; clamped to tiles in player FOV
+//   'cursor_map'    — Arrow keys move cursor; no LoS restriction
+//   'adjacent'      — Arrow keys select one of 8 adjacent tiles
+//
+// Theme controls overlay color: 'combat'=red, 'magic'=blue, 'skill'=yellow
 
-_enterTargeting(type, data) {
-    const nearest = this._findNearestVisibleMonster();
-    const cursor = nearest ?? { x: this.player.x, y: this.player.y };
-    this.targeting = { type, data, cursor: { x: cursor.x, y: cursor.y } };
+_resolveModeForSpell(spell) {
+    if (spell.range === 'self')  return 'self';
+    if (spell.range === 'touch') return 'adjacent';
+    if (spell.area?.startsWith('burst')) return 'cursor_view';
+    return 'ranged_cycle';
+}
+
+_buildVisibleMonsterList() {
+    const map = this.worldMap.getLevel(this.currentLevel);
+    const list = [];
+    for (const entityList of map.entities.values()) {
+        for (const e of entityList) {
+            if (e.type !== 'monster') continue;
+            const tile = map.get(e.x, e.y);
+            if (!tile?.visible) continue;
+            list.push(e);
+        }
+    }
+    list.sort((a, b) => {
+        const da = Math.abs(a.x - this.player.x) + Math.abs(a.y - this.player.y);
+        const db = Math.abs(b.x - this.player.x) + Math.abs(b.y - this.player.y);
+        return da - db;
+    });
+    return list;
+}
+
+_enterTargeting(type, data, mode = null, theme = null) {
+    const spell = type === 'spell' ? SPELLS[data] : null;
+
+    // Resolve mode
+    if (!mode) {
+        if (type === 'ranged') mode = 'ranged_cycle';
+        else if (spell)       mode = this._resolveModeForSpell(spell);
+        else                  mode = 'cursor_view';
+    }
+    if (!theme) {
+        theme = type === 'ranged' ? 'combat' : type === 'spell' ? 'magic' : 'skill';
+    }
+
+    // AOE radius from spell area (feet → tiles)
+    const aoeRadius = spell?.area?.startsWith('burst:')
+        ? Math.round(parseInt(spell.area.split(':')[1]) / 5)
+        : 0;
+
+    // Build target list for cycle mode
+    const targets = (mode === 'ranged_cycle') ? this._buildVisibleMonsterList() : [];
+
+    // Short-circuit: ranged_cycle with exactly 1 target
+    if (mode === 'ranged_cycle' && targets.length === 1) {
+        const t = targets[0];
+        this.targeting = { type, mode, theme, data, aoeRadius,
+            cursor: { x: t.x, y: t.y }, targets, targetIndex: 0 };
+        this.state = STATE.TARGETING;
+        this.log.add(`Target: ${t.name} — [Enter] to confirm, [Esc] to cancel.`, 'system');
+        return;
+    }
+    if (mode === 'ranged_cycle' && targets.length === 0) {
+        this.log.add('No targets in range.', 'system');
+        return;
+    }
+
+    // Default cursor position
+    let cursor;
+    if (mode === 'ranged_cycle' && targets.length > 0) {
+        cursor = { x: targets[0].x, y: targets[0].y };
+    } else if (mode === 'adjacent') {
+        cursor = { x: this.player.x, y: this.player.y - 1 }; // default north
+    } else {
+        const nearest = this._findNearestVisibleMonster();
+        cursor = nearest ?? { x: this.player.x, y: this.player.y };
+    }
+
+    this.targeting = { type, mode, theme, data, aoeRadius,
+        cursor, targets, targetIndex: 0 };
     this.state = STATE.TARGETING;
-    this.log.add('Select target (arrows to move, Enter to fire, Esc to cancel).', 'system');
 }
 
 _updateTargeting() {
@@ -2915,16 +3077,66 @@ _updateTargeting() {
         return;
     }
 
+    const { mode, targets } = this.targeting;
+    const map = this.worldMap.getLevel(this.currentLevel);
+
     const DIR = {
         'move:n': [0,-1], 'move:s': [0,1],
         'move:e': [1,0],  'move:w': [-1,0],
         'move:ne': [1,-1], 'move:nw': [-1,-1],
         'move:se': [1,1],  'move:sw': [-1,1],
     };
+
+    if (mode === 'ranged_cycle') {
+        if (action === 'target:next') {
+            this.targeting.targetIndex = (this.targeting.targetIndex + 1) % targets.length;
+            const t = targets[this.targeting.targetIndex];
+            this.targeting.cursor = { x: t.x, y: t.y };
+        } else if (action === 'target:prev') {
+            this.targeting.targetIndex = (this.targeting.targetIndex - 1 + targets.length) % targets.length;
+            const t = targets[this.targeting.targetIndex];
+            this.targeting.cursor = { x: t.x, y: t.y };
+        } else {
+            // Fall through to free cursor if player presses a direction
+            const dir = DIR[action];
+            if (dir) {
+                this.targeting.mode = 'cursor_view';
+                this.targeting.cursor.x += dir[0];
+                this.targeting.cursor.y += dir[1];
+            }
+        }
+        return;
+    }
+
+    if (mode === 'adjacent') {
+        const dir = DIR[action];
+        if (dir) {
+            this.targeting.cursor = {
+                x: this.player.x + dir[0],
+                y: this.player.y + dir[1],
+            };
+        }
+        return;
+    }
+
+    // cursor_view and cursor_map
     const dir = DIR[action];
     if (dir) {
-        this.targeting.cursor.x += dir[0];
-        this.targeting.cursor.y += dir[1];
+        const nx = this.targeting.cursor.x + dir[0];
+        const ny = this.targeting.cursor.y + dir[1];
+        if (mode === 'cursor_map') {
+            // Clamp to map bounds
+            const m = this.worldMap.getLevel(this.currentLevel);
+            this.targeting.cursor.x = Math.max(0, Math.min(nx, m.w - 1));
+            this.targeting.cursor.y = Math.max(0, Math.min(ny, m.h - 1));
+        } else {
+            // cursor_view: only move if destination tile is visible
+            const tile = map.get(nx, ny);
+            if (tile?.visible) {
+                this.targeting.cursor.x = nx;
+                this.targeting.cursor.y = ny;
+            }
+        }
     }
 }
 
@@ -3004,9 +3216,9 @@ _renderTargeting() {
     this._renderPlaying();
     if (this.targeting?.cursor) {
         const map = this.worldMap.getLevel(this.currentLevel);
-        this.renderer.drawTargetingCursor(
+        this.renderer.drawTargetingOverlay(
             this.renderer.ctx,
-            this.targeting.cursor,
+            this.targeting,
             this.player,
             this.camera.x,
             this.camera.y,
@@ -3020,7 +3232,7 @@ _renderTargeting() {
 
 _updateCharacterSheet() {
     const action = this.input.consumeAction();
-    if (action === 'cancel' || action === 'sheet' || action === 'traits' || action === 'confirm') {
+    if (action === 'cancel' || action === 'sheet' || action === 'confirm') {
         this.state = STATE.PLAYING;
     }
 }
@@ -3127,7 +3339,10 @@ _quickLoad() {
 }
 
   async _toggleMinimap() {
-    // Minimap is currently disabled to improve visibility.
+    this._minimapVisible = !this._minimapVisible;
+    if (this._minimapVisible) {
+      this.log.add('[M] Minimap — press M to close', 'system');
+    }
   }
 }
 

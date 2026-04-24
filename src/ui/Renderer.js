@@ -346,32 +346,91 @@ export class Renderer {
         });
     }
 
-    drawTargetingCursor(ctx, cursor, player, cameraX, cameraY, map) {
-        const col = cursor.x - cameraX;
-        const row = cursor.y - cameraY;
-        if (col < 0 || col >= this.VIEW_COLS || row < 0 || row >= this.VIEW_ROWS) return;
+    drawTargetingOverlay(ctx, targeting, player, cameraX, cameraY, map) {
+        const { TILE_W, TILE_H, VIEW_COLS, VIEW_ROWS } = this;
+        const { cursor, mode, theme, aoeRadius = 0 } = targeting;
 
-        const x = col * this.TILE_W;
-        const y = row * this.TILE_H;
-        const tile = map?.get(cursor.x, cursor.y);
-        const valid = tile?.visible ?? false;
+        const COLORS = {
+            skill:  { fill: 'rgba(255,220,0,0.40)',  stroke: 'rgba(255,220,0,0.9)',  dim: 'rgba(0,0,0,0.40)' },
+            magic:  { fill: 'rgba(80,120,255,0.40)', stroke: 'rgba(100,140,255,0.9)', dim: 'rgba(0,0,0,0.40)' },
+            combat: { fill: 'rgba(255,60,60,0.40)',  stroke: 'rgba(255,80,80,0.9)',  dim: 'rgba(0,0,0,0.40)' },
+        };
+        const c = COLORS[theme] ?? COLORS.combat;
 
-        ctx.fillStyle = valid ? 'rgba(255,255,0,0.35)' : 'rgba(255,0,0,0.35)';
-        ctx.fillRect(x, y, this.TILE_W, this.TILE_H);
+        // 1. Semi-transparent dim over the entire map viewport to signal "paused"
+        ctx.fillStyle = c.dim;
+        ctx.fillRect(0, 0, VIEW_COLS * TILE_W, VIEW_ROWS * TILE_H);
 
-        // Dashed line from player to cursor
-        const px = (player.x - cameraX) * this.TILE_W + this.TILE_W / 2;
-        const py = (player.y - cameraY) * this.TILE_H + this.TILE_H / 2;
-        const cx = x + this.TILE_W / 2;
-        const cy = y + this.TILE_H / 2;
-        ctx.strokeStyle = valid ? 'rgba(255,255,0,0.5)' : 'rgba(255,80,80,0.5)';
-        ctx.lineWidth = 1;
-        ctx.setLineDash([3, 3]);
-        ctx.beginPath();
-        ctx.moveTo(px, py);
-        ctx.lineTo(cx, cy);
-        ctx.stroke();
-        ctx.setLineDash([]);
+        // 2. AOE radius highlight for burst spells
+        if (aoeRadius > 0) {
+            for (let row = 0; row < VIEW_ROWS; row++) {
+                for (let col = 0; col < VIEW_COLS; col++) {
+                    const mx = cameraX + col;
+                    const my = cameraY + row;
+                    const dx = mx - cursor.x;
+                    const dy = my - cursor.y;
+                    if (Math.sqrt(dx * dx + dy * dy) <= aoeRadius) {
+                        const tile = map?.get(mx, my);
+                        if (tile?.visible) {
+                            ctx.fillStyle = c.fill;
+                            ctx.fillRect(col * TILE_W, row * TILE_H, TILE_W, TILE_H);
+                        }
+                    }
+                }
+            }
+        }
+
+        // 3. Cursor tile highlight
+        const cursorCol = cursor.x - cameraX;
+        const cursorRow = cursor.y - cameraY;
+        if (cursorCol >= 0 && cursorCol < VIEW_COLS && cursorRow >= 0 && cursorRow < VIEW_ROWS) {
+            const cx_ = cursorCol * TILE_W;
+            const cy_ = cursorRow * TILE_H;
+            ctx.fillStyle = c.fill;
+            ctx.fillRect(cx_, cy_, TILE_W, TILE_H);
+            ctx.strokeStyle = c.stroke;
+            ctx.lineWidth = 2;
+            ctx.strokeRect(cx_ + 1, cy_ + 1, TILE_W - 2, TILE_H - 2);
+
+            // 4. Dashed trajectory line from player to cursor
+            const px_ = (player.x - cameraX) * TILE_W + TILE_W / 2;
+            const py_ = (player.y - cameraY) * TILE_H + TILE_H / 2;
+            const tcx = cx_ + TILE_W / 2;
+            const tcy = cy_ + TILE_H / 2;
+            ctx.strokeStyle = c.stroke;
+            ctx.lineWidth = 1;
+            ctx.setLineDash([3, 3]);
+            ctx.beginPath();
+            ctx.moveTo(px_, py_);
+            ctx.lineTo(tcx, tcy);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // 5. Target info label above cursor tile
+            const entityList = map?.getEntitiesAt(cursor.x, cursor.y) ?? [];
+            const targetEnt = entityList.find(e => e.type === 'monster');
+            if (targetEnt) {
+                const hpPct = Math.round((targetEnt.hp / targetEnt.hpMax) * 100);
+                const label = `${targetEnt.name} [${hpPct}%]`;
+                ctx.textBaseline = 'bottom';
+                ctx.font = `${Math.max(10, TILE_H - 4)}px monospace`;
+                ctx.fillStyle = '#ffffff';
+                ctx.fillText(label, cx_, cy_ > TILE_H ? cy_ - 2 : cy_ + TILE_H + 2);
+            }
+        }
+
+        // 6. Mode hint bar at bottom of map viewport
+        const hints = {
+            adjacent:     '[Arrow] Select direction  [Enter] Confirm  [Esc] Cancel',
+            ranged_cycle: '[Tab] Cycle targets  [Enter] Confirm  [Esc] Cancel',
+            cursor_view:  '[Arrow] Move cursor (LoS)  [Enter] Confirm  [Esc] Cancel',
+            cursor_map:   '[Arrow] Move cursor  [Enter] Confirm  [Esc] Cancel',
+        };
+        const hint = hints[mode] ?? '[Enter] Confirm  [Esc] Cancel';
+        ctx.textBaseline = 'top';
+        ctx.font = `${Math.max(10, TILE_H - 4)}px monospace`;
+        ctx.fillStyle = 'rgba(200,200,200,0.9)';
+        ctx.fillText(hint, 8, VIEW_ROWS * TILE_H - TILE_H);
     }
 
     drawCharacterSheet(ctx, player) {
@@ -462,7 +521,7 @@ export class Renderer {
 
         // Footer hint
         ctx.fillStyle = '#555555';
-        ctx.fillText('[Esc / C to close]', col1, ctx.canvas.height - th * 2);
+        ctx.fillText('[Esc / T to close]', col1, ctx.canvas.height - th * 2);
     }
 
     wrapText(text, maxWidth) {
