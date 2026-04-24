@@ -258,7 +258,7 @@ this.traps = new TrapSystem(this.bus);
 
             ctx.font = `${tileH - 4}px monospace`;
             ctx.textBaseline = 'top';
-            let dy = y + tileH;
+            let dy = y + h - (tileH * 12);
 
             // Description blurb
             ctx.fillStyle = '#aaaaaa';
@@ -271,21 +271,19 @@ this.traps = new TrapSystem(this.bus);
             ctx.fillText(`Hit Die: d${cls.hitDie}   Prime Stat: ${cls.primeStat.join(', ').toUpperCase()}`, x + 10, dy);
             dy += tileH;
 
-            // Class features (up to 5), each wrapped
+            // Class features (first 3)
             ctx.fillStyle = '#88ffaa';
-            cls.classFeatures.slice(0, 5).forEach(feat => {
-                const fLines = this.renderer.wrapText(`• ${feat}`, w - 20);
-                fLines.forEach(line => { ctx.fillText(line, x + 10, dy); dy += tileH - 2; });
+            cls.classFeatures.slice(0, 3).forEach(feat => {
+                ctx.fillText(`• ${feat}`, x + 10, dy);
+                dy += tileH - 2;
             });
-            dy += 4;
 
-            // Abilities at levels, wrapped
+            // Abilities at levels
             ctx.fillStyle = '#888888';
             const abilKeys = Object.entries(cls.abilitiesAtLevel ?? {})
                 .map(([lvl, keys]) => `Lv${lvl}: ${keys.join(', ')}`)
                 .join('  ');
-            const abilLines = this.renderer.wrapText(abilKeys, w - 20);
-            abilLines.forEach(line => { ctx.fillText(line, x + 10, dy); dy += tileH - 2; });
+            ctx.fillText(abilKeys, x + 10, dy);
 
             ctx.restore();
         }
