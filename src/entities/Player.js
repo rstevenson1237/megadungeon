@@ -201,7 +201,7 @@ export class Player extends Entity {
         abilities: [...this.abilities],
         favoredEnemies: [...this.favoredEnemies],
         skills: { ...this.skills },
-        statuses: [], // Statuses don't persist across save for now
+        statuses: (this.statuses ?? []).map(s => ({ ...s })),
         scars: [...this.scars],
     };
 }
@@ -237,6 +237,7 @@ static deserialize(data) {
       player._grantAbility(ability);
     }
     player.skills = data.skills;
+    player.statuses = data.statuses ?? [];
     player.scars = data.scars ?? [];
     return player;
 }

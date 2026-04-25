@@ -359,7 +359,7 @@ export const ITEMS = {
   wand_of_healing: {
     key: 'wand_of_healing', name: 'Wand of Healing', genericName: 'White Wand',
     category: 'wand', glyph: 0x5C, color: '#88ff88', value: 500, stackable: false,
-    wand: { spellKey: 'cure_light', charges: 4, maxCharges: 4, casterLevel: 5 },
+    wand: { spellKey: 'cure_light_wounds', charges: 4, maxCharges: 4, casterLevel: 5 },
     description: 'Warm and smooth. It pulses faintly in your hand.',
   },
   wand_of_lightning: {

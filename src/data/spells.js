@@ -109,5 +109,64 @@ export const SPELLS = {
     flavorText: '"Holy ground is wherever you stand."',
   },
 
-  // +60 more spells across all schools and levels
+  // === ARCANE LEVEL 1 (continued) ===
+  fear: {
+    key: 'fear', name: 'Fear',
+    school: 'necromancy', type: 'arcane', level: 1, mpCost: 5,
+    range: '60ft', area: 'single', duration: '1d6+2_turns',
+    save: 'spells', saveEffect: 'negate',
+    effect: { type: 'fear' },
+    classes: ['magic_user', 'necromancer', 'illusionist'],
+    description: 'The target is overcome with supernatural terror and flees in panic. Save vs. spells negates.',
+    flavorText: '"The mind breaks long before the body."',
+  },
+
+  frost_bolt: {
+    key: 'frost_bolt', name: 'Frost Bolt',
+    school: 'evocation', type: 'arcane', level: 1, mpCost: 5,
+    range: '60ft', area: 'single', duration: 'instant',
+    save: 'breath', saveEffect: 'half',
+    effect: { type: 'damage', element: 'cold', dice: '1d8' },
+    classes: ['magic_user', 'illusionist'],
+    description: 'A shard of magical ice that deals 1d8 cold damage. Save for half.',
+    flavorText: '"Still as the grave."',
+  },
+
+  // === ARCANE LEVEL 3 (continued) ===
+  lightning_bolt: {
+    key: 'lightning_bolt', name: 'Lightning Bolt',
+    school: 'evocation', type: 'arcane', level: 3, mpCost: 12,
+    range: '120ft', area: 'burst:20ft', duration: 'instant',
+    save: 'breath', saveEffect: 'half',
+    effect: { type: 'damage', element: 'lightning', dice: 'level_d6' },
+    classes: ['magic_user'],
+    description: 'A crackling bolt of lightning detonates in a 20-foot area. Deals 1d6/level lightning damage. Save for half.',
+    flavorText: '"The storm does not negotiate."',
+  },
+
+  // === ARCANE LEVEL 5 ===
+  teleport: {
+    key: 'teleport', name: 'Teleport',
+    school: 'transmutation', type: 'arcane', level: 5, mpCost: 20,
+    range: 'self', area: 'self', duration: 'instant',
+    save: 'none', saveEffect: 'negate',
+    effect: { type: 'teleport' },
+    classes: ['magic_user'],
+    description: 'Instantly transports the caster to a random location on the current dungeon level.',
+    flavorText: '"You are somewhere else. You hope somewhere better."',
+  },
+
+  // === DIVINE LEVEL 1 (continued) ===
+  detect_traps: {
+    key: 'detect_traps', name: 'Detect Traps',
+    school: 'divination', type: 'divine', level: 1, mpCost: 4,
+    range: 'self', area: 'self', duration: 'instant',
+    save: 'none', saveEffect: 'negate',
+    effect: { type: 'detect', target: 'traps', radius: 60 },
+    classes: ['cleric'],
+    description: 'Reveals the location of all hidden traps within 60 feet.',
+    flavorText: '"The floor is not to be trusted."',
+  },
+
+  // +55 more spells across all schools and levels
 };
