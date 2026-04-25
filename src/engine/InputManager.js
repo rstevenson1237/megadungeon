@@ -20,7 +20,7 @@ export class InputManager {
       'move:w':        ['KeyA', 'ArrowLeft',  'Numpad4'],
       'move:ne':       ['KeyE', 'Numpad9'],
       'move:nw':       ['KeyQ', 'Numpad7'],
-      'move:se':       ['Numpad3'],           // C freed from diagonal (was KeyC)
+      'move:se':       ['KeyC', 'Numpad3'],
       'move:sw':       ['KeyZ', 'Numpad1'],
       'confirm':       ['Enter', 'Space'],
       'cancel':        ['Escape'],

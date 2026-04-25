@@ -32,7 +32,9 @@ export class Item extends Entity {
       throw new Error(`Unknown item key: ${itemKey}`);
     }
     const item = new Item(itemKey, itemData);
-    if (item.stackable) item.quantity = 1;
+    if (item.stackable && item.quantity === undefined) {
+      item.quantity = 1;
+    }
     return item;
   }
 }

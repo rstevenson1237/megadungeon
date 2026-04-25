@@ -32,14 +32,17 @@ export class FeaturePlacer {
           tile.opaque = feature.opaque ?? false;
         }
 
-        tile.glyph = feature.glyph;
-        tile.fg    = feature.fg;
         tile.features.dungeon = {
           key:  feature.key,
           tier: feature.tier,
           used: false,   // tracks singleUse exhaustion
-          data: {},      // runtime state (e.g. pairedCircleId)
+          data: {
+            oldGlyph: tile.glyph,
+            oldFg:    tile.fg,
+          },      // runtime state (e.g. pairedCircleId)
         };
+        tile.glyph = feature.glyph;
+        tile.fg    = feature.fg;
 
         // Transport circles: pair them
         if (feature.key === 'transport_circle') {
@@ -79,14 +82,19 @@ export class FeaturePlacer {
     const target = this._randomFloorTile(map, rng.pick(otherRooms), rng);
     if (!target) return;
 
+    const targetTile = map.get(target.x, target.y);
     map.get(pos.x, pos.y).features.dungeon.data.pairedDest = target;
-    map.get(target.x, target.y).features.dungeon = {
+    targetTile.features.dungeon = {
       key:  'transport_circle',
       tier: 'interactive',
       used: false,
-      data: { pairedDest: pos },
+      data: { 
+        pairedDest: pos,
+        oldGlyph: targetTile.glyph,
+        oldFg:    targetTile.fg,
+      },
     };
-    map.get(target.x, target.y).glyph = 0x4F;
-    map.get(target.x, target.y).fg    = '#6644cc';
+    targetTile.glyph = 0x4F;
+    targetTile.fg    = '#6644cc';
   }
 }

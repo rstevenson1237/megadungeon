@@ -102,15 +102,15 @@ export class Player extends Entity {
     for (const itemKey of cls.startingItems ?? []) {
       let item;
       try { item = Item.create(itemKey); } catch(e) { continue; }
-      let equipped = false;
+      
+      this.addToInventory(item);
+
       for (const [slot, keywords] of Object.entries(autoEquipMap)) {
         if (!this.equipped[slot] && keywords.some(kw => itemKey.includes(kw))) {
           this.equipped[slot] = item;
-          equipped = true;
           break;
         }
       }
-      if (!equipped) this.addToInventory(item);
     }
     this.ac = this._computeAC(); // Recompute now that equipment is set
 
@@ -180,7 +180,7 @@ export class Player extends Entity {
     if (i >= 0) this.inventory.splice(i, 1);
   }
 
-  serialize() {
+    serialize() {
     return {
         classKey: this.class.key,
         name: this.name,
@@ -193,9 +193,9 @@ export class Player extends Entity {
         gold: this.gold,
         depth: this.depth,
         x: this.x, y: this.y,
-        inventory: this.inventory.map(i => i.itemKey),
+        inventory: this.inventory.map(i => ({ key: i.itemKey, quantity: i.quantity })),
         equipped: Object.fromEntries(
-            Object.entries(this.equipped).map(([slot, item]) => [slot, item?.itemKey ?? null])
+            Object.entries(this.equipped).map(([slot, item]) => [slot, this.inventory.indexOf(item)])
         ),
         spellbook: [...this.spellbook],
         abilities: [...this.abilities],
@@ -204,9 +204,9 @@ export class Player extends Entity {
         statuses: (this.statuses ?? []).map(s => ({ ...s })),
         scars: [...this.scars],
     };
-}
+  }
 
-static deserialize(data) {
+  static deserialize(data) {
     const player = new Player(data.classKey, data.name, data.stats);
     player.level = data.level;
     player.xp = data.xp;
@@ -221,12 +221,22 @@ static deserialize(data) {
     player.x = data.x;
     player.y = data.y;
     player.inventory = [];
-    for (const key of data.inventory) {
-        try { player.inventory.push(Item.create(key)); } catch(e) {}
+    for (const d of data.inventory) {
+        try { 
+            const item = Item.create(typeof d === 'string' ? d : d.key);
+            if (typeof d === 'object' && d.quantity !== undefined) item.quantity = d.quantity;
+            player.inventory.push(item); 
+        } catch(e) {}
     }
-    for (const [slot, key] of Object.entries(data.equipped)) {
-        if (key) {
-            try { player.equipped[slot] = Item.create(key); } catch(e) {}
+    for (const [slot, idx] of Object.entries(data.equipped)) {
+        if (typeof idx === 'number' && idx !== -1 && player.inventory[idx]) {
+            player.equipped[slot] = player.inventory[idx];
+        } else if (typeof idx === 'string') {
+            // Backward compatibility for old save files
+            try { 
+                const item = Item.create(idx);
+                player.equipped[slot] = item;
+            } catch(e) {}
         }
     }
     player.spellbook = data.spellbook;
@@ -240,5 +250,5 @@ static deserialize(data) {
     player.statuses = data.statuses ?? [];
     player.scars = data.scars ?? [];
     return player;
-}
+  }
 }

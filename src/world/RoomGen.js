@@ -103,6 +103,8 @@ export class RoomGen {
     if (!pos) return;
     try {
       const item = Item.create('gold_pile');
+      const base = size === 'small' ? 10 : size === 'medium' ? 50 : 200;
+      item.quantity = this.rng.int(base, base * 2);
       item.x = pos.x;
       item.y = pos.y;
       map.addEntity(item);

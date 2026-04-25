@@ -78,7 +78,15 @@ export class TileMap {
   constructor(w, h) {
     this.w = w;
     this.h = h;
-    this.tiles = new Array(w * h).fill(null).map(() => createVoidTile());
+    this.tiles = new Array(w * h);
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) {
+        const tile = createVoidTile();
+        tile.x = x;
+        tile.y = y;
+        this.tiles[y * w + x] = tile;
+      }
+    }
     this.entities = new Map(); // `x,y` → Entity[]
     this.metadata = {};        // Arbitrary level-scoped data
   }

@@ -75,6 +75,7 @@ export const FEATURES = {
 
   bookshelf: {
     key: 'bookshelf',
+    name: 'Bookshelf',
     glyph: 0x3D,   // =
     fg: '#886644',
     solid: true,
@@ -95,6 +96,7 @@ export const FEATURES = {
 
   chest: {
     key: 'chest',
+    name: 'Chest',
     glyph: 0x2B,   // +
     fg: '#aa8844',
     solid: false,
@@ -116,6 +118,7 @@ export const FEATURES = {
 
   sarcophagus: {
     key: 'sarcophagus',
+    name: 'Sarcophagus',
     glyph: 0x5B,   // [
     fg: '#aaaaaa',
     solid: true,
@@ -136,6 +139,7 @@ export const FEATURES = {
 
   crate: {
     key: 'crate',
+    name: 'Crate',
     glyph: 0x6F,   // o
     fg: '#885533',
     solid: false,
@@ -157,6 +161,7 @@ export const FEATURES = {
 
   fountain: {
     key: 'fountain',
+    name: 'Fountain',
     glyph: 0x7E,   // ~
     fg: '#4488cc',
     solid: false,
@@ -165,7 +170,8 @@ export const FEATURES = {
     themes: ['dungeon_cellar', 'catacomb', 'dwarven_deep', 'elemental_grotto'],
     weight: 4,
     description: 'A stone fountain, water still flowing from some hidden source.',
-    singleUse: true,
+    singleUse: false,
+    continual: true,
     onInteract: {
       prompt: 'Drink from the fountain?',
       options: [
@@ -175,17 +181,19 @@ export const FEATURES = {
       ],
       // drink_fountain outcome table resolved at runtime:
       drinkOutcomes: [
-        { weight: 35, effect: 'heal',            value: '2d6',    message: 'The water is cool and revitalizing. You feel refreshed.' },
+        { weight: 30, effect: 'heal',            value: '2d6',    message: 'The water is cool and revitalizing. You feel refreshed.' },
         { weight: 20, effect: 'restore_mp',      value: '1d6',    message: 'Magic tingles on your tongue.' },
-        { weight: 20, effect: 'poison',          value: 'mild',   message: 'The water tastes foul. Your stomach turns.' },
+        { weight: 15, effect: 'poison',          value: 'mild',   message: 'The water tastes foul. Your stomach turns.' },
         { weight: 15, effect: 'status',          value: 'blessed', message: 'A faint glow surrounds you.' },
         { weight: 10, effect: 'random_teleport',                   message: 'The world spins — you are elsewhere.' },
+        { weight: 10, effect: 'item',            consumable: true, message: 'As you drink, your hand brushes something at the bottom.' },
       ],
     },
   },
 
   altar: {
     key: 'altar',
+    name: 'Altar',
     glyph: 0x5E,   // ^
     fg: '#ddddaa',
     solid: false,
@@ -219,6 +227,7 @@ export const FEATURES = {
 
   statue: {
     key: 'statue',
+    name: 'Statue',
     glyph: 0x26,   // &
     fg: '#aaaaaa',
     solid: true,
@@ -241,8 +250,8 @@ export const FEATURES = {
         ],
         touch_statue: [
           { weight: 50, effect: 'nothing',  message: 'Cold stone. Nothing more.' },
-          { weight: 30, effect: 'animate',  message: 'The statue shudders to life!' },
-          { weight: 20, effect: 'item',     message: 'Something shifts. A compartment opens.' },
+          { weight: 30, effect: 'animate',  message: 'The statue shudders to life!', consumable: true },
+          { weight: 20, effect: 'item',     message: 'Something shifts. A compartment opens.', consumable: true },
         ],
       },
     },
@@ -250,6 +259,7 @@ export const FEATURES = {
 
   throne: {
     key: 'throne',
+    name: 'Throne',
     glyph: 0x54,   // T
     fg: '#cc9900',
     solid: true,

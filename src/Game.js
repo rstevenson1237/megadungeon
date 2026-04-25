@@ -750,9 +750,17 @@ _executeFeatureInteract(tile) {
     const def = FEATURES[feature.key];
     if (!def) return;
 
-    if (feature.used && def.singleUse) {
-        this.log.add('Nothing happens. It has already been used.', 'system');
-        return;
+    if (feature.used) {
+        if (def.tier === 'searchable') {
+            this.log.add(`You have already searched the ${def.name ?? feature.key}. It is empty.`, 'system');
+        } else if (def.singleUse) {
+            this.log.add('Nothing happens. It has already been used.', 'system');
+        } else if (def.continual && feature.data?.empty) {
+            this.log.add(`The ${def.name ?? feature.key} is now empty.`, 'system');
+        } else {
+            // Non-single-use, non-continual (like Altar) can be reused.
+        }
+        if (def.singleUse || (def.continual && feature.data?.empty) || def.tier === 'searchable') return;
     }
     if (def.tier === 'dressing') return;
 
@@ -844,8 +852,17 @@ _resolveSearch(tile, feature, def) {
             if (key) {
                 try {
                     const item = Item.create(key);
-                    if (!this.player.addToInventory(item))
-                        this.log.add('Your pack is full.', 'system');
+                    if (key === 'gold_pile') {
+                        // For gold, just add it directly or drop it? 
+                        // In _resolveSearch, items found are normally added to inventory.
+                        // Let's make it consistent with _handlePickup.
+                        const goldAmount = this.rng.int(10, 100);
+                        this.player.gold = (this.player.gold ?? 0) + goldAmount;
+                        this.log.add(`You find ${goldAmount} gold coins!`, 'system');
+                    } else {
+                        if (!this.player.addToInventory(item))
+                            this.log.add('Your pack is full.', 'system');
+                    }
                 } catch (_) {}
             }
             break;
@@ -860,13 +877,28 @@ _resolveSearch(tile, feature, def) {
         case 'undead':
         case 'vermin': {
             const map2 = this.worldMap.getLevel(this.currentLevel);
-            const pos  = this._findAdjacentFloor(map2);
-            if (pos) {
-                const mkey = outcome.result === 'undead' ? 'skeleton' : 'giant_rat';
+            const mkey = outcome.result === 'undead' ? 'skeleton' : 'giant_rat';
+            
+            if (outcome.result === 'undead' && def.key === 'sarcophagus') {
+                // Sarcophagus transforms into skeleton
+                if (feature.data?.oldGlyph !== undefined) {
+                    tile.glyph = feature.data.oldGlyph;
+                    tile.fg    = feature.data.oldFg;
+                }
+                delete tile.features.dungeon;
+                tile.solid = false;
                 try {
-                    const m = Monster.create(mkey, pos.x, pos.y, this.currentLevel, this.rng);
+                    const m = Monster.create(mkey, tile.x, tile.y, this.currentLevel, this.rng);
                     map2.addEntity(m);
                 } catch (_) {}
+            } else {
+                const pos = this._findAdjacentFloor(map2);
+                if (pos) {
+                    try {
+                        const m = Monster.create(mkey, pos.x, pos.y, this.currentLevel, this.rng);
+                        map2.addEntity(m);
+                    } catch (_) {}
+                }
             }
             break;
         }
@@ -922,7 +954,16 @@ _openFeatureMenu(tile, feature, def) {
                 [];
 
             if (table.length > 0) {
-                const outcome = this.rng.weightedPick(table.map(o => ({ value: o, weight: o.weight })));
+                let outcome;
+                // Continual effects provide the same result each time
+                if (def.continual && feature.data?.storedOutcome) {
+                    outcome = feature.data.storedOutcome;
+                } else {
+                    outcome = this.rng.weightedPick(table.map(o => ({ value: o, weight: o.weight })));
+                    if (def.continual) {
+                        feature.data = { ...(feature.data ?? {}), storedOutcome: outcome };
+                    }
+                }
                 this._applyFeatureEffect(outcome, tile, feature, def);
             } else if (opt.action === 'fill_flask') {
                 this.log.add('You fill your flask with cool water.', 'system');
@@ -938,6 +979,14 @@ _openFeatureMenu(tile, feature, def) {
 
 _applyFeatureEffect(outcome, tile, feature, def) {
     if (outcome.message) this.log.add(outcome.message, 'lore');
+    
+    // Consumable effects mark the feature as used/empty
+    if (outcome.consumable) {
+        feature.used = true;
+        if (def.continual) {
+            feature.data = { ...(feature.data ?? {}), empty: true };
+        }
+    }
 
     switch (outcome.effect) {
         case 'heal': {
@@ -979,26 +1028,51 @@ _applyFeatureEffect(outcome, tile, feature, def) {
         }
         case 'item': {
             try {
-                const item = Item.create('healing_potion');
-                if (this.player.addToInventory(item))
-                    this.log.add(`You find a ${item.name}.`, 'lore');
-                else
-                    this.log.add('Your pack is full — the item is lost.', 'system');
+                const tableName = this.currentLevel <= 15 ? 'humanoid' : 'humanoid_warrior';
+                const key = rollLootTable(tableName, this.rng);
+                if (key === 'gold_pile') {
+                    const goldAmount = this.rng.int(10, 100);
+                    this.player.gold = (this.player.gold ?? 0) + goldAmount;
+                    this.log.add(`You find ${goldAmount} gold coins!`, 'system');
+                } else {
+                    const item = Item.create(key ?? 'healing_potion');
+                    if (this.player.addToInventory(item))
+                        this.log.add(`You find a ${item.name}.`, 'lore');
+                    else
+                        this.log.add('Your pack is full — the item is lost.', 'system');
+                }
             } catch (_) {}
             break;
         }
         case 'spawn_guardian':
         case 'animate': {
             const map2 = this.worldMap.getLevel(this.currentLevel);
-            const pos  = this._findAdjacentFloor(map2);
-            if (pos) {
-                const mkey = def.key === 'statue'       ? 'stone_golem'
-                           : def.key === 'sarcophagus'  ? 'skeleton'
-                           : 'wight';
+            const mkey = def.key === 'statue'       ? 'stone_golem'
+                       : def.key === 'sarcophagus'  ? 'skeleton'
+                       : 'wight';
+            
+            if (outcome.effect === 'animate') {
+                // Transformation: Remove the feature and replace with monster
+                if (feature.data?.oldGlyph !== undefined) {
+                    tile.glyph = feature.data.oldGlyph;
+                    tile.fg    = feature.data.oldFg;
+                }
+                delete tile.features.dungeon;
+                tile.solid = false; // Golems move, so the tile is no longer solid
+                
                 try {
-                    const m = Monster.create(mkey, pos.x, pos.y, this.currentLevel, this.rng);
+                    const m = Monster.create(mkey, tile.x, tile.y, this.currentLevel, this.rng);
                     map2.addEntity(m);
                 } catch (_) {}
+            } else {
+                // Spawn guardian adjacent
+                const pos = this._findAdjacentFloor(map2);
+                if (pos) {
+                    try {
+                        const m = Monster.create(mkey, pos.x, pos.y, this.currentLevel, this.rng);
+                        map2.addEntity(m);
+                    } catch (_) {}
+                }
             }
             break;
         }
@@ -1028,20 +1102,57 @@ _handlePickup() {
     const items = entities.filter(e => e.type === 'item');
 
     if (items.length === 0) {
-      this.log.add('There is nothing here to pick up.', 'system');
-      return;
+        this.log.add('There is nothing here to pick up.', 'system');
+        return;
     }
 
-    // For now, just pick up the first item found
-    const item = items[0];
+    if (items.length === 1) {
+        this._pickupItem(items[0], map);
+    } else {
+        const menuItems = items.map(item => ({
+            label: item.name + (item.quantity > 1 ? ` x${item.quantity}` : ''),
+            color: item.color ?? '#cccccc',
+            data: item
+        }));
+        // Add "Get All" option
+        menuItems.push({ label: 'Get All', color: '#ffff88', data: 'all' });
+
+        const menu = new Menu('Pick up what?', menuItems, {
+            onSelect: (sel) => {
+                if (sel.data === 'all') {
+                    for (const item of items) {
+                        this._pickupItem(item, map);
+                    }
+                } else {
+                    this._pickupItem(sel.data, map);
+                }
+                menu.closed = true;
+            },
+            onCancel: () => {}
+        });
+        this._openMenu(menu);
+    }
+}
+
+_pickupItem(item, map) {
+    if (item.itemKey === 'gold_pile') {
+        const goldAmt = item.quantity ?? 1;
+        this.player.gold = (this.player.gold ?? 0) + goldAmt;
+        map.removeEntity(item);
+        this.log.add(`You pick up ${goldAmt} gold coins.`, 'system');
+        return true;
+    }
 
     if (this.player.addToInventory(item)) {
-      map.removeEntity(item);
-      this.log.add(`You pick up the ${item.name}.`, 'system');
-      this._updateQuestProgress('fetch', { itemKey: item.itemKey });
-      this._updateQuestProgress('rescue_found', {});
+        map.removeEntity(item);
+        this.log.add(`You pick up the ${item.name}.`, 'system');
+        this._updateQuestProgress('fetch', { itemKey: item.itemKey });
+        this._updateQuestProgress('rescue_found', {});
+        this.bus.emit('item:pickup', { item, entity: this.player });
+        return true;
     } else {
-      this.log.add('Your inventory is full.', 'important');
+        this.log.add('Your inventory is full.', 'important');
+        return false;
     }
 }
 
@@ -1195,6 +1306,9 @@ _openUseMenu() {
     if (!itemKey) return;
     try {
       const item = Item.create(itemKey);
+      if (itemKey === 'gold_pile') {
+          item.quantity = this.rng.int(5, 25) * monster.def.hd;
+      }
       item.x = monster.x;
       item.y = monster.y;
       const map = this._currentMap();
@@ -2664,6 +2778,18 @@ _executeItemAction(item, action) {
             break;
         }
         case 'drop': {
+            if (item.cursed) {
+                this.log.add(`The ${item.name} is cursed and cannot be dropped!`, 'danger');
+                return;
+            }
+            // Unequip if currently equipped
+            for (const [slot, equipped] of Object.entries(this.player.equipped)) {
+                if (equipped === item) {
+                    this.player.equipped[slot] = null;
+                    this.player.ac = this.player._computeAC();
+                    break;
+                }
+            }
             this.player.removeFromInventory(item);
             item.x = this.player.x;
             item.y = this.player.y;
