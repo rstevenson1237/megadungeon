@@ -21,6 +21,7 @@ export class StatusSystem {
             attackMod: options.attackMod ?? 0,
             damageMod: options.damageMod ?? 0,
             fovBonus: options.fovBonus ?? 0,
+            damagePerTurn: options.damagePerTurn ?? 0,
             stat: options.stat ?? null,
             value: options.value ?? 0,
         };
