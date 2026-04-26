@@ -52,7 +52,7 @@ export class RoomGen {
       { value: 'monsters', weight: 35 },
       { value: 'treasure', weight: 15 },
       { value: 'trap',     weight: 10 + this.band.trapWeight },
-      { value: 'puzzle',   weight: 8 },
+      { value: 'puzzle',   weight: this.band.puzzleWeight },
       { value: 'lore',     weight: 7 },
       { value: 'shrine',   weight: 3 },
       { value: 'hazard',   weight: 2 + Math.floor(this.band.trapWeight / 2) },

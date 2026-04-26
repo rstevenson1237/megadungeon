@@ -93,5 +93,27 @@ export class LevelGen {
       if (room.type === 'entry' || room.type === 'boss') continue;
       populator.populate(map, room);
     }
+
+    // Guarantee minimum puzzle count per band without relying on cross-level state.
+    const minPuzzles = populator.band.minPuzzles ?? 0;
+    if (minPuzzles > 0) {
+      const puzzleCount = rooms.filter(r => r.content === 'puzzle').length;
+      if (puzzleCount < minPuzzles) {
+        // Prefer converting lowest-cost rooms first: empty → lore → shrine
+        const candidates = rooms.filter(r =>
+          r.type === 'normal' &&
+          r.content !== 'puzzle' &&
+          ['empty', 'lore', 'shrine'].includes(r.content)
+        );
+        candidates.sort((a, b) => {
+          const order = { empty: 0, lore: 1, shrine: 2 };
+          return (order[a.content] ?? 3) - (order[b.content] ?? 3);
+        });
+        for (let i = 0; i < (minPuzzles - puzzleCount) && i < candidates.length; i++) {
+          candidates[i].content = 'puzzle';
+          populator._placePuzzle(map, candidates[i]);
+        }
+      }
+    }
   }
 }
