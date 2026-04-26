@@ -167,7 +167,60 @@ export class RoomGen {
         }
     }
 
-    _dressRoom(map, room) {}
+    _dressRoom(map, room) {
+        const features = this.theme.dressingFeatures ?? ['rubble', 'stain'];
+        const count = this.rng.int(1, Math.min(3, Math.floor(room.w * room.h / 6) + 1));
+        const placed = new Set();
+
+        for (let i = 0; i < count; i++) {
+            const pos = this._randomFloorInRoom(map, room);
+            if (!pos) continue;
+            const key = `${pos.x},${pos.y}`;
+            if (placed.has(key)) continue;
+            placed.add(key);
+
+            const featureKey = this.rng.pick(features);
+            const tile = map.get(pos.x, pos.y);
+            if (tile.features.dungeon || tile.features.puzzle || tile.features.lore) continue;
+
+            const DRESSING = {
+                torch:   { glyph: 0x0F, fg: '#ffaa22', label: 'wall torch',  passable: true  },
+                barrel:  { glyph: 0xB2, fg: '#885533', label: 'old barrel',  passable: false },
+                rubble:  { glyph: 0xB0, fg: '#666666', label: 'rubble',      passable: true  },
+                stain:   { glyph: 0xFA, fg: '#663333', label: 'dark stain',  passable: true  },
+                crack:   { glyph: 0x2F, fg: '#555555', label: 'floor crack', passable: true  },
+                pillar:  { glyph: 0x4F, fg: '#888888', label: 'stone pillar',passable: false },
+                bones:   { glyph: 0x2B, fg: '#ccbbaa', label: 'scattered bones', passable: true },
+                web:     { glyph: 0x2A, fg: '#888888', label: 'cobwebs',     passable: true  },
+                mushroom:{ glyph: 0x2A, fg: '#88dd88', label: 'mushroom',    passable: true  },
+                pool:    { glyph: 0x7E, fg: '#446688', label: 'shallow pool',passable: true  },
+                altar:   { glyph: 0x54, fg: '#aaaaff', label: 'old altar',   passable: false },
+                statue:  { glyph: 0x01, fg: '#999999', label: 'stone statue',passable: false },
+            };
+
+            const def = DRESSING[featureKey];
+            if (!def) continue;
+
+            tile.features.dungeon = {
+                key: featureKey,
+                name: def.label,
+                tier: 'dressing',
+                glyph: def.glyph,
+                fg: def.fg,
+            };
+
+            if (!def.passable) {
+                tile.solid = true;
+                tile.opaque = featureKey === 'pillar' || featureKey === 'statue';
+            }
+        }
+
+        // Occasionally emit an ambient message from the theme
+        const ambient = this.theme.ambientMessages;
+        if (ambient?.length && this.rng.chance(0.3)) {
+            this.bus.emit('log:message', { text: this.rng.pick(ambient), category: 'lore' });
+        }
+    }
     
     populateBossRoom(map, room){
         const pos = this._randomFloorInRoom(map, room);

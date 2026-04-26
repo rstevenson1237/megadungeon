@@ -69,6 +69,8 @@ this.traps = new TrapSystem(this.bus);
     this.currentLevel = 1;
     this.camera       = { x: 0, y: 0 };
     this.activePuzzle = null;
+    this.puzzleTextBuffer = '';
+    this.puzzleTextMode = false;
     this.activeMenu = null;
     this._previousState = null;
     this.targeting = null; // { type: 'spell'|'ranged', data, cursor: {x,y} }
@@ -175,6 +177,28 @@ this.traps = new TrapSystem(this.bus);
           this._startNewGame(this.pendingClassKey, this.pendingStats, name);
         } else if (e.key.length === 1 && this.pendingName.length < 20) {
           this.pendingName += e.key;
+        }
+        e.preventDefault();
+      }
+      if (this.state === STATE.PUZZLE && this.puzzleTextMode) {
+        if (e.key === 'Backspace') {
+          this.puzzleTextBuffer = this.puzzleTextBuffer.slice(0, -1);
+        } else if (e.key === 'Enter') {
+          const answer = this.puzzleTextBuffer.trim();
+          this.puzzleTextMode = false;
+          this.puzzleTextBuffer = '';
+          if (answer && this.activePuzzle) {
+            const result = this.puzzles.interact(this.activePuzzle, this.player, 'answer', { answer });
+            this.log.add(result.message, result.success ? 'important' : 'danger');
+            this._handlePuzzleSideEffect(result);
+          }
+          this.state = STATE.PUZZLE;
+        } else if (e.key === 'Escape') {
+          this.puzzleTextMode = false;
+          this.puzzleTextBuffer = '';
+          this.state = STATE.PUZZLE;
+        } else if (e.key.length === 1 && this.puzzleTextBuffer.length < 40) {
+          this.puzzleTextBuffer += e.key;
         }
         e.preventDefault();
       }
@@ -534,14 +558,107 @@ if (this._handleMovement(action, map)) {
   }
 
   _updatePuzzle() {
-      // In a real UI, this would handle menu selections.
-      // For now, we'll just exit on any key press.
-      const action = this.input.consumeAction();
-      if(action) {
+    if (this.puzzleTextMode) {
+      // Text input is handled by the raw key listener; drain action queue.
+      this.input.consumeAction();
+      return;
+    }
+    if (this.activePuzzle && !this.activeMenu) {
+      if (this.activePuzzle.solved) {
+        this.state = STATE.PLAYING;
+        this.activePuzzle = null;
+        return;
+      }
+      this._openPuzzleMenu();
+    }
+  }
+
+  _openPuzzleMenu() {
+    const puzzle = this.activePuzzle;
+    if (!puzzle) return;
+    const info = this.puzzles.examine(puzzle);
+    const menuItems = info.interactions.map(i => ({
+      label: i.label,
+      color: '#88aaff',
+      data: i,
+      enabled: true,
+    }));
+    menuItems.push({ label: 'Step away', color: '#888888', data: null, enabled: true });
+
+    const menu = new Menu(info.name, menuItems, {
+      onSelect: (selected) => {
+        menu.closed = true;
+        if (!selected.data) {
           this.state = STATE.PLAYING;
           this.activePuzzle = null;
           this.log.add('You step back from the puzzle.', 'system');
-      }
+          return;
+        }
+        this._executePuzzleInteraction(puzzle, selected.data);
+      },
+      onCancel: () => {
+        this.state = STATE.PLAYING;
+        this.activePuzzle = null;
+        this.log.add('You step back from the puzzle.', 'system');
+      },
+    });
+    this._openMenu(menu);
+  }
+
+  _executePuzzleInteraction(puzzle, interaction) {
+    if (interaction.paramType === 'text') {
+      this.puzzleTextMode = true;
+      this.puzzleTextBuffer = '';
+      this.state = STATE.PUZZLE;
+      this.log.add('Type your answer and press [ENTER], or [ESC] to go back:', 'system');
+      return;
+    }
+    if (interaction.paramType === 'item') {
+      this._openPuzzleItemMenu(puzzle, interaction);
+      return;
+    }
+    // paramType === 'none' — interact directly
+    const result = this.puzzles.interact(puzzle, this.player, interaction.key, {});
+    this.log.add(result.message, result.success ? 'important' : 'danger');
+    this._handlePuzzleSideEffect(result);
+    this.state = STATE.PUZZLE;
+  }
+
+  _openPuzzleItemMenu(puzzle, interaction) {
+    const items = this.player.inventory.map(item => ({
+      label: item.name,
+      color: item.color ?? '#cccccc',
+      enabled: true,
+      data: item,
+    }));
+    if (items.length === 0) {
+      this.log.add('You have nothing to offer.', 'system');
+      this.state = STATE.PUZZLE;
+      return;
+    }
+    const menu = new Menu(`${interaction.label} — choose item`, items, {
+      onSelect: (selected) => {
+        menu.closed = true;
+        const result = this.puzzles.interact(puzzle, this.player, interaction.key, { item: selected.data });
+        this.log.add(result.message, result.success ? 'important' : 'danger');
+        this._handlePuzzleSideEffect(result);
+        this.state = STATE.PUZZLE;
+      },
+      onCancel: () => {
+        this.state = STATE.PUZZLE;
+      },
+    });
+    this._openMenu(menu);
+  }
+
+  _handlePuzzleSideEffect(result) {
+    if (!result?.sideEffect) return;
+    if (result.sideEffect.type === 'damage') {
+      const dmg = rollDiceStr(result.sideEffect.value);
+      this.player.hp = Math.max(0, this.player.hp - dmg);
+      this.log.add(`You take ${dmg} damage!`, 'danger');
+      if (this.player.hp <= 0) this.bus.emit('player:death', { cause: 'puzzle trap' });
+    }
   }
 
   _updateMenu() {
@@ -1544,7 +1661,10 @@ _openUseMenu() {
       case STATE.NAME_ENTRY:       this._renderNameEntry(this.renderer.ctx); break;
       case STATE.PLAYING:          this._renderPlaying(); break;
       case STATE.TOWN:             this._renderTown(); break;
-      case STATE.PUZZLE:           this._renderPlaying(); break;
+      case STATE.PUZZLE:
+        this._renderPlaying();
+        if (this.puzzleTextMode) this._renderPuzzleTextInput(this.renderer.ctx);
+        break;
       case STATE.DEAD:             this._renderDead(); break;
       case STATE.LEVEL_UP:         this._renderLevelUp(this.renderer.ctx); break;
       case STATE.VICTORY:          this._renderVictory(); break;
@@ -1694,6 +1814,37 @@ _openUseMenu() {
       });
     }
 }
+
+  _renderPuzzleTextInput(ctx) {
+    const tw = this.renderer.TILE_W;
+    const th = this.renderer.TILE_H;
+    const w = ctx.canvas.width;
+    const h = ctx.canvas.height;
+    const boxW = Math.min(w - tw * 4, 480);
+    const boxX = (w - boxW) / 2;
+    const boxY = h / 2 - th * 3;
+
+    ctx.fillStyle = 'rgba(0,0,0,0.85)';
+    ctx.fillRect(boxX - 8, boxY - th * 2, boxW + 16, th * 7);
+    ctx.strokeStyle = '#88aaff';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(boxX - 8, boxY - th * 2, boxW + 16, th * 7);
+
+    ctx.fillStyle = '#88aaff';
+    ctx.font = `bold ${th}px monospace`;
+    ctx.textBaseline = 'top';
+    ctx.fillText('Speak your answer:', boxX, boxY - th * 1.5);
+
+    ctx.strokeStyle = '#ffcc44';
+    ctx.strokeRect(boxX, boxY, boxW, th * 2);
+    ctx.fillStyle = '#ffcc44';
+    ctx.font = `bold ${th}px monospace`;
+    ctx.fillText((this.puzzleTextBuffer || '') + '_', boxX + 8, boxY + th * 0.4);
+
+    ctx.fillStyle = '#666666';
+    ctx.font = `${Math.max(10, th - 2)}px monospace`;
+    ctx.fillText('[ENTER] Confirm   [ESC] Go back', boxX, boxY + th * 2.6);
+  }
 
   _renderPlaying() {
     if (!this.player || !this.worldMap) return;
@@ -1856,6 +2007,7 @@ _openUseMenu() {
   _renderMenu() {
     // First render the underlying game state
     if (this._previousState === STATE.PLAYING) this._renderPlaying();
+    else if (this._previousState === STATE.PUZZLE) this._renderPlaying();
     else if (this._previousState === STATE.TOWN) this._renderTown();
     else if (this._previousState === STATE.TITLE) this._renderTitle();
     else {
