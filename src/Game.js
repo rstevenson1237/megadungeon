@@ -27,6 +27,7 @@ import { Item } from './entities/Item.js';
 import { Monster } from './entities/Monster.js';
 import { recordVictory, computeScore, getLeaderboard } from './data/leaderboard.js';
 import { rollLootTable } from './data/lootTables.js';
+import { isDungeonTownLevel, DUNGEON_TOWNS } from './data/dungeonTowns.js';
 
 const PLAYER_FOV_RADIUS = 8;
 
@@ -40,6 +41,7 @@ const STATE = {
   DEAD:             'dead',
   PUZZLE:           'puzzle',
   TOWN:             'town',
+  DUNGEON_TOWN:     'dungeon_town',
   MENU:             'menu',
   LEVEL_UP:         'level_up',
   VICTORY:          'victory',
@@ -321,7 +323,13 @@ this.traps = new TrapSystem(this.bus);
     }
     this.currentLevel = levelNum;
     this.player.depth = Math.max(this.player.depth, levelNum);
-    
+
+    if (isDungeonTownLevel(levelNum)) {
+        this.state = STATE.DUNGEON_TOWN;
+        this._openDungeonTownOverview(DUNGEON_TOWNS[levelNum]);
+        return;
+    }
+
     const map = this.worldMap.getLevel(levelNum);
     
     let entryPoint;
@@ -355,6 +363,7 @@ this.traps = new TrapSystem(this.bus);
       case STATE.NAME_ENTRY:  this._updateNameEntry(); break;
       case STATE.PLAYING:          this._updatePlaying(); break;
       case STATE.TOWN:             this._updateTown(); break;
+      case STATE.DUNGEON_TOWN:     this._updateDungeonTown(); break;
       case STATE.MENU:             this._updateMenu(); break;
       case STATE.DEAD:             this._updateDead(); break;
       case STATE.PUZZLE:           this._updatePuzzle(); break;
@@ -1741,6 +1750,7 @@ _openUseMenu() {
       case STATE.NAME_ENTRY:       this._renderNameEntry(this.renderer.ctx); break;
       case STATE.PLAYING:          this._renderPlaying(); break;
       case STATE.TOWN:             this._renderTown(); break;
+      case STATE.DUNGEON_TOWN:     this._renderDungeonTown(); break;
       case STATE.PUZZLE:
         this._renderPlaying();
         if (this.puzzleTextMode) this._renderPuzzleTextInput(this.renderer.ctx);
@@ -2089,6 +2099,7 @@ _openUseMenu() {
     if (this._previousState === STATE.PLAYING) this._renderPlaying();
     else if (this._previousState === STATE.PUZZLE) this._renderPlaying();
     else if (this._previousState === STATE.TOWN) this._renderTown();
+    else if (this._previousState === STATE.DUNGEON_TOWN) this._renderDungeonTown();
     else if (this._previousState === STATE.TITLE) this._renderTitle();
     else {
         this.renderer._clear();
@@ -2571,7 +2582,7 @@ _openArcaneShopMenu(location) {
     this.activeMenu = menu;
 }
 
-_openIdentifyMenu(location, cost, itemFilter, onDone) {
+_openIdentifyMenu(location, cost, itemFilter, onDone, prevState = STATE.TOWN) {
   const candidates = this.player.inventory.filter(itemFilter);
   if (candidates.length === 0) {
     this.log.add('You have no items that need identification.', 'system');
@@ -2591,11 +2602,11 @@ _openIdentifyMenu(location, cost, itemFilter, onDone) {
       selected.data.identified = true;
       const reveal = selected.data.name;
       this.log.add(`Identified: ${reveal}. ${selected.data.description ?? ''}`, 'magic');
-      this._openIdentifyMenu(location, cost, itemFilter, onDone); // Refresh
+      this._openIdentifyMenu(location, cost, itemFilter, onDone, prevState);
     },
     onCancel: onDone,
   });
-  this._previousState = STATE.TOWN;
+  this._previousState = prevState;
   this.state = STATE.MENU;
   this.activeMenu = menu;
 }
@@ -3930,6 +3941,539 @@ _quickLoad() {
       ctx.fillText(`${this.player.name}  Lv.${this.player.level}  ${this.player.class.name}`, 360, h - stripH + 22);
     }
 }
+
+  // ---------------------------------------------------------------
+  // DUNGEON TOWN — state handler, renderer, and menus
+
+  _updateDungeonTown() {
+    if (this.player?.hp <= 0) { this.state = STATE.DEAD; return; }
+    if (!this.activeMenu) {
+      this._openDungeonTownOverview(DUNGEON_TOWNS[this.currentLevel]);
+    }
+  }
+
+  _renderDungeonTown() {
+    const town = DUNGEON_TOWNS[this.currentLevel];
+    const ctx = this.renderer.ctx;
+    const w = this.canvasEl.width;
+    const h = this.canvasEl.height;
+
+    ctx.fillStyle = '#080810';
+    ctx.fillRect(0, 0, w, h);
+
+    const fontSize = Math.max(12, Math.floor(w / 64));
+    ctx.font = `${fontSize}px monospace`;
+
+    if (town) {
+      // Header
+      ctx.fillStyle = town.color;
+      const header = `— ${town.name}  ·  Depth ${town.depth} —`;
+      ctx.fillText(header, (w - ctx.measureText(header).width) / 2, h * 0.08);
+
+      // ASCII art
+      ctx.fillStyle = '#555566';
+      const art = town.asciiArt ?? [];
+      const startY = h * 0.14;
+      art.forEach((line, i) => {
+        ctx.fillText(line, (w - ctx.measureText(line).width) / 2, startY + i * (fontSize + 4));
+      });
+
+      // Ambience
+      ctx.fillStyle = '#777788';
+      const ambienceY = startY + (art.length + 1) * (fontSize + 4);
+      ctx.fillText(town.ambience, (w - ctx.measureText(town.ambience).width) / 2, ambienceY);
+    }
+
+    // Stat strip
+    if (this.player) {
+      const stripH = 36;
+      ctx.fillStyle = '#111122';
+      ctx.fillRect(0, h - stripH, w, stripH);
+      ctx.strokeStyle = town?.color ?? '#2E75B6';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(0, h - stripH, w, stripH);
+      ctx.font = '14px monospace';
+      ctx.fillStyle = '#66ff66';
+      ctx.fillText(`HP: ${this.player.hp}/${this.player.hpMax}`, 12, h - stripH + 22);
+      ctx.fillStyle = '#4488ff';
+      ctx.fillText(`MP: ${this.player.mp}/${this.player.mpMax}`, 130, h - stripH + 22);
+      ctx.fillStyle = '#ffcc44';
+      ctx.fillText(`Gold: ${this.player.gold}`, 240, h - stripH + 22);
+      ctx.fillStyle = '#cccccc';
+      ctx.fillText(`${this.player.name}  Lv.${this.player.level}  ${this.player.class.name}`, 360, h - stripH + 22);
+    }
+  }
+
+  _openDungeonTownOverview(town) {
+    const items = [];
+
+    // Inn
+    items.push({
+      label: `~ ${town.inn.name}`,
+      color: '#ffcc44',
+      data: { type: 'inn', svc: town.inn },
+    });
+
+    // Shops
+    for (const svc of town.shops) {
+      const icon = svc.key === 'temple' ? '+' : svc.key === 'weapon_smith' ? '!' : '$';
+      items.push({
+        label: `${icon} ${svc.name}`,
+        color: svc.key === 'temple' ? '#ffffaa' : svc.key === 'weapon_smith' ? '#cc8844' : '#44ff44',
+        data: { type: svc.key, svc },
+      });
+    }
+
+    // Lifts
+    if (town.lifts.length > 0) {
+      items.push({
+        label: 'L Lift Station',
+        color: '#88aaff',
+        data: { type: 'lift' },
+      });
+    }
+
+    // Navigation
+    items.push({
+      label: `< Ascend to dungeon level ${town.depth - 1}`,
+      color: '#ff9966',
+      data: { type: 'ascend' },
+    });
+    items.push({
+      label: `> Descend to dungeon level ${town.depth + 1}`,
+      color: '#ff6666',
+      data: { type: 'descend' },
+    });
+
+    const menu = new Menu(`${town.name}  —  Level ${town.depth}`, items, {
+      onSelect: (selected) => {
+        switch (selected.data.type) {
+          case 'inn':
+            this._openDungeonTownInn(selected.data.svc, town); break;
+          case 'general_store':
+            this._openDungeonTownShop(selected.data.svc, town); break;
+          case 'weapon_smith':
+            this._openDungeonTownSmith(selected.data.svc, town); break;
+          case 'temple':
+            this._openDungeonTownTemple(selected.data.svc, town); break;
+          case 'lift':
+            this._openDungeonTownLift(town); break;
+          case 'ascend':
+            this.activeMenu = null;
+            this.state = STATE.PLAYING;
+            this._enterLevel(town.depth - 1, 'from_below');
+            break;
+          case 'descend':
+            this.activeMenu = null;
+            this.state = STATE.PLAYING;
+            this._enterLevel(town.depth + 1, 'from_above');
+            break;
+        }
+      },
+      onCancel: () => { this._openDungeonTownOverview(town); },
+    });
+    this._previousState = STATE.DUNGEON_TOWN;
+    this.state = STATE.MENU;
+    this.activeMenu = menu;
+  }
+
+  _openDungeonTownInn(inn, town) {
+    const restCost = inn.restCost(this.player.level);
+    const henchCost = this.player.level * 100;
+    const hasHenchman = this.player.henchman?.turnsRemaining > 0;
+    const offerHenchman = town.depth >= 40;
+    const items = [
+      { label: `Rest (${restCost} gold)`, color: '#66ff66',
+        enabled: this.player.gold >= restCost, data: 'rest' },
+      { label: 'Listen for rumors', color: '#ccccaa', data: 'rumors' },
+    ];
+    if (offerHenchman) {
+      items.push({
+        label: hasHenchman
+          ? `Henchman (${this.player.henchman.turnsRemaining} turns remaining)`
+          : `Hire a Henchman (${henchCost} gold)`,
+        color: hasHenchman ? '#888888' : '#ffcc44',
+        enabled: !hasHenchman && this.player.gold >= henchCost,
+        data: 'henchman',
+      });
+    }
+    items.push({ label: 'Back', color: '#888888', data: 'back' });
+
+    const menu = new Menu(inn.name, items, {
+      onSelect: (selected) => {
+        switch (selected.data) {
+          case 'rest':
+            this.player.gold -= restCost;
+            this.player.hp = this.player.hpMax;
+            this.player.mp = this.player.mpMax;
+            this.player.statuses = [];
+            this.player._arcaneRecoveryUsed = false;
+            this.player._divineInterventionUsed = false;
+            this.player._legendaryStrikeUsedToday = false;
+            this.player._shadowTurnsUsed = 0;
+            this.player._holyChampionAvailable = this.player.hasAbility('holy_champion');
+            this.player._spellMasteryCharges = Object.fromEntries(
+              (this.player._masteredSpells ?? []).map(k => [k, 1])
+            );
+            this.player._callLightningUsed = false;
+            this.log.add('You rest. HP and MP fully restored.', 'heal');
+            this._openDungeonTownInn(inn, town);
+            break;
+          case 'rumors': {
+            const pool = inn.rumors(this.worldMap.townState ?? {});
+            const rumor = pool[this.rng.int(0, pool.length - 1)];
+            this.log.add(`A fellow traveller leans in: "${rumor}"`, 'lore');
+            this._openDungeonTownInn(inn, town);
+            break;
+          }
+          case 'henchman':
+            this.player.gold -= henchCost;
+            this.player.henchman = { turnsRemaining: 50, bonus: 1 };
+            this.log.add('A sell-sword agrees to accompany you deeper.', 'system');
+            this._openDungeonTownInn(inn, town);
+            break;
+          case 'back':
+            this.activeMenu.closed = true;
+            this._openDungeonTownOverview(town);
+            break;
+        }
+      },
+      onCancel: () => { this._openDungeonTownOverview(town); },
+    });
+    this._previousState = STATE.DUNGEON_TOWN;
+    this.state = STATE.MENU;
+    this.activeMenu = menu;
+  }
+
+  _openDungeonTownShop(shop, town) {
+    const items = [
+      { label: 'Buy',  color: '#44ff44', data: 'buy'  },
+      { label: 'Sell', color: '#ffcc44', data: 'sell' },
+      { label: 'Back', color: '#888888', data: 'back' },
+    ];
+    const menu = new Menu(shop.name, items, {
+      onSelect: (selected) => {
+        switch (selected.data) {
+          case 'buy':  this._openDungeonTownBuyMenu(shop, town);  break;
+          case 'sell': this._openDungeonTownSellMenu(shop, town); break;
+          case 'back':
+            this.activeMenu.closed = true;
+            this._openDungeonTownOverview(town);
+            break;
+        }
+      },
+      onCancel: () => { this._openDungeonTownOverview(town); },
+    });
+    this._previousState = STATE.DUNGEON_TOWN;
+    this.state = STATE.MENU;
+    this.activeMenu = menu;
+  }
+
+  _openDungeonTownBuyMenu(shop, town) {
+    const markup = shop.buyMarkup ?? 1.5;
+    const stock = (shop.stock ?? []).map(key => {
+      try {
+        const item = Item.create(key);
+        const price = Math.ceil(item.value * markup);
+        return {
+          label: `${item.name} — ${price}g`,
+          color: this.player.gold >= price ? '#44ff44' : '#555555',
+          enabled: this.player.gold >= price,
+          data: { key, price },
+        };
+      } catch(e) { return null; }
+    }).filter(Boolean);
+    stock.push({ label: 'Back', color: '#888888', data: { key: 'back' } });
+
+    const menu = new Menu(`Buy (${this.player.gold}g)`, stock, {
+      onSelect: (selected) => {
+        if (selected.data.key === 'back') {
+          this._openDungeonTownShop(shop, town); return;
+        }
+        if (this.player.gold >= selected.data.price) {
+          this.player.gold -= selected.data.price;
+          const item = Item.create(selected.data.key);
+          if (this.player.addToInventory(item)) {
+            this.log.add(`Bought ${item.name} for ${selected.data.price}g.`, 'system');
+          } else {
+            this.player.gold += selected.data.price;
+            this.log.add('Inventory full!', 'important');
+          }
+        }
+        this._openDungeonTownBuyMenu(shop, town);
+      },
+      onCancel: () => { this._openDungeonTownShop(shop, town); },
+    });
+    this._previousState = STATE.DUNGEON_TOWN;
+    this.state = STATE.MENU;
+    this.activeMenu = menu;
+  }
+
+  _openDungeonTownSellMenu(shop, town) {
+    const markup = shop.sellMarkup ?? 0.3;
+    const items = this.player.inventory.map((item, i) => {
+      const price = Math.floor(item.value * markup);
+      const isEquipped = Object.values(this.player.equipped).includes(item);
+      return {
+        label: `${item.name}${isEquipped ? ' [equipped]' : ''} — ${price}g`,
+        color: isEquipped ? '#555555' : '#ffcc44',
+        enabled: !isEquipped,
+        data: { item, price, index: i },
+      };
+    });
+    items.push({ label: 'Back', color: '#888888', data: { item: null } });
+
+    const menu = new Menu(`Sell (${this.player.gold}g)`, items, {
+      onSelect: (selected) => {
+        if (!selected.data.item) {
+          this._openDungeonTownShop(shop, town); return;
+        }
+        this.player.gold += selected.data.price;
+        this.player.removeFromInventory(selected.data.item);
+        this.log.add(`Sold ${selected.data.item.name} for ${selected.data.price}g.`, 'system');
+        this._openDungeonTownSellMenu(shop, town);
+      },
+      onCancel: () => { this._openDungeonTownShop(shop, town); },
+    });
+    this._previousState = STATE.DUNGEON_TOWN;
+    this.state = STATE.MENU;
+    this.activeMenu = menu;
+  }
+
+  _openDungeonTownSmith(smith, town) {
+    const items = [
+      { label: 'Buy Weapons',   color: '#44ff44', data: 'buy'     },
+      { label: 'Sell Items',    color: '#ffcc44', data: 'sell'    },
+      { label: 'Repair Weapon', color: '#cc8844', data: 'repair'  },
+      { label: 'Enchant Item',  color: '#88aaff', data: 'enchant' },
+      { label: 'Back',          color: '#888888', data: 'back'    },
+    ];
+    const menu = new Menu(smith.name, items, {
+      onSelect: (selected) => {
+        switch (selected.data) {
+          case 'buy':     this._openDungeonTownBuyMenu(smith, town);    break;
+          case 'sell':    this._openDungeonTownSellMenu(smith, town);   break;
+          case 'repair':  this._openDungeonTownRepair(smith, town);     break;
+          case 'enchant': this._openDungeonTownEnchant(smith, town);    break;
+          case 'back':
+            this.activeMenu.closed = true;
+            this._openDungeonTownOverview(town);
+            break;
+        }
+      },
+      onCancel: () => { this._openDungeonTownOverview(town); },
+    });
+    this._previousState = STATE.DUNGEON_TOWN;
+    this.state = STATE.MENU;
+    this.activeMenu = menu;
+  }
+
+  _openDungeonTownRepair(smith, town) {
+    const repairable = this.player.inventory.filter(
+      i => i.category === 'weapon' || i.category === 'armor'
+    );
+    if (repairable.length === 0) {
+      this.log.add('You have no weapons or armor to repair.', 'system');
+      this._openDungeonTownSmith(smith, town); return;
+    }
+    const items = repairable.map(item => {
+      const cost = Math.floor(item.value * 0.2);
+      return {
+        label: `${item.name} — ${cost}g`,
+        color: this.player.gold >= cost ? '#cc8844' : '#555555',
+        enabled: this.player.gold >= cost,
+        data: { item, cost },
+      };
+    });
+    items.push({ label: 'Back', color: '#888888', data: null });
+    const menu = new Menu(`Repair (${this.player.gold}g)`, items, {
+      onSelect: (selected) => {
+        if (!selected.data) { this._openDungeonTownSmith(smith, town); return; }
+        this.player.gold -= selected.data.cost;
+        this.log.add(`Repaired ${selected.data.item.name}. Good as new.`, 'system');
+        this._openDungeonTownRepair(smith, town);
+      },
+      onCancel: () => { this._openDungeonTownSmith(smith, town); },
+    });
+    this._previousState = STATE.DUNGEON_TOWN;
+    this.state = STATE.MENU;
+    this.activeMenu = menu;
+  }
+
+  _openDungeonTownEnchant(smith, town) {
+    const enchantable = this.player.inventory.filter(
+      i => (i.weapon || i.armor) && !i.cursed && (i._enchantLevel ?? 0) < 3
+    );
+    if (enchantable.length === 0) {
+      this.log.add('Nothing to enchant, or all items are already at max enchantment (+3).', 'system');
+      this._openDungeonTownSmith(smith, town); return;
+    }
+    const items = enchantable.map(item => {
+      const nextLevel = (item._enchantLevel ?? 0) + 1;
+      const cost = smith.enchantCost(item, nextLevel);
+      return {
+        label: `${item.name} → +${nextLevel} — ${cost}g`,
+        color: this.player.gold >= cost ? '#88aaff' : '#555555',
+        enabled: this.player.gold >= cost,
+        data: { item, cost, nextLevel },
+      };
+    });
+    items.push({ label: 'Back', color: '#888888', data: null });
+    const menu = new Menu(`Enchant Item (${this.player.gold}g)`, items, {
+      onSelect: (selected) => {
+        if (!selected.data) { this._openDungeonTownSmith(smith, town); return; }
+        const { item, cost, nextLevel } = selected.data;
+        this.player.gold -= cost;
+        item._baseName = item._baseName ?? item.name.replace(/ \+\d$/, '');
+        item._enchantLevel = nextLevel;
+        item.name = `${item._baseName} +${nextLevel}`;
+        if (item.weapon) {
+          item.weapon.attackBonus = (item.weapon.attackBonus ?? 0) + 1;
+          item.weapon.damageMod   = (item.weapon.damageMod   ?? 0) + 1;
+        } else if (item.armor) {
+          item.armor.acBonus = (item.armor.acBonus ?? 0) + 1;
+          this.player.ac = this.player._computeAC();
+        }
+        this.log.add(`${item.name} hums with power.`, 'magic');
+        this._openDungeonTownEnchant(smith, town);
+      },
+      onCancel: () => { this._openDungeonTownSmith(smith, town); },
+    });
+    this._previousState = STATE.DUNGEON_TOWN;
+    this.state = STATE.MENU;
+    this.activeMenu = menu;
+  }
+
+  _openDungeonTownTemple(temple, town) {
+    const costs = temple.costs;
+    const restoreCost = costs.raise_dead(this.player.level);
+    const drainedHP = (this.player.hpMaxBase ?? this.player.hpMax) - this.player.hpMax;
+    const items = [
+      { label: `Cure Disease (${costs.cure_disease}g)`, color: '#66ff66',
+        enabled: this.player.gold >= costs.cure_disease, data: 'cure_disease' },
+      { label: `Remove Curse (${costs.remove_curse}g)`, color: '#66ff66',
+        enabled: this.player.gold >= costs.remove_curse, data: 'remove_curse' },
+      { label: `Restore Vitality (${restoreCost}g)${drainedHP > 0 ? ` — +${drainedHP} max HP` : ' — no drain'}`,
+        color: drainedHP > 0 ? '#ff9966' : '#555555',
+        enabled: drainedHP > 0 && this.player.gold >= restoreCost, data: 'raise_dead' },
+      { label: `Atonement (${costs.atonement}g) — cleanse all afflictions`, color: '#ffffaa',
+        enabled: this.player.gold >= costs.atonement, data: 'atonement' },
+      { label: `Identify Item (${costs.identify}g)`, color: '#8888ff',
+        enabled: this.player.gold >= costs.identify, data: 'identify' },
+      { label: 'Back', color: '#888888', data: 'back' },
+    ];
+
+    const menu = new Menu(temple.name, items, {
+      onSelect: (selected) => {
+        const cost = typeof costs[selected.data] === 'function'
+          ? costs[selected.data](this.player.level)
+          : costs[selected.data];
+        switch (selected.data) {
+          case 'cure_disease':
+            this.player.gold -= cost;
+            StatusSystem.remove(this.player, 'disease');
+            StatusSystem.remove(this.player, 'poison');
+            this.log.add('The priests cleanse your body of affliction.', 'heal');
+            this._openDungeonTownTemple(temple, town);
+            break;
+          case 'remove_curse':
+            this.player.gold -= cost;
+            for (const [slot, item] of Object.entries(this.player.equipped)) {
+              if (item?.cursed) {
+                this.player.equipped[slot] = null;
+                this.log.add(`The ${item.name} falls away, its dark power broken.`, 'magic');
+              }
+            }
+            this._openDungeonTownTemple(temple, town);
+            break;
+          case 'raise_dead': {
+            this.player.gold -= cost;
+            const base = this.player.hpMaxBase ?? this.player.hpMax;
+            const restored = base - this.player.hpMax;
+            if (restored > 0) {
+              this.player.hpMax = base;
+              this.player.hp = Math.min(this.player.hp + restored, this.player.hpMax);
+              this.log.add(`The priests restore your life force. Max HP recovered by ${restored}.`, 'heal');
+            } else {
+              this.log.add('The priests bless you, but your vitality is already whole.', 'heal');
+              this.player.gold += cost;
+            }
+            this._openDungeonTownTemple(temple, town);
+            break;
+          }
+          case 'atonement': {
+            this.player.gold -= cost;
+            const negatives = ['cursed', 'fear', 'disease', 'poison', 'burning', 'slow', 'paralysis'];
+            const before = (this.player.statuses ?? []).length;
+            this.player.statuses = (this.player.statuses ?? []).filter(s => !negatives.includes(s.key));
+            const cleared = before - this.player.statuses.length;
+            this.log.add(
+              cleared > 0
+                ? `The priests absolve you. ${cleared} affliction(s) cleansed.`
+                : 'The priests bless you. Your soul is already unburdened.',
+              'heal'
+            );
+            this._openDungeonTownTemple(temple, town);
+            break;
+          }
+          case 'identify':
+            this._openIdentifyMenu(
+              temple, costs.identify,
+              item => !item.identified && item.genericName,
+              () => this._openDungeonTownTemple(temple, town),
+              STATE.DUNGEON_TOWN
+            );
+            break;
+          case 'back':
+            this.activeMenu.closed = true;
+            this._openDungeonTownOverview(town);
+            break;
+        }
+      },
+      onCancel: () => { this._openDungeonTownOverview(town); },
+    });
+    this._previousState = STATE.DUNGEON_TOWN;
+    this.state = STATE.MENU;
+    this.activeMenu = menu;
+  }
+
+  _openDungeonTownLift(town) {
+    const items = town.lifts.map(lift => {
+      const targetTown = DUNGEON_TOWNS[lift.target];
+      const explored = lift.direction === 'up' || this.player.depth >= lift.target;
+      const affordable = this.player.gold >= lift.cost;
+      const arrow = lift.direction === 'up' ? '▲' : '▼';
+      const suffix = !explored ? ' (unexplored)' : '';
+      return {
+        label: `${arrow} ${targetTown.name} (Level ${lift.target}) — ${lift.cost}g${suffix}`,
+        color: explored && affordable ? '#ffcc44' : '#555555',
+        enabled: explored && affordable,
+        data: lift,
+      };
+    });
+    items.push({ label: 'Back', color: '#888888', data: null });
+
+    const menu = new Menu('Lift Station', items, {
+      onSelect: (selected) => {
+        if (!selected.data) {
+          this.activeMenu.closed = true;
+          this._openDungeonTownOverview(town);
+          return;
+        }
+        const lift = selected.data;
+        this.player.gold -= lift.cost;
+        this.log.add(`You pay ${lift.cost}g and ride the lift to level ${lift.target}.`, 'system');
+        this.activeMenu = null;
+        this._enterLevel(lift.target);
+      },
+      onCancel: () => { this._openDungeonTownOverview(town); },
+    });
+    this._previousState = STATE.DUNGEON_TOWN;
+    this.state = STATE.MENU;
+    this.activeMenu = menu;
+  }
+
+  // ---------------------------------------------------------------
 
   async _toggleMinimap() {
     this._minimapVisible = !this._minimapVisible;
