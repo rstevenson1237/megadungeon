@@ -210,6 +210,36 @@ export const CLASSES = {
     code: 'Paladins must remain lawful good. Breaking the code strips all class abilities until atonement at a temple.',
   },
 
+  bard: {
+    key: 'bard', name: 'Bard', glyph: '@', color: '#44cccc',
+    description: 'Wandering minstrels who weave magic through music and word. Jacks of all trades, masters of manipulation.',
+    hitDie: 6, usesMP: true, mpBase: 8, castingStat: 'cha',
+    attackBonus: [0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9],
+    savingThrows: { death: 13, wands: 12, stone: 14, breath: 15, spells: 13 },
+    armorAllowed: ['leather', 'shield'],
+    weaponsAllowed: ['simple', 'light_martial'],
+    startingSkills: { performance: 2, persuasion: 2, arcana: 1 },
+    startingSpells: ['sleep'],
+    startingItems: ['dagger', 'lute', 'leather_armor', 'torch', 'ration'],
+    startingGold: 35,
+    hpBonus: 0,
+    abilitiesAtLevel: {
+      1: ['bardic_inspiration'],
+      3: ['tale_of_valor'],
+      5: ['lore_mastery'],
+      7: ['countersong'],
+      9: ['dirge_of_doom'],
+    },
+    classFeatures: [
+      'Bardic Inspiration: Play a rousing tune, granting +1 to your attacks for 3 turns.',
+      'Tale of Valor: Your stories of heroism steel allies\' nerves, granting +1 damage for 3 turns.',
+      'Lore Mastery: Instantly identify any monster or magical item on sight.',
+      'Countersong: Your music dispels fear, charm, and sleep effects; grants 3-turn protection.',
+      'Dirge of Doom: A haunting melody afflicts all visible enemies with dread (-2 attack, 3 turns).',
+    ],
+    primeStat: ['cha'],
+  },
+
   // Additional classes (all follow same structure):
-  // druid, illusionist, bard, assassin, monk, warlock, necromancer, berserker
+  // druid, illusionist, assassin, monk, warlock, necromancer, berserker
 };

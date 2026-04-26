@@ -2811,7 +2811,7 @@ _openItemActionMenu(item) {
 _handleUseAbility() {
     // Build a list of usable class abilities
     const usable = [];
-    const activeAbilities = ['turn_undead', 'lay_on_hands', 'combat_surge', 'battle_cry'];
+    const activeAbilities = ['turn_undead', 'lay_on_hands', 'combat_surge', 'battle_cry', 'bardic_inspiration', 'tale_of_valor', 'countersong', 'dirge_of_doom'];
 
     for (const key of this.player.abilities) {
         if (activeAbilities.includes(key)) {
@@ -2874,6 +2874,46 @@ _handleUseAbility() {
       case 'battle_cry': {
         StatusSystem.apply(this.player, 'battle_cry', { attackMod: 1, duration: 3 });
         this.log.add('You let out a battle cry! +1 attack for 3 turns.', 'combat');
+        break;
+      }
+      case 'bardic_inspiration': {
+        StatusSystem.apply(this.player, 'bardic_inspiration', { attackMod: 1, duration: 3 });
+        this.log.add('You play an inspiring tune! +1 to attacks for 3 turns.', 'magic');
+        break;
+      }
+      case 'tale_of_valor': {
+        StatusSystem.apply(this.player, 'tale_of_valor', { damageMod: 1, duration: 3 });
+        this.log.add('Your tale of valor steels your nerve! +1 damage for 3 turns.', 'magic');
+        break;
+      }
+      case 'countersong': {
+        const cleansed = ['fear', 'charm', 'sleep'].filter(s => StatusSystem.has(this.player, s));
+        for (const s of cleansed) StatusSystem.remove(this.player, s);
+        StatusSystem.apply(this.player, 'countersong', { duration: 3 });
+        const msg = cleansed.length > 0
+          ? `Your countersong dispels ${cleansed.join(', ')}! Protected for 3 turns.`
+          : 'Your countersong wards off enchantments for 3 turns.';
+        this.log.add(msg, 'magic');
+        break;
+      }
+      case 'dirge_of_doom': {
+        const map = this.worldMap.getLevel(this.currentLevel);
+        let affected = 0;
+        for (const entityList of map.entities.values()) {
+          for (const e of entityList) {
+            if (e.type !== 'monster') continue;
+            const tile = map.get(e.x, e.y);
+            if (!tile?.visible) continue;
+            StatusSystem.apply(e, 'dirge_of_doom', { attackMod: -2, duration: 3 });
+            affected++;
+          }
+        }
+        this.log.add(
+          affected > 0
+            ? `Your dirge fills ${affected} enem${affected === 1 ? 'y' : 'ies'} with dread! (-2 attack, 3 turns)`
+            : 'Your haunting dirge echoes through the dungeon.',
+          'magic'
+        );
         break;
       }
       default:

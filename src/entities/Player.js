@@ -155,6 +155,7 @@ export class Player extends Entity {
       extra_attack:          () => { this._extraAttacks = 1; },
       woodland_stride:       () => { this._ignoreDifficultTerrain = true; },
       aura_of_protection:    () => { /* Applied to allies in CombatSystem or StatusSystem */ },
+      lore_mastery:          () => { this._loreMasteryActive = true; },
     };
     passiveEffects[abilityKey]?.();
     console.log(`${this.name} has gained ability: ${abilityKey}!`);
