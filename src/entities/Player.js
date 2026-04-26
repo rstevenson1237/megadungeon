@@ -176,6 +176,10 @@ export class Player extends Entity {
           if (!this.spellbook.includes(s)) this.spellbook.push(s);
         }
       },
+      // Druid
+      wild_empathy:          () => { this._wildEmpathyActive = true; },
+      regeneration:          () => { this._regenerationActive = true; },
+      call_lightning:        () => { /* active ability — managed in _activateAbility */ },
     };
     passiveEffects[abilityKey]?.();
     console.log(`${this.name} has gained ability: ${abilityKey}!`);

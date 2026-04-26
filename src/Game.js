@@ -535,6 +535,10 @@ if (this._handleMovement(action, map)) {
                     : `${key} has worn off.`;
           this.log.add(msg, 'system');
       }
+      // Regeneration (Druid L7): +1 HP per turn
+      if (this.player._regenerationActive && this.player.hp > 0 && this.player.hp < this.player.hpMax) {
+        this.player.hp++;
+      }
     }
 
     // Non-movement actions (no turn cost for MVP):
@@ -1649,6 +1653,12 @@ _openUseMenu() {
     // Master of Shadows (Thief L9): invisible players cannot be targeted
     if (StatusSystem.has(this.player, 'invisible')) return;
 
+    // Wild Empathy (Druid L1): beast monsters hesitate 50% of the time
+    if (this.player._wildEmpathyActive && monster.def?.tags?.includes('beast') && this.rng.chance(0.5)) {
+      this.log.add(`${monster.name} senses your bond with nature and hesitates.`, 'magic');
+      return;
+    }
+
     const dx = this.player.x - monster.x;
     const dy = this.player.y - monster.y;
     const dist = Math.abs(dx) + Math.abs(dy);
@@ -2195,6 +2205,7 @@ _openInnMenu(location) {
                     this.player._spellMasteryCharges = Object.fromEntries(
                       (this.player._masteredSpells ?? []).map(k => [k, 1])
                     );
+                    this.player._callLightningUsed = false;
                     this.log.add('You rest at the inn. HP and MP fully restored.', 'heal');
                     this._openInnMenu(location);
                     break;
@@ -2900,6 +2911,8 @@ _handleUseAbility() {
       'holy_word',
       'detect_evil', 'smite_evil',
       'quarry', 'pinning_shot',
+      // Druid
+      'barkskin', 'call_lightning', 'nature_wrath',
     ];
 
     for (const key of this.player.abilities) {
@@ -3128,6 +3141,54 @@ _handleUseAbility() {
       case 'pinning_shot': {
         this.player._pinningNextShot = true;
         this.log.add('Pinning Shot ready. Next ranged hit pins the target in place (3 turns).', 'combat');
+        break;
+      }
+      // Druid
+      case 'barkskin': {
+        StatusSystem.apply(this.player, 'barkskin', { acMod: -3, duration: 5 });
+        this.player.ac = this.player._computeAC();
+        this.log.add('Your skin hardens like bark! +3 AC for 5 turns.', 'magic');
+        break;
+      }
+      case 'call_lightning': {
+        if (this.player._callLightningUsed) {
+          this.log.add('You have already called lightning this rest.', 'system'); break;
+        }
+        const clMap = this.worldMap.getLevel(this.currentLevel);
+        let clHit = 0;
+        for (const entityList of clMap.entities.values()) {
+          for (const e of entityList) {
+            if (e.type !== 'monster') continue;
+            const tile = clMap.get(e.x, e.y);
+            if (!tile?.visible) continue;
+            const dmg = rollDiceStr('2d6');
+            e.hp = Math.max(0, e.hp - dmg);
+            if (e.hp === 0) this.bus.emit('monster:death', { entity: e, cause: 'call_lightning' });
+            clHit++;
+          }
+        }
+        this.player._callLightningUsed = true;
+        this.log.add(clHit > 0 ? `Lightning strikes ${clHit} target${clHit > 1 ? 's' : ''}!` : 'Lightning crashes — but nothing is struck.', 'magic');
+        break;
+      }
+      case 'nature_wrath': {
+        const nwMap = this.worldMap.getLevel(this.currentLevel);
+        let nwPrimary = 0, nwSecondary = 0;
+        for (const entityList of nwMap.entities.values()) {
+          for (const e of entityList) {
+            if (e.type !== 'monster') continue;
+            const tile = nwMap.get(e.x, e.y);
+            if (!tile?.visible) continue;
+            const isNature = e.def?.tags?.includes('beast') || e.def?.tags?.includes('elemental');
+            const dmg = isNature ? rollDiceStr('2d6') : (rollSave(e, 'spells') ? 0 : rollDiceStr('1d6'));
+            if (dmg > 0) {
+              e.hp = Math.max(0, e.hp - dmg);
+              if (e.hp === 0) this.bus.emit('monster:death', { entity: e, cause: 'nature_wrath' });
+              isNature ? nwPrimary++ : nwSecondary++;
+            }
+          }
+        }
+        this.log.add(`Nature's Wrath! ${nwPrimary} beast/elemental and ${nwSecondary} other creature${nwSecondary !== 1 ? 's' : ''} affected.`, 'magic');
         break;
       }
       default:

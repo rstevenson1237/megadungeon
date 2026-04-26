@@ -240,6 +240,36 @@ export const CLASSES = {
     primeStat: ['cha'],
   },
 
+  druid: {
+    key: 'druid', name: 'Druid', glyph: '@', color: '#55aa44',
+    description: 'Guardians of the wild places, wielding nature\'s fury and the healing power of the living earth.',
+    hitDie: 8, usesMP: true, mpBase: 8, castingStat: 'wis',
+    attackBonus: [0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9],
+    savingThrows: { death: 12, wands: 13, stone: 12, breath: 14, spells: 15 },
+    armorAllowed: ['leather', 'shield'],
+    weaponsAllowed: ['simple', 'blunt', 'staff'],
+    startingSkills: { survival: 2, beast_lore: 2, divine_lore: 1 },
+    startingSpells: ['cure_light_wounds', 'resist_fire'],
+    startingItems: ['staff', 'leather_armor', 'holy_symbol', 'torch', 'ration', 'rope'],
+    startingGold: 25,
+    hpBonus: 1,
+    abilitiesAtLevel: {
+      1: ['wild_empathy'],
+      3: ['barkskin'],
+      5: ['call_lightning'],
+      7: ['regeneration'],
+      9: ['nature_wrath'],
+    },
+    classFeatures: [
+      'Wild Empathy: Beasts hesitate to attack you (50% chance). +2 attack and damage vs beast monsters.',
+      'Barkskin: Your skin hardens like bark, granting +3 AC for 5 turns.',
+      'Call Lightning: Summon a bolt of lightning to strike all visible enemies for 2d6 damage. Once per rest.',
+      'Regeneration: Passively heal 1 HP per turn while alive.',
+      'Nature\'s Wrath: Beasts and elementals take 2d6 damage; all others save vs spells or take 1d6.',
+    ],
+    primeStat: ['wis'],
+  },
+
   // Additional classes (all follow same structure):
-  // druid, illusionist, assassin, monk, warlock, necromancer, berserker
+  // illusionist, assassin, monk, warlock, necromancer, berserker
 };

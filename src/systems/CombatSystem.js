@@ -99,6 +99,8 @@ export class CombatSystem {
       if (attacker.favoredEnemies?.includes(defender.def?.type)) bonus += 2;
       // Quarry: +4 to attack vs marked target
       if (attacker._quarryX !== undefined && defender.x === attacker._quarryX && defender.y === attacker._quarryY) bonus += 4;
+      // Wild Empathy: +2 to attack vs beasts
+      if (attacker._wildEmpathyActive && defender.def?.tags?.includes('beast')) bonus += 2;
     }
 
     // Situational: status-based attack modifiers (blessed, cursed, battle_cry, etc.)
@@ -127,6 +129,8 @@ export class CombatSystem {
       if (attacker._weaponSpecBonus) dmg += attacker._weaponSpecBonus;
       // Favored Enemy: +2 to damage
       if (attacker.favoredEnemies?.includes(defender.def?.type)) dmg += 2;
+      // Wild Empathy: +2 damage vs beasts
+      if (attacker._wildEmpathyActive && defender.def?.tags?.includes('beast')) dmg += 2;
       // Backstab: multiply damage when attacking a monster that hasn't detected the player
       if (attacker.hasAbility?.('backstab') && options.backstab) {
         const multiplier = Math.min(5, 2 + Math.floor(attacker.level / 4));
