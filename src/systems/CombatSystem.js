@@ -26,7 +26,7 @@ export class CombatSystem {
    * Resolve a melee attack.
    * @returns {{ hit, critical, damage, effects, message }}
    */
-  resolveAttack(attacker, defender, weapon = null, attackPenalty = 0) {
+  resolveAttack(attacker, defender, weapon = null, attackPenalty = 0, options = {}) {
     const atkBonus = this._getAttackBonus(attacker, weapon, defender) - attackPenalty;
     const roll     = rollDie(20);
     const total    = roll + atkBonus;
@@ -37,6 +37,15 @@ export class CombatSystem {
       return this._resolveFumble(attacker, weapon);
     }
 
+    // Legendary Strike: guaranteed critical hit, consumes flag
+    if (attacker._legendaryStrikeReady && attacker.type === 'player') {
+      attacker._legendaryStrikeReady = false;
+      const damage = this._rollDamage(attacker, weapon, true, defender, options);
+      this._applyDamage(defender, damage);
+      this.bus.emit('log:message', { text: `Legendary Strike! Guaranteed critical for ${damage} damage!`, category: 'important' });
+      return { hit: true, critical: true, damage, effects: [], message: `${attacker.name} lands a LEGENDARY STRIKE on ${defender.name} for ${damage} damage!` };
+    }
+
     const targetAC = this._getAC(defender);
     const hit = critical || total >= (20 - targetAC); // THAC0
 
@@ -45,7 +54,7 @@ export class CombatSystem {
       return { hit: false, damage: 0, message: `${attacker.name} misses.` };
     }
 
-    let damage = this._rollDamage(attacker, weapon, critical, defender);
+    let damage = this._rollDamage(attacker, weapon, critical, defender, options);
     damage     = this._applyResistances(damage, weapon, defender);
     damage     = Math.max(1, damage);
 
@@ -88,6 +97,8 @@ export class CombatSystem {
       if (attacker._weaponSpecBonus) bonus += attacker._weaponSpecBonus;
       // Favored Enemy: +2 to attack
       if (attacker.favoredEnemies?.includes(defender.def?.type)) bonus += 2;
+      // Quarry: +4 to attack vs marked target
+      if (attacker._quarryX !== undefined && defender.x === attacker._quarryX && defender.y === attacker._quarryY) bonus += 4;
     }
 
     // Situational: status-based attack modifiers (blessed, cursed, battle_cry, etc.)
@@ -103,7 +114,7 @@ export class CombatSystem {
     return ac;
   }
 
-  _rollDamage(attacker, weapon, critical, defender) {
+  _rollDamage(attacker, weapon, critical, defender, options = {}) {
     const [num, die] = weapon?.weapon?.damage ?? [1, 4];
     let dmg = 0;
     const rolls = critical ? num * 2 : num; // Double dice on crit
@@ -116,6 +127,24 @@ export class CombatSystem {
       if (attacker._weaponSpecBonus) dmg += attacker._weaponSpecBonus;
       // Favored Enemy: +2 to damage
       if (attacker.favoredEnemies?.includes(defender.def?.type)) dmg += 2;
+      // Backstab: multiply damage when attacking a monster that hasn't detected the player
+      if (attacker.hasAbility?.('backstab') && options.backstab) {
+        const multiplier = Math.min(5, 2 + Math.floor(attacker.level / 4));
+        dmg *= multiplier;
+        this.bus.emit('log:message', { text: `Backstab! ×${multiplier} damage!`, category: 'important' });
+      }
+      // Smite Evil: bonus holy damage vs evil/undead, consumes flag
+      const targetIsEvil = defender.def?.alignment === 'chaotic'
+        || defender.def?.tags?.includes('demon')
+        || defender.def?.tags?.includes('undead');
+      if (attacker._smiteEvilActive && targetIsEvil) {
+        attacker._smiteEvilActive = false;
+        const smiteBonus = rollDie(6) + Math.floor(attacker.level / 2);
+        dmg += smiteBonus;
+        this.bus.emit('log:message', { text: `Smite Evil! +${smiteBonus} holy damage!`, category: 'magic' });
+      }
+      // Holy Sword: +2 damage vs evil/undead (passive once granted)
+      if (attacker.hasAbility?.('holy_sword') && targetIsEvil) dmg += 2;
     }
 
     return dmg;

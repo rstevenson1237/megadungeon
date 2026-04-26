@@ -49,7 +49,22 @@ export class MagicSystem {
         return { success: false, message: 'Out of range.' };
     }
 
-    caster.mp -= spell.mpCost;
+    // Spell Mastery: free daily cast for chosen spells (Magic-User L4)
+    const mastered = caster._masteredSpells?.includes(spellKey)
+      && (caster._spellMasteryCharges?.[spellKey] ?? 0) > 0;
+    if (mastered) {
+      caster._spellMasteryCharges[spellKey]--;
+      this.bus.emit('log:message', { text: `Spell Mastery: ${spell.name} cast for free!`, category: 'magic' });
+    } else {
+      caster.mp -= spell.mpCost;
+    }
+
+    // Spell Echo: 30% chance to refund MP after cast (Magic-User L10)
+    if (!mastered && caster.hasAbility?.('spell_echo') && Math.random() < 0.3) {
+      caster.mp = Math.min(caster.mp + spell.mpCost, caster.mpMax);
+      this.bus.emit('log:message', { text: 'Spell Echo! The spell costs no mana.', category: 'magic' });
+    }
+
     const targets = this._resolveTargets(caster, targetPos, spell, map);
     const results = targets.map(t => this._applyEffect(caster, t, spell, targetPos));
 
@@ -151,7 +166,17 @@ export class MagicSystem {
 
     switch (effect.type) {
       case 'damage': {
-        let dmg = rollDiceStr(effect.dice.replace('level', caster.level + ''));
+        // Metamagic Empower: roll twice, take max (Magic-User L6)
+        let dmg;
+        if (caster._empowerNextSpell) {
+          caster._empowerNextSpell = false;
+          const r1 = rollDiceStr(effect.dice.replace('level', caster.level + ''));
+          const r2 = rollDiceStr(effect.dice.replace('level', caster.level + ''));
+          dmg = Math.max(r1, r2);
+          this.bus.emit('log:message', { text: 'Metamagic Empower! Maximised spell damage.', category: 'magic' });
+        } else {
+          dmg = rollDiceStr(effect.dice.replace('level', caster.level + ''));
+        }
         if (effect.extraMissilePerLevel) {
             const extraCount = Math.floor((caster.level - 1) / effect.extraMissilePerLevel);
             for (let i = 0; i < extraCount; i++) {
