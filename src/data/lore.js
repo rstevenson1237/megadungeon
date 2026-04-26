@@ -46,6 +46,23 @@ export const LORE = {
       glyph: 0x22, color: '#aaaaff',
       message: 'Carved in a scholar\'s precise hand: "The lower levels were sealed in the third year of the Interregnum. No record exists of what prompted the order."',
     },
+    // Puzzle-hint lore
+    {
+      glyph: 0xF0, color: '#aaaaff',
+      message: 'A quartermaster\'s note: "The three statues in the east hall are Garrison icons — the Warrior, the Priest, the Mage. Give them what they are owed and they open the north passage. Garrison code."',
+    },
+    {
+      glyph: 0x22, color: '#ccbbaa',
+      message: 'Scratched in haste: "The iron door at the end of the corridor sealed itself when the quarantine began. They say the first soldier to speak the word of unsealing will be promoted. Nobody knows the word."',
+    },
+    {
+      glyph: 0x22, color: '#aaaaff',
+      message: 'A training manual fragment: "Gate wardens are instructed to pose a riddle. Answer correctly and the gate opens. Three wrong answers triggers the curse. No exceptions."',
+    },
+    {
+      glyph: 0xF0, color: '#ccbbaa',
+      message: 'Someone has scratched the same symbol over and over in diminishing sizes, as if running out of room. The symbol resembles a lever with an arrow pointing right, then left, then right.',
+    },
   ],
 
   goblin_warren: [
@@ -84,6 +101,23 @@ export const LORE = {
     {
       glyph: 0x22, color: '#aadd88',
       message: 'In crude pictographs: a figure descends into a hole, finds something shining, and then the figure has become very large. The sequence repeats, each time larger.',
+    },
+    // Additional entries
+    {
+      glyph: 0x0F, color: '#aa7722',
+      message: 'Scratched in orcish script, translated by a later hand in charcoal: "PULL THE ONE IN THE MIDDLE FIRST OR YOU WAKE THE STONE MAN." The charcoal translation is circled with an exclamation mark.',
+    },
+    {
+      glyph: 0x22, color: '#aadd88',
+      message: 'A goblin shaman\'s nesting pile contains a chewed journal page. You can barely read it: "…bowl empty, bowl wants life-water, bowl gives secrets back…"',
+    },
+    {
+      glyph: 0x0F, color: '#886633',
+      message: 'A goblin\'s body lies here, partially eaten. It clutches a scrap of hide with two words burned on it: WRONG ORDER.',
+    },
+    {
+      glyph: 0xF0, color: '#aaaaff',
+      message: 'Pictographs that the goblins have not defaced: a figure speaks to a gate with a face. The gate is open in one panel, and the figure is knocked flat in another. The difference is two small marks above the figure\'s head.',
     },
   ],
 
@@ -128,6 +162,23 @@ export const LORE = {
       glyph: 0x22, color: '#ccbbaa',
       message: 'An archivist\'s note, pinned under a stone: "Confirmed: Section 7 contains pre-Compact burials. Recommend permanent closure. Recommend nobody ask why."',
     },
+    // Additional entries
+    {
+      glyph: 0x22, color: '#aaaaff',
+      message: 'A temple inscription on the east wall: "THE FONT REMEMBERS THOSE WHO FED IT. LIFE GIVEN IS KNOWLEDGE RETURNED." The basin beside it is empty.',
+    },
+    {
+      glyph: 0x22, color: '#ff9999',
+      message: '"We asked the gate the riddle and it asked one back. Brother Tomas answered wrong three times. We carried him out in pieces." — unsigned.',
+    },
+    {
+      glyph: 0x22, color: '#ccbbaa',
+      message: 'Carved on a sealed sarcophagus lid: "POURED WILLINGLY INTO THE DARK WATERS. RECEIVED IN KIND." Above it, a faded diagram shows a vessel tipping into a bowl.',
+    },
+    {
+      glyph: 0xF0, color: '#aaaaff',
+      message: 'A theologian\'s annotation beside an old funerary seal: "These binding-doors open only for a word of freedom — open, release, unseal. Any word of liberation will do. The dead had a dark sense of humor."',
+    },
   ],
 
   generic: [
@@ -163,5 +214,27 @@ export const LORE = {
       glyph: 0x22, color: '#ccbbaa',
       message: '"If you find this, take the left passage at the three-way fork. I left supplies. — Hess." No indication of when this was written, or if Hess survived.',
     },
+    // Additional generic entries
+    {
+      glyph: 0xF0, color: '#ff9999',
+      message: 'Words are burned into the stone in letters a foot tall: "IT LISTENS FOR THE ANSWER, NOT THE QUESTION." Below them, smaller: "Do not speak unless you are certain."',
+    },
+    {
+      glyph: 0x22, color: '#aaaaff',
+      message: 'A surveyor\'s note nailed to a support beam: "Levers in the lower hall are marked with Roman numerals. Pull them in ascending order — I, II, III — or the mechanism locks for an hour."',
+    },
+    {
+      glyph: 0x22, color: '#ccbbaa',
+      message: '"The bowl cannot be bribed with coin. It only recognizes the willingness to sacrifice something useful." — torn from a longer document.',
+    },
+    {
+      glyph: 0x22, color: '#ff9999',
+      message: 'A desperate note scratched by fading torchlight: "TRIED EVERY WORD. NOTHING WORKED. TRIED: OPEN. TRIED: SESAME. TRIED: PLEASE. PLEASE WORKED THE THIRD TIME."',
+    },
+    {
+      glyph: 0xF0, color: '#ccbbaa',
+      message: 'Carved carefully, with deliberate spacing: "The gate asks what the cartographer knows. What the dreamer hears. What the walker leaves. Think before you speak."',
+    },
   ],
+
 };
