@@ -154,7 +154,32 @@ export class Player extends Entity {
       weapon_specialization: () => { this._weaponSpecBonus = 2; },
       extra_attack:          () => { this._extraAttacks = 1; },
       woodland_stride:       () => { this._ignoreDifficultTerrain = true; },
-      aura_of_protection:    () => { /* Applied to allies in CombatSystem or StatusSystem */ },
+      lore_mastery:          () => { this._loreMasteryActive = true; },
+      // Fighter
+      legendary_strike:      () => { this._legendaryStrikeReady = false; },
+      // Thief
+      uncanny_dodge:         () => { this._uncannyDodge = true; },
+      // Magic-User
+      arcane_sight:          () => { this._arcaneSightActive = true; },
+      spell_echo:            () => { /* checked in MagicSystem.cast() */ },
+      // Cleric
+      aura_of_protection:    () => { this._saveBonus = (this._saveBonus ?? 0) + 2; },
+      // Ranger
+      master_hunter:         () => { this._masterHunterActive = true; },
+      // Paladin
+      divine_health:         () => { this._divineHealthActive = true; },
+      aura_of_courage:       () => { this._fearImmune = true; },
+      holy_champion:         () => { this._holyChampionAvailable = true; },
+      divine_spells:         () => {
+        const grants = ['cure_light_wounds', 'bless', 'cure_poison', 'hold_person'];
+        for (const s of grants) {
+          if (!this.spellbook.includes(s)) this.spellbook.push(s);
+        }
+      },
+      // Druid
+      wild_empathy:          () => { this._wildEmpathyActive = true; },
+      regeneration:          () => { this._regenerationActive = true; },
+      call_lightning:        () => { /* active ability — managed in _activateAbility */ },
     };
     passiveEffects[abilityKey]?.();
     console.log(`${this.name} has gained ability: ${abilityKey}!`);

@@ -358,7 +358,7 @@ export const SPELLS = {
     range: '60ft', area: 'burst:15ft', duration: 'instant',
     save: 'breath', saveEffect: 'half',
     effect: { type: 'damage', element: 'fire', dice: '6d8' },
-    classes: ['cleric'],
+    classes: ['cleric', 'druid'],
     description: 'A pillar of divine fire roars down from above, dealing 6d8 fire damage. Save vs. breath for half.',
     flavorText: '"Not from me. From above me."',
   },

@@ -6,6 +6,9 @@ export class StatusSystem {
      */
     static apply(entity, statusKey, options = {}) {
         if (!entity.statuses) entity.statuses = [];
+        // Immunity gates from class abilities
+        if (entity._fearImmune && statusKey === 'fear') return;
+        if (entity._divineHealthActive && ['fear', 'charm', 'disease'].includes(statusKey)) return;
         
         // Check if already has this status — refresh duration if so
         const existing = entity.statuses.find(s => s.key === statusKey);

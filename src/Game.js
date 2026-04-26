@@ -20,7 +20,7 @@ import { StatusSystem } from './systems/StatusSystem.js';
 import { QuestSystem } from './systems/QuestSystem.js';
 import { SPELLS } from './data/spells.js';
 import { TOWN_LOCATIONS } from './data/town.js';
-import { rollDiceStr, statModifier } from './engine/rules.js';
+import { rollDiceStr, statModifier, rollSave } from './engine/rules.js';
 import { CLASSES } from './data/classes.js';
 import { FEATURES } from './data/features.js';
 import { Item } from './entities/Item.js';
@@ -534,6 +534,10 @@ if (this._handleMovement(action, map)) {
                     : key === 'blessed'    ? 'The blessing fades.'
                     : `${key} has worn off.`;
           this.log.add(msg, 'system');
+      }
+      // Regeneration (Druid L7): +1 HP per turn
+      if (this.player._regenerationActive && this.player.hp > 0 && this.player.hp < this.player.hpMax) {
+        this.player.hp++;
       }
     }
 
@@ -1338,26 +1342,40 @@ _openUseMenu() {
     return true;  }
 
   _playerAttacks(monster) {
+    // Master of Shadows: attacking breaks invisibility
+    StatusSystem.remove(this.player, 'invisible');
+
     // Show description on first engagement
     if (!monster._described && monster.def.description) {
       monster._described = true;
       this.log.add(monster.def.description, 'lore');
     }
+    // Backstab: applies when the monster hasn't detected the player yet
+    const backstabActive = this.player.hasAbility('backstab') && monster.aiState === 'idle';
     const attackCount = 1 + (this.player._extraAttacks ?? 0);
+    let lastResult = null;
     for (let i = 0; i < attackCount; i++) {
-        const result = this.combat.resolveAttack(this.player, monster, this.player.equipped.weapon);
+        const result = this.combat.resolveAttack(this.player, monster, this.player.equipped.weapon, 0, { backstab: backstabActive && i === 0 });
+        lastResult = result;
         this.log.add(result.message, result.hit ? 'combat' : 'system');
 
         if (result.hit) {
           if (monster.hp <= 0) {
             this.player.monstersKilled = (this.player.monstersKilled ?? 0) + 1;
-            const xpResult = this.player.gainXP(monster.def.xpBase + monster.def.xpPerHD * monster.def.hd);
+            let xpAmount = monster.def.xpBase + monster.def.xpPerHD * monster.def.hd;
+            // Master Hunter (Ranger L10): double XP vs favored enemies
+            if (this.player._masterHunterActive && this.player.favoredEnemies?.includes(monster.def?.type)) {
+              xpAmount *= 2;
+              this.log.add('Master Hunter: double XP from favored enemy!', 'important');
+            }
+            const xpResult = this.player.gainXP(xpAmount);
             this._updateQuestProgress('kill', { monsterType: monster.def?.key ?? monster.name });
             this._rollMonsterLoot(monster);
             if (xpResult.leveled) {
               this.pendingLevelUp = xpResult;
               this.state = STATE.LEVEL_UP;
               this._checkFavoredEnemy();
+              this._checkSpellMastery();
             }
             break; // Monster dead, stop extra attacks
           }
@@ -1370,6 +1388,22 @@ _openUseMenu() {
             }
           }
         }
+    }
+
+    // Two-Weapon Fighting (Ranger L2): bonus offhand attack at -2 penalty
+    if (this.player.hasAbility('two_weapon_fighting') && this.player.equipped.offhand?.weapon && monster.hp > 0) {
+      const offResult = this.combat.resolveAttack(this.player, monster, this.player.equipped.offhand, 2);
+      this.log.add(offResult.message + ' (offhand)', offResult.hit ? 'combat' : 'system');
+    }
+
+    // Pinning Shot (Ranger L8): apply paralysis on a successful ranged hit
+    if (this.player._pinningNextShot && lastResult?.hit) {
+      const weapon = this.player.equipped.weapon;
+      if ((weapon?.weapon?.range ?? 1) > 1 && monster.hp > 0) {
+        StatusSystem.apply(monster, 'paralysis', { duration: 3 });
+        this.player._pinningNextShot = false;
+        this.log.add(`${monster.name} is pinned in place! (3 turns)`, 'combat');
+      }
     }
   }
 
@@ -1415,6 +1449,31 @@ _openUseMenu() {
     return this.worldMap?.getLevel(this.currentLevel) ?? null;
   }
 
+  _checkSpellMastery() {
+    if (this.player.hasAbility('spell_mastery') && !this.player._masteredSpells) {
+      this.player._masteredSpells = [];
+      this._openSpellMasteryMenu();
+    }
+  }
+
+  _openSpellMasteryMenu() {
+    if (!this.player._masteredSpells) this.player._masteredSpells = [];
+    const available = this.player.spellbook.filter(k => !(this.player._masteredSpells ?? []).includes(k));
+    if ((this.player._masteredSpells ?? []).length >= 2 || available.length === 0) return;
+    const options = available.map(k => ({ label: SPELLS[k]?.name ?? k, data: k, color: '#8844cc', enabled: true }));
+    const menu = new Menu('Choose Mastered Spell', options, {
+      onSelect: (selected) => {
+        this.player._masteredSpells.push(selected.data);
+        this.player._spellMasteryCharges = Object.fromEntries(this.player._masteredSpells.map(k => [k, 1]));
+        this.log.add(`You have mastered ${SPELLS[selected.data]?.name ?? selected.data}!`, 'important');
+        menu.closed = true;
+        this._openSpellMasteryMenu();
+      },
+      onCancel: () => { menu.closed = true; },
+    });
+    this._openMenu(menu);
+  }
+
   _rollMonsterLoot(monster) {
     const loot = monster.def.loot;
     if (!loot) return;
@@ -1441,6 +1500,12 @@ _openUseMenu() {
     const roll = this.rng.int(1, 20);
     const hit  = roll >= (20 - this.player.ac);
 
+    // Evasion (Thief L3): a successful stone save completely negates a hit
+    if (hit && this.player.hasAbility('evasion') && rollSave(this.player, 'stone')) {
+      this.log.add(`${monster.name} strikes but you evade entirely!`, 'combat');
+      return;
+    }
+
     // Henchman intercept: 30% chance to halve damage when active
     if (hit && this.player.henchman?.turnsRemaining > 0) {
       this.player.henchman.turnsRemaining--;
@@ -1454,7 +1519,13 @@ _openUseMenu() {
     }
 
     if (hit) {
-      const dmg = Math.max(1, monster.rollDamage(attack));
+      let dmg = Math.max(1, monster.rollDamage(attack));
+      // Holy Champion (Paladin L9): survive a killing blow once per day
+      if (this.player._holyChampionAvailable && this.player.hp - dmg <= 0) {
+        dmg = this.player.hp - 1;
+        this.player._holyChampionAvailable = false;
+        this.log.add('Holy Champion! Divine grace keeps you standing at 1 HP!', 'heal');
+      }
       this.player.hp = Math.max(0, this.player.hp - dmg);
       this.log.add(`${monster.name} hits you for ${dmg} damage.`, 'danger');
       if (attack.special) this._applyAttackSpecial(attack.special, monster);
@@ -1577,6 +1648,15 @@ _openUseMenu() {
     if (StatusSystem.has(monster, 'sleep') || StatusSystem.has(monster, 'paralysis')) {
       // Still tick duration — handled by end-of-turn StatusSystem.tick()
       return; // Cannot act
+    }
+
+    // Master of Shadows (Thief L9): invisible players cannot be targeted
+    if (StatusSystem.has(this.player, 'invisible')) return;
+
+    // Wild Empathy (Druid L1): beast monsters hesitate 50% of the time
+    if (this.player._wildEmpathyActive && monster.def?.tags?.includes('beast') && this.rng.chance(0.5)) {
+      this.log.add(`${monster.name} senses your bond with nature and hesitates.`, 'magic');
+      return;
     }
 
     const dx = this.player.x - monster.x;
@@ -2116,6 +2196,16 @@ _openInnMenu(location) {
                     this.player.hp = this.player.hpMax;
                     this.player.mp = this.player.mpMax;
                     this.player.statuses = [];
+                    // Reset once-per-day ability flags
+                    this.player._arcaneRecoveryUsed = false;
+                    this.player._divineInterventionUsed = false;
+                    this.player._legendaryStrikeUsedToday = false;
+                    this.player._shadowTurnsUsed = 0;
+                    this.player._holyChampionAvailable = this.player.hasAbility('holy_champion');
+                    this.player._spellMasteryCharges = Object.fromEntries(
+                      (this.player._masteredSpells ?? []).map(k => [k, 1])
+                    );
+                    this.player._callLightningUsed = false;
                     this.log.add('You rest at the inn. HP and MP fully restored.', 'heal');
                     this._openInnMenu(location);
                     break;
@@ -2811,7 +2901,19 @@ _openItemActionMenu(item) {
 _handleUseAbility() {
     // Build a list of usable class abilities
     const usable = [];
-    const activeAbilities = ['turn_undead', 'lay_on_hands', 'combat_surge', 'battle_cry'];
+    const activeAbilities = [
+      'turn_undead', 'lay_on_hands', 'combat_surge', 'battle_cry',
+      'bardic_inspiration', 'tale_of_valor', 'countersong', 'dirge_of_doom',
+      'legendary_strike',
+      'shadow_step', 'master_of_shadows',
+      'arcane_recovery', 'spell_mastery', 'metamagic_empower',
+      'divine_intervention',
+      'holy_word',
+      'detect_evil', 'smite_evil',
+      'quarry', 'pinning_shot',
+      // Druid
+      'barkskin', 'call_lightning', 'nature_wrath',
+    ];
 
     for (const key of this.player.abilities) {
         if (activeAbilities.includes(key)) {
@@ -2861,7 +2963,10 @@ _handleUseAbility() {
         break;
       }
       case 'lay_on_hands': {
-        const heal = this.player.level * 2;
+        // Paladin heals level HP; Cleric heals level×2 HP
+        const heal = this.player.class.key === 'paladin'
+          ? this.player.level
+          : this.player.level * 2;
         this.player.hp = Math.min(this.player.hp + heal, this.player.hpMax);
         this.log.add(`You lay on hands, restoring ${heal} HP.`, 'heal');
         break;
@@ -2874,6 +2979,216 @@ _handleUseAbility() {
       case 'battle_cry': {
         StatusSystem.apply(this.player, 'battle_cry', { attackMod: 1, duration: 3 });
         this.log.add('You let out a battle cry! +1 attack for 3 turns.', 'combat');
+        break;
+      }
+      case 'bardic_inspiration': {
+        StatusSystem.apply(this.player, 'bardic_inspiration', { attackMod: 1, duration: 3 });
+        this.log.add('You play an inspiring tune! +1 to attacks for 3 turns.', 'magic');
+        break;
+      }
+      case 'tale_of_valor': {
+        StatusSystem.apply(this.player, 'tale_of_valor', { damageMod: 1, duration: 3 });
+        this.log.add('Your tale of valor steels your nerve! +1 damage for 3 turns.', 'magic');
+        break;
+      }
+      case 'countersong': {
+        const cleansed = ['fear', 'charm', 'sleep'].filter(s => StatusSystem.has(this.player, s));
+        for (const s of cleansed) StatusSystem.remove(this.player, s);
+        StatusSystem.apply(this.player, 'countersong', { duration: 3 });
+        const msg = cleansed.length > 0
+          ? `Your countersong dispels ${cleansed.join(', ')}! Protected for 3 turns.`
+          : 'Your countersong wards off enchantments for 3 turns.';
+        this.log.add(msg, 'magic');
+        break;
+      }
+      case 'dirge_of_doom': {
+        const map = this.worldMap.getLevel(this.currentLevel);
+        let affected = 0;
+        for (const entityList of map.entities.values()) {
+          for (const e of entityList) {
+            if (e.type !== 'monster') continue;
+            const tile = map.get(e.x, e.y);
+            if (!tile?.visible) continue;
+            StatusSystem.apply(e, 'dirge_of_doom', { attackMod: -2, duration: 3 });
+            affected++;
+          }
+        }
+        this.log.add(
+          affected > 0
+            ? `Your dirge fills ${affected} enem${affected === 1 ? 'y' : 'ies'} with dread! (-2 attack, 3 turns)`
+            : 'Your haunting dirge echoes through the dungeon.',
+          'magic'
+        );
+        break;
+      }
+      // Fighter
+      case 'legendary_strike': {
+        if (this.player._legendaryStrikeUsedToday) {
+          this.log.add('Legendary Strike already used today.', 'system'); break;
+        }
+        this.player._legendaryStrikeReady = true;
+        this.player._legendaryStrikeUsedToday = true;
+        this.log.add('You focus your full mastery. Next attack is a guaranteed critical!', 'combat');
+        break;
+      }
+      // Thief
+      case 'shadow_step': {
+        const map = this.worldMap.getLevel(this.currentLevel);
+        const candidates = [];
+        for (let dy = -20; dy <= 20; dy++) {
+          for (let dx = -20; dx <= 20; dx++) {
+            if (Math.abs(dx) + Math.abs(dy) > 20) continue;
+            const tx = this.player.x + dx, ty = this.player.y + dy;
+            const tile = map.get(tx, ty);
+            if (tile?.visible && tile.walkable && !(dx === 0 && dy === 0)) candidates.push({ x: tx, y: ty });
+          }
+        }
+        if (candidates.length === 0) { this.log.add('No visible tiles nearby to step into.', 'system'); break; }
+        const dest = this.rng.pick(candidates);
+        map.moveEntity(this.player, dest.x, dest.y);
+        this.log.add('You step through the shadows!', 'magic');
+        break;
+      }
+      case 'master_of_shadows': {
+        const turnsLeft = 10 - (this.player._shadowTurnsUsed ?? 0);
+        if (turnsLeft <= 0) { this.log.add('No shadow essence remaining today.', 'system'); break; }
+        this.player._shadowTurnsUsed = (this.player._shadowTurnsUsed ?? 0) + turnsLeft;
+        StatusSystem.apply(this.player, 'invisible', { duration: turnsLeft });
+        this.log.add(`You melt into the shadows (${turnsLeft} turns).`, 'magic');
+        break;
+      }
+      // Magic-User
+      case 'arcane_recovery': {
+        if (this.player._arcaneRecoveryUsed) {
+          this.log.add('Arcane Recovery already used this rest.', 'system'); break;
+        }
+        const recovered = Math.floor(this.player.mpMax / 2);
+        this.player.mp = Math.min(this.player.mp + recovered, this.player.mpMax);
+        this.player._arcaneRecoveryUsed = true;
+        this.log.add(`Arcane Recovery! Regained ${recovered} MP.`, 'magic');
+        break;
+      }
+      case 'spell_mastery': {
+        this._openSpellMasteryMenu();
+        break;
+      }
+      case 'metamagic_empower': {
+        this.player._empowerNextSpell = true;
+        this.log.add('Metamagic Empower ready. Next damage spell maximises its dice.', 'magic');
+        break;
+      }
+      // Cleric
+      case 'divine_intervention': {
+        if (this.player._divineInterventionUsed) {
+          this.log.add('Your deity has already answered today.', 'system'); break;
+        }
+        this.player.hp = this.player.hpMax;
+        this.player.mp = this.player.mpMax;
+        this.player.statuses = (this.player.statuses ?? []).filter(s => s.key === 'light');
+        this.player._divineInterventionUsed = true;
+        this.log.add('Your deity intervenes! HP and MP fully restored, all ailments lifted.', 'heal');
+        break;
+      }
+      case 'holy_word': {
+        const hwMap = this.worldMap.getLevel(this.currentLevel);
+        let stunned = 0;
+        for (const entityList of hwMap.entities.values()) {
+          for (const e of entityList) {
+            if (e.type !== 'monster') continue;
+            const tile = hwMap.get(e.x, e.y);
+            if (!tile?.visible) continue;
+            if (e.def?.alignment === 'lawful') continue;
+            StatusSystem.apply(e, 'paralysis', { duration: 3 });
+            stunned++;
+          }
+        }
+        this.log.add(stunned > 0 ? `Holy Word stuns ${stunned} creature${stunned > 1 ? 's' : ''}!` : 'The Holy Word echoes without effect.', 'magic');
+        break;
+      }
+      // Paladin
+      case 'detect_evil': {
+        const deMap = this.worldMap.getLevel(this.currentLevel);
+        let found = 0;
+        for (const entityList of deMap.entities.values()) {
+          for (const e of entityList) {
+            if (e.type !== 'monster') continue;
+            const def = e.def ?? {};
+            const isEvil = def.alignment === 'chaotic' || def.tags?.includes('demon') || def.tags?.includes('undead');
+            if (isEvil) {
+              const tile = deMap.get(e.x, e.y);
+              if (tile) tile.explored = true;
+              found++;
+            }
+          }
+        }
+        this.log.add(found > 0 ? `You sense ${found} evil presence${found > 1 ? 's' : ''} nearby!` : 'No evil detected.', 'magic');
+        break;
+      }
+      case 'smite_evil': {
+        this.player._smiteEvilActive = true;
+        this.log.add('Smite Evil ready. Next attack vs an evil creature deals bonus holy damage.', 'magic');
+        break;
+      }
+      // Ranger
+      case 'quarry': {
+        const nearest = this._findNearestVisibleMonster();
+        if (!nearest) { this.log.add('No visible target to mark as quarry.', 'system'); break; }
+        this.player._quarryX = nearest.x;
+        this.player._quarryY = nearest.y;
+        this.log.add('You mark your quarry. +4 to attacks against them.', 'combat');
+        break;
+      }
+      case 'pinning_shot': {
+        this.player._pinningNextShot = true;
+        this.log.add('Pinning Shot ready. Next ranged hit pins the target in place (3 turns).', 'combat');
+        break;
+      }
+      // Druid
+      case 'barkskin': {
+        StatusSystem.apply(this.player, 'barkskin', { acMod: -3, duration: 5 });
+        this.player.ac = this.player._computeAC();
+        this.log.add('Your skin hardens like bark! +3 AC for 5 turns.', 'magic');
+        break;
+      }
+      case 'call_lightning': {
+        if (this.player._callLightningUsed) {
+          this.log.add('You have already called lightning this rest.', 'system'); break;
+        }
+        const clMap = this.worldMap.getLevel(this.currentLevel);
+        let clHit = 0;
+        for (const entityList of clMap.entities.values()) {
+          for (const e of entityList) {
+            if (e.type !== 'monster') continue;
+            const tile = clMap.get(e.x, e.y);
+            if (!tile?.visible) continue;
+            const dmg = rollDiceStr('2d6');
+            e.hp = Math.max(0, e.hp - dmg);
+            if (e.hp === 0) this.bus.emit('monster:death', { entity: e, cause: 'call_lightning' });
+            clHit++;
+          }
+        }
+        this.player._callLightningUsed = true;
+        this.log.add(clHit > 0 ? `Lightning strikes ${clHit} target${clHit > 1 ? 's' : ''}!` : 'Lightning crashes — but nothing is struck.', 'magic');
+        break;
+      }
+      case 'nature_wrath': {
+        const nwMap = this.worldMap.getLevel(this.currentLevel);
+        let nwPrimary = 0, nwSecondary = 0;
+        for (const entityList of nwMap.entities.values()) {
+          for (const e of entityList) {
+            if (e.type !== 'monster') continue;
+            const tile = nwMap.get(e.x, e.y);
+            if (!tile?.visible) continue;
+            const isNature = e.def?.tags?.includes('beast') || e.def?.tags?.includes('elemental');
+            const dmg = isNature ? rollDiceStr('2d6') : (rollSave(e, 'spells') ? 0 : rollDiceStr('1d6'));
+            if (dmg > 0) {
+              e.hp = Math.max(0, e.hp - dmg);
+              if (e.hp === 0) this.bus.emit('monster:death', { entity: e, cause: 'nature_wrath' });
+              isNature ? nwPrimary++ : nwSecondary++;
+            }
+          }
+        }
+        this.log.add(`Nature's Wrath! ${nwPrimary} beast/elemental and ${nwSecondary} other creature${nwSecondary !== 1 ? 's' : ''} affected.`, 'magic');
         break;
       }
       default:

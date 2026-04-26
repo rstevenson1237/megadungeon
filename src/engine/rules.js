@@ -48,9 +48,9 @@ export function rollDiceStr(diceStr) {
  * Returns true if the save succeeds.
  */
 export function rollSave(entity, saveType) {
-  const threshold = entity.class?.savingThrows?.[saveType]
+  const threshold = (entity.class?.savingThrows?.[saveType]
     ?? entity.def?.savingThrows?.[saveType]
-    ?? 15;
+    ?? 15) - (entity._saveBonus ?? 0);
   return rollDie(20) >= threshold;
 }
 

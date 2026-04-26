@@ -48,6 +48,7 @@ export const ITEMS = {
   spellbook:    { key: 'spellbook',    name: 'Spellbook',      category: 'tool',    glyph: 0x2B, color: '#8844cc', value: 50, stackable: false, description: 'A leather-bound book of arcane formulae.' },
   inkpot:       { key: 'inkpot',       name: 'Inkpot',         category: 'tool',    glyph: 0x6F, color: '#222222', value: 2,  stackable: false, description: 'A small pot of black ink.' },
   arrows_20:    { key: 'arrows_20',    name: '20 Arrows',      category: 'tool',    glyph: 0x18, color: '#885533', value: 5,  stackable: true,  quantity: 20, description: 'A quiver of wooden arrows.' },
+  lute:         { key: 'lute',         name: 'Lute',           category: 'tool',    glyph: 0x6C, color: '#cc9933', value: 15, stackable: false, description: 'A finely crafted stringed instrument. A bard\'s most important tool.' },
   gold_pile:    { key: 'gold_pile',    name: 'Gold Coins',     category: 'treasure',glyph: 0x24, color: '#ffcc00', value: 0,  stackable: true,  description: 'A handful of gold coins.' },
 
   // === POTIONS (unidentified until tested or ID'd) ===
