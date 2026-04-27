@@ -5,6 +5,7 @@ import { pickLayout } from './layouts/index.js';
 import { RoomGen } from './RoomGen.js';
 import { bus } from '../engine/EventBus.js';
 import { FeaturePlacer } from './FeaturePlacer.js';
+import { isDungeonTownLevel } from '../data/dungeonTowns.js';
 
 // Named map sizes — layouts use map.w/map.h internally so all scale automatically.
 const MAP_SIZES = {
@@ -35,6 +36,7 @@ export class LevelGen {
     }
 
     this._placeStairs(map, rooms, rng, levelNumber);
+    this._placeRunes(map, rooms, rng, levelNumber);
     FeaturePlacer.place(map, rooms, rng, theme);
     this._populateRooms(map, rooms, rng, levelNumber, theme);
     return map;
@@ -78,6 +80,49 @@ export class LevelGen {
       t.fg    = '#aaffaa';
     }
     t.solid = false;
+  }
+
+  static _placeRunes(map, rooms, rng, levelNumber) {
+    if (levelNumber < 3 || levelNumber >= 98) return;
+    const chance = 0.25 + (levelNumber / 200);  // ~25% at lv3, ~74% at lv97
+    if (rng.next() > chance) return;
+
+    const eligible = rooms.filter(r => r.type !== 'entry' && r.type !== 'boss');
+    if (!eligible.length) return;
+
+    const room = rng.pick(eligible);
+    const pos  = this._randomFloorInRoom(map, room, rng);
+    if (!pos) return;
+
+    // Pick destination: 5–15 levels away; 70% deeper, 30% shallower
+    const sign   = rng.next() < 0.7 ? 1 : -1;
+    let destLevel = Math.max(1, Math.min(99, levelNumber + sign * rng.int(5, 15)));
+    // Avoid landing on a dungeon town level — bump by 1 in the same direction
+    if (isDungeonTownLevel(destLevel)) {
+      destLevel = Math.max(1, Math.min(99, destLevel + sign));
+    }
+    if (isDungeonTownLevel(destLevel)) return;  // still on a town level; skip
+
+    const tile = map.get(pos.x, pos.y);
+    tile.features.rune = { destLevel };
+    tile.glyph = 0xF0;   // ≡
+    tile.fg    = '#8844cc';
+    tile.solid = false;
+
+    if (!map.metadata.runes) map.metadata.runes = [];
+    map.metadata.runes.push({ x: pos.x, y: pos.y, destLevel });
+  }
+
+  static _randomFloorInRoom(map, room, rng) {
+    for (let a = 0; a < 12; a++) {
+      const x = room.x + rng.int(0, room.w - 1);
+      const y = room.y + rng.int(0, room.h - 1);
+      const t = map.get(x, y);
+      if (t && !t.solid && t.type === 'floor' && !t.features.dungeon && !t.features.rune) {
+        return { x, y };
+      }
+    }
+    return null;
   }
 
   static _populateRooms(map, rooms, rng, levelNumber, theme) {

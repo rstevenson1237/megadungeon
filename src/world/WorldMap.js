@@ -9,6 +9,7 @@
  */
 
 import { createInitialTownState } from '../data/town.js';
+import { isDungeonTownLevel } from '../data/dungeonTowns.js';
 import { RNG } from '../engine/RNG.js';
 import { LevelGen } from './LevelGen.js';
 import { TileMap } from './TileMap.js';
@@ -21,6 +22,7 @@ export class WorldMap {
   }
 
   getLevel(n) {
+    if (isDungeonTownLevel(n)) return null;
     if (!this.levels.has(n)) {
       const levelSeed = new RNG(this.masterSeed).fork(n * 997);
       this.levels.set(n, LevelGen.generate(n, levelSeed));
@@ -32,7 +34,9 @@ export class WorldMap {
     return {
       masterSeed: this.masterSeed,
       town: this.townState,
-      levels: [...this.levels.entries()].map(([n, l]) => [n, l.serialize()])
+      levels: [...this.levels.entries()]
+        .filter(([n]) => !isDungeonTownLevel(n))
+        .map(([n, l]) => [n, l.serialize()])
     };
   }
 
