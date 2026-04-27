@@ -4,6 +4,7 @@ import { TRAPS } from '../data/traps.js';
 import { PUZZLES } from '../data/puzzles.js';
 import { MonsterGroups } from './MonsterGroups.js';
 import { LORE } from '../data/lore.js';
+import { SIGN_MESSAGES } from '../data/signs.js';
 import { getBand } from '../data/difficultyBands.js';
 
 /**
@@ -41,6 +42,7 @@ export class RoomGen {
       case 'trap':     this._placeTrap(map, room); break;
       case 'puzzle':   this._placePuzzle(map, room); break;
       case 'lore':     this._placeLore(map, room); break;
+      case 'sign':     this._placeSign(map, room); break;
       case 'shrine':   this._placeShrine(map, room); break;
       case 'hazard':   this._placeHazard(map, room); break;
     }
@@ -54,6 +56,7 @@ export class RoomGen {
       { value: 'trap',     weight: 10 + this.band.trapWeight },
       { value: 'puzzle',   weight: this.band.puzzleWeight },
       { value: 'lore',     weight: 7 },
+      { value: 'sign',     weight: 4 },
       { value: 'shrine',   weight: 3 },
       { value: 'hazard',   weight: 2 + Math.floor(this.band.trapWeight / 2) },
     ];
@@ -145,6 +148,22 @@ export class RoomGen {
       };
       this.bus.emit('log:message', { text: entry.message });
     }
+  }
+
+  _placeSign(map, room) {
+    const pos = this._randomFloorInRoom(map, room);
+    if (!pos) return;
+    const tile = map.get(pos.x, pos.y);
+    if (tile.features.dungeon || tile.features.lore || tile.features.sign) return;
+    const pool = SIGN_MESSAGES[this.theme.key] ?? SIGN_MESSAGES.generic;
+    const count = this.rng.int(1, 3);
+    const messages = [];
+    for (let i = 0; i < count; i++) {
+      messages.push({ text: this.rng.pick(pool), author: 'system' });
+    }
+    tile.features.sign = { messages };
+    tile.glyph = 0x22;   // "
+    tile.fg    = '#ccbb88';
   }
 
     _placeShrine(map, room) {

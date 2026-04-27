@@ -73,6 +73,9 @@ this.traps = new TrapSystem(this.bus);
     this.activePuzzle = null;
     this.puzzleTextBuffer = '';
     this.puzzleTextMode = false;
+    this.signTextMode    = false;
+    this.signTextBuffer  = '';
+    this._activeSignTile = null;
     this.activeMenu = null;
     this._previousState = null;
     this.targeting = null; // { type: 'spell'|'ranged', data, cursor: {x,y} }
@@ -181,6 +184,28 @@ this.traps = new TrapSystem(this.bus);
           this.pendingName += e.key;
         }
         e.preventDefault();
+      }
+      if (this.signTextMode) {
+        if (e.key === 'Backspace') {
+          this.signTextBuffer = this.signTextBuffer.slice(0, -1);
+        } else if (e.key === 'Enter') {
+          const text = this.signTextBuffer.trim();
+          this.signTextMode = false;
+          this.signTextBuffer = '';
+          if (text && this._activeSignTile?.features.sign) {
+            this._activeSignTile.features.sign.messages.push({ text, author: 'player' });
+            this.log.add('Your message has been added to the sign.', 'system');
+          }
+          this._activeSignTile = null;
+        } else if (e.key === 'Escape') {
+          this.signTextMode = false;
+          this.signTextBuffer = '';
+          this._activeSignTile = null;
+        } else if (e.key.length === 1 && this.signTextBuffer.length < 60) {
+          this.signTextBuffer += e.key;
+        }
+        e.preventDefault();
+        return;
       }
       if (this.state === STATE.PUZZLE && this.puzzleTextMode) {
         if (e.key === 'Backspace') {
@@ -709,7 +734,7 @@ if (this._handleMovement(action, map)) {
         const y = this.player.y + dy;
         const t = map.get(x, y);
         if (!t) continue;
-        if (t.features.puzzle || t.features.lore || t.features.shrine || t.features.dungeon)
+        if (t.features.puzzle || t.features.lore || t.features.shrine || t.features.dungeon || t.features.sign || t.features.rune)
             results.push({ tile: t, x, y, dx, dy });
     }
     return results;
@@ -779,6 +804,20 @@ if (this._handleMovement(action, map)) {
             this.log.add(`${prefix}${t.features.shrine.message} [press F to pray]`, 'lore');
             found = true;
         }
+        if (t.features.sign) {
+            const n = t.features.sign.messages.length;
+            this.log.add(`${prefix}A sign with ${n} message${n !== 1 ? 's' : ''}. [press F to read]`, 'lore');
+            found = true;
+        }
+        if (t.features.rune) {
+            const destLevel = t.features.rune.destLevel;
+            const active = this.player.depth >= destLevel;
+            this.log.add(
+                `${prefix}A teleport rune. Destination: Level ${destLevel}. ${active ? 'Active. [press F to use]' : 'Dormant — descend to level ' + destLevel + ' to unlock.'}`,
+                'lore'
+            );
+            found = true;
+        }
         if (t.features.dungeon) {
             const def = FEATURES[t.features.dungeon.key];
             if (def?.description) {
@@ -835,6 +874,10 @@ _handleFeatureInteract() {
             label += 'inscription';
         } else if (r.tile.features.puzzle) {
             label += 'puzzle';
+        } else if (r.tile.features.sign) {
+            label += 'sign';
+        } else if (r.tile.features.rune) {
+            label += 'teleport rune';
         }
         return { label, data: r.tile };
     });
@@ -852,6 +895,14 @@ _handleFeatureInteract() {
 }
 
 _executeFeatureInteract(tile) {
+    if (tile.features.sign) {
+        this._interactWithSign(tile);
+        return;
+    }
+    if (tile.features.rune) {
+        this._interactWithRune(tile);
+        return;
+    }
     // Puzzle takes priority
     if (tile.features.puzzle) {
         this.activePuzzle = tile.features.puzzle;
@@ -932,6 +983,91 @@ _interactWithShrine(tile) {
                 StatusSystem.apply(this.player, 'blessed', { attackMod: 1, duration: 20 });
                 this.log.add('The shrine glows. You feel blessed! (+1 attack for 20 turns)', 'magic');
             }
+        },
+        onCancel: () => { menu.closed = true; this.activeMenu = null; this.state = STATE.PLAYING; },
+    });
+    this._openMenu(menu);
+}
+
+_interactWithSign(tile) {
+    const sign = tile.features.sign;
+    const playerMsgCount = sign.messages.filter(m => m.author === 'player').length;
+    const canWrite = playerMsgCount < 3;
+    const n = sign.messages.length;
+    const items = [
+        { label: `Read (${n} message${n !== 1 ? 's' : ''})`, color: '#ccbb88', data: 'read' },
+    ];
+    if (canWrite) {
+        items.push({ label: 'Add a message', color: '#ffcc44', data: 'write' });
+    }
+    items.push({ label: 'Back', color: '#888888', data: 'back' });
+
+    const menu = new Menu('Sign', items, {
+        onSelect: (sel) => {
+            menu.closed = true;
+            this.activeMenu = null;
+            this.state = STATE.PLAYING;
+            if (sel.data === 'read') {
+                sign.messages.forEach(m => {
+                    const tag = m.author === 'player' ? '[scrawled] ' : '';
+                    this.log.add(`${tag}${m.text}`, 'lore');
+                });
+            } else if (sel.data === 'write') {
+                this._activeSignTile = tile;
+                this.signTextMode = true;
+                this.signTextBuffer = '';
+                this.log.add('Type your message and press [ENTER], or [ESC] to cancel.', 'system');
+            }
+        },
+        onCancel: () => { menu.closed = true; this.activeMenu = null; this.state = STATE.PLAYING; },
+    });
+    this._openMenu(menu);
+}
+
+_interactWithRune(tile) {
+    const rune = tile.features.rune;
+    const destLevel = rune.destLevel;
+    const active = this.player.depth >= destLevel;
+    const items = [
+        {
+            label: active
+                ? `Activate rune — teleport to Level ${destLevel}`
+                : `Dormant — requires reaching Level ${destLevel} first`,
+            color: active ? '#aa44cc' : '#555555',
+            data: active ? 'use' : 'dormant',
+        },
+        { label: 'Leave it', color: '#888888', data: 'cancel' },
+    ];
+
+    const menu = new Menu('Teleport Rune', items, {
+        onSelect: (sel) => {
+            menu.closed = true;
+            this.activeMenu = null;
+            this.state = STATE.PLAYING;
+            if (sel.data !== 'use') return;
+
+            const destMap = this.worldMap.getLevel(destLevel);
+            const destRunes = destMap.metadata.runes ?? [];
+            let arrival;
+            if (destRunes.length > 0) {
+                arrival = { x: destRunes[0].x, y: destRunes[0].y };
+            } else {
+                arrival = { x: destMap.metadata.entry?.x ?? 5, y: destMap.metadata.entry?.y ?? 5 };
+            }
+
+            const srcMap = this.worldMap.getLevel(this.currentLevel);
+            srcMap.removeEntity(this.player);
+            this.log.add(`The rune flares with violet light. You are hurled to Level ${destLevel}.`, 'magic');
+            this.currentLevel = destLevel;
+            if (destLevel > this.player.depth) {
+                this.player.depth = destLevel;
+                this._updateQuestProgress('explore', { depth: destLevel });
+            }
+            this.player.x = arrival.x;
+            this.player.y = arrival.y;
+            destMap.addEntity(this.player);
+            destMap.computeFOV(this.player.x, this.player.y, this._effectiveFovRadius());
+            this._updateCamera(destMap);
         },
         onCancel: () => { menu.closed = true; this.activeMenu = null; this.state = STATE.PLAYING; },
     });
@@ -1748,7 +1884,10 @@ _openUseMenu() {
       case STATE.MENU:             this._renderMenu(); break;
       case STATE.STAT_ROLL:        this._renderStatRoll(this.renderer.ctx); break;
       case STATE.NAME_ENTRY:       this._renderNameEntry(this.renderer.ctx); break;
-      case STATE.PLAYING:          this._renderPlaying(); break;
+      case STATE.PLAYING:
+        this._renderPlaying();
+        if (this.signTextMode) this._renderSignTextInput(this.renderer.ctx);
+        break;
       case STATE.TOWN:             this._renderTown(); break;
       case STATE.DUNGEON_TOWN:     this._renderDungeonTown(); break;
       case STATE.PUZZLE:
@@ -1934,6 +2073,37 @@ _openUseMenu() {
     ctx.fillStyle = '#666666';
     ctx.font = `${Math.max(10, th - 2)}px monospace`;
     ctx.fillText('[ENTER] Confirm   [ESC] Go back', boxX, boxY + th * 2.6);
+  }
+
+  _renderSignTextInput(ctx) {
+    const tw = this.renderer.TILE_W;
+    const th = this.renderer.TILE_H;
+    const w = ctx.canvas.width;
+    const h = ctx.canvas.height;
+    const boxW = Math.min(w - tw * 4, 480);
+    const boxX = (w - boxW) / 2;
+    const boxY = h / 2 - th * 3;
+
+    ctx.fillStyle = 'rgba(0,0,0,0.85)';
+    ctx.fillRect(boxX - 8, boxY - th * 2, boxW + 16, th * 7);
+    ctx.strokeStyle = '#ccbb88';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(boxX - 8, boxY - th * 2, boxW + 16, th * 7);
+
+    ctx.fillStyle = '#ccbb88';
+    ctx.font = `bold ${th}px monospace`;
+    ctx.textBaseline = 'top';
+    ctx.fillText('Write your message:', boxX, boxY - th * 1.5);
+
+    ctx.strokeStyle = '#ffcc44';
+    ctx.strokeRect(boxX, boxY, boxW, th * 2);
+    ctx.fillStyle = '#ffcc44';
+    ctx.font = `bold ${th}px monospace`;
+    ctx.fillText((this.signTextBuffer || '') + '_', boxX + 8, boxY + th * 0.4);
+
+    ctx.fillStyle = '#666666';
+    ctx.font = `${Math.max(10, th - 2)}px monospace`;
+    ctx.fillText('[ENTER] Post   [ESC] Cancel', boxX, boxY + th * 2.6);
   }
 
   _renderPlaying() {
