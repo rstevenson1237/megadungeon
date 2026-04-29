@@ -140,7 +140,7 @@ export const FEATURES = {
   crate: {
     key: 'crate',
     name: 'Crate',
-    glyph: 0x6F,   // o
+    glyph: 0x7B,   // {
     fg: '#885533',
     solid: false,
     opaque: false,
@@ -260,7 +260,7 @@ export const FEATURES = {
   throne: {
     key: 'throne',
     name: 'Throne',
-    glyph: 0x54,   // T
+    glyph: 0x5C,   // \
     fg: '#cc9900',
     solid: true,
     opaque: false,
@@ -288,7 +288,7 @@ export const FEATURES = {
 
   transport_circle: {
     key: 'transport_circle',
-    glyph: 0x4F,   // O
+    glyph: 0x30,   // 0
     fg: '#6644cc',
     solid: false,
     opaque: false,
