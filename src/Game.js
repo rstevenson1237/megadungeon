@@ -1418,7 +1418,6 @@ _pickupItem(item, map) {
         map.removeEntity(item);
         this.log.add(`You pick up the ${item.name}.`, 'system');
         this._updateQuestProgress('fetch', { itemKey: item.itemKey });
-        this._updateQuestProgress('rescue_found', {});
         this.bus.emit('item:pickup', { item, entity: this.player });
         return true;
     } else {
@@ -1478,7 +1477,7 @@ _openUseMenu() {
 
     // Move player
     map.moveEntity(this.player, nx, ny);
-    
+
     const newTile = map.get(nx, ny);
     const trapResult = this.traps.checkTile(newTile, this.player);
     if (trapResult?.teleport) {
@@ -1489,6 +1488,16 @@ _openUseMenu() {
             map.moveEntity(this.player, dest.x, dest.y);
         }
     }
+
+    // Captive rescue: player steps onto captive tile feature
+    if (newTile?.features?.captive) {
+        const captive = newTile.features.captive;
+        this._updateQuestProgress('rescue_found', { questTitle: captive.questTitle });
+        newTile.glyph = captive.oldGlyph;
+        newTile.fg    = captive.oldFg;
+        delete newTile.features.captive;
+    }
+
     return true;  }
 
   _playerAttacks(monster) {
@@ -1519,7 +1528,7 @@ _openUseMenu() {
               this.log.add('Master Hunter: double XP from favored enemy!', 'important');
             }
             const xpResult = this.player.gainXP(xpAmount);
-            this._updateQuestProgress('kill', { monsterType: monster.def?.key ?? monster.name });
+            this._updateQuestProgress('kill', { monsterType: monster.def?.key ?? monster.name, depth: this.currentLevel });
             this._rollMonsterLoot(monster);
             if (xpResult.leveled) {
               this.pendingLevelUp = xpResult;
@@ -2939,8 +2948,20 @@ _openQuestViewMenu(location) {
                 this._openGuildBoardMenu(location);
                 return;
             }
-            this.quests.active.push(selected.data);
-            this.log.add(`Quest accepted: ${selected.data.title}`, 'important');
+            const quest = selected.data;
+            this.quests.active.push(quest);
+            this.log.add(`Quest accepted: ${quest.title}`, 'important');
+            if (quest.type === 'rescue') {
+                this._spawnCaptive(quest);
+            } else if (quest.type === 'tribute') {
+                quest.state.baseGold = this.player.gold;
+            }
+            // Refresh board if all quests have been accepted
+            const boardQuests = this.worldMap.townState.guild_board_quests ?? [];
+            const activeIds = new Set(this.quests.active.map(q => q.title));
+            if (boardQuests.every(q => activeIds.has(q.title))) {
+                this.worldMap.townState.guild_board_quests = [];
+            }
             this._openQuestViewMenu(location); // Refresh
         },
         onCancel: () => { this._openGuildBoardMenu(location); }
@@ -3034,6 +3055,19 @@ _effectiveFovRadius() {
     const bonus = (this.player.statuses ?? [])
         .reduce((sum, s) => sum + (s.fovBonus ?? 0), 0);
     return PLAYER_FOV_RADIUS + bonus;
+}
+
+_spawnCaptive(quest) {
+    const map = this.worldMap.getLevel(quest.targetDepth);
+    if (!map) return;
+    const floors = map.findTiles('floor');
+    if (!floors.length) return;
+    const pos  = this.rng.pick(floors);
+    const tile = map.get(pos.x, pos.y);
+    if (!tile) return;
+    tile.features.captive = { questTitle: quest.title, oldGlyph: tile.glyph, oldFg: tile.fg };
+    tile.glyph = '@';
+    tile.fg    = '#ffcc44';
 }
 
 _equippedTag(item) {
@@ -3653,10 +3687,17 @@ _openSpellMenu(readOnly = false) {
 _updateQuestProgress(type, data) {
     for (const quest of this.quests.active) {
       if (quest.type === 'kill' && type === 'kill') {
-        if (quest.target === data.monsterType || quest.target === 'any') {
+        if (quest.target === data.monsterType) {
           quest.state.killed = (quest.state.killed ?? 0) + 1;
-          const needed = quest.count;
-          this.log.add(`Quest: ${quest.title} — ${quest.state.killed}/${needed} killed.`, 'system');
+          this.log.add(`Quest: ${quest.title} — ${quest.state.killed}/${quest.count} killed.`, 'system');
+          if (this.quests.checkCompletion(quest, this.player, this.worldMap)) {
+            this.log.add(`Quest complete: ${quest.title}! Return to the Guild Board.`, 'important');
+          }
+        }
+      } else if (quest.type === 'bounty' && type === 'kill') {
+        if (data.depth === quest.targetDepth) {
+          quest.state.killed = (quest.state.killed ?? 0) + 1;
+          this.log.add(`Quest: ${quest.title} — ${quest.state.killed}/${quest.count} killed.`, 'system');
           if (this.quests.checkCompletion(quest, this.player, this.worldMap)) {
             this.log.add(`Quest complete: ${quest.title}! Return to the Guild Board.`, 'important');
           }
@@ -3677,9 +3718,9 @@ _updateQuestProgress(type, data) {
           this.log.add(`Quest complete: ${quest.title}! Return to the Guild Board.`, 'important');
         }
       } else if (quest.type === 'rescue' && type === 'rescue_found') {
-        if (!quest.state.found && this.currentLevel === quest.targetDepth) {
+        if (!quest.state.found && data.questTitle === quest.title) {
           quest.state.found = true;
-          this.log.add(`You find signs of the captive on level ${quest.targetDepth}. Get back to town!`, 'important');
+          this.log.add(`You free the captive! Get back to the surface!`, 'important');
         }
       } else if (quest.type === 'rescue' && type === 'rescue_returned') {
         if (quest.state.found && !quest.state.returned) {
