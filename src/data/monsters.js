@@ -68,7 +68,7 @@ export const MONSTERS = {
 
   wight: {
     key: 'wight', name: 'Wight', plural: 'Wights',
-    glyph: 'W', color: '#445566',
+    glyph: 'W', color: '#5577aa',
     hd: 3, hdType: 'd8', ac: 14, speed: 1,
     attacks: [{ name: 'draining touch', numDice: 1, die: 4, dmgBonus: 0, special: 'energy_drain_1' }],
     specials: ['energy_drain', 'immune_sleep', 'immune_charm', 'immune_cold', 'immune_nonmagic_weapons'],
@@ -114,7 +114,7 @@ export const MONSTERS = {
 
   zombie: {
     key: 'zombie', name: 'Zombie', plural: 'Zombies',
-    glyph: 'z', color: '#4a694a',
+    glyph: 'z', color: '#6a8a5a',
     hd: 2, hdType: 'd8', ac: 11, speed: 0.5,
     attacks: [{ name: 'slam', numDice: 1, die: 6, dmgBonus: 0, special: 'disease_10' }],
     specials: ['immune_sleep', 'immune_charm'],
@@ -128,7 +128,7 @@ export const MONSTERS = {
 
   goblin_shaman: {
     key: 'goblin_shaman', name: 'Goblin Shaman', plural: 'Goblin Shamans',
-    glyph: 'p', color: '#88ee88',
+    glyph: 'p', color: '#55cc33',
     hd: 2, hdType: 'd6', ac: 12, speed: 1,
     attacks: [{ name: 'ritual dagger', numDice: 1, die: 4, dmgBonus: 0, special: null }],
     specials: ['light_sensitivity', 'cast_curse', 'cast_heal_self'],
@@ -336,7 +336,7 @@ export const MONSTERS = {
 
   void_wraith: {
     key: 'void_wraith', name: 'Void Wraith', plural: 'Void Wraiths',
-    glyph: 'X', color: '#660099',
+    glyph: 'X', color: '#8833cc',
     hd: 5, hdType: 'd8', ac: 14, speed: 1,
     attacks: [{ name: 'void touch', numDice: 1, die: 6, dmgBonus: 0, special: 'energy_drain_1' }],
     specials: ['energy_drain', 'immune_nonmagic_weapons', 'immune_cold', 'immune_sleep', 'immune_charm', 'incorporeal', 'fly'],
@@ -413,7 +413,7 @@ export const MONSTERS = {
 
   hobgoblin: {
     key: 'hobgoblin', name: 'Hobgoblin', plural: 'Hobgoblins',
-    glyph: 'H', color: '#cc6633',
+    glyph: 'H', color: '#557733',
     hd: 2, hdType: 'd8', ac: 14, speed: 1,
     attacks: [{ name: 'military pick', numDice: 1, die: 8, dmgBonus: 1, special: null }],
     specials: ['battle_discipline'],
@@ -443,7 +443,7 @@ export const MONSTERS = {
 
   ghoul: {
     key: 'ghoul', name: 'Ghoul', plural: 'Ghouls',
-    glyph: 'u', color: '#667744',
+    glyph: 'u', color: '#7a9950',
     hd: 2, hdType: 'd8', ac: 13, speed: 1,
     attacks: [
       { name: 'claw', numDice: 1, die: 3, dmgBonus: 0, special: 'paralysis_3' },
@@ -460,7 +460,7 @@ export const MONSTERS = {
 
   wraith: {
     key: 'wraith', name: 'Wraith', plural: 'Wraiths',
-    glyph: 'x', color: '#553388',
+    glyph: 'x', color: '#7766bb',
     hd: 4, hdType: 'd6', ac: 13, speed: 1,
     attacks: [{ name: 'spectral touch', numDice: 1, die: 6, dmgBonus: 0, special: 'energy_drain_1' }],
     specials: ['energy_drain', 'immune_nonmagic_weapons', 'immune_cold', 'immune_sleep', 'immune_charm', 'incorporeal', 'fly'],
