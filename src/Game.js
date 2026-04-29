@@ -1047,10 +1047,14 @@ _interactWithRune(tile) {
             this.state = STATE.PLAYING;
             if (sel.data !== 'use') return;
 
+            const srcLevel = this.currentLevel;
             const destMap = this.worldMap.getLevel(destLevel);
             const destRunes = destMap.metadata.runes ?? [];
+            const returnRune = destRunes.find(r => r.destLevel === srcLevel);
             let arrival;
-            if (destRunes.length > 0) {
+            if (returnRune) {
+                arrival = { x: returnRune.x, y: returnRune.y };
+            } else if (destRunes.length > 0) {
                 arrival = { x: destRunes[0].x, y: destRunes[0].y };
             } else {
                 arrival = { x: destMap.metadata.entry?.x ?? 5, y: destMap.metadata.entry?.y ?? 5 };

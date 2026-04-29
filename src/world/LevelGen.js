@@ -84,33 +84,42 @@ export class LevelGen {
 
   static _placeRunes(map, rooms, rng, levelNumber) {
     if (levelNumber < 3 || levelNumber >= 98) return;
-    const chance = 0.25 + (levelNumber / 200);  // ~25% at lv3, ~74% at lv97
-    if (rng.next() > chance) return;
+
+    const count = rng.pick([0, 1, 2]);
+    if (count === 0) return;
 
     const eligible = rooms.filter(r => r.type !== 'entry' && r.type !== 'boss');
     if (!eligible.length) return;
 
-    const room = rng.pick(eligible);
-    const pos  = this._randomFloorInRoom(map, room, rng);
-    if (!pos) return;
+    const usedDests = new Set();
+    for (let i = 0; i < count; i++) {
+      const room = rng.pick(eligible);
+      const pos  = this._randomFloorInRoom(map, room, rng);
+      if (!pos) continue;
 
-    // Pick destination: 5–15 levels away; 70% deeper, 30% shallower
-    const sign   = rng.next() < 0.7 ? 1 : -1;
-    let destLevel = Math.max(1, Math.min(99, levelNumber + sign * rng.int(5, 15)));
-    // Avoid landing on a dungeon town level — bump by 1 in the same direction
-    if (isDungeonTownLevel(destLevel)) {
-      destLevel = Math.max(1, Math.min(99, destLevel + sign));
+      // Pick destination: 5–15 levels away; 70% deeper, 30% shallower
+      let destLevel, tries = 0;
+      do {
+        const sign = rng.next() < 0.7 ? 1 : -1;
+        destLevel = Math.max(1, Math.min(99, levelNumber + sign * rng.int(5, 15)));
+        if (isDungeonTownLevel(destLevel)) {
+          destLevel = Math.max(1, Math.min(99, destLevel + sign));
+        }
+        tries++;
+      } while ((isDungeonTownLevel(destLevel) || usedDests.has(destLevel)) && tries < 10);
+
+      if (isDungeonTownLevel(destLevel) || usedDests.has(destLevel)) continue;
+      usedDests.add(destLevel);
+
+      const tile = map.get(pos.x, pos.y);
+      tile.features.rune = { destLevel };
+      tile.glyph = 0xF0;
+      tile.fg    = '#8844cc';
+      tile.solid = false;
+
+      if (!map.metadata.runes) map.metadata.runes = [];
+      map.metadata.runes.push({ x: pos.x, y: pos.y, destLevel });
     }
-    if (isDungeonTownLevel(destLevel)) return;  // still on a town level; skip
-
-    const tile = map.get(pos.x, pos.y);
-    tile.features.rune = { destLevel };
-    tile.glyph = 0xF0;   // ≡
-    tile.fg    = '#8844cc';
-    tile.solid = false;
-
-    if (!map.metadata.runes) map.metadata.runes = [];
-    map.metadata.runes.push({ x: pos.x, y: pos.y, destLevel });
   }
 
   static _randomFloorInRoom(map, room, rng) {
