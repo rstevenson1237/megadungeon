@@ -17,13 +17,13 @@ function setFloor(map, x, y, theme, rng) {
   t.glyph = rng.pick(theme.floorGlyphs); t.fg = theme.floorFg; t.bg = theme.floorBg;
 }
 
-function carveRect(map, rx, ry, rw, rh, theme) {
+function carveRect(map, rx, ry, rw, rh, theme, rng) {
   for (let dy = 0; dy < rh; dy++)
     for (let dx = 0; dx < rw; dx++)
       setFloor(map, rx + dx, ry + dy, theme, rng);
 }
 
-function carveRounded(map, rx, ry, rw, rh, R, theme) {
+function carveRounded(map, rx, ry, rw, rh, R, theme, rng) {
   for (let dy = 0; dy < rh; dy++) {
     for (let dx = 0; dx < rw; dx++) {
       // Evaluate corner circles — skip tiles outside the arc
@@ -65,7 +65,7 @@ export function generate(map, rng, theme, levelNumber) {
   // 1. Central arena (rounded rect 24×20)
   const arenaX = Math.floor((W - AW) / 2);
   const arenaY = Math.floor((H - AH) / 2);
-  carveRounded(map, arenaX, arenaY, AW, AH, CORNER_R, theme);
+  carveRounded(map, arenaX, arenaY, AW, AH, CORNER_R, theme, rng);
 
   const arenaCX = arenaX + (AW >> 1);   // 39 on a 78-wide map
   const arenaCY = arenaY + (AH >> 1);   // 19 on a 38-tall map
@@ -87,22 +87,22 @@ export function generate(map, rng, theme, levelNumber) {
   const eastY = arenaCY - halfAntH;
 
   // Carve north antechamber + 2-wide doorway to arena
-  carveRect(map, northX, northY, ANT_W, ANT_H, theme);
+  carveRect(map, northX, northY, ANT_W, ANT_H, theme, rng);
   for (let i = 0; i < 2; i++)
     setFloor(map, northX + halfAntW - 1 + i, arenaY - 1, theme, rng);
 
   // Carve east antechamber + 2-wide doorway
-  carveRect(map, eastX, eastY, ANT_W, ANT_H, theme);
+  carveRect(map, eastX, eastY, ANT_W, ANT_H, theme, rng);
   for (let i = 0; i < 2; i++)
     setFloor(map, arenaX + AW, eastY + halfAntH - 1 + i, theme, rng);
 
   // Carve south antechamber + 2-wide doorway
-  carveRect(map, southX, southY, ANT_W, ANT_H, theme);
+  carveRect(map, southX, southY, ANT_W, ANT_H, theme, rng);
   for (let i = 0; i < 2; i++)
     setFloor(map, southX + halfAntW - 1 + i, southY - 1, theme, rng);
 
   // Carve west antechamber + 2-wide doorway
-  carveRect(map, westX, westY, ANT_W, ANT_H, theme);
+  carveRect(map, westX, westY, ANT_W, ANT_H, theme, rng);
   for (let i = 0; i < 2; i++)
     setFloor(map, arenaX - 1, westY + halfAntH - 1 + i, theme, rng);
 

@@ -28,6 +28,28 @@ export class Menu {
       this.onCancel();
       return;
     }
+
+    // Letter key selection (a-z)
+    if (action.startsWith('select:')) {
+        const letter = action.split(':')[1];
+        const index = letter.charCodeAt(0) - 97;
+        if (index >= 0 && index < this.items.length) {
+            const item = this.items[index];
+            if (item.enabled !== false) {
+                this.cursor = index;
+                this.onSelect(item, index);
+                this._lastSelectionFrame = Date.now();
+                return;
+            }
+        }
+    }
+
+    // Ignore movement actions if we just selected something via letter key
+    // This prevents "W" from moving up AND selecting item 'w'.
+    if (this._lastSelectionFrame && (Date.now() - this._lastSelectionFrame < 50)) {
+        return;
+    }
+
     if (action === 'move:n') {
       this.cursor = Math.max(0, this.cursor - 1);
       this._adjustScroll();
@@ -43,19 +65,6 @@ export class Menu {
         this.onSelect(this.items[this.cursor], this.cursor);
       }
       return;
-    }
-    
-    // Letter key selection
-    if (action.startsWith('select:')) {
-        const letter = action.split(':')[1];
-        const index = letter.charCodeAt(0) - 97;
-        if (index >= 0 && index < this.items.length) {
-            const item = this.items[index];
-            if (item.enabled !== false) {
-                this.cursor = index;
-                this.onSelect(item, index);
-            }
-        }
     }
   }
 

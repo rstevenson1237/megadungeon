@@ -339,7 +339,7 @@ this.traps = new TrapSystem(this.bus);
             ctx.restore();
         }
     });
-    this.activeMenu = menu;
+    this._openMenu(menu);
   }
 
   _enterLevel(levelNum, entryMethod = 'from_above') {
@@ -428,9 +428,10 @@ this.traps = new TrapSystem(this.bus);
       this.activeMenu.handleAction(action);
       
       if (this.activeMenu && this.activeMenu.closed) {
+          const wasClosed = this.activeMenu.closed;
           this.activeMenu = null;
           // Safeguard: if state hasn't changed, go back to title
-          if (this.state === STATE.CHAR_CREATE) {
+          if (this.state === STATE.CHAR_CREATE && wasClosed) {
               this.state = STATE.TITLE;
           }
       }
@@ -443,7 +444,7 @@ this.traps = new TrapSystem(this.bus);
       this.pendingName = '';
     }
     // Bind 'R' key temporarily for reroll via drop action (since we moved drop to R)
-    if (action === 'drop') {
+    if (action === 'drop' || action === 'select:r') {
       if (this.rollRerolls > 0) {
         this.pendingStats = this._rollStatArray();
         this.rollRerolls--;
@@ -2293,6 +2294,7 @@ _openUseMenu() {
     }
     this.state = STATE.MENU;
     this.activeMenu = menu;
+    this.input.clearQueue();
   }
 
   _openTownOverview() {
@@ -2323,9 +2325,7 @@ _openUseMenu() {
         }
     });
     
-    this._previousState = STATE.TOWN;
-    this.state = STATE.MENU;
-    this.activeMenu = menu;
+    this._openMenu(menu);
 }
 
 _enterDungeonFromTown() {
@@ -4242,11 +4242,8 @@ _quickLoad() {
       },
       onCancel: () => { this._openDungeonTownOverview(town); },
     });
-    this._previousState = STATE.DUNGEON_TOWN;
-    this.state = STATE.MENU;
-    this.activeMenu = menu;
-  }
-
+    this._openMenu(menu);
+    }
   _openDungeonTownInn(inn, town) {
     const restCost = inn.restCost(this.player.level);
     const henchCost = this.player.level * 100;
@@ -4310,11 +4307,8 @@ _quickLoad() {
       },
       onCancel: () => { this._openDungeonTownOverview(town); },
     });
-    this._previousState = STATE.DUNGEON_TOWN;
-    this.state = STATE.MENU;
-    this.activeMenu = menu;
-  }
-
+    this._openMenu(menu);
+    }
   _openDungeonTownShop(shop, town) {
     const items = [
       { label: 'Buy',  color: '#44ff44', data: 'buy'  },
@@ -4334,11 +4328,8 @@ _quickLoad() {
       },
       onCancel: () => { this._openDungeonTownOverview(town); },
     });
-    this._previousState = STATE.DUNGEON_TOWN;
-    this.state = STATE.MENU;
-    this.activeMenu = menu;
-  }
-
+    this._openMenu(menu);
+    }
   _openDungeonTownBuyMenu(shop, town) {
     const markup = shop.buyMarkup ?? 1.5;
     const stock = (shop.stock ?? []).map(key => {
@@ -4374,11 +4365,8 @@ _quickLoad() {
       },
       onCancel: () => { this._openDungeonTownShop(shop, town); },
     });
-    this._previousState = STATE.DUNGEON_TOWN;
-    this.state = STATE.MENU;
-    this.activeMenu = menu;
-  }
-
+    this._openMenu(menu);
+    }
   _openDungeonTownSellMenu(shop, town) {
     const markup = shop.sellMarkup ?? 0.3;
     const items = this.player.inventory.map((item, i) => {
@@ -4405,11 +4393,8 @@ _quickLoad() {
       },
       onCancel: () => { this._openDungeonTownShop(shop, town); },
     });
-    this._previousState = STATE.DUNGEON_TOWN;
-    this.state = STATE.MENU;
-    this.activeMenu = menu;
-  }
-
+    this._openMenu(menu);
+    }
   _openDungeonTownSmith(smith, town) {
     const items = [
       { label: 'Buy Weapons',   color: '#44ff44', data: 'buy'     },
@@ -4433,11 +4418,8 @@ _quickLoad() {
       },
       onCancel: () => { this._openDungeonTownOverview(town); },
     });
-    this._previousState = STATE.DUNGEON_TOWN;
-    this.state = STATE.MENU;
-    this.activeMenu = menu;
-  }
-
+    this._openMenu(menu);
+    }
   _openDungeonTownRepair(smith, town) {
     const repairable = this.player.inventory.filter(
       i => i.category === 'weapon' || i.category === 'armor'
@@ -4465,11 +4447,8 @@ _quickLoad() {
       },
       onCancel: () => { this._openDungeonTownSmith(smith, town); },
     });
-    this._previousState = STATE.DUNGEON_TOWN;
-    this.state = STATE.MENU;
-    this.activeMenu = menu;
-  }
-
+    this._openMenu(menu);
+    }
   _openDungeonTownEnchant(smith, town) {
     const enchantable = this.player.inventory.filter(
       i => (i.weapon || i.armor) && !i.cursed && (i._enchantLevel ?? 0) < 3
@@ -4509,11 +4488,8 @@ _quickLoad() {
       },
       onCancel: () => { this._openDungeonTownSmith(smith, town); },
     });
-    this._previousState = STATE.DUNGEON_TOWN;
-    this.state = STATE.MENU;
-    this.activeMenu = menu;
-  }
-
+    this._openMenu(menu);
+    }
   _openDungeonTownTemple(temple, town) {
     const costs = temple.costs;
     const restoreCost = costs.raise_dead(this.player.level);
@@ -4602,11 +4578,8 @@ _quickLoad() {
       },
       onCancel: () => { this._openDungeonTownOverview(town); },
     });
-    this._previousState = STATE.DUNGEON_TOWN;
-    this.state = STATE.MENU;
-    this.activeMenu = menu;
-  }
-
+    this._openMenu(menu);
+    }
   _openDungeonTownLift(town) {
     const items = town.lifts.map(lift => {
       const targetTown = DUNGEON_TOWNS[lift.target];
@@ -4638,11 +4611,8 @@ _quickLoad() {
       },
       onCancel: () => { this._openDungeonTownOverview(town); },
     });
-    this._previousState = STATE.DUNGEON_TOWN;
-    this.state = STATE.MENU;
-    this.activeMenu = menu;
-  }
-
+    this._openMenu(menu);
+    }
   // ---------------------------------------------------------------
 
   async _toggleMinimap() {

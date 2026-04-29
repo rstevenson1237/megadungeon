@@ -13,7 +13,7 @@ function setFloor(map, x, y, theme, rng) {
   t.glyph = rng.pick(theme.floorGlyphs); t.fg = theme.floorFg; t.bg = theme.floorBg;
 }
 
-function connectRooms(map, roomList, theme) {
+function connectRooms(map, roomList, theme, rng) {
   for (let i = 0; i < roomList.length - 1; i++) {
     const a = roomList[i], b = roomList[i + 1];
     const ax = a.x + (a.w >> 1), ay = a.y + (a.h >> 1);
@@ -80,8 +80,8 @@ export function generate(map, rng, theme, levelNumber) {
   // Connect rooms within each half
   const northRooms = rooms.filter(r => r.y + r.h <= midY);
   const southRooms = rooms.filter(r => r.y >= midY + riverWidth);
-  connectRooms(map, northRooms, theme);
-  connectRooms(map, southRooms, theme);
+  connectRooms(map, northRooms, theme, rng);
+  connectRooms(map, southRooms, theme, rng);
 
   // 3. 2–3 bridge strips crossing the river
   const bridgeCount = rng.int(2, 3);

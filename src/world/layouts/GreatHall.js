@@ -13,7 +13,7 @@ function setFloor(map, x, y, theme, rng) {
   t.glyph = rng.pick(theme.floorGlyphs); t.fg = theme.floorFg; t.bg = theme.floorBg;
 }
 
-function carveRect(map, rx, ry, rw, rh, theme) {
+function carveRect(map, rx, ry, rw, rh, theme, rng) {
   for (let dy = 0; dy < rh; dy++)
     for (let dx = 0; dx < rw; dx++)
       setFloor(map, rx + dx, ry + dy, theme, rng);
@@ -35,7 +35,7 @@ export function generate(map, rng, theme, levelNumber) {
   const hallX = Math.floor((W - hallW) / 2);
   const hallY = Math.floor((H - hallH) / 2);
 
-  carveRect(map, hallX, hallY, hallW, hallH, theme);
+  carveRect(map, hallX, hallY, hallW, hallH, theme, rng);
   const rooms = [makeRoom(hallX, hallY, hallW, hallH, 0)];
 
   // 2. 4–6 side rooms, one per wall segment, cycling north/south/east/west first
@@ -77,7 +77,7 @@ export function generate(map, rng, theme, levelNumber) {
     // Bounds check
     if (rx < 1 || ry < 1 || rx + sw >= W - 1 || ry + sh >= H - 1) continue;
 
-    carveRect(map, rx, ry, sw, sh, theme);
+    carveRect(map, rx, ry, sw, sh, theme, rng);
     setFloor(map, doorX, doorY, theme, rng); // 1-tile doorway
     rooms.push(makeRoom(rx, ry, sw, sh, rooms.length));
   }

@@ -76,10 +76,16 @@ export class InputManager {
 
     if (foundAction) {
         this._queue.push(foundAction);
+    }
+
+    // Always handle letter keys for menu selection as a fallback or secondary action
+    if (!e.ctrlKey && !e.altKey && !e.metaKey && e.key.length === 1 && e.key.match(/[a-z]/i)) {
+        const selectAction = `select:${e.key.toLowerCase()}`;
+        if (foundAction !== selectAction) {
+            this._queue.push(selectAction);
+        }
         e.preventDefault();
-    } else if (!e.ctrlKey && !e.altKey && !e.metaKey && e.key.length === 1 && e.key.match(/[a-z]/i)) {
-        // Handle letter keys for menu selection
-        this._queue.push(`select:${e.key.toLowerCase()}`);
+    } else if (foundAction) {
         e.preventDefault();
     }
   }
