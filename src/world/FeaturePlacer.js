@@ -94,7 +94,7 @@ export class FeaturePlacer {
         oldFg:    targetTile.fg,
       },
     };
-    targetTile.glyph = 0x4F;
+    targetTile.glyph = 0x30;
     targetTile.fg    = '#6644cc';
   }
 }

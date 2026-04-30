@@ -26,7 +26,7 @@ export const MONSTERS = {
 
   giant_rat: {
     key: 'giant_rat', name: 'Giant Rat', plural: 'Giant Rats',
-    glyph: 0x72, color: '#885533', // 'r'
+    glyph: 'r', color: '#885533',
     hd: 1, hdType: 'd4', ac: 12, speed: 1.5,
     attacks: [{ name: 'bite', numDice: 1, die: 3, dmgBonus: 0, special: 'disease_5' }],
     specials: ['disease'],
@@ -40,7 +40,7 @@ export const MONSTERS = {
 
   goblin: {
     key: 'goblin', name: 'Goblin', plural: 'Goblins',
-    glyph: 0x67, color: '#44aa44', // 'g'
+    glyph: 'g', color: '#44aa44',
     hd: 1, hdType: 'd6', ac: 13, speed: 1,
     attacks: [{ name: 'crude weapon', numDice: 1, die: 6, dmgBonus: -1, special: null }],
     specials: ['light_sensitivity'], // -2 to attack in bright light
@@ -54,7 +54,7 @@ export const MONSTERS = {
 
   skeleton: {
     key: 'skeleton', name: 'Skeleton', plural: 'Skeletons',
-    glyph: 0x73, color: '#cccccc', // 's'
+    glyph: 's', color: '#cccccc',
     hd: 1, hdType: 'd8', ac: 13, speed: 1,
     attacks: [{ name: 'clawed hands', numDice: 1, die: 6, dmgBonus: 0, special: null }],
     specials: ['immune_sleep', 'immune_charm', 'half_damage_piercing'],
@@ -68,7 +68,7 @@ export const MONSTERS = {
 
   wight: {
     key: 'wight', name: 'Wight', plural: 'Wights',
-    glyph: 0x57, color: '#445566', // 'W'
+    glyph: 'W', color: '#5577aa',
     hd: 3, hdType: 'd8', ac: 14, speed: 1,
     attacks: [{ name: 'draining touch', numDice: 1, die: 4, dmgBonus: 0, special: 'energy_drain_1' }],
     specials: ['energy_drain', 'immune_sleep', 'immune_charm', 'immune_cold', 'immune_nonmagic_weapons'],
@@ -82,7 +82,7 @@ export const MONSTERS = {
 
   dragon_young_red: {
     key: 'dragon_young_red', name: 'Young Red Dragon', plural: 'Young Red Dragons',
-    glyph: 0x44, color: '#ff2200', // 'D'
+    glyph: 'D', color: '#ff2200',
     hd: 9, hdType: 'd12', ac: 17, speed: 1,
     attacks: [
       { name: 'bite',  numDice: 2, die: 8,  dmgBonus: 4, special: null },
@@ -100,7 +100,7 @@ export const MONSTERS = {
 
   orc: {
     key: 'orc', name: 'Orc', plural: 'Orcs',
-    glyph: 0x6F, color: '#668866', // 'o'
+    glyph: 'o', color: '#668866',
     hd: 2, hdType: 'd8', ac: 14, speed: 1,
     attacks: [{ name: 'notched axe', numDice: 1, die: 8, dmgBonus: 1, special: null }],
     specials: [],
@@ -114,7 +114,7 @@ export const MONSTERS = {
 
   zombie: {
     key: 'zombie', name: 'Zombie', plural: 'Zombies',
-    glyph: 0x7A, color: '#4a694a', // 'z'
+    glyph: 'z', color: '#6a8a5a',
     hd: 2, hdType: 'd8', ac: 11, speed: 0.5,
     attacks: [{ name: 'slam', numDice: 1, die: 6, dmgBonus: 0, special: 'disease_10' }],
     specials: ['immune_sleep', 'immune_charm'],
@@ -128,7 +128,7 @@ export const MONSTERS = {
 
   goblin_shaman: {
     key: 'goblin_shaman', name: 'Goblin Shaman', plural: 'Goblin Shamans',
-    glyph: 0x67, color: '#88ee88', // 'g'
+    glyph: 'p', color: '#55cc33',
     hd: 2, hdType: 'd6', ac: 12, speed: 1,
     attacks: [{ name: 'ritual dagger', numDice: 1, die: 4, dmgBonus: 0, special: null }],
     specials: ['light_sensitivity', 'cast_curse', 'cast_heal_self'],
@@ -144,7 +144,7 @@ export const MONSTERS = {
 
   duergar: {
     key: 'duergar', name: 'Duergar', plural: 'Duergar',
-    glyph: 0x64, color: '#886655', // 'd'
+    glyph: 'd', color: '#886655',
     hd: 2, hdType: 'd8', ac: 14, speed: 1,
     attacks: [{ name: 'war pick', numDice: 1, die: 8, dmgBonus: 1, special: null }],
     specials: ['immune_paralysis', 'immune_illusion', 'enlarge_self'],
@@ -158,7 +158,7 @@ export const MONSTERS = {
 
   dark_dwarf_warrior: {
     key: 'dark_dwarf_warrior', name: 'Dark Dwarf Warrior', plural: 'Dark Dwarf Warriors',
-    glyph: 0x44, color: '#776644', // 'D'
+    glyph: 'F', color: '#776644',
     hd: 3, hdType: 'd8', ac: 16, speed: 1,
     attacks: [
       { name: 'battle axe', numDice: 1, die: 10, dmgBonus: 2, special: null },
@@ -175,7 +175,7 @@ export const MONSTERS = {
 
   cave_troll: {
     key: 'cave_troll', name: 'Cave Troll', plural: 'Cave Trolls',
-    glyph: 0x54, color: '#558855', // 'T'
+    glyph: 'T', color: '#558855',
     hd: 6, hdType: 'd8', ac: 14, speed: 1,
     attacks: [
       { name: 'claw', numDice: 1, die: 8, dmgBonus: 3, special: null },
@@ -192,7 +192,7 @@ export const MONSTERS = {
 
   stone_golem: {
     key: 'stone_golem', name: 'Stone Golem', plural: 'Stone Golems',
-    glyph: 0x47, color: '#888888', // 'G'
+    glyph: 'G', color: '#888888',
     hd: 8, hdType: 'd10', ac: 16, speed: 0.75,
     attacks: [{ name: 'stone fist', numDice: 2, die: 8, dmgBonus: 4, special: 'slow_on_hit' }],
     specials: ['immune_magic', 'immune_nonmagic_weapons', 'immune_sleep', 'immune_charm', 'immune_cold', 'immune_fire', 'immune_lightning'],
@@ -206,7 +206,7 @@ export const MONSTERS = {
 
   iron_defender: {
     key: 'iron_defender', name: 'Iron Defender', plural: 'Iron Defenders',
-    glyph: 0x49, color: '#999999', // 'I'
+    glyph: 'I', color: '#999999',
     hd: 4, hdType: 'd10', ac: 17, speed: 1,
     attacks: [{ name: 'iron jaw', numDice: 1, die: 8, dmgBonus: 3, special: null }],
     specials: ['immune_sleep', 'immune_charm', 'immune_poison', 'darkvision'],
@@ -220,7 +220,7 @@ export const MONSTERS = {
 
   duergar_sorcerer: {
     key: 'duergar_sorcerer', name: 'Duergar Sorcerer', plural: 'Duergar Sorcerers',
-    glyph: 0x64, color: '#bb8866', // 'd'
+    glyph: 'q', color: '#bb8866',
     hd: 4, hdType: 'd6', ac: 12, speed: 1,
     attacks: [{ name: 'staff', numDice: 1, die: 6, dmgBonus: 0, special: null }],
     specials: ['immune_paralysis', 'immune_illusion', 'cast_darkness', 'cast_enlarge', 'cast_hold_person'],
@@ -236,7 +236,7 @@ export const MONSTERS = {
 
   fire_elemental: {
     key: 'fire_elemental', name: 'Fire Elemental', plural: 'Fire Elementals',
-    glyph: 0x45, color: '#ff6600', // 'E'
+    glyph: 'f', color: '#ff6600',
     hd: 8, hdType: 'd8', ac: 14, speed: 1.5,
     attacks: [{ name: 'burning touch', numDice: 2, die: 8, dmgBonus: 0, special: 'ignite' }],
     specials: ['immune_fire', 'vulnerability_cold', 'immune_nonmagic_weapons', 'immune_sleep', 'immune_charm'],
@@ -250,7 +250,7 @@ export const MONSTERS = {
 
   water_elemental: {
     key: 'water_elemental', name: 'Water Elemental', plural: 'Water Elementals',
-    glyph: 0x45, color: '#4488ff', // 'E'
+    glyph: 'e', color: '#4488ff',
     hd: 8, hdType: 'd8', ac: 13, speed: 1,
     attacks: [{ name: 'crushing wave', numDice: 2, die: 8, dmgBonus: 0, special: 'knockback' }],
     specials: ['immune_cold', 'vulnerability_lightning', 'immune_nonmagic_weapons', 'immune_sleep', 'immune_charm'],
@@ -264,7 +264,7 @@ export const MONSTERS = {
 
   earth_elemental: {
     key: 'earth_elemental', name: 'Earth Elemental', plural: 'Earth Elementals',
-    glyph: 0x45, color: '#886644', // 'E'
+    glyph: 'E', color: '#886644',
     hd: 8, hdType: 'd10', ac: 17, speed: 0.75,
     attacks: [{ name: 'stone slam', numDice: 2, die: 10, dmgBonus: 5, special: null }],
     specials: ['immune_lightning', 'vulnerability_sonic', 'immune_nonmagic_weapons', 'immune_sleep', 'immune_charm'],
@@ -278,7 +278,7 @@ export const MONSTERS = {
 
   magma_sprite: {
     key: 'magma_sprite', name: 'Magma Sprite', plural: 'Magma Sprites',
-    glyph: 0x6D, color: '#ff4400', // 'm'
+    glyph: 'm', color: '#ff4400',
     hd: 3, hdType: 'd6', ac: 12, speed: 1.25,
     attacks: [{ name: 'magma spit', numDice: 1, die: 6, dmgBonus: 1, special: 'ignite' }],
     specials: ['immune_fire', 'vulnerability_cold'],
@@ -292,7 +292,7 @@ export const MONSTERS = {
 
   crystal_golem: {
     key: 'crystal_golem', name: 'Crystal Golem', plural: 'Crystal Golems',
-    glyph: 0x43, color: '#88ccff', // 'C'
+    glyph: 'C', color: '#88ccff',
     hd: 7, hdType: 'd10', ac: 15, speed: 0.75,
     attacks: [{ name: 'crystalline strike', numDice: 2, die: 6, dmgBonus: 2, special: 'prismatic_burst' }],
     specials: ['immune_sleep', 'immune_charm', 'immune_poison', 'reflect_magic_15', 'prismatic_aura'],
@@ -306,7 +306,7 @@ export const MONSTERS = {
 
   storm_wisp: {
     key: 'storm_wisp', name: 'Storm Wisp', plural: 'Storm Wisps',
-    glyph: 0x77, color: '#aaccff', // 'w'
+    glyph: 'l', color: '#aaccff',
     hd: 4, hdType: 'd6', ac: 13, speed: 1.5,
     attacks: [{ name: 'lightning arc', numDice: 1, die: 8, dmgBonus: 0, special: 'chain_lightning' }],
     specials: ['immune_lightning', 'immune_nonmagic_weapons', 'fly', 'phase'],
@@ -322,7 +322,7 @@ export const MONSTERS = {
 
   shadow_demon: {
     key: 'shadow_demon', name: 'Shadow Demon', plural: 'Shadow Demons',
-    glyph: 0x26, color: '#440066', // '&'
+    glyph: 'B', color: '#440066',
     hd: 7, hdType: 'd8', ac: 13, speed: 1.25,
     attacks: [{ name: 'shadow claws', numDice: 2, die: 6, dmgBonus: 0, special: 'strength_drain' }],
     specials: ['immune_nonmagic_weapons', 'immune_cold', 'immune_lightning', 'immune_fire', 'vulnerability_holy', 'vulnerability_light', 'incorporeal'],
@@ -336,7 +336,7 @@ export const MONSTERS = {
 
   void_wraith: {
     key: 'void_wraith', name: 'Void Wraith', plural: 'Void Wraiths',
-    glyph: 0x57, color: '#660099', // 'W'
+    glyph: 'X', color: '#8833cc',
     hd: 5, hdType: 'd8', ac: 14, speed: 1,
     attacks: [{ name: 'void touch', numDice: 1, die: 6, dmgBonus: 0, special: 'energy_drain_1' }],
     specials: ['energy_drain', 'immune_nonmagic_weapons', 'immune_cold', 'immune_sleep', 'immune_charm', 'incorporeal', 'fly'],
@@ -350,7 +350,7 @@ export const MONSTERS = {
 
   phase_spider: {
     key: 'phase_spider', name: 'Phase Spider', plural: 'Phase Spiders',
-    glyph: 0x73, color: '#884488', // 's'
+    glyph: 'P', color: '#884488',
     hd: 5, hdType: 'd8', ac: 13, speed: 1.5,
     attacks: [{ name: 'phase bite', numDice: 1, die: 8, dmgBonus: 2, special: 'poison' }],
     specials: ['blink', 'poison', 'web'],
@@ -364,7 +364,7 @@ export const MONSTERS = {
 
   void_hound: {
     key: 'void_hound', name: 'Void Hound', plural: 'Void Hounds',
-    glyph: 0x68, color: '#553377', // 'h'
+    glyph: 'h', color: '#553377',
     hd: 4, hdType: 'd8', ac: 14, speed: 1.5,
     attacks: [{ name: 'null bite', numDice: 1, die: 8, dmgBonus: 2, special: 'dispel_magic' }],
     specials: ['immune_magic', 'darkvision', 'null_howl'],
@@ -378,7 +378,7 @@ export const MONSTERS = {
 
   rift_stalker: {
     key: 'rift_stalker', name: 'Rift Stalker', plural: 'Rift Stalkers',
-    glyph: 0x52, color: '#772299', // 'R'
+    glyph: 'R', color: '#772299',
     hd: 9, hdType: 'd8', ac: 16, speed: 1.25,
     attacks: [
       { name: 'rift claw',   numDice: 2, die: 8, dmgBonus: 3, special: 'planar_rend' },
@@ -397,7 +397,7 @@ export const MONSTERS = {
 
   giant_spider: {
     key: 'giant_spider', name: 'Giant Spider', plural: 'Giant Spiders',
-    glyph: 0x73, color: '#884422', // 's'
+    glyph: 'S', color: '#884422',
     hd: 2, hdType: 'd8', ac: 13, speed: 1.25,
     attacks: [{ name: 'bite', numDice: 1, die: 6, dmgBonus: 0, special: 'poison' }],
     specials: ['poison', 'web', 'darkvision', 'climb'],
@@ -413,7 +413,7 @@ export const MONSTERS = {
 
   hobgoblin: {
     key: 'hobgoblin', name: 'Hobgoblin', plural: 'Hobgoblins',
-    glyph: 0x68, color: '#cc6633', // 'h'
+    glyph: 'H', color: '#557733',
     hd: 2, hdType: 'd8', ac: 14, speed: 1,
     attacks: [{ name: 'military pick', numDice: 1, die: 8, dmgBonus: 1, special: null }],
     specials: ['battle_discipline'],
@@ -427,7 +427,7 @@ export const MONSTERS = {
 
   warg: {
     key: 'warg', name: 'Warg', plural: 'Wargs',
-    glyph: 0x77, color: '#665544', // 'w'
+    glyph: 'w', color: '#665544',
     hd: 3, hdType: 'd8', ac: 13, speed: 1.5,
     attacks: [{ name: 'bite', numDice: 2, die: 4, dmgBonus: 1, special: 'knockback' }],
     specials: ['darkvision', 'scent'],
@@ -443,7 +443,7 @@ export const MONSTERS = {
 
   ghoul: {
     key: 'ghoul', name: 'Ghoul', plural: 'Ghouls',
-    glyph: 0x67, color: '#667744', // 'g'
+    glyph: 'u', color: '#7a9950',
     hd: 2, hdType: 'd8', ac: 13, speed: 1,
     attacks: [
       { name: 'claw', numDice: 1, die: 3, dmgBonus: 0, special: 'paralysis_3' },
@@ -460,7 +460,7 @@ export const MONSTERS = {
 
   wraith: {
     key: 'wraith', name: 'Wraith', plural: 'Wraiths',
-    glyph: 0x57, color: '#553388', // 'W'
+    glyph: 'x', color: '#7766bb',
     hd: 4, hdType: 'd6', ac: 13, speed: 1,
     attacks: [{ name: 'spectral touch', numDice: 1, die: 6, dmgBonus: 0, special: 'energy_drain_1' }],
     specials: ['energy_drain', 'immune_nonmagic_weapons', 'immune_cold', 'immune_sleep', 'immune_charm', 'incorporeal', 'fly'],
@@ -474,7 +474,7 @@ export const MONSTERS = {
 
   vampire_spawn: {
     key: 'vampire_spawn', name: 'Vampire Spawn', plural: 'Vampire Spawn',
-    glyph: 0x56, color: '#aa2222', // 'V'
+    glyph: 'V', color: '#aa2222',
     hd: 4, hdType: 'd8', ac: 15, speed: 1,
     attacks: [{ name: 'slam', numDice: 1, die: 6, dmgBonus: 2, special: 'energy_drain_1' }],
     specials: ['energy_drain', 'immune_sleep', 'immune_charm', 'immune_cold', 'immune_nonmagic_weapons', 'regenerate_2'],
@@ -490,7 +490,7 @@ export const MONSTERS = {
 
   abyssal_throne: {
     key: 'abyssal_throne', name: 'The Abyssal Throne', plural: 'Abyssal Thrones',
-    glyph: 0x54, color: '#cc0000', // 'T'
+    glyph: 'A', color: '#cc0000',
     hd: 15, hdType: 'd10', ac: 20, speed: 0.75,
     attacks: [
       { name: 'abyssal slam', numDice: 3, die: 10, dmgBonus: 8, special: null },

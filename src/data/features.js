@@ -18,7 +18,7 @@ export const FEATURES = {
     solid: true,
     opaque: true,
     tier: 'dressing',
-    themes: ['dungeon_cellar', 'catacomb', 'dwarven_deep'],
+    themes: ['dungeon_cellar', 'catacomb', 'dwarven_deep', 'natural_cavern', 'ruined_temple'],
     weight: 8,
     description: 'A stone pillar, load-bearing and ancient.',
   },
@@ -30,7 +30,7 @@ export const FEATURES = {
     solid: false,
     opaque: false,
     tier: 'dressing',
-    themes: ['dungeon_cellar', 'goblin_warren', 'catacomb'],
+    themes: ['dungeon_cellar', 'goblin_warren', 'catacomb', 'natural_cavern', 'ruined_temple'],
     weight: 10,
     description: 'Loose stones and broken masonry.',
   },
@@ -54,7 +54,7 @@ export const FEATURES = {
     solid: true,
     opaque: false,
     tier: 'dressing',
-    themes: ['elemental_grotto', 'void_passage'],
+    themes: ['elemental_grotto', 'void_passage', 'natural_cavern', 'abyssal_rift'],
     weight: 10,
     description: 'Jutting mineral crystals, cold to the touch.',
   },
@@ -66,7 +66,7 @@ export const FEATURES = {
     solid: false,
     opaque: false,
     tier: 'dressing',
-    themes: ['catacomb', 'goblin_warren'],
+    themes: ['catacomb', 'goblin_warren', 'natural_cavern', 'ruined_temple', 'abyssal_rift'],
     weight: 8,
     description: 'A heap of old bones.',
   },
@@ -81,7 +81,7 @@ export const FEATURES = {
     solid: true,
     opaque: false,
     tier: 'searchable',
-    themes: ['dungeon_cellar', 'catacomb', 'dwarven_deep'],
+    themes: ['dungeon_cellar', 'catacomb', 'dwarven_deep', 'ruined_temple'],
     weight: 6,
     description: 'Rows of mouldering tomes.',
     onSearch: {
@@ -124,7 +124,7 @@ export const FEATURES = {
     solid: true,
     opaque: false,
     tier: 'searchable',
-    themes: ['catacomb'],
+    themes: ['catacomb', 'ruined_temple'],
     weight: 10,
     description: 'A stone burial casket, sealed with wax.',
     onSearch: {
@@ -140,7 +140,7 @@ export const FEATURES = {
   crate: {
     key: 'crate',
     name: 'Crate',
-    glyph: 0x6F,   // o
+    glyph: 0x7B,   // {
     fg: '#885533',
     solid: false,
     opaque: false,
@@ -167,7 +167,7 @@ export const FEATURES = {
     solid: false,
     opaque: false,
     tier: 'interactive',
-    themes: ['dungeon_cellar', 'catacomb', 'dwarven_deep', 'elemental_grotto'],
+    themes: ['dungeon_cellar', 'catacomb', 'dwarven_deep', 'elemental_grotto', 'natural_cavern', 'ruined_temple'],
     weight: 4,
     description: 'A stone fountain, water still flowing from some hidden source.',
     singleUse: false,
@@ -199,7 +199,7 @@ export const FEATURES = {
     solid: false,
     opaque: false,
     tier: 'interactive',
-    themes: ['catacomb', 'dungeon_cellar', 'void_passage'],
+    themes: ['catacomb', 'dungeon_cellar', 'void_passage', 'ruined_temple', 'abyssal_rift'],
     weight: 3,
     description: 'A stone altar stained with old offerings.',
     singleUse: false,  // can be used repeatedly but with diminishing returns
@@ -233,7 +233,7 @@ export const FEATURES = {
     solid: true,
     opaque: false,
     tier: 'interactive',
-    themes: ['dungeon_cellar', 'catacomb', 'dwarven_deep'],
+    themes: ['dungeon_cellar', 'catacomb', 'dwarven_deep', 'ruined_temple', 'abyssal_rift'],
     weight: 4,
     description: 'A stone statue. The eyes seem to follow you.',
     onInteract: {
@@ -260,12 +260,12 @@ export const FEATURES = {
   throne: {
     key: 'throne',
     name: 'Throne',
-    glyph: 0x54,   // T
+    glyph: 0x5C,   // \
     fg: '#cc9900',
     solid: true,
     opaque: false,
     tier: 'interactive',
-    themes: ['dungeon_cellar', 'catacomb', 'dwarven_deep'],
+    themes: ['dungeon_cellar', 'catacomb', 'dwarven_deep', 'ruined_temple'],
     weight: 2,
     description: 'An ornate throne of stone and tarnished metal. Empty, or waiting.',
     singleUse: true,
@@ -288,12 +288,12 @@ export const FEATURES = {
 
   transport_circle: {
     key: 'transport_circle',
-    glyph: 0x4F,   // O
+    glyph: 0x30,   // 0
     fg: '#6644cc',
     solid: false,
     opaque: false,
     tier: 'interactive',
-    themes: ['void_passage', 'elemental_grotto', 'catacomb'],
+    themes: ['void_passage', 'elemental_grotto', 'catacomb', 'abyssal_rift'],
     weight: 3,
     description: 'A circle of runes etched into the floor. A faint hum rises from it.',
     // Circles are placed in pairs on a given floor. Each circle stores a pairedId.

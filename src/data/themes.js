@@ -105,7 +105,7 @@ export const THEMES = {
   elemental_grotto: {
     name: 'Elemental Grotto',
     description: 'A rift in natural law, where elemental forces leak through from the inner planes into glittering caverns.',
-    minDepth: 40, maxDepth: 80, weight: 10,
+    minDepth: 40, maxDepth: 99, weight: 10,
     mapSizes: ['medium', 'large'],
     floorGlyphs: [0x2E, 0x2C, 0x60],  // . , `
     wallGlyph: 0xB1,                   // ▒
@@ -122,6 +122,73 @@ export const THEMES = {
       'A rift in the stone weeps something that might be water — or might not be.',
       'The temperature swings wildly between ice-cold and scalding as you move.',
       'You hear singing. There are no voices — just the stone, vibrating at the edge of meaning.',
+    ]
+  },
+
+  natural_cavern: {
+    name: 'Natural Cavern',
+    description: 'Raw limestone passages threaded with underground streams and pale fungal growth — the dungeon before anyone carved it.',
+    minDepth: 1, maxDepth: 30, weight: 10,
+    mapSizes: ['small', 'medium'],
+    floorGlyphs: [0x2E, 0x2C, 0x60],   // . , `
+    wallGlyph: 0xB2,                    // ▓
+    floorFg: '#3a3a2a', floorBg: '#030302',
+    wallFg: '#4a4535',  wallBg: '#0a0908',
+    minRoomW: 4, maxRoomW: 12, minRoomH: 3, maxRoomH: 8,
+    monsterWeights: { giant_rat: 30, giant_spider: 25, goblin: 20, orc: 10, warg: 10, skeleton: 5 },
+    itemWeights: { torch: 20, ration: 15, rope: 15, healing_potion: 15, short_sword: 10, leather_armor: 10, antidote: 10, crude_dagger: 5 },
+    dressingFeatures: ['rubble', 'mushroom', 'pool', 'crack', 'web', 'bones'],
+    ambientMessages: [
+      'Cold water drips from the stalactites above.',
+      'Something bioluminescent pulses faintly in the walls.',
+      'The cave narrows. Claw marks line the walls at shoulder height.',
+      'An underground stream runs somewhere beneath your feet.',
+      'Pale fungus grows in rings here, undisturbed for a very long time.',
+    ]
+  },
+
+  ruined_temple: {
+    name: 'Ruined Temple',
+    description: 'A shattered sanctuary of a god no longer remembered. The faithful who remain are dead — and restless.',
+    minDepth: 18, maxDepth: 70, weight: 10,
+    mapSizes: ['small', 'medium'],
+    floorGlyphs: [0x2E, 0xFA, 0xF9],   // . · ·
+    wallGlyph: 0xDB,                    // █
+    floorFg: '#4a3a3a', floorBg: '#080505',
+    wallFg: '#7a6a5a',  wallBg: '#100a08',
+    minRoomW: 5, maxRoomW: 12, minRoomH: 4, maxRoomH: 9,
+    monsterWeights: { skeleton: 20, zombie: 20, ghoul: 15, wight: 15, wraith: 10, vampire_spawn: 10, dark_dwarf_warrior: 5, orc: 5 },
+    itemWeights: { bone_holy_symbol: 15, burial_urn: 15, ancient_coin: 15, antique_ring: 10, unholy_water: 10, grave_dust: 10, embalming_kit: 5, wand_of_fear: 5, scroll_of_sleep: 10, healing_potion: 5 },
+    dressingFeatures: ['rubble', 'stain', 'bones', 'crack', 'altar', 'statue', 'pillar'],
+    ambientMessages: [
+      'Broken idols line the walls, their faces deliberately defaced.',
+      'The altar is cracked in two. Something stained it dark long ago.',
+      'Faded murals depict a god you cannot name performing acts you cannot understand.',
+      'A bell hangs above, its clapper removed. It sways without wind.',
+      'The floor is a mosaic of tiny tiles — most depict things dying.',
+    ]
+  },
+
+  abyssal_rift: {
+    name: 'Abyssal Rift',
+    description: 'A tear in the fabric of the world. Through the gap, things come. They do not go back.',
+    minDepth: 60, maxDepth: 99, weight: 10,
+    mapSizes: ['medium', 'large'],
+    floorGlyphs: [0x2E, 0xFA, 0xF8],   // . · °
+    wallGlyph: 0xB0,                    // ░
+    floorFg: '#2a0808', floorBg: '#050000',
+    wallFg: '#880022',  wallBg: '#120000',
+    corridorFg: '#1a0505', corridorBg: '#030000',
+    minRoomW: 4, maxRoomW: 12, minRoomH: 3, maxRoomH: 9,
+    monsterWeights: { shadow_demon: 25, void_wraith: 20, phase_spider: 20, void_hound: 15, rift_stalker: 15, fire_elemental: 5 },
+    itemWeights: { void_shard: 20, shadow_essence: 15, dark_pearl: 10, soul_candle: 10, null_stone: 10, fire_opal: 10, phase_blade: 5, scroll_of_fireball: 10, wand_of_lightning: 5, planar_compass: 5 },
+    dressingFeatures: ['stain', 'crack', 'bones', 'altar', 'statue'],
+    ambientMessages: [
+      'The rift pulses like a wound that will not close.',
+      'Gravity hesitates here. You feel heavier, then lighter, then wrong.',
+      'Something screams in a language of pure intent. You understand: it wants out.',
+      'The walls are not stone. They are compressed absence, shaped like stone.',
+      'Your torch burns the wrong color for three steps, then returns to normal.',
     ]
   },
 

@@ -73,9 +73,11 @@ export class RoomGen {
         const floorTiles = [];
         for (let y = room.y; y < room.y + room.h; y++) {
             for (let x = room.x; x < room.x + room.w; x++) {
-                if (map.inBounds(x, y) && !map.get(x, y).solid) {
-                    floorTiles.push({ x, y });
-                }
+                if (!map.inBounds(x, y)) continue;
+                const t = map.get(x, y);
+                if (t.solid) continue;
+                if (t.type === 'stair_up' || t.type === 'stair_down') continue;
+                floorTiles.push({ x, y });
             }
         }
         return this.rng.pick(floorTiles);
@@ -208,13 +210,13 @@ export class RoomGen {
                 rubble:  { glyph: 0xB0, fg: '#666666', label: 'rubble',      passable: true  },
                 stain:   { glyph: 0xFA, fg: '#663333', label: 'dark stain',  passable: true  },
                 crack:   { glyph: 0x2F, fg: '#555555', label: 'floor crack', passable: true  },
-                pillar:  { glyph: 0x4F, fg: '#888888', label: 'stone pillar',passable: false },
-                bones:   { glyph: 0x2B, fg: '#ccbbaa', label: 'scattered bones', passable: true },
-                web:     { glyph: 0x2A, fg: '#888888', label: 'cobwebs',     passable: true  },
-                mushroom:{ glyph: 0x2A, fg: '#88dd88', label: 'mushroom',    passable: true  },
-                pool:    { glyph: 0x7E, fg: '#446688', label: 'shallow pool',passable: true  },
-                altar:   { glyph: 0x54, fg: '#aaaaff', label: 'old altar',   passable: false },
-                statue:  { glyph: 0x01, fg: '#999999', label: 'stone statue',passable: false },
+                pillar:  { glyph: 0x7C, fg: '#888888', label: 'stone pillar',passable: false }, // |
+                bones:   { glyph: 0x3B, fg: '#ccbbaa', label: 'scattered bones', passable: true }, // ;
+                web:     { glyph: 0x3A, fg: '#888888', label: 'cobwebs',     passable: true  }, // :
+                mushroom:{ glyph: 0x27, fg: '#88dd88', label: 'mushroom',    passable: true  }, // '
+                pool:    { glyph: 0x2D, fg: '#446688', label: 'shallow pool',passable: true  }, // -
+                altar:   { glyph: 0x5E, fg: '#aaaaff', label: 'old altar',   passable: false }, // ^
+                statue:  { glyph: 0x26, fg: '#999999', label: 'stone statue',passable: false }, // &
             };
 
             const def = DRESSING[featureKey];

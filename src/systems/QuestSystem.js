@@ -2,53 +2,59 @@ import { QUEST_TEMPLATES } from '../data/quests.js';
 import { Item } from '../entities/Item.js';
 
 /**
- * Procedurally generates quests and tracks completion.
  * Quest types:
- *   'fetch'      — Retrieve specific item from specific level
- *   'kill'       — Kill N of monster type
- *   'clear'      — Clear all monsters from target level
- *   'explore'    — Reach target depth for first time
- *   'rescue'     — Find and return NPC captive
- *   'escort'     — Escort NPC from town to level without them dying
+ *   kill     — kill N of a specific monster type
+ *   bounty   — kill any N monsters on a specific level
+ *   fetch    — recover a specific item
+ *   tribute  — return to surface having earned N gold since accepting
+ *   explore  — reach a target depth for the first time
+ *   clear    — eliminate every monster on a target level
+ *   rescue   — find the captive NPC spawned on the target level and return to surface
  */
 export class QuestSystem {
   constructor(worldMap, rng) {
-    this.world = worldMap;
-    this.rng   = rng;
-    this.active = [];
+    this.world  = worldMap;
+    this.rng    = rng;
+    this.active    = [];
     this.completed = [];
   }
 
   generateQuestBoard(playerLevel) {
     const quests = [];
-    for (let i = 0; i < 6; i++) {
+    const seen   = new Set();   // dedup key: type + '/' + target-or-depth
+    let attempts = 0;
+    while (quests.length < 6 && attempts < 40) {
+      attempts++;
       const quest = this._generateQuest(playerLevel);
-      if(quest) quests.push(quest);
+      if (!quest) continue;
+      const key = `${quest.type}/${quest.target ?? quest.targetDepth ?? ''}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      quests.push(quest);
     }
-    // For now, just assign to the guild board in town data
     this.world.townState.guild_board_quests = quests;
     return quests;
   }
 
   _generateQuest(playerLevel) {
     const type = this.rng.weightedPick([
-      { value: 'kill',    weight: 30 },
-      { value: 'fetch',   weight: 25 },
-      { value: 'explore', weight: 20 },
-      { value: 'clear',   weight: 15 },
+      { value: 'kill',    weight: 25 },
+      { value: 'bounty',  weight: 20 },
+      { value: 'fetch',   weight: 15 },
+      { value: 'explore', weight: 10 },
+      { value: 'clear',   weight: 10 },
       { value: 'rescue',  weight: 10 },
+      { value: 'tribute', weight: 10 },
     ]);
-    const depth    = this.rng.int(playerLevel, playerLevel + 3);
+    const depth    = this.rng.int(Math.max(1, playerLevel), playerLevel + 3);
     const template = QUEST_TEMPLATES[type];
-    if(template) {
-        return template.generate(depth, this.rng);
-    }
-    return null;
+    return template ? template.generate(depth, this.rng) : null;
   }
 
+  // Pass quest as 4th arg so completionConditions can reference self.field safely.
   checkCompletion(quest, player, worldState) {
-    if(!quest) return false;
-    return quest.completionCondition(quest.state, player, worldState);
+    if (!quest) return false;
+    return quest.completionCondition(quest.state, player, worldState, quest);
   }
 
   abandonQuest(quest) {
@@ -56,7 +62,7 @@ export class QuestSystem {
   }
 
   completeQuest(quest, player) {
-    if(!quest) return;
+    if (!quest) return;
     player.gainXP(quest.reward.xp || 0);
     player.gold += quest.reward.gold || 0;
     if (quest.reward.item) player.addToInventory(Item.create(quest.reward.item));
@@ -65,41 +71,50 @@ export class QuestSystem {
   }
 
   serialize() {
-    return {
-      active: this.active,
-      completed: this.completed,
-    };
+    return { active: this.active, completed: this.completed };
   }
 
   static deserialize(data, worldMap, rng) {
     const qs = new QuestSystem(worldMap, rng);
-    qs.active    = (data?.active ?? []).map(q => qs._hydrateQuest(q));
-    qs.completed = (data?.completed ?? []).map(q => qs._hydrateQuest(q));
+    qs.active    = (data?.active    ?? []).map(q => QuestSystem._hydrateQuest(q));
+    qs.completed = (data?.completed ?? []).map(q => QuestSystem._hydrateQuest(q));
     return qs;
   }
 
-  _hydrateQuest(questData) {
-    const template = QUEST_TEMPLATES[questData.type];
-    if (!template) return questData;
-
-    // We need a way to recreate the completionCondition.
-    // The easiest way is to re-run generate with the stored state,
-    // but generate currently creates new state.
-    // Alternatively, we can just attach the condition from a fresh template quest.
-
-    // Since our templates are now closure-based, we can't easily re-bind.
-    // Let's refactor QUEST_TEMPLATES slightly or just handle it here.
-
-    // Re-generating might change some random values if we're not careful.
-    // But for most quests, depth and count are what matter.
-
-    const dummyRng = { int: (a, b) => questData.count || a, pick: (arr) => questData.target || arr[0] };
-    const hydrated = template.generate(questData.targetDepth || 0, dummyRng);
-
-    return {
-      ...hydrated,
-      ...questData,
-      completionCondition: hydrated.completionCondition
-    };
+  // Re-attach the completionCondition closure from stored quest data.
+  // Uses top-level quest fields (self.count, self.required, etc.) so it doesn't
+  // depend on re-running generate() with a fragile dummy RNG.
+  static _hydrateQuest(q) {
+    switch (q.type) {
+      case 'kill':
+        q.completionCondition = (s, _p, _w, self) => s.killed >= self.count;
+        break;
+      case 'bounty':
+        q.completionCondition = (s, _p, _w, self) => s.killed >= self.count;
+        break;
+      case 'fetch':
+        q.completionCondition = (s) => s.recovered;
+        break;
+      case 'tribute':
+        q.completionCondition = (s, player, _w, self) =>
+          s.baseGold !== null && (player.gold - s.baseGold) >= self.required;
+        break;
+      case 'explore':
+        q.completionCondition = (_s, player, _w, self) => player.depth >= self.targetDepth;
+        break;
+      case 'clear':
+        q.completionCondition = (_s, _p, world, self) => {
+          const map = world.getLevel(self.targetDepth);
+          if (!map) return false;
+          return ![...map.entities.values()].flat().some(e => e.type === 'monster');
+        };
+        break;
+      case 'rescue':
+        q.completionCondition = (s) => s.returned;
+        break;
+      default:
+        q.completionCondition = () => false;
+    }
+    return q;
   }
 }

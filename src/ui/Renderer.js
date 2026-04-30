@@ -548,8 +548,9 @@ export class Renderer {
 }
 
 export function glyphToChar(code) {
+  if (typeof code === 'string') return code[0] ?? '?';
   if (code >= 0x20 && code <= 0x7E) return String.fromCharCode(code);
-  
+
   const cp437Map = {
     0x01: '☺', 0x02: '☻', 0x03: '♥', 0x04: '♦', 0x05: '♣', 0x06: '♠',
     0x07: '•', 0x0F: '☼',

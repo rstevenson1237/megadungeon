@@ -39,6 +39,7 @@ export class LevelGen {
     this._placeRunes(map, rooms, rng, levelNumber);
     FeaturePlacer.place(map, rooms, rng, theme);
     this._populateRooms(map, rooms, rng, levelNumber, theme);
+    this._ensureStairDownReachable(map, levelNumber);
     return map;
   }
 
@@ -84,33 +85,42 @@ export class LevelGen {
 
   static _placeRunes(map, rooms, rng, levelNumber) {
     if (levelNumber < 3 || levelNumber >= 98) return;
-    const chance = 0.25 + (levelNumber / 200);  // ~25% at lv3, ~74% at lv97
-    if (rng.next() > chance) return;
+
+    const count = rng.pick([0, 1, 2]);
+    if (count === 0) return;
 
     const eligible = rooms.filter(r => r.type !== 'entry' && r.type !== 'boss');
     if (!eligible.length) return;
 
-    const room = rng.pick(eligible);
-    const pos  = this._randomFloorInRoom(map, room, rng);
-    if (!pos) return;
+    const usedDests = new Set();
+    for (let i = 0; i < count; i++) {
+      const room = rng.pick(eligible);
+      const pos  = this._randomFloorInRoom(map, room, rng);
+      if (!pos) continue;
 
-    // Pick destination: 5–15 levels away; 70% deeper, 30% shallower
-    const sign   = rng.next() < 0.7 ? 1 : -1;
-    let destLevel = Math.max(1, Math.min(99, levelNumber + sign * rng.int(5, 15)));
-    // Avoid landing on a dungeon town level — bump by 1 in the same direction
-    if (isDungeonTownLevel(destLevel)) {
-      destLevel = Math.max(1, Math.min(99, destLevel + sign));
+      // Pick destination: 5–15 levels away; 70% deeper, 30% shallower
+      let destLevel, tries = 0;
+      do {
+        const sign = rng.next() < 0.7 ? 1 : -1;
+        destLevel = Math.max(1, Math.min(99, levelNumber + sign * rng.int(5, 15)));
+        if (isDungeonTownLevel(destLevel)) {
+          destLevel = Math.max(1, Math.min(99, destLevel + sign));
+        }
+        tries++;
+      } while ((isDungeonTownLevel(destLevel) || usedDests.has(destLevel)) && tries < 10);
+
+      if (isDungeonTownLevel(destLevel) || usedDests.has(destLevel)) continue;
+      usedDests.add(destLevel);
+
+      const tile = map.get(pos.x, pos.y);
+      tile.features.rune = { destLevel };
+      tile.glyph = 0xF0;
+      tile.fg    = '#8844cc';
+      tile.solid = false;
+
+      if (!map.metadata.runes) map.metadata.runes = [];
+      map.metadata.runes.push({ x: pos.x, y: pos.y, destLevel });
     }
-    if (isDungeonTownLevel(destLevel)) return;  // still on a town level; skip
-
-    const tile = map.get(pos.x, pos.y);
-    tile.features.rune = { destLevel };
-    tile.glyph = 0xF0;   // ≡
-    tile.fg    = '#8844cc';
-    tile.solid = false;
-
-    if (!map.metadata.runes) map.metadata.runes = [];
-    map.metadata.runes.push({ x: pos.x, y: pos.y, destLevel });
   }
 
   static _randomFloorInRoom(map, room, rng) {
@@ -160,5 +170,53 @@ export class LevelGen {
         }
       }
     }
+  }
+
+  // BFS from the entry stair; if stair_down is unreachable, relocate it to the
+  // farthest reachable floor tile from the entry so the player can always descend.
+  static _ensureStairDownReachable(map, levelNumber) {
+    if (levelNumber >= 100) return;
+    const entry     = map.metadata.entry;
+    const stairDown = map.metadata.stairDown;
+    if (!entry || !stairDown) return;
+
+    // BFS — 4-directional, only non-solid tiles
+    const visited = new Set();
+    const queue   = [entry];
+    visited.add(`${entry.x},${entry.y}`);
+    while (queue.length) {
+      const { x, y } = queue.shift();
+      for (const [dx, dy] of [[0,1],[0,-1],[1,0],[-1,0]]) {
+        const nx = x + dx, ny = y + dy;
+        const key = `${nx},${ny}`;
+        if (visited.has(key) || !map.inBounds(nx, ny)) continue;
+        if (map.get(nx, ny).solid) continue;
+        visited.add(key);
+        queue.push({ x: nx, y: ny });
+      }
+    }
+
+    if (visited.has(`${stairDown.x},${stairDown.y}`)) return; // already reachable
+
+    // Pick the reachable floor tile farthest (Manhattan) from the entry for the stair
+    let bestPos = null, bestDist = -1;
+    for (const key of visited) {
+      const [x, y] = key.split(',').map(Number);
+      const t = map.get(x, y);
+      if (t.type === 'stair_up') continue;
+      const dist = Math.abs(x - entry.x) + Math.abs(y - entry.y);
+      if (dist > bestDist) { bestDist = dist; bestPos = { x, y }; }
+    }
+    if (!bestPos) return;
+
+    // Restore old stair_down tile to plain floor
+    const old = map.get(stairDown.x, stairDown.y);
+    old.type  = 'floor';
+    old.glyph = map.metadata.theme?.floorGlyphs?.[0] ?? 0x2E;
+    old.fg    = map.metadata.theme?.floorFg ?? '#555555';
+    old.solid = false;
+
+    this._stampStair(map, bestPos.x, bestPos.y, 'down');
+    map.metadata.stairDown = bestPos;
   }
 }
