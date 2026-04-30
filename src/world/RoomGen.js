@@ -73,9 +73,11 @@ export class RoomGen {
         const floorTiles = [];
         for (let y = room.y; y < room.y + room.h; y++) {
             for (let x = room.x; x < room.x + room.w; x++) {
-                if (map.inBounds(x, y) && !map.get(x, y).solid) {
-                    floorTiles.push({ x, y });
-                }
+                if (!map.inBounds(x, y)) continue;
+                const t = map.get(x, y);
+                if (t.solid) continue;
+                if (t.type === 'stair_up' || t.type === 'stair_down') continue;
+                floorTiles.push({ x, y });
             }
         }
         return this.rng.pick(floorTiles);

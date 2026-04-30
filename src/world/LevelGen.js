@@ -39,6 +39,7 @@ export class LevelGen {
     this._placeRunes(map, rooms, rng, levelNumber);
     FeaturePlacer.place(map, rooms, rng, theme);
     this._populateRooms(map, rooms, rng, levelNumber, theme);
+    this._ensureStairDownReachable(map, levelNumber);
     return map;
   }
 
@@ -169,5 +170,53 @@ export class LevelGen {
         }
       }
     }
+  }
+
+  // BFS from the entry stair; if stair_down is unreachable, relocate it to the
+  // farthest reachable floor tile from the entry so the player can always descend.
+  static _ensureStairDownReachable(map, levelNumber) {
+    if (levelNumber >= 100) return;
+    const entry     = map.metadata.entry;
+    const stairDown = map.metadata.stairDown;
+    if (!entry || !stairDown) return;
+
+    // BFS — 4-directional, only non-solid tiles
+    const visited = new Set();
+    const queue   = [entry];
+    visited.add(`${entry.x},${entry.y}`);
+    while (queue.length) {
+      const { x, y } = queue.shift();
+      for (const [dx, dy] of [[0,1],[0,-1],[1,0],[-1,0]]) {
+        const nx = x + dx, ny = y + dy;
+        const key = `${nx},${ny}`;
+        if (visited.has(key) || !map.inBounds(nx, ny)) continue;
+        if (map.get(nx, ny).solid) continue;
+        visited.add(key);
+        queue.push({ x: nx, y: ny });
+      }
+    }
+
+    if (visited.has(`${stairDown.x},${stairDown.y}`)) return; // already reachable
+
+    // Pick the reachable floor tile farthest (Manhattan) from the entry for the stair
+    let bestPos = null, bestDist = -1;
+    for (const key of visited) {
+      const [x, y] = key.split(',').map(Number);
+      const t = map.get(x, y);
+      if (t.type === 'stair_up') continue;
+      const dist = Math.abs(x - entry.x) + Math.abs(y - entry.y);
+      if (dist > bestDist) { bestDist = dist; bestPos = { x, y }; }
+    }
+    if (!bestPos) return;
+
+    // Restore old stair_down tile to plain floor
+    const old = map.get(stairDown.x, stairDown.y);
+    old.type  = 'floor';
+    old.glyph = map.metadata.theme?.floorGlyphs?.[0] ?? 0x2E;
+    old.fg    = map.metadata.theme?.floorFg ?? '#555555';
+    old.solid = false;
+
+    this._stampStair(map, bestPos.x, bestPos.y, 'down');
+    map.metadata.stairDown = bestPos;
   }
 }
