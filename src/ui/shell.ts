@@ -21,7 +21,15 @@ import { ratingText } from '../game/monsters.ts';
 import { blinkCells, canBlinkTo, spellTargets, targetSpecOf } from '../game/magic.ts';
 import type { Spell } from '../core/schemas.ts';
 import { describeStatus } from '../rules/magic/status.ts';
+import { InventoryOverlay, type InventoryHost } from './inventory.ts';
 import { spellMenu } from './spells.ts';
+import { type ItemCtx, ctxOf, drinkPotion, equipItem, itemName, unequipSlot } from '../game/items.ts';
+import type { ActResult } from '../game/game.ts';
+import { carriedEstimate } from '../rules/items/treasure.ts';
+import { equipped, slotsUsed } from '../rules/items/inventory.ts';
+import { isIdentified, displayName } from '../rules/items/magic.ts';
+import { type Item } from '../rules/items/types.ts';
+import { resolvesAtOnce, needsCell } from '../rules/magic/spells.ts';
 
 export class Shell {
   readonly log = new MessageLog();
@@ -38,6 +46,8 @@ export class Shell {
   targeting: Targeting | null = null;
   /** The spell being aimed, while targeting or choosing a cell for it; null when the target is for the ranged weapon. */
   casting: Spell | null = null;
+  /** The wand, rod or staff being aimed, when the spell is cast from its charges. */
+  usingItem: Item | null = null;
   /** Set while the player is choosing the cell Blink goes to. */
   cursor: CellCursor | null = null;
 
@@ -57,6 +67,7 @@ export class Shell {
     this.targeting = null;
     this.cursor = null;
     this.casting = null;
+    this.usingItem = null;
     this.arrived();
   }
 
@@ -126,6 +137,9 @@ export class Shell {
       case 'cast':
         this.openSpells();
         return;
+      case 'inventory':
+        this.openInventory();
+        return;
       default: {
         const result = this.game?.act(command);
         if (result) {
@@ -159,6 +173,83 @@ export class Shell {
     }
     // Active effects with their rounds left, then a Shield (Spec 01, Status; Spec 04).
     this.character.status = [...player.statuses.map(describeStatus), ...(player.shield > 0 ? [`Shield ${player.shield}`] : [])];
+    // What is worn and wielded with its quality, the slots in use and the carried estimate (Spec 01, Spec 05).
+    const ctx = this.itemCtx();
+    if (ctx) {
+      this.character.equipment = equipped(player.equipment).map(({ item }) => ({
+        name: displayName(item, ctx.knowledge),
+        quality: item.kind === 'weapon' || item.kind === 'ranged' || item.kind === 'armour' || item.kind === 'shield'
+          ? item.broken ? 'Broken' : item.quality[0]!.toUpperCase() + item.quality.slice(1)
+          : isIdentified(item, player.known) ? '' : 'Unknown',
+      }));
+    }
+    this.character.inventory = { used: slotsUsed(player), total: player.packSlots };
+    this.character.carried = carriedEstimate(player.coins, player.pack);
+  }
+
+  /** What the item actions work from: the level's game, or in a village the run alone. */
+  private itemCtx(): ItemCtx | null {
+    return this.game ? ctxOf(this.game) : this.run ? this.run.ctx() : null;
+  }
+
+  /** I: the inventory, anywhere. Equipping and inspecting work in a village too; the rest need a level. */
+  private openInventory(): void {
+    const ctx = this.itemCtx();
+    if (!ctx) {
+      this.log.add({ kind: 'system', text: 'There is nothing to carry yet.' }, this.turn);
+      return;
+    }
+    this.overlays.push(new InventoryOverlay(ctx, this.inventoryHost()));
+  }
+
+  /** Log what an action said and bring the pane and round counter in line. */
+  private done(result: ActResult): void {
+    for (const m of result.messages) this.log.add(m, this.game ? this.game.state.round : this.turn);
+    if (this.game) this.afterAction();
+    else this.syncCharacter();
+  }
+
+  /** In a village an item action takes no round: it just says what happened. */
+  private free(run: (messages: LogMessage[]) => unknown): void {
+    const messages: LogMessage[] = [];
+    run(messages);
+    this.done({ messages, spent: false });
+  }
+
+  private inventoryHost(): InventoryHost {
+    return {
+      equip: (item) => {
+        const g = this.game;
+        if (g) this.done(g.equip(item));
+        else this.free((m) => equipItem(this.run!.ctx(), item, m));
+      },
+      unequip: (slot) => {
+        const g = this.game;
+        if (g) this.done(g.unequip(slot));
+        else this.free((m) => unequipSlot(this.run!.ctx(), slot, m));
+      },
+      drop: (item) => {
+        const g = this.game;
+        if (g) this.done(g.drop(item));
+        else this.free((m) => m.push({ kind: 'system', text: 'There is nowhere to drop that in a village.' }));
+      },
+      use: (item) => {
+        const g = this.game;
+        if (!g) {
+          if (item.kind === 'potion') this.free((m) => drinkPotion(this.run!.ctx(), item, m));
+          else this.free((m) => m.push({ kind: 'system', text: 'You cannot use that in a village.' }));
+          return;
+        }
+        // A wand, rod or staff whose spell needs a creature or a cell is aimed first.
+        const spell = item.kind === 'wand' || item.kind === 'rod' || item.kind === 'staff' ? g.spells.get(item.spell) : undefined;
+        if (spell && !resolvesAtOnce(spell)) {
+          this.overlays.length = 0;
+          this.beginAim(spell, item);
+          return;
+        }
+        this.done(g.use(item));
+      },
+    };
   }
 
   /** C: the spell list. Choosing a spell starts the cast. */
@@ -177,26 +268,37 @@ export class Shell {
     this.overlays.push(spellMenu(known, player.magic, (spell) => this.beginCast(spell)));
   }
 
-  /** A self spell, or one around the caster, resolves on choosing; the rest ask for a creature or a cell (Spec 01, Targeting). */
+  /** A spell chosen from the list. */
   private beginCast(spell: Spell): void {
+    this.beginAim(spell, null);
+  }
+
+  /**
+   * A self spell, or one around the caster, resolves on choosing; the rest ask for a creature or a cell (Spec 01,
+   * Targeting). `item` is the wand, rod or staff when the spell is cast from its charges.
+   */
+  private beginAim(spell: Spell, item: Item | null): void {
     const game = this.game!;
-    if (spell.effect === 'blink') {
+    const go = (aim?: Parameters<typeof game.cast>[1]) => (item ? game.use(item, aim) : game.cast(spell, aim));
+    if (needsCell(spell)) {
       const cells = blinkCells(game, spell);
       if (cells.length === 0) {
         this.log.add({ kind: 'system', text: 'There is nowhere to blink to.' }, this.turn);
         return;
       }
       this.casting = spell;
+      this.usingItem = item;
       this.cursor = new CellCursor(game, (at) => canBlinkTo(game, spell, at), cells);
       return;
     }
-    if (game.castsAtOnce(spell)) return this.finishCast(game.cast(spell));
+    if (resolvesAtOnce(spell)) return this.finishCast(go());
     const targets = spellTargets(game, spell);
     if (targets.length === 0) {
       this.log.add({ kind: 'system', text: 'There is no valid target.' }, this.turn);
       return;
     }
     this.casting = spell;
+    this.usingItem = item;
     this.targeting = new Targeting(game, targetSpecOf(spell), targets);
     this.showTarget();
   }
@@ -204,6 +306,14 @@ export class Shell {
   private finishCast(result: { messages: LogMessage[] }): void {
     for (const m of result.messages) this.log.add(m, this.game!.state.round);
     this.afterAction();
+  }
+
+  /** Forget what was being aimed. */
+  private stopAiming(): void {
+    this.targeting = null;
+    this.cursor = null;
+    this.casting = null;
+    this.usingItem = null;
   }
 
   // Keys while choosing Blink's cell: W A S D move the cursor, Enter confirms, Esc cancels with no turn spent.
@@ -219,14 +329,13 @@ export class Shell {
           return;
         }
         const spell = this.casting!;
-        this.cursor = null;
-        this.casting = null;
-        this.finishCast(this.game!.cast(spell, { ...cursor.at }));
+        const item = this.usingItem;
+        this.stopAiming();
+        this.finishCast(item ? this.game!.use(item, { ...cursor.at }) : this.game!.cast(spell, { ...cursor.at }));
         return;
       }
       case 'cancel':
-        this.cursor = null;
-        this.casting = null;
+        this.stopAiming();
         return;
       default:
         return;
@@ -235,12 +344,16 @@ export class Shell {
 
   private startTargeting(): void {
     const game = this.game!;
-    const weapon = game.state.player.ranged;
-    if (!weapon) {
+    const option = game.ranged();
+    if (!option) {
       this.log.add({ kind: 'system', text: 'You have no ranged weapon readied.' }, this.turn);
       return;
     }
-    const targeting = startTargeting(game, { range: weapon.range, shape: { kind: 'single' } });
+    if (option.problem) {
+      this.log.add({ kind: 'system', text: option.problem }, this.turn);
+      return;
+    }
+    const targeting = startTargeting(game, { range: option.range, shape: { kind: 'single' } });
     if (!targeting) {
       this.log.add({ kind: 'system', text: 'There is no valid target.' }, this.turn);
       return;
@@ -267,16 +380,15 @@ export class Shell {
       case 'confirm':
       {
         const spell = this.casting;
-        const result = spell ? this.game!.cast(spell, t.selected) : this.game!.fire(t.selected);
-        this.targeting = null;
-        this.casting = null;
+        const item = this.usingItem;
+        const result = item ? this.game!.use(item, t.selected) : spell ? this.game!.cast(spell, t.selected) : this.game!.fire(t.selected);
+        this.stopAiming();
         for (const m of result.messages) this.log.add(m, this.game!.state.round);
         this.afterAction();
         break;
       }
       case 'cancel':
-        this.targeting = null;
-        this.casting = null;
+        this.stopAiming();
         break;
       default:
         return;

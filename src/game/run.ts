@@ -7,11 +7,13 @@
 
 import type { LogMessage } from '../core/log.ts';
 import type { Spell } from '../core/schemas.ts';
+import { type ItemData, disguisesFor } from '../rules/items/magic.ts';
 import { generateLevel, PLAIN_STYLE, type LevelStyle } from '../rules/world/generate.ts';
 import { MAX_DEPTH, type Level, type SizeClass } from '../rules/world/level.ts';
 import type { LevelContents } from '../rules/world/placement/index.ts';
 import type { RunLayout } from '../rules/world/run-layout.ts';
 import { Game, type LevelDelta, type PlayerState } from './game.ts';
+import type { ItemCtx } from './items.ts';
 
 /** The surface village sits above level 1. */
 export const SURFACE = 0;
@@ -34,6 +36,8 @@ export interface RunOptions {
   villages?: number[];
   /** The spell table, so the spells the player knows can be cast (Spec 04). */
   spells?: readonly Spell[];
+  /** The item tables, so loot can be made into items (Spec 05). */
+  items?: ItemData;
   /** Where the run starts: the surface village by default. */
   startDepth?: number;
   /** Supplies the level for a depth. Tests pass hand-built levels; the default generates from the seed. */
@@ -51,6 +55,9 @@ export class Run {
   round = 1;
   private readonly levelFor: (depth: number) => Level;
   private readonly spells: readonly Spell[];
+  private readonly items: ItemData | undefined;
+  /** This run's look for each unidentified magic item (Spec 05). Derived from the tables and the seed. */
+  readonly disguises: ReadonlyMap<string, string>;
 
   constructor(
     readonly runSeed: number,
@@ -59,12 +66,19 @@ export class Run {
   ) {
     this.layout = options.layout;
     this.spells = options.spells ?? [];
+    this.items = options.items;
+    this.disguises = options.items ? disguisesFor(runSeed, options.items.magic.values(), options.items.disguiseNames) : new Map();
     this.villages = options.villages ?? [SURFACE, ...(options.layout?.villages.map((v) => v.level) ?? [])];
     const sizeFor = options.sizeFor ?? stubSize;
     const styleFor = options.styleFor ?? (() => PLAIN_STYLE);
     this.levelFor = options.levelFor ?? ((d) => generateLevel(runSeed, d, sizeFor(d), styleFor(d), options.contentsFor?.(d)));
     this.depth = options.startDepth ?? SURFACE;
     this.arrive(this.depth, 'down');
+  }
+
+  /** What the item actions need, from the run alone: usable in a village, where there is no level. */
+  ctx(): ItemCtx {
+    return { player: this.player, knowledge: { known: this.player.known, disguises: this.disguises }, spells: new Map(this.spells.map((sp) => [sp.id, sp])) };
   }
 
   get inVillage(): boolean {
@@ -112,6 +126,7 @@ export class Run {
       delta: this.deltas[depth],
       round: this.round,
       spells: this.spells,
+      ...(this.items ? { items: this.items } : {}),
     });
   }
 }

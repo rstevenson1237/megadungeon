@@ -4,7 +4,7 @@
 import { createRng, hash32 } from '../../core/rng.ts';
 import type { ContentBundle, Spell } from '../../core/schemas.ts';
 import type { Rng } from '../../core/rng.ts';
-import { rollPool, type Pool, type RollResult } from '../character/dice.ts';
+import { rollPool, type Pool, type RollMode, type RollResult } from '../character/dice.ts';
 import type { Character, ClassDef } from '../character/character.ts';
 
 export type { Spell };
@@ -27,11 +27,11 @@ export const needsCell = (spell: Spell): boolean => spell.effect === 'blink';
 /**
  * The spell roll (Spec 03): one Magic die. 4 or more works; 2 to 3 works and the die is lost; 1 fails and the
  * die is lost. An empty pool rolls with disadvantage and loses nothing. `lossFree` is the Mage's Arcane Bolt:
- * a 2 to 3 costs no die.
+ * a 2 to 3 costs no die. `mode` is plate armour's disadvantage or a staff's advantage (Spec 05).
  */
-export function castRoll(rng: Rng, magic: Pool, lossFree = false): RollResult {
+export function castRoll(rng: Rng, magic: Pool, lossFree = false, mode: RollMode = 'normal'): RollResult {
   const before = magic.dice;
-  const result = rollPool(rng, magic, 'spell');
+  const result = rollPool(rng, magic, 'spell', mode);
   if (lossFree && result.success && result.dieLost) {
     magic.dice = before;
     result.dieLost = false;

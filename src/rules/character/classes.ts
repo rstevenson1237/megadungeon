@@ -18,6 +18,7 @@ export function classesFrom(bundle: ContentBundle): ClassDef[] {
       start: { combat: c.start.combat as Step, skill: c.start.skill as Step, magic: c.start.magic as Step },
       steps: { 4: c.steps[0], 7: c.steps[1], 9: c.steps[2] },
       minorAbilities: pool,
+      ...(c.gear ? { gear: c.gear.map((g) => ({ id: g.id, ...(g.count ? { count: g.count } : {}) })) } : {}),
       ...(c.spells ? { spells: { count: c.spells.count, ...(c.spells.always ? { always: c.spells.always } : {}) } } : {}),
     };
   });

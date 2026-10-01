@@ -5,6 +5,7 @@
 import type { LogMessage } from '../core/log.ts';
 import { LOSE_TRACK_ROUNDS, NOTICE_RANGE, noticeRoll } from '../rules/combat/awareness.ts';
 import { creatureMelee, failsMorale, monsterRanged } from '../rules/combat/attacks.ts';
+import { derive } from '../rules/items/gear.ts';
 import { cannotAct, effectiveSpeed, hasStatus } from '../rules/magic/status.ts';
 import { distanceSq, lineCells } from '../rules/world/geometry.ts';
 import { distancesFrom } from '../rules/world/grid.ts';
@@ -176,7 +177,7 @@ function checkRound(round: Round, m: Monster): void {
   if (m.awareness !== 'alert') {
     if (m.role === 'boss' && inSameRoom(game, m)) alert(game, m);
     else if (m.kind === 'bandit' && visible) alert(game, m);
-    else if (visible && distanceSq(m, map.player) <= NOTICE_RANGE * NOTICE_RANGE && noticeRoll(game.rng, m.awareness, player.stealth)) alert(game, m);
+    else if (visible && distanceSq(m, map.player) <= NOTICE_RANGE * NOTICE_RANGE && player.invisible <= 0 && noticeRoll(game.rng, m.awareness, derive(player.equipment, player.stealth).notice)) alert(game, m);
     return;
   }
   if (m.fleeing) return trackFleeing(m, visible);
@@ -428,6 +429,10 @@ export function creaturesAct(game: Game, messages: LogMessage[]): void {
     for (let n = actionsInRound(effectiveSpeed(m.speed, m.statuses), number); n > 0; n--) {
       if (player.dead || !monsters.includes(m)) break;
       if (cannotAct(m.statuses)) break; // Asleep or Held (Spec 04, Status effects)
+      if (m.stunned) {
+        m.stunned = false; // a mace's stun costs its next action (Spec 05)
+        continue;
+      }
       if (m.kind === 'rival' && !m.hostile) rivalTurn(round, m);
       else if (m.awareness === 'asleep') break;
       else if (m.awareness === 'unaware') wander(game, m);

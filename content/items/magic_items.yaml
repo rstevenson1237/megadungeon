@@ -1,30 +1,198 @@
-# Stub entries for task 2.4 (Spec 05, "Magic items"). Their effects arrive with task 2.9; the launch table of
-# 130 is written in Phase 3 (task 3.5).
-- id: magic_stub_potion_healing
+# Stub entries (Spec 08, "Stub content in Phases 1 and 2"): a few magic items of each kind of Spec 05, enough that
+# every system can be built and tested, with the effect fields the code reads. Values are in gp and placeholders,
+# except the three potion prices the spec sets (Healing 50, Clarity 60, Cure 40). The launch table of 130 is
+# written in Phase 3 (task 3.5).
+- id: potion_healing
   name: Potion of Healing
   kind: potion
-- id: magic_stub_ring_search
+  value: 50
+  effect: restore_dice
+  pool: combat
+  dice: 1
+  tags: [stub]
+- id: potion_vigour
+  name: Potion of Vigour
+  kind: potion
+  value: 120
+  effect: restore_dice
+  pool: combat
+  dice: 2
+  depth: [5, 100]
+  tags: [stub]
+- id: potion_focus
+  name: Potion of Focus
+  kind: potion
+  value: 60
+  effect: restore_dice
+  pool: skill
+  dice: 1
+  tags: [stub]
+- id: potion_clarity
+  name: Potion of Clarity
+  kind: potion
+  value: 60
+  effect: restore_dice
+  pool: magic
+  dice: 1
+  tags: [stub]
+- id: potion_haste
+  name: Potion of Haste
+  kind: potion
+  value: 80
+  effect: grant_status
+  status: hasted
+  rounds: 5
+  depth: [3, 100]
+  tags: [stub]
+- id: potion_cure
+  name: Potion of Cure
+  kind: potion
+  value: 40
+  effect: cure_poison
+  tags: [stub]
+- id: potion_invisibility
+  name: Potion of Invisibility
+  kind: potion
+  value: 100
+  effect: invisibility
+  rounds: 10
+  depth: [5, 100]
+  tags: [stub]
+- id: potion_remove_curse
+  name: Potion of Remove Curse
+  kind: potion
+  value: 150
+  effect: remove_curse
+  tags: [stub]
+- id: ring_searching
   name: Ring of Searching
   kind: ring
-- id: magic_stub_wand_bolt
+  value: 200
+  passive: search
+  tags: [stub]
+- id: ring_stealth
+  name: Ring of Stealth
+  kind: ring
+  value: 250
+  passive: stealth
+  tags: [stub]
+- id: ring_might
+  name: Ring of Might
+  kind: ring
+  value: 300
+  passive: melee
+  amount: 1
+  tags: [stub]
+- id: ring_rest
+  name: Ring of Rest
+  kind: ring
+  value: 200
+  passive: wait
+  amount: 7
+  tags: [stub]
+- id: wand_arcane_bolt
   name: Wand of Arcane Bolt
   kind: wand
-- id: magic_stub_rod_fire
+  value: 250
+  spell: arcane_bolt
+  charges: [3, 8]
+  tags: [stub]
+- id: wand_sleep
+  name: Wand of Sleep
+  kind: wand
+  value: 250
+  spell: sleep
+  charges: [3, 8]
+  tags: [stub]
+- id: rod_fireball
   name: Rod of Fireball
   kind: rod
+  value: 400
+  spell: fireball
+  charges: [2, 5]
   depth: [10, 100]
-- id: magic_stub_staff_magus
+  tags: [stub]
+- id: rod_thunderclap
+  name: Rod of Thunderclap
+  kind: rod
+  value: 350
+  spell: thunderclap
+  charges: [2, 5]
+  depth: [10, 100]
+  tags: [stub]
+- id: staff_magus
   name: Staff of the Magus
   kind: staff
+  value: 600
+  spell: arcane_bolt
+  charges: [3, 6]
+  shape: target
   depth: [20, 100]
-- id: magic_stub_cloak_shadows
+  tags: [stub]
+- id: staff_warding
+  name: Staff of Warding
+  kind: staff
+  value: 600
+  spell: shield
+  charges: [3, 6]
+  shape: self
+  depth: [20, 100]
+  tags: [stub]
+- id: cloak_shadows
   name: Cloak of Shadows
   kind: clothing
-- id: magic_stub_blade_flame
+  value: 300
+  slot: cloak
+  passive: stealth
+  tags: [stub]
+- id: boots_speed
+  name: Boots of Speed
+  kind: clothing
+  value: 400
+  slot: boots
+  effect: grant_status
+  status: hasted
+  rounds: 3
+  oncePerLevel: true
+  tags: [stub]
+- id: gloves_finesse
+  name: Gloves of Finesse
+  kind: clothing
+  value: 250
+  slot: gloves
+  passive: lockpick
+  tags: [stub]
+- id: sword_keen
+  name: Keen Sword
+  kind: weapon
+  value: 350
+  base: short_sword
+  bonus: 1
+  depth: [5, 100]
+  tags: [stub]
+- id: blade_flame
   name: Flame Blade
   kind: weapon
+  value: 500
+  base: long_sword
+  trait: flame
   depth: [15, 100]
-- id: magic_stub_chain_elven
+  tags: [stub]
+- id: chain_elven
   name: Elven Chain
   kind: armour
+  value: 800
+  base: chain
+  bonus: 1
+  unburdened: true
   depth: [25, 100]
+  tags: [stub]
+- id: shield_guardian
+  name: Guardian Shield
+  kind: armour
+  value: 400
+  base: round_shield
+  bonus: 1
+  off: true
+  depth: [10, 100]
+  tags: [stub]

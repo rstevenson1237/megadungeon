@@ -2,6 +2,7 @@
 // object. The rules layer returns it; only the UI layer draws it.
 
 import type { ContainerKind, FixtureKind, LayoutAlgorithm, NpcKind } from '../../core/catalog.ts';
+import type { Item } from '../items/types.ts';
 
 export type SizeClass = 'small' | 'medium' | 'large';
 
@@ -65,7 +66,11 @@ export type Loot =
   | { kind: 'key' }
   | { kind: 'vault_key'; link: string }
   | { kind: 'map_fragment'; link: string; mappedLevel: number }
-  | { kind: 'quest_item'; quest: string; id: string; name: string };
+  | { kind: 'quest_item'; quest: string; id: string; name: string }
+  /** A boss's artifact, dropped where it dies (Spec 05, task 2.9). */
+  | { kind: 'artifact'; id: string; name: string }
+  /** A made item: what a bandit stole, what a rival looted, what the player dropped or threw. */
+  | { kind: 'item'; item: Item };
 
 /** Containers, fixtures and debris (Spec 02, step 6). */
 export type Feature =

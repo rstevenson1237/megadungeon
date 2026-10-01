@@ -1,7 +1,7 @@
 // Content checks that run after every table has passed its schema (Spec 08, "Validation and
 // coverage"): references, roll cycles, theme ids, template text and single-line widths.
 
-import { BEHAVIOURS, EFFECTS } from '../src/core/catalog.ts';
+import { BEHAVIOURS, DISGUISED_KINDS, EFFECTS } from '../src/core/catalog.ts';
 import type { ContentBundle } from '../src/core/schemas.ts';
 import { templateErrors } from '../src/core/templates.ts';
 
@@ -17,8 +17,8 @@ export const REGISTRIES: Record<string, readonly string[]> = {
 export interface RefRule {
   /** Dotted path into the entry, e.g. `loot.roll`. */
   field: string;
-  /** `table`: the value names another table in the bundle. Otherwise a code registry name. */
-  target: 'table' | { registry: keyof typeof REGISTRIES };
+  /** `table`: the value names another table in the bundle. `ids`: the value is an id in the named table. Otherwise a code registry name. */
+  target: 'table' | { ids: string } | { registry: keyof typeof REGISTRIES };
 }
 
 /** Each table's reference fields. A task that adds a table with `effect:` or `roll:` adds its rule here. */
@@ -29,6 +29,11 @@ export const REFERENCE_RULES: Record<string, readonly RefRule[]> = {
   ],
   bosses: [{ field: 'behaviour', target: { registry: 'behaviours' } }],
   spells: [{ field: 'effect', target: { registry: 'effects' } }],
+  magic_items: [
+    { field: 'effect', target: { registry: 'effects' } },
+    { field: 'spell', target: { ids: 'spells' } },
+    { field: 'base', target: { ids: 'equipment_bases' } },
+  ],
 };
 
 /** The table that defines theme ids; `themes:` keys are checked against it once it exists. */
@@ -69,6 +74,8 @@ export const SINGLE_LINE_FIELDS: Record<string, readonly string[]> = {
   classes: ['name'],
   minor_abilities: ['name'],
   spells: ['name'],
+  equipment_bases: ['name'],
+  disguise_names: ['name'],
 };
 
 function getPath(entry: Entry, path: string): unknown {
@@ -101,6 +108,9 @@ export function checkReferences(bundle: ContentBundle): string[] {
             if (!edges.has(table)) edges.set(table, new Set());
             edges.get(table)!.add(name);
           }
+        } else if ('ids' in rule.target) {
+          const known = new Set(entriesOf(bundle, rule.target.ids).map((e) => String(e.id)));
+          if (!known.has(String(value))) errors.push(`${where} "${String(value)}" is not an id in ${rule.target.ids}`);
         } else {
           const registry = REGISTRIES[rule.target.registry]!;
           if (!registry.includes(String(value))) {
@@ -116,6 +126,7 @@ export function checkReferences(bundle: ContentBundle): string[] {
   errors.push(...checkThemeVariants(bundle));
   errors.push(...checkMinorAbilityClasses(bundle));
   errors.push(...checkClassSpells(bundle));
+  errors.push(...checkItems(bundle));
   return errors;
 }
 
@@ -143,6 +154,38 @@ function checkClassSpells(bundle: ContentBundle): string[] {
       errors.push(`classes "${String(entry.id)}": spells.always "${spells.always}" is not a spell`);
     }
     if (spells && spells.count > known.size) errors.push(`classes "${String(entry.id)}": starts with ${spells.count} spells but only ${known.size} exist`);
+  }
+  return errors;
+}
+
+/**
+ * Items hold together (Spec 05): a magic weapon sits on a melee base, magic armour on an armour base (or a
+ * shield for `off`), starting gear names real things, and every disguised kind has a name for each item.
+ */
+function checkItems(bundle: ContentBundle): string[] {
+  const errors: string[] = [];
+  const bases = new Map(entriesOf(bundle, 'equipment_bases').map((e) => [String(e.id), String(e.type)]));
+  const magic = entriesOf(bundle, 'magic_items');
+  for (const item of magic) {
+    const where = `magic_items "${String(item.id)}"`;
+    const base = item.base === undefined ? undefined : bases.get(String(item.base));
+    if (base === undefined) continue;
+    if (item.kind === 'weapon' && base !== 'melee') errors.push(`${where}: a magic weapon needs a melee base, not ${base}`);
+    if (item.kind === 'armour' && base !== (item.off ? 'shield' : 'armour')) errors.push(`${where}: magic armour needs ${item.off ? 'a shield' : 'an armour'} base, not ${base}`);
+    if (item.kind !== 'armour' && item.off) errors.push(`${where}: only magic armour can be \`off\``);
+  }
+  const known = new Set([...bases.keys(), ...magic.map((m) => String(m.id))]);
+  for (const cls of entriesOf(bundle, 'classes')) {
+    for (const g of (cls.gear ?? []) as { id: string }[]) {
+      if (!known.has(g.id)) errors.push(`classes "${String(cls.id)}": gear "${g.id}" is not an equipment base or magic item`);
+    }
+  }
+  if (bundle.tables.disguise_names) {
+    for (const kind of DISGUISED_KINDS) {
+      const items = magic.filter((m) => m.kind === kind).length;
+      const names = entriesOf(bundle, 'disguise_names').filter((d) => d.kind === kind).length;
+      if (names < items) errors.push(`disguise_names: ${names} ${kind} names for ${items} ${kind} magic items; each item needs its own`);
+    }
   }
   return errors;
 }

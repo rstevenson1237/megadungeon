@@ -30,6 +30,8 @@ describe('content build', () => {
       'books',
       'bosses',
       'classes',
+      'disguise_names',
+      'equipment_bases',
       'gems_jewelry',
       'graffiti',
       'level_themes',

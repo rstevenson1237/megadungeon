@@ -2,7 +2,7 @@
 // Pure rules: whether a roll or an event changes a creature's state. The game applies the result.
 
 import type { Rng } from '../../core/rng.ts';
-import { rollFace } from '../character/dice.ts';
+import { rollFace, type RollMode } from '../character/dice.ts';
 
 export type Awareness = 'asleep' | 'unaware' | 'alert';
 
@@ -15,9 +15,13 @@ export const COMBAT_RADIUS: Record<'asleep' | 'unaware', number> = { asleep: 3, 
 /** An alert creature loses track after this many rounds with the player out of sight. */
 export const LOSE_TRACK_ROUNDS = 20;
 
-/** The once-a-round notice roll. A stealth buff gives the creature disadvantage on it. */
-export function noticeRoll(rng: Rng, state: 'asleep' | 'unaware', stealth = false): boolean {
-  return rollFace(rng, 6, stealth ? 'disadvantage' : 'normal') >= NOTICE_TARGET[state];
+/**
+ * The once-a-round notice roll. A stealth buff gives the creature disadvantage on it (`true` is shorthand for
+ * that); plate armour gives it advantage (Spec 05).
+ */
+export function noticeRoll(rng: Rng, state: 'asleep' | 'unaware', mode: RollMode | boolean = 'normal'): boolean {
+  const m: RollMode = mode === true ? 'disadvantage' : mode === false ? 'normal' : mode;
+  return rollFace(rng, 6, m) >= NOTICE_TARGET[state];
 }
 
 /** Whether combat `distSq` (squared cells) away alerts a creature in this state. */

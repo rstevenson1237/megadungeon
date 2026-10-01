@@ -5,6 +5,7 @@
 import { formatSeed } from '../core/rng.ts';
 import { createPlayer } from '../game/game.ts';
 import type { Step } from '../rules/character/dice.ts';
+import type { Kit } from '../rules/items/kit.ts';
 import { Run, type RunOptions } from '../game/run.ts';
 import type { CharacterPaneData } from './character-pane.ts';
 import type { Grid } from './grid.ts';
@@ -20,6 +21,8 @@ export interface AppDeps extends TitleDeps {
   /** The spells a new character knows, and the major abilities with a rule in code (test data until creation exists). */
   startingSpells?: (seed: number) => string[];
   abilities?: readonly string[];
+  /** What the new character carries and wields (test data until creation exists). */
+  kit?: () => Kit;
 }
 
 export class App {
@@ -40,6 +43,7 @@ export class App {
   startRun(choice: RunChoice): void {
     const character = this.deps.newCharacter();
     const combat = character.stats.find((s) => s.name === 'Combat')!;
+    const kit = this.deps.kit?.();
     const pool = (name: 'Skill' | 'Magic') => {
       const stat = character.stats.find((s) => s.name === name);
       return stat ? { step: stat.step as Step, dice: stat.current, max: stat.max } : undefined;
@@ -52,7 +56,7 @@ export class App {
       ...(pool('Magic') ? { magic: pool('Magic')! } : {}),
       spells: this.deps.startingSpells?.(choice.seed) ?? [],
       abilities: [...(this.deps.abilities ?? [])],
-      ranged: { name: 'Sling', range: 6, ammo: 20 }, // the test character's sling (Spec 05: 6 cells, 20 sling stones)
+      ...(kit ? { pack: kit.pack, equipment: kit.equipment } : {}),
     });
     const shell = new Shell('', character);
     shell.onQuit = () => this.openTitle();

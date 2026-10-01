@@ -97,6 +97,48 @@ export type TrapKind = (typeof TRAP_KINDS)[number];
 
 /** Kinds of magic item (Spec 05, "Magic items"). */
 export const MAGIC_ITEM_KINDS = ['potion', 'ring', 'wand', 'rod', 'staff', 'clothing', 'weapon', 'armour'] as const;
+export type MagicItemKind = (typeof MAGIC_ITEM_KINDS)[number];
+
+/** The kinds that wear a disguise until identified (Spec 05): potion looks, ring metals, wand, rod and staff woods. */
+export const DISGUISED_KINDS = ['potion', 'ring', 'wand', 'rod', 'staff'] as const;
+
+/** What an equipment base is (Spec 05): the 16 weapon, armour and shield bases, plus ammunition. */
+export const BASE_TYPES = ['melee', 'ranged', 'armour', 'shield', 'ammo'] as const;
+export type BaseType = (typeof BASE_TYPES)[number];
+
+/** Ammunition types, tracked per type (Spec 04, Spec 05). */
+export const AMMO_TYPES = ['stone', 'arrow', 'bolt'] as const;
+export type AmmoType = (typeof AMMO_TYPES)[number];
+
+/** Gear traits defined in code (Spec 05); a table row names the ones it has. `flame` is a magic weapon's. */
+export const GEAR_TRAITS = [
+  'light',
+  'throwable',
+  'stun',
+  'defence',
+  'reach',
+  'reload',
+  'heavy',
+  'no_stealth_buff',
+  'notice_advantage',
+  'spell_penalty',
+  'ranged_penalty',
+  'flame',
+] as const;
+export type GearTrait = (typeof GEAR_TRAITS)[number];
+
+/** Passive effects of rings, clothing and artifacts that are always on (Spec 05, "Magic items"). */
+export const PASSIVES = ['search', 'stealth', 'melee', 'wait', 'lockpick'] as const;
+export type Passive = (typeof PASSIVES)[number];
+
+/** Where clothing and artifacts are worn (Spec 05, "Equipment slots"). */
+export const WORN_SLOTS = ['cloak', 'boots', 'gloves', 'hat', 'ring'] as const;
+export type WornSlot = (typeof WORN_SLOTS)[number];
+
+/** Effects of potions and worn powers, defined in code (Spec 05). Spell effects are in `SPELL_EFFECTS`. */
+export const ITEM_EFFECTS = ['restore_dice', 'grant_status', 'cure_poison', 'invisibility', 'remove_curse'] as const;
+export type ItemEffect = (typeof ITEM_EFFECTS)[number];
+
 export const GEM_KINDS = ['gem', 'jewelry'] as const;
 export const NPC_KINDS = ['rival', 'trader', 'bandit', 'hermit', 'captive'] as const;
 export type NpcKind = (typeof NPC_KINDS)[number];
@@ -134,8 +176,8 @@ export const SPELL_EFFECTS = [
 ] as const;
 export type SpellEffect = (typeof SPELL_EFFECTS)[number];
 
-/** Effects defined in code. Tables name these (`effect: restore_die`). */
-export const EFFECTS: readonly string[] = [...SPELL_EFFECTS];
+/** Effects defined in code. Tables name these (`effect: restore_dice`). */
+export const EFFECTS: readonly string[] = [...SPELL_EFFECTS, ...ITEM_EFFECTS];
 
 /** Launch floors for tables that are checked by group (Spec 08, "Validation and coverage"). */
 export const MONSTERS_PER_RATING = 5;

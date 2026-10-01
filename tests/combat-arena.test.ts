@@ -5,7 +5,7 @@ import { Run } from '../src/game/run.ts';
 import { distanceSq } from '../src/rules/world/geometry.ts';
 import { generateLevel } from '../src/rules/world/generate.ts';
 import type { Level, PlacedMonster } from '../src/rules/world/level.ts';
-import { gameOn, levelFrom, monsterAt, press, room, shellOn, testPlayer } from './helpers.ts';
+import { gameOn, levelFrom, monsterAt, press, room, shellOn, slingKit, stonesLeft, testPlayer } from './helpers.ts';
 
 const wait = (game: Game, n = 1): void => {
   for (let i = 0; i < n; i++) game.act({ type: 'wait' });
@@ -531,26 +531,26 @@ describe('Spec 04: rivals', () => {
 
 describe('Spec 04: ranged weapons spend ammunition', () => {
   it('each shot, hit or miss, spends one; with none left the weapon cannot fire and no round passes', () => {
-    const game = gameOn(room(12, 3, 1, 2), { ranged: { name: 'Sling', range: 6, ammo: 3 }, ...sturdy });
+    const game = gameOn(room(12, 3, 1, 2), { ...slingKit(3), ...sturdy });
     const m = monsterAt(7, 2, { ...harmless, awareness: 'unaware' });
     game.state.monsters.push(m);
     for (let left = 2; left >= 0; left--) {
       expect(game.fire(m).spent).toBe(true);
-      expect(game.state.player.ranged!.ammo).toBe(left);
+      expect(stonesLeft(game)).toBe(left);
     }
     const round = game.state.round;
     const dry = game.fire(m);
     expect(dry.spent).toBe(false);
     expect(dry.messages[0]!.text).toContain('out of ammunition');
     expect(game.state.round).toBe(round);
-    expect(game.state.player.ranged!.ammo).toBe(0);
+    expect(stonesLeft(game)).toBe(0);
   });
 
   it('a shot costs a Skill die on a 2 to 3 or a 1, a hit removes one die, and a shot alerts its target', () => {
     let hits = 0;
     let lost = 0;
     for (let seed = 0; seed < 1500; seed++) {
-      const game = new Game(seed, room(12, 3, 1, 2), testPlayer({ ...sturdy, skill: { step: 6, dice: 3, max: 3 }, ranged: { name: 'Sling', range: 6, ammo: 5 } }));
+      const game = new Game(seed, room(12, 3, 1, 2), testPlayer({ ...sturdy, skill: { step: 6, dice: 3, max: 3 }, ...slingKit(5) }));
       const m = monsterAt(7, 2, { ...harmless, awareness: 'asleep' });
       game.state.monsters.push(m);
       game.fire(m);
@@ -564,7 +564,7 @@ describe('Spec 04: ranged weapons spend ammunition', () => {
   });
 
   it('there is no shot without a weapon', () => {
-    const game = gameOn(room(8, 3, 1, 2), { ranged: null });
+    const game = gameOn(room(8, 3, 1, 2), { equipment: {}, pack: [] });
     const m = monsterAt(5, 2);
     game.state.monsters.push(m);
     expect(game.fire(m)).toMatchObject({ spent: false });
@@ -575,7 +575,7 @@ describe('Spec 04: ranged weapons spend ammunition', () => {
     const missRate = (x: number) => {
       let miss = 0;
       for (let seed = 0; seed < 600; seed++) {
-        const game = new Game(seed, room(12, 3, 1, 2), testPlayer({ ...sturdy, skill: { step: 6, dice: 3, max: 3 }, ranged: { name: 'Sling', range: 6, ammo: 5 } }));
+        const game = new Game(seed, room(12, 3, 1, 2), testPlayer({ ...sturdy, skill: { step: 6, dice: 3, max: 3 }, ...slingKit(5) }));
         const m = monsterAt(x, 2, { ...harmless, awareness: 'alert', behaviour: 'brute', speed: 'slow' }); // a slow creature does not act in round 1
         game.state.monsters.push(m);
         game.fire(m);

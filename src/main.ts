@@ -3,6 +3,9 @@ import type { CharacterPaneData } from './ui/character-pane.ts';
 import bundle from './generated/content-bundle.json';
 import type { ContentBundle } from './core/schemas.ts';
 import { runOptionsFor } from './game/world.ts';
+import { classById } from './rules/character/classes.ts';
+import { itemDataFrom } from './rules/items/magic.ts';
+import { startingKit } from './rules/items/kit.ts';
 import { spellsFrom } from './rules/magic/spells.ts';
 import { App } from './ui/app.ts';
 import { Grid } from './ui/grid.ts';
@@ -43,6 +46,8 @@ if (root) {
     runOptions: (seed) => runOptionsFor(bundle as ContentBundle, seed),
     // Test data until character creation exists: the test character knows every spell, so each can be tried.
     startingSpells: () => spellsFrom(bundle as ContentBundle).map((s) => s.id),
+    // The Thief's starting gear from the class table (Spec 05).
+    kit: () => startingKit(classById(bundle as ContentBundle, 'thief').gear ?? [], itemDataFrom(bundle as ContentBundle)),
   });
   const grid = new Grid();
   void mountScreen(root, 'Px437 IBM VGA 9x16').then((renderer) => {

@@ -3,11 +3,14 @@
 
 import type { LogMessage } from '../core/log.ts';
 import { alertedByCombat } from '../rules/combat/awareness.ts';
+import { derive } from '../rules/items/gear.ts';
+import { theftTake } from '../rules/items/treasure.ts';
 import { hasStatus, removeStatus } from '../rules/magic/status.ts';
-import { THEFTS_BEFORE_FLEEING, monsterMelee, playerMelee, playerRanged, theftAmount } from '../rules/combat/attacks.ts';
+import { THEFTS_BEFORE_FLEEING, monsterMelee, playerMelee } from '../rules/combat/attacks.ts';
 import { distanceSq } from '../rules/world/geometry.ts';
 import type { Loot } from '../rules/world/level.ts';
 import type { Game } from './game.ts';
+import { wearerHit, weaponHit } from './items.ts';
 import type { Monster } from './monsters.ts';
 
 /** How a creature is named in the log: "the goblin", but "Corvin the Bold" for a named one. */
@@ -115,6 +118,7 @@ export function hurtPlayer(game: Game, messages: LogMessage[], say: DieText): bo
   }
   player.combatDice--;
   messages.push({ kind: 'combat', text: say.hit });
+  wearerHit(game, messages); // armour and shield roll to break when the wearer is hit (Spec 05)
   return true;
 }
 
@@ -122,15 +126,27 @@ export function hurtPlayer(game: Game, messages: LogMessage[], say: DieText): bo
 export const hitPlayer = (game: Game, m: Monster, messages: LogMessage[], verb = 'hits'): boolean =>
   hurtPlayer(game, messages, { hit: `${Name(m)} ${verb} you.`, kill: `${Name(m)} kills you.` });
 
-/** A bandit's hit also steals 10% of the carried gold; the second theft sends it running (Spec 04, task 2.7). */
+/**
+ * A bandit's hit also steals 10% of the carried treasure, coins first and then the cheapest pieces (Spec 04, Spec 05);
+ * the second theft sends it running. A theft that finds no treasure takes nothing and does not count.
+ */
 function steal(game: Game, bandit: Monster, messages: LogMessage[]): void {
   const { player } = game.state;
-  const amount = theftAmount(player.coins);
-  if (amount === 0) return;
-  player.coins -= amount;
-  addLoot(bandit.carried, [{ kind: 'coins', amount }]);
+  const take = theftTake(player.coins, player.pack);
+  if (take.coins === 0 && take.pieces.length === 0) return;
+  const loot: Loot[] = [];
+  if (take.coins > 0) {
+    player.coins -= take.coins;
+    loot.push({ kind: 'coins', amount: take.coins });
+    messages.push({ kind: 'loot', text: `${Name(bandit)} steals ${take.coins} gp.` });
+  }
+  for (const piece of take.pieces) {
+    player.pack.splice(player.pack.indexOf(piece), 1);
+    loot.push({ kind: 'item', item: piece });
+    messages.push({ kind: 'loot', text: `${Name(bandit)} steals your ${piece.name}.` });
+  }
+  addLoot(bandit.carried, loot);
   bandit.thefts++;
-  messages.push({ kind: 'loot', text: `${Name(bandit)} steals ${amount} gp.` });
   if (bandit.thefts >= THEFTS_BEFORE_FLEEING) {
     bandit.fleeing = true;
     bandit.fleeLost = 0;
@@ -138,34 +154,39 @@ function steal(game: Game, bandit: Monster, messages: LogMessage[]): void {
   }
 }
 
-/** The player's melee attack on a creature: one exchange (Spec 04, Attacks). */
-export function playerAttacks(game: Game, m: Monster, messages: LogMessage[]): void {
+/** The player's melee attack on a creature: one exchange (Spec 04, Attacks), with the weapon's modifier (Spec 05). */
+export function playerAttacks(game: Game, m: Monster, messages: LogMessage[], reach = false): void {
   const { player } = game.state;
-  const exchange = playerMelee(game.rng, { step: player.combatStep, dice: player.combatDice }, { modifier: m.modifier, unaware: m.awareness !== 'alert', asleep: hasStatus(m.statuses, 'asleep') });
+  const d = derive(player.equipment, player.stealth);
+  const exchange = playerMelee(game.rng, { step: player.combatStep, dice: player.combatDice }, { modifier: m.modifier, unaware: m.awareness !== 'alert', asleep: hasStatus(m.statuses, 'asleep') }, d.melee);
   provoke(game, m);
   combatAt(game, m, [m]);
-  if (exchange.defenderHit) damage(game, m, messages, 'player');
-  if (exchange.attackerHit) hitPlayer(game, m, messages);
+  if (exchange.defenderHit) {
+    damage(game, m, messages, 'player');
+    const alive = game.state.monsters.includes(m);
+    // A mace stuns when the hit wins by 3 or more (Spec 05).
+    if (alive && d.weaponTraits.includes('stun') && exchange.attacker - exchange.defender >= 3) {
+      m.stunned = true;
+      messages.push({ kind: 'combat', text: `${Name(m)} is stunned.` });
+    }
+    // A flame blade burns the undead for a second die (Spec 05).
+    if (alive && d.weaponTraits.includes('flame') && m.undead) {
+      removeDie(game, m, messages, { hit: `The flame sears ${nameOf(m)}.`, kill: `The flame consumes ${nameOf(m)}.` }, true);
+    }
+    const weapon = player.equipment.main;
+    if (weapon?.kind === 'weapon') weaponHit(game, weapon, messages);
+  }
+  // A spear's reach cannot be answered from 2 cells away (Spec 05, task 2.9).
+  if (exchange.attackerHit && !reach) hitPlayer(game, m, messages);
 }
 
-/** A creature's melee attack on the player: one exchange. An ambusher's first has advantage. */
+/** A creature's melee attack on the player: one exchange. An ambusher's first has advantage. The player's armour adds to the defence die. */
 export function monsterAttacks(game: Game, m: Monster, messages: LogMessage[]): void {
   const { player } = game.state;
-  const exchange = monsterMelee(game.rng, m, { step: player.combatStep, dice: player.combatDice }, hasStatus(player.statuses, 'asleep'));
+  const defence = derive(player.equipment, player.stealth).defence;
+  const exchange = monsterMelee(game.rng, m, { step: player.combatStep, dice: player.combatDice }, hasStatus(player.statuses, 'asleep'), defence);
   m.ambush = false;
   combatAt(game, game.state.map.player, [m]);
   if (exchange.defenderHit && hitPlayer(game, m, messages) && m.kind === 'bandit') steal(game, m, messages);
   if (exchange.attackerHit) damage(game, m, messages, 'player');
-}
-
-/** The player's ranged attack: one Skill die as a skill use, then one shot of ammunition (Spec 04). */
-export function playerFires(game: Game, m: Monster, messages: LogMessage[]): void {
-  const { player, map } = game.state;
-  const adjacent = Math.max(Math.abs(m.x - map.player.x), Math.abs(m.y - map.player.y)) <= 1;
-  const result = playerRanged(game.rng, player.skill, adjacent);
-  provoke(game, m);
-  combatAt(game, m, [m]);
-  if (result.success) damage(game, m, messages, 'player');
-  else messages.push({ kind: 'combat', text: `Your shot misses ${nameOf(m)}.` });
-  if (result.dieLost) messages.push({ kind: 'combat', text: 'You lose a Skill die.' });
 }

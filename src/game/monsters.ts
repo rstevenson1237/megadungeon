@@ -35,6 +35,8 @@ export interface Monster {
   fearless: boolean;
   /** A row tagged undead: Turn Undead reaches it (Spec 04). */
   undead: boolean;
+  /** Stunned by a mace: it loses its next action (Spec 05). */
+  stunned: boolean;
   /** Active status effects (Spec 04, "Status effects"). */
   statuses: StatusEffect[];
   awareness: Awareness;
@@ -82,6 +84,7 @@ export function creature(base: Pick<Monster, 'id' | 'name' | 'glyph' | 'colour' 
     role: 'normal',
     fearless: false,
     undead: false,
+    stunned: false,
     statuses: [],
     awareness: 'unaware',
     lost: 0,
@@ -123,6 +126,8 @@ export const spawn = (p: PlacedMonster, id: number, rng?: Rng): Monster => {
     awareness: ambusher || p.role === 'boss' ? 'unaware' : roll ? 'asleep' : 'unaware',
     ambush: ambusher,
     group: p.group,
+    // A boss carries its artifact and drops it where it dies (Spec 05, task 2.9).
+    carried: p.artifact ? [{ kind: 'artifact', id: p.artifact.id, name: p.artifact.name }] : [],
   });
 };
 

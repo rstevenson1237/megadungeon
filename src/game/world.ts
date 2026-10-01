@@ -13,6 +13,7 @@ import type {
   Trap,
   VillageName,
 } from '../core/schemas.ts';
+import { itemDataFrom } from '../rules/items/magic.ts';
 import { spellsFrom } from '../rules/magic/spells.ts';
 import { PLAIN_STYLE } from '../rules/world/generate.ts';
 import { planLevel, type PlacementContent } from '../rules/world/placement/index.ts';
@@ -68,6 +69,7 @@ export function runOptionsFor(bundle: ContentBundle, seed: number): RunOptions {
   return {
     layout,
     spells: spellsFrom(bundle),
+    items: itemDataFrom(bundle),
     sizeFor: (depth) => themeAt(depth)?.size ?? 'medium',
     styleFor: (depth) => themeAt(depth) ?? PLAIN_STYLE,
     contentsFor: (depth) => {

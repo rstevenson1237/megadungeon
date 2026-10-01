@@ -4,6 +4,7 @@
 
 import type { LogMessage } from '../core/log.ts';
 import type { Spell } from '../core/schemas.ts';
+import { derive, spellMode } from '../rules/items/gear.ts';
 import { castRoll, reachOf, resolvesAtOnce } from '../rules/magic/spells.ts';
 import { type StatusId, STATUS_NAMES, applyStatus } from '../rules/magic/status.ts';
 import { distanceSq, squareFootprint } from '../rules/world/geometry.ts';
@@ -62,13 +63,29 @@ export function spellAimError(game: Game, spell: Spell, aim: Aim | undefined): s
   return isMonster(aim) && spellTargets(game, spell).includes(aim) ? undefined : 'That is not a valid target.';
 }
 
-/** Cast: the spell roll, then the effect on a success. The caller has checked the aim and ends the round. */
-export function castSpell(game: Game, spell: Spell, aim: Aim | undefined, messages: LogMessage[]): void {
+/** How a spell is cast when it is not the player's own: from a wand, rod or staff, with no roll and no failure (Spec 05). */
+export interface CastOptions {
+  free?: boolean;
+  /** What the spell comes from, for the log ("the ash wand"). */
+  source?: string;
+}
+
+/**
+ * Cast: the spell roll, then the effect on a success. The caller has checked the aim and ends the round. A free
+ * cast (from a charge) skips the roll. Plate armour gives spell rolls disadvantage and a staff of the spell's
+ * shape advantage (Spec 05).
+ */
+export function castSpell(game: Game, spell: Spell, aim: Aim | undefined, messages: LogMessage[], options: CastOptions = {}): void {
   const { player } = game.state;
+  const at = isMonster(aim) ? ` at ${nameOf(aim)}` : '';
+  if (options.free) {
+    messages.push({ kind: 'combat', text: `You use ${options.source ?? 'it'}${at}: ${spell.name}.` });
+    apply(game, spell, aim, messages);
+    return;
+  }
   // The Mage's major ability: Arcane Bolt loses no die on a 2 to 3 (Spec 03).
   const lossFree = spell.id === 'arcane_bolt' && player.abilities.includes('arcane_bolt');
-  const roll = castRoll(game.rng, player.magic, lossFree);
-  const at = isMonster(aim) ? ` at ${nameOf(aim)}` : '';
+  const roll = castRoll(game.rng, player.magic, lossFree, spellMode(derive(player.equipment, player.stealth), spell.shape));
   messages.push({ kind: 'combat', text: `You cast ${spell.name}${at}.` });
   if (roll.success) apply(game, spell, aim, messages);
   else messages.push({ kind: 'warning', text: 'The spell fizzles.' });

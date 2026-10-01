@@ -6,7 +6,7 @@ import { cameraOrigin } from '../src/ui/camera.ts';
 import { drawMap } from '../src/ui/map-view.ts';
 import { TARGET } from '../src/ui/palette.ts';
 import { MAIN_PANE, inner } from '../src/ui/panes.ts';
-import { gameOn, levelFrom, monsterAt, press, room, screenText, shellOn } from './helpers.ts';
+import { gameOn, levelFrom, monsterAt, press, room, screenText, shellOn, stonesLeft } from './helpers.ts';
 
 // A 21 x 21 open room, the player in the middle at (11,11).
 const open = () => room(21, 21, 11, 11);
@@ -185,12 +185,12 @@ describe('targeting in the shell (Spec 01): F then Enter is the quick shot', () 
 
   it('Enter confirms and fires: one round and one ammunition are spent', () => {
     const s = shell();
-    const ammo = s.game!.state.player.ranged!.ammo;
+    const ammo = stonesLeft(s.game!);
     press(s, 'f');
     press(s, 'Enter');
     expect(s.targeting).toBeNull();
     expect(s.game!.state.round).toBe(2);
-    expect(s.game!.state.player.ranged!.ammo).toBe(ammo - 1);
+    expect(stonesLeft(s.game!)).toBe(ammo - 1);
     expect(s.log.lines(s.turn).some((l) => /shot misses|You (hit|kill)/.test(l.text))).toBe(true);
   });
 

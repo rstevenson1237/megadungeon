@@ -5,10 +5,13 @@
 import type { LogMessage } from '../core/log.ts';
 import { createRng, hash32, levelSeed, type Rng } from '../core/rng.ts';
 import type { Spell } from '../core/schemas.ts';
+import { type Item, type Equipment, type EquipSlot } from '../rules/items/types.ts';
+import { derive } from '../rules/items/gear.ts';
+import { type ItemData, disguisesFor, itemDataFrom, type Knowledge } from '../rules/items/magic.ts';
+import { PACK_BASE } from '../rules/items/inventory.ts';
 import type { Pool } from '../rules/character/dice.ts';
 import { waitRound } from '../rules/character/health.ts';
 import { BOOK_CURSE_ROUNDS, readSpellbook, readiness, type Spellbook } from '../rules/magic/learning.ts';
-import { resolvesAtOnce } from '../rules/magic/spells.ts';
 import {
   type StatusEffect,
   applyStatus,
@@ -24,10 +27,11 @@ import {
 import { distanceSq } from '../rules/world/geometry.ts';
 import { TILE, type Level, type Pile, type Point } from '../rules/world/level.ts';
 import { MAX_SIMULATED, actionsInRound, creaturesAct } from './ai.ts';
-import { nameOf, playerAttacks, playerFires, removeDie } from './combat.ts';
+import { nameOf, playerAttacks, removeDie } from './combat.ts';
 import type { Command } from './commands.ts';
+import { ctxOf, dropItem, equipItem, fireRanged, pickUp, rangedOption, throwableDagger, unequipSlot, useItem } from './items.ts';
 import { type MapState, TERRAIN_BLOCKED, TERRAIN_OPEN, createMapState, isOpen, refreshSight } from './map-state.ts';
-import { castSpell, spellAimError } from './magic.ts';
+import { type Aim, castSpell, spellAimError } from './magic.ts';
 import { type Monster, spawnAll } from './monsters.ts';
 
 export { MAX_SIMULATED, actionsInRound };
@@ -56,8 +60,17 @@ export interface PlayerState {
   waited: number;
   /** Direction of the last move, so closing a door prefers the one the player faces. */
   facing: { dx: number; dy: number };
-  /** The readied ranged weapon, if any: its range sets how far targeting reaches and each shot spends one ammunition (Spec 04, 05). */
-  ranged: { name: string; range: number; ammo: number } | null;
+  /** What is carried in the pack (coins are `coins`), and what is worn and wielded (Spec 05). */
+  pack: Item[];
+  equipment: Equipment;
+  /** Inventory slots the pack has: 12, and 2 more for each Pack Mule (Spec 03). */
+  packSlots: number;
+  /** Potions, wands, rods and staves identified by use, by table id (Spec 05). */
+  known: string[];
+  /** Rounds left of Invisibility: no notice rolls are made against the player (Spec 05). */
+  invisible: number;
+  /** Rounds until a crossbow is loaded again (Spec 05). */
+  reload: number;
   /** Active status effects (Spec 04, "Status effects"). */
   statuses: StatusEffect[];
   /** Rounds left of a Shield, which absorbs the next hit (Spec 04, task 2.8); 0 when there is none. */
@@ -73,7 +86,7 @@ export interface PlayerState {
 }
 
 type PlayerSetup = Pick<PlayerState, 'combatStep' | 'combatDice' | 'combatMax'> &
-  Partial<Pick<PlayerState, 'skill' | 'magic' | 'coins' | 'stealth' | 'ranged' | 'spells' | 'abilities'>>;
+  Partial<Pick<PlayerState, 'skill' | 'magic' | 'coins' | 'stealth' | 'spells' | 'abilities' | 'pack' | 'equipment' | 'packSlots' | 'known'>>;
 
 /** A living player with the given Combat pool, facing south. Skill and Magic default to one d6 each. */
 export function createPlayer(setup: PlayerSetup): PlayerState {
@@ -82,10 +95,15 @@ export function createPlayer(setup: PlayerSetup): PlayerState {
     magic: { step: 6, dice: 1, max: 1 },
     coins: 0,
     stealth: false,
-    ranged: null,
     spells: [],
     abilities: [],
+    pack: [],
+    equipment: {},
+    packSlots: PACK_BASE,
+    known: [],
     ...setup,
+    invisible: 0,
+    reload: 0,
     dead: false,
     waited: 0,
     facing: { dx: 0, dy: 1 },
@@ -160,6 +178,8 @@ export interface ArrivalOptions {
   round?: number;
   /** The spell table, so the spells a player knows can be cast (Spec 04). */
   spells?: readonly Spell[];
+  /** The item tables, so loot can be made into items (Spec 05). */
+  items?: ItemData;
 }
 
 export class Game {
@@ -168,8 +188,16 @@ export class Game {
   readonly rng: Rng;
   /** Every spell in the content, by id. Derived from the content, so never saved. */
   readonly spells: ReadonlyMap<string, Spell>;
+  /** The item tables and this run's disguises. Derived from the content and the seed, so never saved. */
+  readonly items: ItemData;
+  readonly disguises: ReadonlyMap<string, string>;
 
-  constructor(runSeed: number, level: Level, player: PlayerState, arrival: ArrivalOptions = {}) {
+  constructor(
+    readonly runSeed: number,
+    level: Level,
+    player: PlayerState,
+    arrival: ArrivalOptions = {},
+  ) {
     const seed = levelSeed(runSeed, level.depth);
     const round = arrival.round ?? 1;
     const { delta } = arrival;
@@ -177,6 +205,8 @@ export class Game {
     // dice of the last visit; the monsters come from the generated level, so they regenerate identically.
     this.rng = createRng(hash32('runtime', seed, round));
     this.spells = new Map((arrival.spells ?? []).map((sp) => [sp.id, sp]));
+    this.items = arrival.items ?? itemDataFrom({ tables: {} });
+    this.disguises = disguisesFor(runSeed, this.items.magic.values(), this.items.disguiseNames);
     const at = arrival.stair === 'down' ? level.downStair ?? level.upStair : level.upStair;
     this.state = {
       map: createMapState(level, { at, openDoors: delta?.openDoors.slice(), explored: delta?.explored.slice() }),
@@ -224,7 +254,7 @@ export class Game {
       return { messages: [{ kind: 'system', text: 'You are dead. Death options arrive in task 2.13.' }], spent: false };
     }
     const messages: LogMessage[] = [];
-    if (['move', 'wait', 'interact'].includes(command.type)) {
+    if (['move', 'wait', 'interact', 'pickup'].includes(command.type)) {
       const helpless = this.helpless(messages);
       if (helpless) return helpless;
     }
@@ -235,32 +265,86 @@ export class Game {
         return this.endRound(messages, true);
       case 'interact':
         return this.useStairs(messages) ?? this.closeDoor(messages);
+      case 'pickup': {
+        // Picking up costs a round when something is taken (Spec 04, Spec 05).
+        const taken = pickUp(this, messages);
+        return taken === 'taken' ? this.endRound(messages) : { messages, spent: false };
+      }
       default:
         return undefined;
     }
   }
 
   /**
-   * Fire the readied ranged weapon at a creature (Spec 04): one Skill die as a skill use and one
-   * shot of ammunition, hit or miss. With none left the weapon cannot fire and no round passes.
+   * Fire the readied ranged weapon at a creature, or throw a dagger when none is readied (Spec 04, Spec 05): one
+   * Skill die as a skill use and one shot of ammunition, hit or miss. A weapon that cannot fire (out of ammunition,
+   * broken, a crossbow not yet loaded) spends no round.
    */
   fire(target: Monster): ActResult {
     const { player } = this.state;
     const messages: LogMessage[] = [];
     if (player.dead) return { messages: [{ kind: 'system', text: 'You are dead.' }], spent: false };
-    if (!player.ranged) {
+    const option = rangedOption(this);
+    if (!option) {
       messages.push({ kind: 'system', text: 'You have no ranged weapon readied.' });
       return { messages, spent: false };
     }
-    if (player.ranged.ammo <= 0) {
-      messages.push({ kind: 'system', text: `Your ${player.ranged.name} is out of ammunition.` });
+    if (option.problem) {
+      messages.push({ kind: 'system', text: option.problem });
       return { messages, spent: false };
     }
     const helpless = this.helpless(messages);
     if (helpless) return helpless;
-    player.ranged.ammo--;
-    playerFires(this, target, messages);
+    fireRanged(this, target, messages);
     return this.endRound(messages);
+  }
+
+  /** What F would fire right now: the readied weapon, or a dagger to throw; undefined when there is nothing. */
+  ranged() {
+    return rangedOption(this);
+  }
+
+  /** A dagger that could be thrown, for the inventory screen. */
+  get dagger() {
+    return throwableDagger(this);
+  }
+
+  /** Wield or wear an item from the pack (one round). A failure costs nothing. */
+  equip(item: Item): ActResult {
+    const messages: LogMessage[] = [];
+    if (this.state.player.dead) return { messages: [{ kind: 'system', text: 'You are dead.' }], spent: false };
+    return equipItem(ctxOf(this), item, messages) ? this.endRound(messages) : { messages, spent: false };
+  }
+
+  /** Take off what is in a slot (one round). */
+  unequip(slot: EquipSlot): ActResult {
+    const messages: LogMessage[] = [];
+    if (this.state.player.dead) return { messages: [{ kind: 'system', text: 'You are dead.' }], spent: false };
+    return unequipSlot(ctxOf(this), slot, messages) ? this.endRound(messages) : { messages, spent: false };
+  }
+
+  /** Drop an item where the player stands (one round). */
+  drop(item: Item): ActResult {
+    const messages: LogMessage[] = [];
+    if (this.state.player.dead) return { messages: [{ kind: 'system', text: 'You are dead.' }], spent: false };
+    return dropItem(this, item, messages) ? this.endRound(messages) : { messages, spent: false };
+  }
+
+  /**
+   * Use an item (one round): drink a potion, spend a charge of a wand, rod or wielded staff (at `aim`, if its spell
+   * needs one), or work a worn power. A spellbook is read instead. A use that cannot be made costs nothing.
+   */
+  use(item: Item, aim?: Aim): ActResult {
+    const messages: LogMessage[] = [];
+    if (this.state.player.dead) return { messages: [{ kind: 'system', text: 'You are dead.' }], spent: false };
+    if (item.kind === 'spellbook') {
+      const read = this.readBook(item);
+      if (read.used) this.state.player.pack.splice(this.state.player.pack.indexOf(item), 1);
+      return read;
+    }
+    const helpless = this.helpless(messages);
+    if (helpless) return helpless;
+    return useItem(this, item, aim, messages) ? this.endRound(messages) : { messages, spent: false };
   }
 
   /**
@@ -279,11 +363,6 @@ export class Game {
     if (helpless) return helpless;
     castSpell(this, spell, aim, messages);
     return this.endRound(messages);
-  }
-
-  /** Whether choosing the spell is the whole of casting it (a self spell or an area around the caster). */
-  castsAtOnce(spell: Spell): boolean {
-    return resolvesAtOnce(spell);
   }
 
   /**
@@ -350,6 +429,14 @@ export class Game {
     if (monster) {
       playerAttacks(this, monster, messages);
       return this.endRound(messages);
+    }
+    // A spear reaches 2 cells: moving toward a creature that far off, with the cell between free, attacks it (Spec 05, task 2.9).
+    if (isOpen(map, x, y) && derive(player.equipment, player.stealth).weaponTraits.includes('reach')) {
+      const far = this.monsterAt(x + dx, y + dy);
+      if (far) {
+        playerAttacks(this, far, messages, true);
+        return this.endRound(messages);
+      }
     }
     const cell = y * level.width + x;
     // A frightened player may not step nearer to what frightens them, though they may still fight (Spec 04, task 2.8).
@@ -427,7 +514,7 @@ export class Game {
       if (hasStatus(player.statuses, 'poisoned')) player.waited = 0;
       else if (waiting && !player.dead) {
         const pool = { dice: player.combatDice, max: player.combatMax };
-        const wait = waitRound(player.waited, pool);
+        const wait = waitRound(player.waited, pool, derive(player.equipment, player.stealth).waitRounds);
         player.waited = wait.waited;
         player.combatDice = pool.dice;
         if (wait.restored) messages.push({ kind: 'system', text: 'You feel your strength return.' });
@@ -439,6 +526,8 @@ export class Game {
   /** End of a round (Spec 04, task 2.8): the player's and every monster's effects lose a round and poison bites. */
   private endOfRound(messages: LogMessage[]): void {
     const { player, monsters } = this.state;
+    if (player.reload > 0) player.reload--;
+    if (player.invisible > 0 && --player.invisible === 0) messages.push({ kind: 'system', text: 'You become visible again.' });
     const mine = tickStatuses(player.statuses);
     for (const id of mine.ended) messages.push({ kind: 'system', text: `You are no longer ${describeStatus({ id, rounds: null, clock: 0 }).toLowerCase()}.` });
     if (player.shield > 0 && --player.shield === 0) messages.push({ kind: 'system', text: 'Your shield fades.' });

@@ -29,6 +29,8 @@ export interface ClassDef {
   minorAbilities: readonly MinorAbilityDef[];
   /** Spells known at level 1, and the one the class always has (Spec 04); none when absent. */
   spells?: { count: number; always?: string };
+  /** Starting equipment: base or magic item ids, with a count for a stack (Spec 05). */
+  gear?: { id: string; count?: number }[];
 }
 
 export interface Character {

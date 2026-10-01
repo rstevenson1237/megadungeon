@@ -76,15 +76,15 @@ describe('every key acts or logs "not yet available"', () => {
     const handled = press(shell, key, shift);
     expect(handled).toBe(true);
     const acted = shell.overlays.length > 0;
-    // Casting (task 2.8) acts: with no level to cast in it says so instead.
-    const logged = shell.log.lines(shell.turn).some((l) => l.text.endsWith('is not yet available.') || l.text.startsWith('There is nothing to cast'));
+    // Casting (task 2.8) and the inventory (task 2.9) act: with no run to act in they say so instead.
+    const logged = shell.log.lines(shell.turn).some((l) => l.text.endsWith('is not yet available.') || l.text.startsWith('There is nothing to cast') || l.text.startsWith('There is nothing to carry'));
     expect(acted || logged).toBe(true);
   });
 
   it('names the missing feature in the message and spends no turn', () => {
     const shell = newShell();
-    press(shell, 'i');
-    expect(shell.log.lines(1).map((l) => l.text)).toEqual(['Inventory is not yet available.']);
+    press(shell, 'j');
+    expect(shell.log.lines(1).map((l) => l.text)).toEqual(['Journal is not yet available.']);
     expect(shell.turn).toBe(1);
   });
 

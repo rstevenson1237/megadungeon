@@ -1,12 +1,18 @@
 import { z } from 'zod';
 import {
+  AMMO_TYPES,
+  BASE_TYPES,
   CAVE_STAMPS,
+  DISGUISED_KINDS,
   DOOR_WEIGHT_KEYS,
   FEATURE_KEYS,
+  GEAR_TRAITS,
   GEM_KINDS,
+  ITEM_EFFECTS,
   LAYOUT_ALGORITHMS,
   LIQUIDS,
   MAGIC_ITEM_KINDS,
+  PASSIVES,
   QUEST_TYPES,
   RUMOUR_KINDS,
   SIZE_CLASSES,
@@ -14,6 +20,7 @@ import {
   SPELL_SHAPES,
   STATUS_IDS,
   TRAP_KINDS,
+  WORN_SLOTS,
 } from './catalog.ts';
 
 // Shared filter fields every table has (Spec 08, "Table format and rolling").
@@ -74,6 +81,10 @@ export const levelThemeSchema = z.strictObject({
 export const artifactSchema = z.strictObject({
   ...baseFields,
   name: z.string().min(1),
+  // Where it is worn (default ring) and an always-on effect (Spec 05, "Magic items"); Phase 3 gives the real ones.
+  slot: z.enum(WORN_SLOTS).optional(),
+  passive: z.enum(PASSIVES).optional(),
+  amount: z.number().int().positive().optional(),
 });
 
 // Tables placement rolls from (Spec 02, steps 6 to 11). Only the fields placement reads are defined here;
@@ -93,7 +104,98 @@ export const npcNameSchema = z.strictObject(named);
 export const vaultNameSchema = z.strictObject(named);
 // Base value in gp, before appraisal (Spec 05, "Treasure and appraisal").
 export const gemJewelrySchema = z.strictObject({ ...named, kind: z.enum(GEM_KINDS), value: z.number().int().positive() });
-export const magicItemSchema = z.strictObject({ ...named, kind: z.enum(MAGIC_ITEM_KINDS) });
+// Equipment bases (Spec 05, "Weapons and ammunition", "Armour and shields"): the numbers a gear item copies when it
+// is made. `modifier` is the melee modifier of a weapon or the defence modifier of armour; `price` is for normal
+// quality at the surface, in gp; an ammunition row's `price` is for `per` pieces.
+export const equipmentBaseSchema = z
+  .strictObject({
+    ...named,
+    type: z.enum(BASE_TYPES),
+    price: z.number().int().positive(),
+    modifier: z.number().int().optional(),
+    hands: z.union([z.literal(1), z.literal(2)]).optional(),
+    traits: z.array(z.enum(GEAR_TRAITS)).optional(),
+    range: z.number().int().positive().optional(),
+    ammo: z.enum(AMMO_TYPES).optional(),
+    per: z.number().int().positive().optional(),
+    large: z.boolean().optional(),
+  })
+  .superRefine((base, ctx) => {
+    const bad = (message: string): void => void ctx.addIssue({ code: 'custom', message });
+    if (base.type === 'melee' && !base.hands) bad('a melee weapon needs `hands`');
+    if (base.type === 'ranged' && (!base.range || !base.ammo)) bad('a ranged weapon needs `range` and `ammo`');
+    if (base.type === 'ammo' && (!base.ammo || !base.per)) bad('ammunition needs `ammo` and `per`');
+    if (base.type !== 'melee' && base.hands) bad('only a melee weapon has `hands`');
+    if (base.type !== 'ranged' && base.range) bad('only a ranged weapon has `range`');
+    if (base.type !== 'ranged' && base.type !== 'ammo' && base.ammo) bad('only a ranged weapon or ammunition has `ammo`');
+    if (base.type === 'ammo' && (base.modifier || base.traits)) bad('ammunition has no modifier or traits');
+  });
+
+// Disguise names (Spec 05, "Magic items, identification and curses"): the unidentified look of a potion, ring,
+// wand, rod or staff, shuffled per run seed. "cloudy blue" gives "a cloudy blue potion".
+export const disguiseNameSchema = z.strictObject({ ...named, kind: z.enum(DISGUISED_KINDS) });
+
+// Magic items (Spec 05): the fields each kind reads are listed with it. `value` is in gp.
+const itemRounds = z.number().int().positive();
+export const magicItemSchema = z
+  .strictObject({
+    ...named,
+    kind: z.enum(MAGIC_ITEM_KINDS),
+    value: z.number().int().positive(),
+    // Potions and powers worn: an effect in code, with its numbers.
+    effect: z.enum(ITEM_EFFECTS).optional(),
+    pool: z.enum(['combat', 'skill', 'magic']).optional(),
+    dice: z.number().int().positive().optional(),
+    status: z.enum(STATUS_IDS).optional(),
+    rounds: itemRounds.optional(),
+    // Always-on effects of rings and clothing.
+    passive: z.enum(PASSIVES).optional(),
+    amount: z.number().int().positive().optional(),
+    // Wands, rods and staves: the spell they cast and how many charges they start with; a staff's shape.
+    spell: id.optional(),
+    charges: z.tuple([z.number().int().positive(), z.number().int().positive()]).optional(),
+    shape: z.enum(SPELL_SHAPES).optional(),
+    // Clothing and artifacts: where it is worn; a worn power that works once per level.
+    slot: z.enum(WORN_SLOTS).optional(),
+    oncePerLevel: z.boolean().optional(),
+    // Magic weapons and armour: the base they are made on, the enchantment and a trait.
+    base: id.optional(),
+    bonus: z.number().int().positive().optional(),
+    trait: z.enum(GEAR_TRAITS).optional(),
+    unburdened: z.boolean().optional(),
+    off: z.boolean().optional(),
+  })
+  .superRefine((item, ctx) => {
+    const bad = (message: string): void => void ctx.addIssue({ code: 'custom', message });
+    switch (item.kind) {
+      case 'potion':
+        if (!item.effect) bad('a potion needs an `effect`');
+        break;
+      case 'ring':
+        if (!item.passive) bad('a ring needs a `passive`');
+        break;
+      case 'wand':
+      case 'rod':
+      case 'staff':
+        if (!item.spell || !item.charges) bad(`a ${item.kind} needs a \`spell\` and \`charges\``);
+        else if (item.charges[0] > item.charges[1]) bad('charges run low to high');
+        if (item.kind === 'staff' && !item.shape) bad('a staff needs a `shape`');
+        break;
+      case 'clothing':
+        if (!item.slot || item.slot === 'ring') bad('clothing needs a `slot` of cloak, boots, gloves or hat');
+        if (!item.passive && !item.effect) bad('clothing needs a `passive` or an `effect`');
+        break;
+      case 'weapon':
+      case 'armour':
+        if (!item.base) bad(`a magic ${item.kind} needs a \`base\``);
+        if (!item.bonus && !item.trait && !item.unburdened) bad(`a magic ${item.kind} needs a \`bonus\`, a \`trait\` or \`unburdened\``);
+        break;
+    }
+    if (item.effect === 'restore_dice' && (!item.pool || !item.dice)) bad('restore_dice needs `pool` and `dice`');
+    if (item.effect === 'grant_status' && (!item.status || !item.rounds)) bad('grant_status needs `status` and `rounds`');
+    if (item.effect === 'invisibility' && !item.rounds) bad('invisibility needs `rounds`');
+    if ((item.passive === 'melee' || item.passive === 'wait') && !item.amount) bad(`${item.passive} needs an \`amount\``);
+  });
 // A named item for a "find a lost belonging" or "collect a magical item" quest (Spec 02, "Quest goals").
 export const questItemSchema = z.strictObject({ ...named, needs: z.enum(['belonging', 'magic_item']) });
 // A lore chain's entries, in the order the player finds them (Spec 02, "Connective elements").
@@ -118,6 +220,8 @@ export const classSchema = z.strictObject({
   steps: z.tuple([poolName, poolName, poolName]),
   // Spells known at level 1 (Spec 04): how many, and the one every character of the class has.
   spells: z.strictObject({ count: z.number().int().min(1).max(3), always: id.optional() }).optional(),
+  // Starting gear (Spec 05, "Prices, shops and starting gear"): equipment base or magic item ids, with a count for stacks.
+  gear: z.array(z.strictObject({ id, count: z.number().int().positive().optional() })).optional(),
   ability: z.strictObject({ id, name: z.string().min(1), text: z.string().min(1) }),
 });
 
@@ -179,6 +283,8 @@ export const questTemplateSchema = z.strictObject({
 });
 
 export type Spell = z.infer<typeof spellSchema>;
+export type EquipmentBase = z.infer<typeof equipmentBaseSchema>;
+export type DisguiseName = z.infer<typeof disguiseNameSchema>;
 export type ClassEntry = z.infer<typeof classSchema>;
 export type MinorAbilityEntry = z.infer<typeof minorAbilitySchema>;
 export type VillageName = z.infer<typeof villageNameSchema>;
@@ -218,6 +324,8 @@ export const tableSchemas = {
   classes: classSchema,
   minor_abilities: minorAbilitySchema,
   spells: spellSchema,
+  equipment_bases: equipmentBaseSchema,
+  disguise_names: disguiseNameSchema,
 } as const;
 
 export type TableName = keyof typeof tableSchemas;

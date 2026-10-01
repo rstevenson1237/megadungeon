@@ -30,7 +30,7 @@ describe('turn loop (Spec 04, Turns and timing)', () => {
 
   it('leaves commands it does not handle to the caller', () => {
     const game = gameOn(room(5, 5, 2, 2));
-    for (const type of ['inventory', 'look', 'search', 'pickup', 'cast', 'journal', 'waitLong'] as const) {
+    for (const type of ['inventory', 'look', 'search', 'cast', 'journal', 'waitLong'] as const) {
       expect(game.act({ type })).toBeUndefined();
     }
   });
