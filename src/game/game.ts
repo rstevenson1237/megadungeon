@@ -5,6 +5,7 @@
 
 import type { LogMessage } from '../core/log.ts';
 import { createRng, hash32, levelSeed, type Rng } from '../core/rng.ts';
+import { waitRound } from '../rules/character/health.ts';
 import { meleeOutcome, monsterRoll, rollDie } from '../rules/combat/melee.ts';
 import { distancesFrom } from '../rules/world/grid.ts';
 import { distanceSq } from '../rules/world/geometry.ts';
@@ -29,6 +30,8 @@ export interface PlayerState {
   combatDice: number;
   combatMax: number;
   dead: boolean;
+  /** Consecutive rounds spent waiting; 10 restore a Combat die, an action or move resets it (Spec 03). */
+  waited: number;
   /** Direction of the last move, so closing a door prefers the one the player faces. */
   facing: { dx: number; dy: number };
   /** The readied ranged weapon, if any; its range sets how far targeting reaches (Spec 05). */
@@ -37,7 +40,7 @@ export interface PlayerState {
 
 /** A living player with the given Combat pool, facing south. */
 export function createPlayer(pool: Pick<PlayerState, 'combatStep' | 'combatDice' | 'combatMax' | 'ranged'>): PlayerState {
-  return { ...pool, dead: false, facing: { dx: 0, dy: 1 } };
+  return { ...pool, dead: false, waited: 0, facing: { dx: 0, dy: 1 } };
 }
 
 export interface GameState {
@@ -137,7 +140,7 @@ export class Game {
       case 'move':
         return this.move(command.dx, command.dy, messages);
       case 'wait':
-        return this.endRound(messages);
+        return this.endRound(messages, true);
       case 'interact':
         return this.useStairs(messages) ?? this.closeDoor(messages);
       default:
@@ -149,9 +152,10 @@ export class Game {
   private useStairs(messages: LogMessage[]): ActResult | undefined {
     const { map } = this.state;
     const tile = map.level.tiles[map.player.y]![map.player.x];
-    if (tile === TILE.stairsUp) return { messages, spent: false, stairs: 'up' };
-    if (tile === TILE.stairsDown) return { messages, spent: false, stairs: 'down' };
-    return undefined;
+    const stairs = tile === TILE.stairsUp ? 'up' : tile === TILE.stairsDown ? 'down' : null;
+    if (!stairs) return undefined;
+    this.state.player.waited = 0;
+    return { messages, spent: false, stairs };
   }
 
   private move(dx: number, dy: number, messages: LogMessage[]): ActResult {
@@ -250,9 +254,21 @@ export class Game {
     messages.push({ kind: 'combat', text: `The ${monster.name} hits you.` });
   }
 
-  /** The player has spent an action: every monster acts, then the round ends. */
-  private endRound(messages: LogMessage[]): ActResult {
+  /**
+   * The player has spent an action: every monster acts, then the round ends. Waiting counts toward
+   * the next Combat die; any other action or move resets the count (Spec 03, Waiting).
+   */
+  private endRound(messages: LogMessage[], waiting = false): ActResult {
+    const { player } = this.state;
+    if (!waiting) player.waited = 0;
     this.monstersAct(messages);
+    if (waiting && !player.dead) {
+      const pool = { dice: player.combatDice, max: player.combatMax };
+      const wait = waitRound(player.waited, pool);
+      player.waited = wait.waited;
+      player.combatDice = pool.dice;
+      if (wait.restored) messages.push({ kind: 'system', text: 'You feel your strength return.' });
+    }
     this.state.round++;
     return { messages, spent: true };
   }
