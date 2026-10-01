@@ -23,6 +23,9 @@ export function toCp437(ch: string): number {
   return UNICODE_TO_CP437.get(ch) ?? 63;
 }
 
+/** Truncation mark: CP437 has no ellipsis character. */
+export const TRUNCATED = '»';
+
 /** The core glyph table from Spec 01, by name. Codes are CP437. */
 export const GLYPH = {
   player: 64,
