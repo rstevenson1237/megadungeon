@@ -38,3 +38,15 @@ export const OVERLAY = {
   selectedBg: 0x3a3020,
   hint: 0x8a8a8a,
 } as const;
+
+/**
+ * Map colours (Spec 01: each level theme supplies palette tokens). This is the default set,
+ * taken from the mockup; themes arrive in task 3.2. Remembered cells use the dimmed colour.
+ */
+export const MAP = {
+  floor: { visible: 0x6b5638, remembered: 0x33291c },
+  wall: { visible: 0xa07a44, remembered: 0x4a3b26 },
+  stairs: { visible: 0xf0e6c8, remembered: 0x6e6858 },
+  player: 0xffffff,
+  background: 0x000000,
+} as const;

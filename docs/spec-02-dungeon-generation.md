@@ -95,6 +95,16 @@ Every level must be finishable by a player who moves in four directions and neve
 - **Blocking features:** containers, fixtures and NPCs never block a one-cell corridor or doorway.
 - **Boss room:** always reachable without secret or locked doors.
 
+## Visibility and explored cells
+
+Spec 01 draws three cell states and leaves the rule for them to this spec. Approved October 1, 2026.
+
+- **Sight:** a cell is visible if it lies within 8 cells of the player (straight-line distance, dx squared plus dy squared at most 64) and an unblocked line of sight reaches it. The player's own cell is always visible. The 8 cells match the awareness range in Spec 04.
+- **Blocking:** walls block sight. Closed doors block sight; open doors do not. A secret door blocks sight because it is drawn as wall until found. Water, lava, features, items and creatures never block sight.
+- **Walls are seen:** a wall that sight reaches is visible, so a room's boundary draws as soon as its floor does.
+- **Explored cells:** every cell that is visible becomes explored and stays explored. Explored cells that are not currently visible are the remembered cells, drawn dimmed with no monsters or loose items. The explored set is the level's "explored cells" delta (see Persistence).
+- **No light sources:** every level is equally lit; torches and darkness are out of scope for now.
+
 ## Depth scaling
 
 Difficulty and reward both climb with depth, tuned so a thorough player reaches character level 10 around dungeon level 50 to 55. All figures below are starting values for playtesting.
@@ -169,6 +179,7 @@ The generator is done when an automated test run over 10,000 seeds (every level 
 - [ ] Every run has exactly one village per band, teleporters in reflective pairs, and no artifact twice.
 - [ ] Fewer than 1% of levels need the plain-rooms fallback.
 - [ ] A large level generates in under 50 ms on a mid-range laptop.
+- [ ] Visibility follows the sight rule: radius 8, walls and closed doors block, every visible cell becomes explored and stays explored.
 - [ ] Leaving and revisiting a level shows every delta (opened doors, looted chests, dead monsters) exactly as left.
 
 ## Open questions

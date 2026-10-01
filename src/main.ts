@@ -1,11 +1,14 @@
 import './ui/fonts/font.css';
 import type { CharacterPaneData } from './ui/character-pane.ts';
+import { createMapState } from './game/map-state.ts';
+import { seedOfTheDay } from './core/rng.ts';
+import { generateLevel } from './rules/world/generate.ts';
 import { Grid } from './ui/grid.ts';
 import { mountScreen } from './ui/screen.ts';
 import { Shell } from './ui/shell.ts';
 
-// Task 1.5 demo: the shell with its key map, overlays and log. The character is
-// test data; the map arrives in tasks 1.6 and 1.7.
+// Task 1.7 demo: the shell with a generated level, camera and visibility. The character is
+// test data; real movement, doors and monsters arrive in task 1.8.
 const testCharacter: CharacterPaneData = {
   name: 'Mara',
   className: 'Thief',
@@ -34,10 +37,9 @@ const testCharacter: CharacterPaneData = {
 
 const app = document.getElementById('app');
 if (app) {
-  const shell = new Shell('Goblin Warrens, Level 7', testCharacter);
-  shell.log.add({ kind: 'discovery', text: 'You enter the Goblin Warrens.' }, 1);
-  shell.log.add({ kind: 'discovery', text: 'Scrawled on the wall: "The deep lift is watched."' }, 1);
-  shell.log.add({ kind: 'warning', text: 'A rival delver slips past you, heading east.' }, 1);
+  const shell = new Shell('Test Level, Level 1', testCharacter);
+  shell.map = createMapState(generateLevel(seedOfTheDay(new Date()), 1, 'large'));
+  shell.log.add({ kind: 'discovery', text: 'You enter the test level.' }, 1);
   shell.log.add({ kind: 'system', text: 'Press ? for help, Esc for the menu.' }, 1);
   const grid = new Grid();
   void mountScreen(app, 'Px437 IBM VGA 9x16').then((renderer) => {
