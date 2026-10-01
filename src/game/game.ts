@@ -33,7 +33,8 @@ import { ctxOf, dropItem, equipItem, fireRanged, pickUp, rangedOption, throwable
 import { type MapState, TERRAIN_BLOCKED, TERRAIN_OPEN, createMapState, isOpen, refreshSight } from './map-state.ts';
 import { freeCaptive, interact, lockedDoorAt, npcIndexAt, useNpc, offer, readLoreBook, search, stepEnds, takeFromContainer, trapAt, walkIntoLocked } from './features/index.ts';
 import { mapLevel } from './features/fixtures.ts';
-import { teleportPlayer } from './features/spawn.ts';
+import { restock, teleportPlayer, wanderer } from './features/spawn.ts';
+import { WANDER_ONE_IN } from '../rules/world/restock.ts';
 import { type Aim, castSpell, spellAimError } from './magic.ts';
 import { type Monster, spawnAll } from './monsters.ts';
 import type { Fact } from '../core/templates.ts';
@@ -293,6 +294,8 @@ export class Game {
   readonly disguises: ReadonlyMap<string, string>;
   /** The tables features roll from. Derived from the content, so never saved. */
   readonly content: GameContent;
+  /** Decides each turn whether a wandering monster arrives (Spec 02): its own stream, so it never shifts a fight's dice. */
+  private readonly wandering: Rng;
   /** The village multiplier index and rumour facts for dungeon people (Spec 07). */
   readonly above: { villagesAbove: number; facts: () => Fact[] };
   /** What the last action asked the run to do next: change level by a fall or a teleport, or show something. Not saved. */
@@ -310,6 +313,7 @@ export class Game {
     // The runtime stream is mixed with the arrival round, so a revisit does not replay the
     // dice of the last visit; the monsters come from the generated level, so they regenerate identically.
     this.rng = createRng(hash32('runtime', seed, round));
+    this.wandering = createRng(hash32('wandering', seed, round));
     this.spells = new Map((arrival.spells ?? []).map((sp) => [sp.id, sp]));
     this.items = arrival.items ?? itemDataFrom({ tables: {} });
     this.content = arrival.content ?? noContent();
@@ -329,6 +333,8 @@ export class Game {
     };
     // A level a map fragment has mapped shows its layout the first time it is entered (Spec 02, task 2.10).
     if (!delta && player.mapped.includes(level.depth)) mapLevel(this);
+    // On a return, the time away refills the level with monsters, out of sight of the arrival (Spec 02, task 2.12).
+    if (delta) restock(this, round - delta.turnLeft);
   }
 
   /** Snapshot what a revisit must replay: doors, explored cells, the living creatures and what they dropped or took. */
@@ -657,6 +663,8 @@ export class Game {
     const { player } = this.state;
     creaturesAct(this, messages);
     if (!player.dead) {
+      // A 1 in 200 chance each turn that a wandering monster arrives, out of sight (Spec 02, task 2.12).
+      if (this.wandering.oneIn(WANDER_ONE_IN)) wanderer(this, messages);
       this.endOfRound(messages);
       // Waiting does not recover dice while poisoned (Spec 04).
       if (hasStatus(player.statuses, 'poisoned')) player.waited = 0;

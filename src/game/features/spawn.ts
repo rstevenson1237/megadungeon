@@ -5,6 +5,7 @@ import type { LogMessage } from '../../core/log.ts';
 import { eligibleEntries, pickWeighted } from '../../core/roller.ts';
 import type { Monster as MonsterRow } from '../../core/schemas.ts';
 import { ratingCeiling } from '../../rules/world/depth.ts';
+import { monsterBudget, restockCount } from '../../rules/world/restock.ts';
 import { distanceSq } from '../../rules/world/geometry.ts';
 import type { Point } from '../../rules/world/level.ts';
 import { placedFrom, withinCeiling } from '../../rules/world/placement/contents.ts';
@@ -85,6 +86,38 @@ export function wanderer(game: Game, messages: LogMessage[]): Monster | undefine
   const m = placeCreature(game, row, game.rng.pick(cells));
   messages.push({ kind: 'warning', text: 'Something stirs in the dark, and it is coming for you.' });
   return m;
+}
+
+/**
+ * The player returns to a level after `turnsAway` turns (Spec 02): new monsters from the depth table as it stands, out of
+ * sight of where the player arrives, each asleep or unaware like any placed monster. Returns how many came.
+ */
+export function restock(game: Game, turnsAway: number): number {
+  const { map, monsters } = game.state;
+  const alive = monsters.filter((m) => m.role === 'normal' && m.kind === 'monster').length;
+  const count = restockCount(monsterBudget(map.level), turnsAway, alive);
+  if (count === 0) return 0;
+  const cells: Point[] = [];
+  const { width, height } = map.level;
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const i = y * width + x;
+      if (map.terrain[i] !== TERRAIN_OPEN || map.visible[i] === 1 || game.monsterAt(x, y) || trapAt(game, x, y) || (map.player.x === x && map.player.y === y)) continue;
+      cells.push({ x, y });
+    }
+  }
+  const spots = game.rng.shuffle(cells);
+  let placed = 0;
+  while (placed < count && spots.length > 0) {
+    const row = pickRow(game);
+    if (!row) break;
+    const at = spots.pop()!;
+    const id = monsters.reduce((n, m) => Math.max(n, m.id), -1) + 1;
+    const group = monsters.reduce((n, m) => Math.max(n, m.group), -1) + 1;
+    monsters.push(spawn(placedFrom(row, at, group), id, game.rng));
+    placed++;
+  }
+  return placed;
 }
 
 /** Every unaware creature within `radius` cells of a point is alerted: the noise of forcing a lock or smashing pottery (Spec 06). */

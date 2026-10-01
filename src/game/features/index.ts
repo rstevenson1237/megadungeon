@@ -19,7 +19,7 @@ export { hiddenNear, negative, onStep, passiveNotice, search, triggerTrap, trapD
 export { chestLocked, doorAt, interactLockedDoor, lockedDoorAt, walkIntoLocked } from './locks.ts';
 export { buyFromTrader, freeCaptive, hermitOffers, npcIndexAt, traderItems, traderOffer, traderPriceOf, unknownItems, useHermit, useNpc, type HermitOffer } from './npcs.ts';
 export { addJournal, journalByLevel, markAt, readLoreBook } from './lore.ts';
-export { noiseAt, placeCreature, pickRow, summon, teleportPlayer, wanderer } from './spawn.ts';
+export { noiseAt, placeCreature, pickRow, restock, summon, teleportPlayer, wanderer } from './spawn.ts';
 
 /** Close an open door beside the player (Spec 06: closing is an interact action). A forced door stays open. Returns the spent flag, or undefined if there was none. */
 function closeDoorAt(game: Game, x: number, y: number, messages: LogMessage[]): boolean | undefined {
