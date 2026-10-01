@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { createExploration, updateExploration } from '../src/game/exploration.ts';
-import { createMapState, stepPlayer } from '../src/game/map-state.ts';
+import { buildTerrain } from '../src/game/map-state.ts';
 import { generateLevel } from '../src/rules/world/generate.ts';
-import { GENERATOR_VERSION, type Level, type Point } from '../src/rules/world/level.ts';
+import type { Level, Point } from '../src/rules/world/level.ts';
 import { SIGHT_RADIUS, computeVisible } from '../src/rules/world/visibility.ts';
 import { cameraOrigin } from '../src/ui/camera.ts';
 import { COLS, Grid } from '../src/ui/grid.ts';
@@ -10,29 +10,8 @@ import { drawMap } from '../src/ui/map-view.ts';
 import { MAP } from '../src/ui/palette.ts';
 import { MAIN_PANE, inner } from '../src/ui/panes.ts';
 import { Shell } from '../src/ui/shell.ts';
+import { gameOn, levelFrom, room, walk } from './helpers.ts';
 
-/** Build a level from rows: '#' wall, '.' floor, '<' up stair (required), '>' down stair. */
-function levelFrom(rows: string[]): Level {
-  const find = (c: string): Point | null => {
-    for (let y = 0; y < rows.length; y++) {
-      const x = rows[y]!.indexOf(c);
-      if (x >= 0) return { x, y };
-    }
-    return null;
-  };
-  return {
-    generatorVersion: GENERATOR_VERSION, runSeed: 0, depth: 1, size: 'small',
-    width: rows[0]!.length, height: rows.length, tiles: rows, rooms: [],
-    upStair: find('<')!, downStair: find('>'), attempts: 1, fallback: false,
-  };
-}
-const blank = (w: number, h: number): string[] => Array.from({ length: h }, () => '#'.repeat(w));
-/** An open w x h room inside a wall border, with the up stair at (px, py). */
-function room(w: number, h: number, px: number, py: number): Level {
-  const rows = blank(w + 2, h + 2).map((r, y) => (y === 0 || y === h + 1 ? r : '#' + '.'.repeat(w) + '#'));
-  rows[py] = rows[py]!.slice(0, px) + '<' + rows[py]!.slice(px + 1);
-  return levelFrom(rows);
-}
 const opaqueOf = (level: Level) => (x: number, y: number): boolean => level.tiles[y]![x] === '#';
 const visibleSet = (level: Level, from: Point, radius?: number): Uint8Array =>
   computeVisible(level.width, level.height, from, opaqueOf(level), radius);
@@ -113,10 +92,10 @@ describe('explored cells (Spec 02)', () => {
   it('every visible cell becomes explored and stays explored after the player moves away', () => {
     const level = room(40, 4, 2, 2);
     const ex = createExploration(level);
-    const first = updateExploration(level, ex, { x: 2, y: 2 });
+    const first = updateExploration(ex, { x: 2, y: 2 }, buildTerrain(level, []));
     for (let i = 0; i < first.length; i++) if (first[i]) expect(ex.explored[i]).toBe(1);
     const seenBefore = ex.explored.filter((c) => c === 1).length;
-    const far = updateExploration(level, ex, { x: 38, y: 2 });
+    const far = updateExploration(ex, { x: 38, y: 2 }, buildTerrain(level, []));
     expect(far[2 * level.width + 2]).toBe(0); // no longer visible...
     expect(ex.explored[2 * level.width + 2]).toBe(1); // ...but remembered
     expect(ex.explored.filter((c) => c === 1).length).toBeGreaterThan(seenBefore);
@@ -124,17 +103,17 @@ describe('explored cells (Spec 02)', () => {
 
   it('is plain data that survives a JSON round trip', () => {
     const ex = createExploration(room(5, 5, 2, 2));
-    updateExploration(room(5, 5, 2, 2), ex, { x: 2, y: 2 });
+    updateExploration(ex, { x: 2, y: 2 }, buildTerrain(room(5, 5, 2, 2), []));
     expect(JSON.parse(JSON.stringify(ex))).toEqual(ex);
   });
 
   it('starts a new map on the up stair, and moves only orthogonally and not into walls', () => {
-    const state = createMapState(levelFrom(['#####', '#<..#', '#####']));
-    expect(state.player).toEqual({ x: 1, y: 1 });
-    expect(stepPlayer(state, 1, 1)).toBe(false);
-    expect(stepPlayer(state, 0, -1)).toBe(false);
-    expect(stepPlayer(state, 1, 0)).toBe(true);
-    expect(state.player).toEqual({ x: 2, y: 1 });
+    const game = gameOn(levelFrom(['#####', '#<..#', '#####']));
+    expect(game.state.map.player).toEqual({ x: 1, y: 1 });
+    expect(game.act({ type: 'move', dx: 1, dy: 1 })!.spent).toBe(false);
+    expect(game.act({ type: 'move', dx: 0, dy: -1 })!.spent).toBe(false);
+    expect(game.act({ type: 'move', dx: 1, dy: 0 })!.spent).toBe(true);
+    expect(game.state.map.player).toEqual({ x: 2, y: 1 });
   });
 });
 
@@ -171,12 +150,11 @@ describe('main view drawing (Spec 01): three cell states', () => {
 
   it('draws unseen blank, remembered dimmed and visible in full colour', () => {
     const level = room(40, 4, 2, 2); // 42 x 6, centred in the 70 x 28 window
-    const state = createMapState(level);
-    stepPlayer(state, 1, 0);
-    for (let i = 0; i < 5; i++) stepPlayer(state, 1, 0);
-    for (let i = 0; i < 20; i++) stepPlayer(state, 1, 0); // far from the start, which is now out of sight
+    const game = gameOn(level);
+    walk(game, 'd'.repeat(26)); // far from the start, which is now out of sight
+    const state = game.state.map;
     const g = new Grid();
-    drawMap(g, state);
+    drawMap(g, game.state);
     const origin = cameraOrigin(level.width, level.height, state.player, view.w, view.h);
     const at = (lx: number, ly: number) => cell(g, lx - origin.x, ly - origin.y);
 
@@ -199,24 +177,25 @@ describe('main view drawing (Spec 01): three cell states', () => {
 
   it('draws stairs as < and > and the player as @ on top', () => {
     const level = levelFrom(['#####', '#<.>#', '#####']);
-    const state = createMapState(level);
+    const game = gameOn(level);
+    const state = game.state.map;
     const g = new Grid();
-    drawMap(g, state);
+    drawMap(g, game.state);
     const origin = cameraOrigin(level.width, level.height, state.player, view.w, view.h);
     expect(cell(g, 1 - origin.x, 1 - origin.y).glyph).toBe(64); // the player stands on the up stair
     expect(cell(g, 3 - origin.x, 1 - origin.y).glyph).toBe(62);
-    stepPlayer(state, 1, 0);
-    drawMap(g, state);
+    walk(game, 'd');
+    drawMap(g, game.state);
     expect(cell(g, 1 - origin.x, 1 - origin.y).glyph).toBe(60);
   });
 
   it('keeps the player at the centre of the view in the middle of a large level, and shows no map past the level', () => {
     const level = generateLevel(5, 3, 'large');
-    const state = createMapState(level);
-    state.player = { x: 70, y: 30 };
-    state.visible = updateExploration(level, state.exploration, state.player);
+    const game = gameOn(level);
+    game.state.map.player = { x: 70, y: 30 };
+    game.state.map.visible = updateExploration(game.state.map.exploration, game.state.map.player, game.state.map.terrain);
     const g = new Grid();
-    drawMap(g, state);
+    drawMap(g, game.state);
     expect(cell(g, 35, 14).glyph).toBe(64);
   });
 
@@ -227,9 +206,9 @@ describe('main view drawing (Spec 01): three cell states', () => {
     });
     shell.handleKey({ key: 'd', shiftKey: false });
     expect(shell.log.lines(shell.turn).some((l) => l.text.includes('not yet available'))).toBe(true);
-    shell.map = createMapState(levelFrom(['#####', '#<..#', '#####']));
+    shell.game = gameOn(levelFrom(['#####', '#<..#', '#####']));
     shell.handleKey({ key: 'd', shiftKey: false });
-    expect(shell.map.player).toEqual({ x: 2, y: 1 });
+    expect(shell.game.state.map.player).toEqual({ x: 2, y: 1 });
     const g = new Grid();
     shell.draw(g);
     expect(g.glyph.includes(64)).toBe(true);

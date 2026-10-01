@@ -1,14 +1,14 @@
 import './ui/fonts/font.css';
 import type { CharacterPaneData } from './ui/character-pane.ts';
-import { createMapState } from './game/map-state.ts';
+import { Game } from './game/game.ts';
 import { seedOfTheDay } from './core/rng.ts';
 import { generateLevel } from './rules/world/generate.ts';
 import { Grid } from './ui/grid.ts';
 import { mountScreen } from './ui/screen.ts';
 import { Shell } from './ui/shell.ts';
 
-// Task 1.7 demo: the shell with a generated level, camera and visibility. The character is
-// test data; real movement, doors and monsters arrive in task 1.8.
+// Task 1.8 demo: the shell with a generated level, turn loop, stub monsters and targeting.
+// The character is test data; levels and runs arrive in tasks 1.9 and 1.10.
 const testCharacter: CharacterPaneData = {
   name: 'Mara',
   className: 'Thief',
@@ -38,9 +38,16 @@ const testCharacter: CharacterPaneData = {
 const app = document.getElementById('app');
 if (app) {
   const shell = new Shell('Test Level, Level 1', testCharacter);
-  shell.map = createMapState(generateLevel(seedOfTheDay(new Date()), 1, 'large'));
+  const runSeed = seedOfTheDay(new Date());
+  const combat = testCharacter.stats.find((s) => s.name === 'Combat')!;
+  shell.game = new Game(runSeed, generateLevel(runSeed, 1, 'large'), {
+    combatStep: combat.step,
+    combatDice: combat.current,
+    combatMax: combat.max,
+    ranged: { name: 'Sling', range: 6 }, // the test character's sling (Spec 05: 6 cells)
+  });
   shell.log.add({ kind: 'discovery', text: 'You enter the test level.' }, 1);
-  shell.log.add({ kind: 'system', text: 'Press ? for help, Esc for the menu.' }, 1);
+  shell.log.add({ kind: 'system', text: 'Move with WASD, F to target, ? for help, Esc for the menu.' }, 1);
   const grid = new Grid();
   void mountScreen(app, 'Px437 IBM VGA 9x16').then((renderer) => {
     const redraw = (): void => {

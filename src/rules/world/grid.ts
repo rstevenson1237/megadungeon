@@ -7,8 +7,9 @@ export const WALL = 0;
 export const FLOOR = 1;
 export const STAIRS_UP = 2;
 export const STAIRS_DOWN = 3;
+export const DOOR = 4;
 
-const TILE_CHARS = [TILE.wall, TILE.floor, TILE.stairsUp, TILE.stairsDown];
+const TILE_CHARS = [TILE.wall, TILE.floor, TILE.stairsUp, TILE.stairsDown, TILE.door];
 
 export const ORTHOGONAL: readonly (readonly [number, number])[] = [
   [0, -1],

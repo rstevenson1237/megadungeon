@@ -146,8 +146,12 @@ In menus, arrows or W/S move the selection and Enter confirms, so a player never
 Targeting always starts on the closest valid target, so a quick ranged attack is two key presses: F, then Enter.
 
 1. The player presses F (ranged), or C and picks a targeted spell.
-2. Valid targets are those visible and in range, sorted by distance, ties broken clockwise from north.
-3. The closest target is selected: its cell is highlighted, the path draws as dim dots, and the Target block fills in the character pane.
+2. Valid targets are those visible and in range, with a clear line of fire, sorted by distance, ties broken clockwise from north.
+   - **Distance and range** are straight-line, as for sight (Spec 02): a cell is in range when dx squared plus dy squared is at most range squared. The Target block shows the distance rounded to the nearest whole cell.
+   - **Range** comes from the readied ranged weapon (Spec 05) or the spell's reach (Spec 04).
+   - **Line of fire** is a Bresenham line from the player to the target; it is clear when no wall, closed door or other creature lies on it between the two ends.
+   - **Path preview:** the cells of that line, both ends left out, draw as dim dots.
+3. The closest target is selected: its cell is highlighted, the path draws, and the Target block fills in the character pane.
 4. Tab and Shift+Tab cycle through the sorted list, wrapping at the end.
 5. Enter confirms; Esc cancels with no turn spent.
 

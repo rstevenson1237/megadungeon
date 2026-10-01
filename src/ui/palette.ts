@@ -47,6 +47,18 @@ export const MAP = {
   floor: { visible: 0x6b5638, remembered: 0x33291c },
   wall: { visible: 0xa07a44, remembered: 0x4a3b26 },
   stairs: { visible: 0xf0e6c8, remembered: 0x6e6858 },
+  door: { visible: 0xd0963c, remembered: 0x5e4520 },
   player: 0xffffff,
   background: 0x000000,
+} as const;
+
+/** Targeting overlay on the main view (Spec 01 "Targeting"), from the mockup. */
+export const TARGET = {
+  path: 0xe8c040,
+  selectedFg: 0xffffff,
+  selectedBg: 0x8a6a10,
+  /** Tint for every cell an area footprint touches. */
+  footprintBg: 0x3a2c0c,
+  /** Background for monsters inside the footprint. */
+  markedBg: 0x6a4a10,
 } as const;

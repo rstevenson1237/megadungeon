@@ -1,7 +1,7 @@
 // Explored cells (Spec 02, "Visibility and explored cells"): every cell the player has
 // seen stays explored. Plain and serialisable; it is the level's "explored cells" delta.
 
-import { TILE, type Level, type Point } from '../rules/world/level.ts';
+import type { Level, Point } from '../rules/world/level.ts';
 import { computeVisible } from '../rules/world/visibility.ts';
 
 export interface Exploration {
@@ -15,14 +15,13 @@ export function createExploration(level: Pick<Level, 'width' | 'height'>): Explo
   return { width: level.width, height: level.height, explored: new Array<number>(level.width * level.height).fill(0) };
 }
 
-/** Walls block sight. Closed doors join them when doors exist (task 1.8). */
-export function blocksSight(level: Level, x: number, y: number): boolean {
-  return level.tiles[y]![x] === TILE.wall;
-}
-
-/** Cells visible from `from`, and mark them all explored. Returns the visible set (1 = visible). */
-export function updateExploration(level: Level, exploration: Exploration, from: Point): Uint8Array {
-  const visible = computeVisible(level.width, level.height, from, (x, y) => blocksSight(level, x, y));
+/**
+ * Cells visible from `from`, and mark them all explored. `terrain` is 0 where a cell blocks
+ * sight (walls and closed doors). Returns the visible set (1 = visible).
+ */
+export function updateExploration(exploration: Exploration, from: Point, terrain: Uint8Array): Uint8Array {
+  const { width, height } = exploration;
+  const visible = computeVisible(width, height, from, (x, y) => terrain[y * width + x] === 0);
   for (let i = 0; i < visible.length; i++) if (visible[i]) exploration.explored[i] = 1;
   return visible;
 }

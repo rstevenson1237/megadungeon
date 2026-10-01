@@ -25,6 +25,8 @@ export const TILE = {
   floor: '.',
   stairsUp: '<',
   stairsDown: '>',
+  /** A normal door. Whether it is open is a level delta, not part of the generated tiles. */
+  door: '+',
 } as const;
 
 export interface Point {
