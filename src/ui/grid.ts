@@ -28,6 +28,11 @@ export class Grid {
     this.bg[i] = bg & 0xffffff;
   }
 
+  /** Change only a cell's background, keeping its glyph and foreground (used to tint cells). */
+  setBg(x: number, y: number, bg: number): void {
+    if (this.inBounds(x, y)) this.bg[y * COLS + x] = bg & 0xffffff;
+  }
+
   /** Write a string left to right, one cell per character. */
   text(x: number, y: number, s: string, fg: number, bg: number): void {
     let cx = x;

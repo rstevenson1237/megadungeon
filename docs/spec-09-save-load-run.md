@@ -39,7 +39,7 @@ A save stores only what the seed cannot rebuild: the character, the player's cha
 | Run | Run seed, seed of the day flag and date, turn counter |
 | Character | Name, class, level, XP, dice and steps per pool, current dice, minor abilities drawn, known spells, statuses, curses |
 | Possessions | Equipment, pack contents with quality, charges and broken state, bank balance |
-| Level deltas | Per visited level: explored cells, doors opened or broken, containers looted, items taken or dropped, dead monsters, found or disarmed traps, used fixtures, NPC states, restocked monsters, turn last left |
+| Level deltas | Per visited level: explored cells, doors opened or broken, containers looted, items taken or dropped, dead monsters and the position and wounds of living ones, found or disarmed traps, used fixtures, NPC states, restocked monsters, turn last left |
 | World progress | Villages visited, teleporters unlocked, quests taken and done, active quest state, rescued specialists, connective element progress, artifacts found |
 | Knowledge | Identified item kinds, journal entries, rumours heard, spellbook retry flags |
 | Location | The village of the last rest (the only place a save is made) |

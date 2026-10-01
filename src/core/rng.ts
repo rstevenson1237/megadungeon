@@ -45,6 +45,11 @@ export function seedOfTheDay(date: Date | string): number {
   return hash32('seed-of-the-day', day);
 }
 
+/** A seed as the title screen shows it: eight upper-case hex digits, e.g. "0A1B2C3D". */
+export function formatSeed(seed: number): string {
+  return (seed >>> 0).toString(16).toUpperCase().padStart(8, '0');
+}
+
 /** Random run seed from the browser's crypto source. */
 export function randomRunSeed(): number {
   return crypto.getRandomValues(new Uint32Array(1))[0]!;
