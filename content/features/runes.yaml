@@ -1,0 +1,26 @@
+# Stub entries for task 2.4 (Spec 02, "Rune words"): rune-word letters. Effect runes arrive with task 2.10;
+# the launch table of 10 is written in Phase 3 (task 3.7).
+- id: rune_letter_a
+  name: rune of A
+  letter: A
+- id: rune_letter_e
+  name: rune of E
+  letter: E
+- id: rune_letter_k
+  name: rune of K
+  letter: K
+- id: rune_letter_n
+  name: rune of N
+  letter: N
+- id: rune_letter_o
+  name: rune of O
+  letter: O
+- id: rune_letter_r
+  name: rune of R
+  letter: R
+- id: rune_letter_s
+  name: rune of S
+  letter: S
+- id: rune_letter_t
+  name: rune of T
+  letter: T

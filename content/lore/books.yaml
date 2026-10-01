@@ -1,0 +1,7 @@
+# Stub entries for task 2.4 (Spec 02, step 10). The launch table of 200 is written in Phase 3 (task 3.8).
+- id: book_stub_01
+  text: "A water-stained ledger of coal weights and the names of the men who carried them."
+- id: book_stub_02
+  text: "A prayer book. Every page ends with the same word, written smaller each time."
+- id: book_stub_03
+  text: "A delver's diary. The last entry says only that the stairs were farther than they looked."

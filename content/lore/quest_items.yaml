@@ -1,0 +1,19 @@
+# Stub entries for task 2.4 (Spec 02, "Quest goals"). The launch table of 60 is written in Phase 3 (task 3.9).
+- id: quest_item_stub_belonging_01
+  name: a tarnished locket
+  needs: belonging
+- id: quest_item_stub_belonging_02
+  name: a worn signet ring
+  needs: belonging
+- id: quest_item_stub_belonging_03
+  name: a child's wooden horse
+  needs: belonging
+- id: quest_item_stub_magic_01
+  name: the Ember Rod
+  needs: magic_item
+- id: quest_item_stub_magic_02
+  name: the Veil Cloak
+  needs: magic_item
+- id: quest_item_stub_magic_03
+  name: the Hollow Crown
+  needs: magic_item

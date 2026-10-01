@@ -74,6 +74,33 @@ export type Liquid = (typeof LIQUIDS)[number];
 
 export const SIZE_CLASSES = ['small', 'medium', 'large'] as const;
 
+/** Door kinds a theme may weight (Spec 02, clarifications of task 2.4); `none` is an entrance left open. */
+export const DOOR_WEIGHT_KEYS = ['none', 'normal', 'locked', 'secret'] as const;
+export type DoorWeightKey = (typeof DOOR_WEIGHT_KEYS)[number];
+
+/** Containers and fixtures (Spec 06) and the clutter and lore a level places (Spec 02, step 6 and 10). */
+export const CONTAINER_KINDS = ['chest', 'sack', 'pottery', 'rack'] as const;
+export type ContainerKind = (typeof CONTAINER_KINDS)[number];
+export const FIXTURE_KINDS = ['fountain', 'altar', 'sarcophagus', 'rune'] as const;
+export type FixtureKind = (typeof FIXTURE_KINDS)[number];
+
+/**
+ * Keys of a theme's `features` field: a weight multiplier per kind, plus `containers` (a count
+ * multiplier) and the lore kinds, whose counts it multiplies.
+ */
+export const FEATURE_KEYS = [...CONTAINER_KINDS, ...FIXTURE_KINDS, 'debris', 'containers', 'graffiti', 'sign', 'book'] as const;
+export type FeatureKey = (typeof FEATURE_KEYS)[number];
+
+/** Trap kinds: floor traps spring on the player's step, container traps on opening (Spec 06). */
+export const TRAP_KINDS = ['floor', 'container'] as const;
+export type TrapKind = (typeof TRAP_KINDS)[number];
+
+/** Kinds of magic item (Spec 05, "Magic items"). */
+export const MAGIC_ITEM_KINDS = ['potion', 'ring', 'wand', 'rod', 'staff', 'clothing', 'weapon', 'armour'] as const;
+export const GEM_KINDS = ['gem', 'jewelry'] as const;
+export const NPC_KINDS = ['rival', 'trader', 'bandit', 'hermit', 'captive'] as const;
+export type NpcKind = (typeof NPC_KINDS)[number];
+
 /** Rumour kinds (Spec 07, Tavern): what a rumour can say. A rumour template `needs` one. */
 export const RUMOUR_KINDS = ['vault', 'boss', 'teleporter', 'rival_stash', 'trap_level', 'fountain'] as const;
 export type RumourKind = (typeof RUMOUR_KINDS)[number];

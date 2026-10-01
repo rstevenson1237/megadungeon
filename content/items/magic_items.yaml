@@ -1,0 +1,30 @@
+# Stub entries for task 2.4 (Spec 05, "Magic items"). Their effects arrive with task 2.9; the launch table of
+# 130 is written in Phase 3 (task 3.5).
+- id: magic_stub_potion_healing
+  name: Potion of Healing
+  kind: potion
+- id: magic_stub_ring_search
+  name: Ring of Searching
+  kind: ring
+- id: magic_stub_wand_bolt
+  name: Wand of Arcane Bolt
+  kind: wand
+- id: magic_stub_rod_fire
+  name: Rod of Fireball
+  kind: rod
+  depth: [10, 100]
+- id: magic_stub_staff_magus
+  name: Staff of the Magus
+  kind: staff
+  depth: [20, 100]
+- id: magic_stub_cloak_shadows
+  name: Cloak of Shadows
+  kind: clothing
+- id: magic_stub_blade_flame
+  name: Flame Blade
+  kind: weapon
+  depth: [15, 100]
+- id: magic_stub_chain_elven
+  name: Elven Chain
+  kind: armour
+  depth: [25, 100]

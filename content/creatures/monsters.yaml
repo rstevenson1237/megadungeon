@@ -1,17 +1,37 @@
-# Stub entries for task 1.1. Real monsters are written in Phase 3 (task 3.3).
+# Stub entries (Spec 08, "Stub content in Phases 1 and 2"): enough that every level from 1 to 100
+# has something to place. Real monsters are written in Phase 3 (task 3.3). Ratings keep inside the
+# depth ceiling of Spec 02 (1 + depth / 5 dice), so each row's dice never exceed it where it appears.
 - id: stub_monster_weak
   name: stub rat
   glyph: r
   colour: moss
   rating: 1d4+0
   behaviour: stub
+  speed: fast
   depth: [1, 5]
-  tags: [stub]
+  tags: [stub, pack]
 - id: stub_monster_strong
   name: stub ogre
   glyph: O
   colour: moss
   rating: 1d8+2
   behaviour: stub
+  speed: slow
   depth: [3, 10]
+  tags: [stub]
+- id: stub_monster_mid
+  name: stub goblin
+  glyph: g
+  colour: moss
+  rating: 3d6+1
+  behaviour: stub
+  depth: [11, 40]
+  tags: [stub]
+- id: stub_monster_deep
+  name: stub troll
+  glyph: T
+  colour: moss
+  rating: 8d6+3
+  behaviour: stub
+  depth: [41, 100]
   tags: [stub]

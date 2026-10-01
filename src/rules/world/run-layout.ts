@@ -4,7 +4,7 @@
 // one never moves another. Where a figure is not in the spec text it comes from the approved
 // clarifications beside the Run layout table.
 
-import { QUEST_TYPES, type QuestType } from '../../core/catalog.ts';
+import { QUEST_TYPES, type DoorWeightKey, type FeatureKey, type QuestType } from '../../core/catalog.ts';
 import { createRng, hash32, type Rng } from '../../core/rng.ts';
 import { pickWeighted, rollTable, type Rollable } from '../../core/roller.ts';
 import type { Fact } from '../../core/templates.ts';
@@ -46,6 +46,9 @@ export type SpecialistService = (typeof SPECIALIST_SERVICES)[number];
 export interface ThemeRow extends Rollable, LevelStyle {
   name: string;
   size: SizeClass;
+  /** Placement variants (Spec 02, clarifications of task 2.4): door weights and feature bias. */
+  doors?: Partial<Record<DoorWeightKey, number>> | undefined;
+  features?: Partial<Record<FeatureKey, number>> | undefined;
 }
 export interface NamedRow extends Rollable {
   name: string;

@@ -1,6 +1,7 @@
 // Level generation pipeline (Spec 02, "Generation pipeline"). Tasks 1.6 and 2.3 build steps 1 to 3
-// (carve, connect, stairs) and the validation they need (step 12) for all eight layout algorithms,
-// with the retries and the plain-rooms fallback. Doors, keys, features and the rest arrive with task 2.4.
+// (carve, connect, stairs) for all eight layout algorithms, with the retries and the plain-rooms fallback.
+// Task 2.4 adds steps 4 to 11 (placement/) and the validation they need (step 12), when the level is given
+// its contents; without them a level is walls, floor, liquids and stairs only.
 
 import type { LayoutAlgorithm } from '../../core/catalog.ts';
 import { levelSeed, levelStreams, subSeed, type Rng } from '../../core/rng.ts';
@@ -17,7 +18,18 @@ import {
   toRows,
 } from './grid.ts';
 import { carveLayout, DEFAULT_STYLE, type LayoutStyle } from './layouts/index.ts';
-import { GENERATOR_VERSION, LEVEL_SIZES, MAX_DEPTH, type Level, type Point, type Rect, type SizeClass } from './level.ts';
+import {
+  GENERATOR_VERSION,
+  LEVEL_SIZES,
+  MAX_DEPTH,
+  emptyPlacements,
+  type Level,
+  type Placements,
+  type Point,
+  type Rect,
+  type SizeClass,
+} from './level.ts';
+import { placeContents, type LevelContents } from './placement/index.ts';
 import { farEnough, findProblems } from './validate.ts';
 
 /**
@@ -170,6 +182,7 @@ function build(
   cells: Uint8Array,
   rooms: Rect[],
   stairs: { up: Point; down: Point | null },
+  placements: Placements = emptyPlacements(),
 ): Level {
   const { width, height } = LEVEL_SIZES[size];
   return {
@@ -186,6 +199,7 @@ function build(
     downStair: stairs.down,
     attempts,
     fallback,
+    ...placements,
   };
 }
 
@@ -193,8 +207,8 @@ function build(
 const algorithmFor = (layout: LayoutAlgorithm): LayoutAlgorithm => (layout === 'set_piece' ? 'rooms_and_corridors' : layout);
 
 /**
- * One try with one sub-seed: carve, connect, stairs. Null when the layout comes out unusable or
- * the stairs cannot be placed.
+ * One try with one sub-seed: carve, connect, stairs, then (given contents) steps 4 to 11. Null when the
+ * layout comes out unusable, the stairs cannot be placed or a required piece does not fit.
  */
 function attempt(
   runSeed: number,
@@ -204,9 +218,12 @@ function attempt(
   seed: number,
   attempts: number,
   fallback: boolean,
+  contents?: LevelContents,
+  strict = true,
 ): Level | null {
   const { width, height } = LEVEL_SIZES[size];
-  const { layout } = levelStreams(seed);
+  const streams = levelStreams(seed);
+  const { layout } = streams;
   const cells = new Uint8Array(width * height);
   const variants: LayoutStyle = {
     stamp: style.stamp ?? DEFAULT_STYLE.stamp,
@@ -220,16 +237,32 @@ function attempt(
   if (rooms.length === 0) return null;
   const stairs = placeStairs(cells, width, height, rooms, depth, layout, carved.looseStairs);
   if (!stairs) return null;
-  return build(runSeed, depth, size, algorithmFor(style.layout), attempts, fallback, cells, rooms, stairs);
+  if (!contents) return build(runSeed, depth, size, algorithmFor(style.layout), attempts, fallback, cells, rooms, stairs);
+  const placed = placeContents({
+    cells,
+    width,
+    height,
+    rooms,
+    up: stairs.up,
+    down: stairs.down,
+    size,
+    depth,
+    literalRooms: carved.rooms !== null,
+    contents,
+    rng: streams.contents,
+    strict,
+  });
+  if (!placed) return null;
+  return build(runSeed, depth, size, algorithmFor(style.layout), attempts, fallback, cells, placed.rooms, stairs, placed.placements);
 }
 
 /**
  * The plain-rooms fallback (Spec 02, step 12): rooms and corridors with 20 more sub-seeds, and
  * only if all of those fail, two fixed rooms in opposite corners joined by one corridor.
  */
-export function fallbackLevel(runSeed: number, depth: number, size: SizeClass, seed: number): Level {
+export function fallbackLevel(runSeed: number, depth: number, size: SizeClass, seed: number, contents?: LevelContents): Level {
   for (let n = 0; n < MAX_ATTEMPTS; n++) {
-    const level = attempt(runSeed, depth, size, PLAIN_STYLE, subSeed(seed, n), MAX_ATTEMPTS, true);
+    const level = attempt(runSeed, depth, size, PLAIN_STYLE, subSeed(seed, n), MAX_ATTEMPTS, true, contents);
     if (level && findProblems(level).length === 0) return level;
   }
   const { width, height } = LEVEL_SIZES[size];
@@ -243,7 +276,14 @@ export function fallbackLevel(runSeed: number, depth: number, size: SizeClass, s
   carveCorridor(cells, width, { x: 9, y: 5 }, { x: width - 10, y: height - 7 }, true);
   const stairs = placeStairs(cells, width, height, rooms, depth, layout);
   if (!stairs) throw new Error('fallback level could not place stairs');
-  return build(runSeed, depth, size, 'rooms_and_corridors', MAX_ATTEMPTS, true, cells, rooms, stairs);
+  // The last resort never fails: whatever of the contents fits is placed, and what does not is left out.
+  const placed = contents
+    ? placeContents({
+        cells, width, height, rooms, up: stairs.up, down: stairs.down, size, depth,
+        literalRooms: true, contents, rng: levelStreams(seed).contents, strict: false,
+      })
+    : null;
+  return build(runSeed, depth, size, 'rooms_and_corridors', MAX_ATTEMPTS, true, cells, placed?.rooms ?? rooms, stairs, placed?.placements);
 }
 
 /**
@@ -251,14 +291,20 @@ export function fallbackLevel(runSeed: number, depth: number, size: SizeClass, s
  * and generator version always give the same level, and no other level is needed first.
  * If validation fails, the next sub-seed is tried (up to 20 times), then the fallback.
  */
-export function generateLevel(runSeed: number, depth: number, size: SizeClass, style: LevelStyle = PLAIN_STYLE): Level {
+export function generateLevel(
+  runSeed: number,
+  depth: number,
+  size: SizeClass,
+  style: LevelStyle = PLAIN_STYLE,
+  contents?: LevelContents,
+): Level {
   if (!Number.isInteger(depth) || depth < 1 || depth > MAX_DEPTH) throw new RangeError(`bad level number: ${depth}`);
   const seed = levelSeed(runSeed, depth);
   for (let n = 0; n < MAX_ATTEMPTS; n++) {
-    const level = attempt(runSeed, depth, size, style, subSeed(seed, n), n + 1, false);
+    const level = attempt(runSeed, depth, size, style, subSeed(seed, n), n + 1, false, contents);
     if (level && findProblems(level).length === 0) return level;
   }
-  const level = fallbackLevel(runSeed, depth, size, subSeed(seed, MAX_ATTEMPTS));
+  const level = fallbackLevel(runSeed, depth, size, subSeed(seed, MAX_ATTEMPTS), contents);
   const problems = findProblems(level);
   if (problems.length > 0) throw new Error(`fallback level invalid: ${problems.join('; ')}`);
   return level;

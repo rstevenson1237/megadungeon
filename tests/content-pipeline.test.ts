@@ -149,7 +149,7 @@ describe('coverage report', () => {
   it('lists every catalog table against its launch minimum', () => {
     expect(report.tables.map((t) => t.table)).toEqual(CATALOG.map((c) => c.table));
     expect(report.tables).toHaveLength(28);
-    expect(byTable('monsters')).toMatchObject({ count: 2, minimum: 150, present: true, ok: false });
+    expect(byTable('monsters')).toMatchObject({ count: 4, minimum: 150, present: true, ok: false });
     expect(byTable('spells')).toMatchObject({ count: 0, minimum: 15, present: false, ok: false });
     expect(byTable('minor_abilities')).toMatchObject({ minimum: 240, unit: 'slots' });
     expect(byTable('rumours').minimum).toBe(60);
@@ -161,16 +161,18 @@ describe('coverage report', () => {
     for (const table of Object.keys(tableSchemas)) expect(names.has(table), table).toBe(true);
   });
 
-  it('flags the depth gap in the stub monsters and the missing tables', () => {
-    expect(byTable('monsters').depthGaps).toEqual([{ from: 11, to: 100 }]);
-    expect(byTable('bosses').depthGaps).toEqual([{ from: 1, to: 99 }]);
+  it('finds no depth gap in the stub monsters and bosses, which cover every level a run places them on', () => {
+    expect(byTable('monsters').depthGaps).toEqual([]);
+    expect(byTable('bosses').depthGaps).toEqual([]);
+    expect(byTable('bosses')).toMatchObject({ count: 3, minimum: 40, present: true, ok: false });
   });
 
   it('counts monsters per rating', () => {
     const groups = byTable('monsters').groups;
     expect(groups).toHaveLength(20);
     expect(groups[0]).toEqual({ label: 'rating 1', count: 2, minimum: 5 });
-    expect(groups[7]).toEqual({ label: 'rating 8', count: 0, minimum: 5 });
+    expect(groups[7]).toEqual({ label: 'rating 8', count: 1, minimum: 5 });
+    expect(groups[8]).toEqual({ label: 'rating 9', count: 0, minimum: 5 });
   });
 
   it('finds a template for every rumour kind and quest type in the stub content', () => {
@@ -252,8 +254,8 @@ describe('coverage report', () => {
   it('writes a page that names every table', () => {
     const html = renderCoverageHtml(report);
     for (const t of CATALOG) expect(html).toContain(t.table);
-    expect(html).toContain('2 / 150 entries');
-    expect(html).toContain('levels 11 to 100 (all themes)');
+    expect(html).toContain('4 / 150 entries');
+    expect(html).toContain('3 / 40 entries');
     expect(html.startsWith('<!doctype html>')).toBe(true);
   });
 

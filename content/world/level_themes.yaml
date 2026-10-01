@@ -1,60 +1,73 @@
 # The 13 level themes of Spec 02 and the intake. `depth` starts at the unlock level.
-# `stamp`, `liquid` and `pillared` are layout variants (Spec 02, task 2.3). Palettes, tile sets and
-# feature weights are added with tasks 2.4 and 3.2.
+# `stamp`, `liquid` and `pillared` are layout variants (Spec 02, task 2.3). `doors` and `features` are the
+# placement variants of task 2.4: door weights, and the intake's feature bias (the first kind listed x3, the others
+# x2). Palettes and tile sets are added with task 3.2.
 - id: cellars_and_crypts
   name: Cellars and Crypts
   depth: [1, 99]
   layout: rooms_and_corridors
   size: small
+  features: { sarcophagus: 3, pottery: 2, debris: 2 }
 - id: goblin_warrens
   name: Goblin Warrens
   depth: [1, 99]
   layout: warren_tunnels
   size: small
+  features: { sack: 3, graffiti: 2 }
 - id: flooded_sewers
   name: Flooded Sewers
   depth: [1, 99]
   layout: channel_grid
   size: medium
+  features: { sack: 3 }
 - id: old_mine
   name: Old Mine
   depth: [1, 99]
   layout: cellular_caves
   size: medium
   stamp: shafts
+  features: { debris: 3, rack: 2 }
 - id: ruined_temple
   name: Ruined Temple
   depth: [20, 99]
   layout: mirrored_halls
   size: medium
+  features: { altar: 3, fountain: 2, rune: 2, book: 2 }
 - id: fungal_caverns
   name: Fungal Caverns
   depth: [20, 99]
   layout: cellular_caves
   size: large
   stamp: river
+  features: { debris: 3, pottery: 2 }
 - id: dwarven_hold
   name: Dwarven Hold
   depth: [40, 99]
   layout: rooms_and_corridors
   size: large
   pillared: true
+  doors: { locked: 25 }
+  features: { rack: 3, chest: 2, sign: 2 }
 - id: catacomb_labyrinth
   name: Catacomb Labyrinth
   depth: [40, 99]
   layout: maze_with_crypts
   size: medium
+  doors: { secret: 25 }
+  features: { sarcophagus: 3 }
 - id: wizards_sanctum
   name: Wizard's Sanctum
   depth: [60, 99]
   layout: freeform_chambers
   size: medium
+  features: { rune: 3, book: 2, altar: 2 }
 - id: underdark_lake
   name: Underdark Lake
   depth: [60, 99]
   layout: cellular_caves
   size: large
   stamp: lake
+  features: { fountain: 3, sign: 2, containers: 0.5 }
 - id: lava_forges
   name: Lava Forges
   depth: [80, 99]
@@ -62,11 +75,14 @@
   size: large
   stamp: river
   liquid: lava
+  features: { rack: 3, altar: 2, rune: 2 }
 - id: void_halls
   name: Void Halls
   depth: [80, 99]
   layout: disjoint_rooms
   size: medium
+  doors: { secret: 40 }
+  features: { rune: 3 }
 - id: abyssal_throne
   name: The Abyssal Throne
   depth: [100, 100]

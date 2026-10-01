@@ -4,14 +4,14 @@
 // behaviours, items and the full character come with tasks 2.5 to 2.9.
 
 import type { LogMessage } from '../core/log.ts';
-import { createRng, hash32, levelSeed, levelStreams, type Rng } from '../core/rng.ts';
+import { createRng, hash32, levelSeed, type Rng } from '../core/rng.ts';
 import { meleeOutcome, monsterRoll, rollDie } from '../rules/combat/melee.ts';
 import { distancesFrom } from '../rules/world/grid.ts';
 import { distanceSq } from '../rules/world/geometry.ts';
 import { TILE, type Level, type Point } from '../rules/world/level.ts';
 import type { Command } from './commands.ts';
 import { type MapState, TERRAIN_BLOCKED, TERRAIN_OPEN, createMapState, isOpen, refreshSight } from './map-state.ts';
-import { type Monster, type Speed, placeStubMonsters } from './monsters.ts';
+import { type Monster, type Speed, spawnAll } from './monsters.ts';
 
 /** At most this many creatures act per round, nearest first (Spec 04). */
 export const MAX_SIMULATED = 50;
@@ -93,16 +93,15 @@ export class Game {
 
   constructor(runSeed: number, level: Level, player: PlayerState, arrival: ArrivalOptions = {}) {
     const seed = levelSeed(runSeed, level.depth);
-    const streams = levelStreams(seed);
     const round = arrival.round ?? 1;
     const { delta } = arrival;
     // The runtime stream is mixed with the arrival round, so a revisit does not replay the
-    // dice of the last visit; the contents stream is not, so monsters regenerate identically.
+    // dice of the last visit; the monsters come from the generated level, so they regenerate identically.
     this.rng = createRng(hash32('runtime', seed, round));
     const at = arrival.stair === 'down' ? level.downStair ?? level.upStair : level.upStair;
     this.state = {
       map: createMapState(level, { at, openDoors: delta?.openDoors.slice(), explored: delta?.explored.slice() }),
-      monsters: delta ? delta.monsters.map((m) => ({ ...m })) : placeStubMonsters(level, streams.contents),
+      monsters: delta ? delta.monsters.map((m) => ({ ...m })) : spawnAll(level),
       player,
       round,
     };
@@ -171,6 +170,11 @@ export class Game {
     }
     const cell = y * level.width + x;
     if (level.tiles[y]![x] === TILE.door && !isOpen(map, x, y)) {
+      // Locked and sealed doors stay shut until keys and picking arrive (task 2.10); trying one is free.
+      if (level.doors.some((d) => d.x === x && d.y === y && (d.kind === 'locked' || d.kind === 'sealed'))) {
+        messages.push({ kind: 'system', text: 'The door is locked.' });
+        return { messages, spent: false };
+      }
       // A normal door opens when moved into; it costs the move (Spec 06).
       map.openDoors.push(cell);
       map.terrain[cell] = TERRAIN_OPEN;

@@ -1,0 +1,26 @@
+# Stub entries for task 2.4 (Spec 02, step 11). A boss's rating is the ceiling plus up to 3 dice
+# (Spec 02, Depth scaling). The launch table of 40 is written in Phase 3 (task 3.3).
+- id: stub_boss_shallow
+  name: stub warlord
+  glyph: B
+  colour: moss
+  rating: 4d6+2
+  behaviour: stub
+  depth: [1, 30]
+  tags: [stub]
+- id: stub_boss_middle
+  name: stub overlord
+  glyph: B
+  colour: moss
+  rating: 10d6+4
+  behaviour: stub
+  depth: [31, 60]
+  tags: [stub]
+- id: stub_boss_deep
+  name: stub tyrant
+  glyph: B
+  colour: moss
+  rating: 15d6+5
+  behaviour: stub
+  depth: [61, 99]
+  tags: [stub]
