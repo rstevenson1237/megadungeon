@@ -27,6 +27,8 @@ export interface ClassDef {
   /** The pool that steps up one at each of levels 4, 7 and 9. */
   steps: Record<StepLevel, PoolName>;
   minorAbilities: readonly MinorAbilityDef[];
+  /** Spells known at level 1, and the one the class always has (Spec 04); none when absent. */
+  spells?: { count: number; always?: string };
 }
 
 export interface Character {

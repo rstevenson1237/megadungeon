@@ -3,7 +3,7 @@
 // monster or player, then the targeting overlay.
 
 import type { GameState } from '../game/game.ts';
-import type { Targeting } from '../game/targeting.ts';
+import type { CellCursor, Targeting } from '../game/targeting.ts';
 import { TILE } from '../rules/world/level.ts';
 import { toCp437 } from './cp437.ts';
 import { cameraOrigin } from './camera.ts';
@@ -20,6 +20,7 @@ const GLYPH_DOOR_CLOSED = 43;
 const GLYPH_DOOR_OPEN = 39;
 const GLYPH_SHALLOW = 126;
 const GLYPH_LIQUID = 247;
+const GLYPH_TRAP = 94; // ^
 
 /** Glyph and colour pair for a terrain character in one of its two drawn states. */
 function terrain(tile: string, visible: boolean, open: boolean): [number, number] {
@@ -44,11 +45,17 @@ function terrain(tile: string, visible: boolean, open: boolean): [number, number
   }
 }
 
-export function drawMap(grid: Grid, state: GameState, targeting: Targeting | null = null): void {
+export function drawMap(grid: Grid, state: GameState, targeting: Targeting | null = null, cursor: CellCursor | null = null): void {
   const view = inner(MAIN_PANE);
   const { level, exploration, visible, player, openDoors } = state.map;
   const origin = cameraOrigin(level.width, level.height, player, view.w, view.h);
   const open = new Set(openDoors);
+  // Hidden things the player has found (Spec 04, Detect; Spec 06): secret doors draw as doors, traps as ^.
+  const found = new Set(state.revealed);
+  const secrets = new Set(level.doors.filter((d) => d.kind === 'secret' && found.has(d.y * level.width + d.x)).map((d) => d.y * level.width + d.x));
+  const traps = new Set(
+    [...level.traps, ...level.features.filter((f) => f.type === 'container' && f.trap)].map((p) => p.y * level.width + p.x).filter((i) => found.has(i)),
+  );
   // Level cell to screen cell, or null when off the window.
   const screen = (x: number, y: number): [number, number] | null => {
     const sx = x - origin.x;
@@ -63,8 +70,11 @@ export function drawMap(grid: Grid, state: GameState, targeting: Targeting | nul
       if (lx < 0 || ly < 0 || lx >= level.width || ly >= level.height) continue;
       const i = ly * level.width + lx;
       if (!exploration.explored[i]) continue;
-      const [glyph, fg] = terrain(level.tiles[ly]![lx]!, visible[i] === 1, open.has(i));
+      // A secret door that was found draws as a door, closed or open.
+      const tile = secrets.has(i) ? TILE.door : level.tiles[ly]![lx]!;
+      const [glyph, fg] = terrain(tile, visible[i] === 1, open.has(i));
       grid.set(view.x + vx, view.y + vy, glyph, fg, MAP.background);
+      if (traps.has(i)) grid.set(view.x + vx, view.y + vy, GLYPH_TRAP, MAP.trap[visible[i] === 1 ? 'visible' : 'remembered'], MAP.background);
     }
   }
 
@@ -77,6 +87,17 @@ export function drawMap(grid: Grid, state: GameState, targeting: Targeting | nul
   if (me) grid.set(me[0], me[1], GLYPH_PLAYER, MAP.player, MAP.background);
 
   if (targeting) drawTargeting(grid, targeting, screen);
+  if (cursor) drawCursor(grid, cursor, screen);
+}
+
+/** Blink's cell choice: every valid destination tinted, the cursor on top. */
+function drawCursor(grid: Grid, c: CellCursor, screen: (x: number, y: number) => [number, number] | null): void {
+  for (const p of c.cells) {
+    const at = screen(p.x, p.y);
+    if (at) grid.setBg(at[0], at[1], TARGET.footprintBg);
+  }
+  const at = screen(c.at.x, c.at.y);
+  if (at) grid.setBg(at[0], at[1], c.ok ? TARGET.selectedBg : TARGET.markedBg);
 }
 
 function drawTargeting(grid: Grid, t: Targeting, screen: (x: number, y: number) => [number, number] | null): void {

@@ -20,7 +20,7 @@ export interface TargetSpec {
  * Valid targets (Spec 01 and 04): visible, within range, with a clear line of fire (no wall,
  * closed door or other creature on the way; water and lava do not block it). Sorted by distance, ties broken clockwise from north.
  */
-export function validTargets(game: Game, range: number): Monster[] {
+export function validTargets(game: Game, range: number, allow: (m: Monster) => boolean = () => true): Monster[] {
   const { map } = game.state;
   const from = map.player;
   const { width } = map.level;
@@ -29,7 +29,7 @@ export function validTargets(game: Game, range: number): Monster[] {
       .slice(0, -1)
       .every((c) => isClear(map, c.x, c.y) && !game.monsterAt(c.x, c.y));
   return game.state.monsters
-    .filter((m) => map.visible[m.y * width + m.x] === 1 && distanceSq(from, m) <= range * range && clear(m))
+    .filter((m) => map.visible[m.y * width + m.x] === 1 && distanceSq(from, m) <= range * range && allow(m) && clear(m))
     .sort((a, b) => distanceSq(from, a) - distanceSq(from, b) || bearingFromNorth(from, a) - bearingFromNorth(from, b));
 }
 
@@ -93,7 +93,36 @@ export class Targeting {
 }
 
 /** Start targeting on the closest valid target, or null when there is none (the caller logs it; no turn is spent). */
-export function startTargeting(game: Game, spec: TargetSpec): Targeting | null {
-  const targets = validTargets(game, spec.range);
+export function startTargeting(game: Game, spec: TargetSpec, allow?: (m: Monster) => boolean): Targeting | null {
+  const targets = validTargets(game, spec.range, allow);
   return targets.length === 0 ? null : new Targeting(game, spec, targets);
+}
+
+/**
+ * Choosing a cell rather than a creature (Blink, Spec 04, task 2.8): a cursor that starts on the caster and
+ * moves one cell at a time, with the cells that would be valid listed so the view can tint them.
+ */
+export class CellCursor {
+  at: Point;
+
+  constructor(
+    private readonly game: Game,
+    /** Whether a cell is a valid destination. */
+    private readonly valid: (at: Point) => boolean,
+    /** Every valid destination, for the preview. */
+    readonly cells: readonly Point[],
+  ) {
+    this.at = { ...game.state.map.player };
+  }
+
+  /** Move the cursor one cell, staying on the map. */
+  move(dx: number, dy: number): void {
+    const { width, height } = this.game.state.map.level;
+    this.at = { x: Math.max(0, Math.min(width - 1, this.at.x + dx)), y: Math.max(0, Math.min(height - 1, this.at.y + dy)) };
+  }
+
+  /** Whether the cursor stands on a valid destination. */
+  get ok(): boolean {
+    return this.valid(this.at);
+  }
 }

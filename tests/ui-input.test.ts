@@ -76,7 +76,8 @@ describe('every key acts or logs "not yet available"', () => {
     const handled = press(shell, key, shift);
     expect(handled).toBe(true);
     const acted = shell.overlays.length > 0;
-    const logged = shell.log.lines(shell.turn).some((l) => l.text.endsWith('is not yet available.'));
+    // Casting (task 2.8) acts: with no level to cast in it says so instead.
+    const logged = shell.log.lines(shell.turn).some((l) => l.text.endsWith('is not yet available.') || l.text.startsWith('There is nothing to cast'));
     expect(acted || logged).toBe(true);
   });
 

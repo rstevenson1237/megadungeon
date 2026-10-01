@@ -13,6 +13,7 @@ import type {
   Trap,
   VillageName,
 } from '../core/schemas.ts';
+import { spellsFrom } from '../rules/magic/spells.ts';
 import { PLAIN_STYLE } from '../rules/world/generate.ts';
 import { planLevel, type PlacementContent } from '../rules/world/placement/index.ts';
 import { generateRunLayout, type LayoutContent, type ThemeRow } from '../rules/world/run-layout.ts';
@@ -66,6 +67,7 @@ export function runOptionsFor(bundle: ContentBundle, seed: number): RunOptions {
   const themeAt = (depth: number): ThemeRow | undefined => themes.get(layout.themes[depth] ?? '');
   return {
     layout,
+    spells: spellsFrom(bundle),
     sizeFor: (depth) => themeAt(depth)?.size ?? 'medium',
     styleFor: (depth) => themeAt(depth) ?? PLAIN_STYLE,
     contentsFor: (depth) => {

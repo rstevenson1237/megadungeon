@@ -44,6 +44,7 @@ describe('content build', () => {
       'rumours',
       'runes',
       'signs',
+      'spells',
       'traps',
       'vault_names',
       'village_names',

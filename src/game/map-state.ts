@@ -32,12 +32,12 @@ export function buildTerrain(level: Level, openDoors: readonly number[]): Uint8A
     const row = level.tiles[y]!;
     for (let x = 0; x < level.width; x++) {
       const tile = row[x];
-      terrain[y * level.width + x] =
-        tile === TILE.wall || (tile === TILE.door && !open.has(y * level.width + x))
-          ? TERRAIN_BLOCKED
-          : tile === TILE.deepWater || tile === TILE.lava
-            ? TERRAIN_LIQUID
-            : TERRAIN_OPEN;
+      const cell = y * level.width + x;
+      // An open door is passable whatever the tile: a secret door that was found and opened is a wall tile (Spec 06).
+      if (open.has(cell)) terrain[cell] = TERRAIN_OPEN;
+      else if (tile === TILE.wall || tile === TILE.door) terrain[cell] = TERRAIN_BLOCKED;
+      else if (tile === TILE.deepWater || tile === TILE.lava) terrain[cell] = TERRAIN_LIQUID;
+      else terrain[cell] = TERRAIN_OPEN;
     }
   }
   return terrain;

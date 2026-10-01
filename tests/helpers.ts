@@ -1,4 +1,7 @@
-import { Game, type PlayerState, createPlayer } from '../src/game/game.ts';
+import { resolve } from 'node:path';
+import type { Rng } from '../src/core/rng.ts';
+import type { Spell } from '../src/core/schemas.ts';
+import { Game, type ArrivalOptions, type PlayerState, createPlayer } from '../src/game/game.ts';
 import { Run } from '../src/game/run.ts';
 import { GENERATOR_VERSION, emptyPlacements, type Level, type Point } from '../src/rules/world/level.ts';
 import { creature, type Monster } from '../src/game/monsters.ts';
@@ -6,6 +9,8 @@ import type { CharacterPaneData } from '../src/ui/character-pane.ts';
 import { CP437_TO_UNICODE } from '../src/ui/cp437.ts';
 import { COLS, Grid } from '../src/ui/grid.ts';
 import { Shell } from '../src/ui/shell.ts';
+import { buildContent } from '../tools/content-build.ts';
+import { spellsFrom } from '../src/rules/magic/spells.ts';
 
 /** Build a level from rows: '#' wall, '.' floor, '<' up stair (required), '>' down stair. */
 export function levelFrom(rows: string[]): Level {
@@ -35,8 +40,42 @@ export function room(w: number, h: number, px: number, py: number): Level {
 export const testPlayer = (extra: Partial<PlayerState> = {}): PlayerState =>
   ({ ...createPlayer({ combatStep: 6, combatDice: 2, combatMax: 2, ranged: { name: 'Sling', range: 6, ammo: 20 } }), ...extra });
 
-export function gameOn(level: Level, player: Partial<PlayerState> = {}): Game {
-  return new Game(1, level, testPlayer(player));
+export function gameOn(level: Level, player: Partial<PlayerState> = {}, arrival: ArrivalOptions = {}): Game {
+  return new Game(1, level, testPlayer(player), arrival);
+}
+
+/** The real content, built once: the 15 spells and the classes are read from the tables, not rewritten in tests. */
+let built: ReturnType<typeof buildContent> | undefined;
+export const content = () => (built ??= buildContent(resolve(import.meta.dirname, '../content')));
+export const SPELLS: Spell[] = spellsFrom(content().bundle);
+export const spell = (id: string): Spell => SPELLS.find((s) => s.id === id)!;
+
+/** A caster: three Magic d6 dice, and every spell known. */
+export const caster = (extra: Partial<PlayerState> = {}): Partial<PlayerState> => ({
+  magic: { step: 6, dice: 3, max: 3 },
+  spells: SPELLS.map((s) => s.id),
+  combatDice: 3,
+  combatMax: 3,
+  ...extra,
+});
+
+/** A game for casting: the spell table loaded, the player a caster. */
+export const castingGame = (level: Level, extra: Partial<PlayerState> = {}): Game => gameOn(level, caster(extra), { spells: SPELLS });
+
+/**
+ * Deal the given faces to the next `int` calls of the game's generator, then carry on with the real stream.
+ * Each call replaces what was still queued. A spell's own roll comes first, then any duration it rolls, then
+ * whatever the creatures roll after it, so rig a trailing face for any creature that will roll that round.
+ */
+export function rig(game: Game, ...faces: number[]): void {
+  const rng = game.rng as Rng & { queue?: number[] };
+  if (!rng.queue) {
+    rng.queue = [];
+    const real = rng.int.bind(rng);
+    rng.int = (min: number, max: number): number => (rng.queue!.length > 0 ? rng.queue!.shift()! : real(min, max));
+  }
+  rng.queue.length = 0;
+  rng.queue.push(...faces);
 }
 
 /** A monster with sensible defaults: one die, normal speed, a brute, unaware unless `alert` is set. */
@@ -59,9 +98,9 @@ export const testCharacter = (): CharacterPaneData => ({
 });
 
 /** A shell with a game loaded on the given level. */
-export function shellOn(level: Level, monsters: Monster[] = []): Shell {
+export function shellOn(level: Level, monsters: Monster[] = [], player: Partial<PlayerState> = {}): Shell {
   const shell = new Shell('Test', testCharacter());
-  shell.setRun(new Run(1, testPlayer(), { startDepth: 1, levelFor: () => level }));
+  shell.setRun(new Run(1, testPlayer(player), { startDepth: 1, levelFor: () => level, spells: SPELLS }));
   shell.game!.state.monsters.push(...monsters);
   return shell;
 }

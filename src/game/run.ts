@@ -6,6 +6,7 @@
 // algorithm on to the generator. Saving comes with task 2.13.
 
 import type { LogMessage } from '../core/log.ts';
+import type { Spell } from '../core/schemas.ts';
 import { generateLevel, PLAIN_STYLE, type LevelStyle } from '../rules/world/generate.ts';
 import { MAX_DEPTH, type Level, type SizeClass } from '../rules/world/level.ts';
 import type { LevelContents } from '../rules/world/placement/index.ts';
@@ -31,6 +32,8 @@ export interface RunOptions {
   contentsFor?: (depth: number) => LevelContents | undefined;
   /** Depths that are villages instead of levels; the surface only, unless a layout is given. */
   villages?: number[];
+  /** The spell table, so the spells the player knows can be cast (Spec 04). */
+  spells?: readonly Spell[];
   /** Where the run starts: the surface village by default. */
   startDepth?: number;
   /** Supplies the level for a depth. Tests pass hand-built levels; the default generates from the seed. */
@@ -47,6 +50,7 @@ export class Run {
   /** The run's round counter; a level's own counter takes over while it is being played. */
   round = 1;
   private readonly levelFor: (depth: number) => Level;
+  private readonly spells: readonly Spell[];
 
   constructor(
     readonly runSeed: number,
@@ -54,6 +58,7 @@ export class Run {
     options: RunOptions = {},
   ) {
     this.layout = options.layout;
+    this.spells = options.spells ?? [];
     this.villages = options.villages ?? [SURFACE, ...(options.layout?.villages.map((v) => v.level) ?? [])];
     const sizeFor = options.sizeFor ?? stubSize;
     const styleFor = options.styleFor ?? (() => PLAIN_STYLE);
@@ -106,6 +111,7 @@ export class Run {
       stair: direction === 'down' ? 'up' : 'down',
       delta: this.deltas[depth],
       round: this.round,
+      spells: this.spells,
     });
   }
 }

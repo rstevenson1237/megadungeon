@@ -51,6 +51,7 @@ export const MAP = {
   shallowWater: { visible: 0x4a8fd0, remembered: 0x21415e },
   deepWater: { visible: 0x2a5aa8, remembered: 0x162c52 },
   lava: { visible: 0xe05a20, remembered: 0x6a2a10 },
+  trap: { visible: 0xe05a5a, remembered: 0x6a2e2e },
   player: 0xffffff,
   background: 0x000000,
 } as const;

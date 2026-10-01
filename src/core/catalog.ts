@@ -112,8 +112,30 @@ export type QuestType = (typeof QUEST_TYPES)[number];
 /** Monster behaviours defined in code (Spec 04). `stub` serves the Phase 1 stub monsters until task 2.7. */
 export const BEHAVIOURS = ['brute', 'skirmisher', 'caster', 'ambusher', 'pack', 'coward', 'stub'] as const;
 
-/** Effects defined in code. Tables name these (`effect: restore_die`); none exist until tasks 2.8 and 2.9. */
-export const EFFECTS: readonly string[] = [];
+/** The eight status effects (Spec 04, "Status effects"). */
+export const STATUS_IDS = ['poisoned', 'slowed', 'hasted', 'asleep', 'held', 'frightened', 'blessed', 'cursed'] as const;
+export type StatusId = (typeof STATUS_IDS)[number];
+
+/** The three spell shapes (Spec 04, "Starting spell list"). */
+export const SPELL_SHAPES = ['self', 'target', 'area'] as const;
+export type SpellShape = (typeof SPELL_SHAPES)[number];
+
+/** Spell effects defined in code (Spec 08: tables name effects, never scripts). Item effects arrive with task 2.9. */
+export const SPELL_EFFECTS = [
+  'restore_die',
+  'shield',
+  'status',
+  'light',
+  'detect',
+  'blink',
+  'remove_die',
+  'drain',
+  'push',
+] as const;
+export type SpellEffect = (typeof SPELL_EFFECTS)[number];
+
+/** Effects defined in code. Tables name these (`effect: restore_die`). */
+export const EFFECTS: readonly string[] = [...SPELL_EFFECTS];
 
 /** Launch floors for tables that are checked by group (Spec 08, "Validation and coverage"). */
 export const MONSTERS_PER_RATING = 5;

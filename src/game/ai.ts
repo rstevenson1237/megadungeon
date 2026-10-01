@@ -5,6 +5,7 @@
 import type { LogMessage } from '../core/log.ts';
 import { LOSE_TRACK_ROUNDS, NOTICE_RANGE, noticeRoll } from '../rules/combat/awareness.ts';
 import { creatureMelee, failsMorale, monsterRanged } from '../rules/combat/attacks.ts';
+import { cannotAct, effectiveSpeed, hasStatus } from '../rules/magic/status.ts';
 import { distanceSq, lineCells } from '../rules/world/geometry.ts';
 import { distancesFrom } from '../rules/world/grid.ts';
 import { TILE, type Point } from '../rules/world/level.ts';
@@ -303,7 +304,7 @@ function hunt(round: Round, m: Monster): void {
 /** The rival's melee with a monster next to it: one exchange in which both roll d6 plus modifier. */
 function rivalFights(round: Round, rival: Monster, target: Monster): void {
   const { game, messages } = round;
-  const exchange = creatureMelee(game.rng, rival, { modifier: target.modifier, unaware: target.awareness !== 'alert' });
+  const exchange = creatureMelee(game.rng, rival, { modifier: target.modifier, unaware: target.awareness !== 'alert', asleep: hasStatus(target.statuses, 'asleep') });
   provoke(game, target);
   combatAt(game, target, [target]);
   if (exchange.defenderHit) damage(game, target, messages, rival);
@@ -424,12 +425,13 @@ export function creaturesAct(game: Game, messages: LogMessage[]): void {
     if (player.dead) return;
     if (!monsters.includes(m)) continue;
     checkRound(round, m);
-    for (let n = actionsInRound(m.speed, number); n > 0; n--) {
+    for (let n = actionsInRound(effectiveSpeed(m.speed, m.statuses), number); n > 0; n--) {
       if (player.dead || !monsters.includes(m)) break;
+      if (cannotAct(m.statuses)) break; // Asleep or Held (Spec 04, Status effects)
       if (m.kind === 'rival' && !m.hostile) rivalTurn(round, m);
       else if (m.awareness === 'asleep') break;
       else if (m.awareness === 'unaware') wander(game, m);
-      else if (m.fleeing) flee(round, m);
+      else if (m.fleeing || hasStatus(m.statuses, 'frightened')) flee(round, m);
       else hunt(round, m);
     }
   }

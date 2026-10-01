@@ -10,6 +10,9 @@ import {
   QUEST_TYPES,
   RUMOUR_KINDS,
   SIZE_CLASSES,
+  SPELL_EFFECTS,
+  SPELL_SHAPES,
+  STATUS_IDS,
   TRAP_KINDS,
 } from './catalog.ts';
 
@@ -113,6 +116,8 @@ export const classSchema = z.strictObject({
       'starting dice are all d6, or one each of d4, d6 and d8',
     ),
   steps: z.tuple([poolName, poolName, poolName]),
+  // Spells known at level 1 (Spec 04): how many, and the one every character of the class has.
+  spells: z.strictObject({ count: z.number().int().min(1).max(3), always: id.optional() }).optional(),
   ability: z.strictObject({ id, name: z.string().min(1), text: z.string().min(1) }),
 });
 
@@ -125,6 +130,37 @@ export const minorAbilitySchema = z.strictObject({
   // May be drawn more than once (such as Pack Mule).
   stackable: z.boolean().optional(),
 });
+
+// Spells (Spec 04, "Spells" and "Starting spell list"): the shape, the reach in cells and the effect, which
+// is code. `status` and `rounds` belong to the `status` effect; `size` is the footprint of an area spell
+// aimed at a creature and `centred` an area around the caster; `affects` limits an area to creatures with a tag.
+const spellRounds = z.union([z.number().int().positive(), z.literal('d6')]);
+export const spellSchema = z
+  .strictObject({
+    ...baseFields,
+    name: z.string().min(1),
+    shape: z.enum(SPELL_SHAPES),
+    effect: z.enum(SPELL_EFFECTS),
+    text: z.string().min(1),
+    reach: z.number().int().positive().optional(),
+    size: z.union([z.literal(3), z.literal(5)]).optional(),
+    centred: z.boolean().optional(),
+    status: z.enum(STATUS_IDS).optional(),
+    rounds: spellRounds.optional(),
+    distance: z.number().int().positive().optional(),
+    affects: z.array(z.string()).min(1).optional(),
+  })
+  .superRefine((spell, ctx) => {
+    const bad = (message: string): void => void ctx.addIssue({ code: 'custom', message });
+    if (spell.effect === 'status' && (!spell.status || spell.rounds === undefined)) bad('a status spell needs `status` and `rounds`');
+    if (spell.effect !== 'status' && (spell.status || spell.rounds !== undefined) && spell.effect !== 'shield') bad('only status and shield spells take `status` or `rounds`');
+    if (spell.effect === 'shield' && spell.rounds === undefined) bad('a shield spell needs `rounds`');
+    if (spell.effect === 'push' && spell.distance === undefined) bad('a push spell needs `distance`');
+    if (spell.shape === 'area' && !spell.centred && !spell.size) bad('an area spell needs `size` or `centred`');
+    if (spell.shape !== 'self' && !spell.reach) bad('a target or area spell needs a `reach`');
+    if (spell.centred && spell.shape !== 'area') bad('only an area spell can be centred');
+    if (spell.size && (spell.shape !== 'area' || spell.centred)) bad('`size` is for an area spell aimed at a creature');
+  });
 
 const templateText = z.array(z.string().min(1)).min(1, 'a template needs at least one phrasing');
 
@@ -142,6 +178,7 @@ export const questTemplateSchema = z.strictObject({
   text: templateText,
 });
 
+export type Spell = z.infer<typeof spellSchema>;
 export type ClassEntry = z.infer<typeof classSchema>;
 export type MinorAbilityEntry = z.infer<typeof minorAbilitySchema>;
 export type VillageName = z.infer<typeof villageNameSchema>;
@@ -180,6 +217,7 @@ export const tableSchemas = {
   lore_chains: loreChainSchema,
   classes: classSchema,
   minor_abilities: minorAbilitySchema,
+  spells: spellSchema,
 } as const;
 
 export type TableName = keyof typeof tableSchemas;

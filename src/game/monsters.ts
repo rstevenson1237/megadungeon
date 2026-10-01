@@ -4,10 +4,11 @@
 
 import type { Rng } from '../core/rng.ts';
 import type { Awareness } from '../rules/combat/awareness.ts';
+import type { Speed, StatusEffect } from '../rules/magic/status.ts';
 import { npcRating } from '../rules/world/depth.ts';
 import type { Level, Loot, MonsterRole, PlacedMonster } from '../rules/world/level.ts';
 
-export type Speed = 'slow' | 'normal' | 'fast';
+export type { Speed };
 export type CreatureKind = 'monster' | 'bandit' | 'rival';
 
 /** Shots a skirmisher (or a hostile rival) carries before it closes in (Spec 04, task 2.7). */
@@ -32,6 +33,10 @@ export interface Monster {
   role: MonsterRole;
   /** Never flees: undead, constructs and bosses (Spec 04, Morale). */
   fearless: boolean;
+  /** A row tagged undead: Turn Undead reaches it (Spec 04). */
+  undead: boolean;
+  /** Active status effects (Spec 04, "Status effects"). */
+  statuses: StatusEffect[];
   awareness: Awareness;
   /** Rounds spent alert with the player out of sight (Spec 04, Awareness). */
   lost: number;
@@ -76,6 +81,8 @@ export function creature(base: Pick<Monster, 'id' | 'name' | 'glyph' | 'colour' 
     kind: 'monster',
     role: 'normal',
     fearless: false,
+    undead: false,
+    statuses: [],
     awareness: 'unaware',
     lost: 0,
     fleeing: false,
@@ -112,6 +119,7 @@ export const spawn = (p: PlacedMonster, id: number, rng?: Rng): Monster => {
     behaviour: p.behaviour,
     role: p.role,
     fearless: p.fearless === true || p.role === 'boss',
+    undead: p.undead === true,
     awareness: ambusher || p.role === 'boss' ? 'unaware' : roll ? 'asleep' : 'unaware',
     ambush: ambusher,
     group: p.group,

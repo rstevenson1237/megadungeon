@@ -15,8 +15,13 @@ import { drawMap } from './map-view.ts';
 import type { Game } from '../game/game.ts';
 import type { Run } from '../game/run.ts';
 import { VillageScreen } from './village.ts';
-import { type Targeting, startTargeting } from '../game/targeting.ts';
+import type { LogMessage } from '../core/log.ts';
+import { CellCursor, Targeting, startTargeting } from '../game/targeting.ts';
 import { ratingText } from '../game/monsters.ts';
+import { blinkCells, canBlinkTo, spellTargets, targetSpecOf } from '../game/magic.ts';
+import type { Spell } from '../core/schemas.ts';
+import { describeStatus } from '../rules/magic/status.ts';
+import { spellMenu } from './spells.ts';
 
 export class Shell {
   readonly log = new MessageLog();
@@ -31,6 +36,10 @@ export class Shell {
   village: VillageScreen | null = null;
   /** Set while the player is choosing a target (a free action: no round passes). */
   targeting: Targeting | null = null;
+  /** The spell being aimed, while targeting or choosing a cell for it; null when the target is for the ranged weapon. */
+  casting: Spell | null = null;
+  /** Set while the player is choosing the cell Blink goes to. */
+  cursor: CellCursor | null = null;
 
   constructor(
     public title: string,
@@ -46,6 +55,8 @@ export class Shell {
   setRun(run: Run): void {
     this.run = run;
     this.targeting = null;
+    this.cursor = null;
+    this.casting = null;
     this.arrived();
   }
 
@@ -88,6 +99,10 @@ export class Shell {
       this.target(command);
       return;
     }
+    if (this.cursor) {
+      this.chooseCell(command);
+      return;
+    }
     if (this.village && ['move', 'confirm', 'interact'].includes(command.type)) {
       this.applyVillage(this.village.handle(command));
       return;
@@ -108,6 +123,9 @@ export class Shell {
           return;
         }
         break;
+      case 'cast':
+        this.openSpells();
+        return;
       default: {
         const result = this.game?.act(command);
         if (result) {
@@ -133,10 +151,85 @@ export class Shell {
 
   private syncCharacter(): void {
     const player = this.run?.player;
-    const combat = this.character.stats.find((s) => s.name === 'Combat');
-    if (combat && player) {
-      combat.current = player.combatDice;
-      combat.max = player.combatMax;
+    if (!player) return;
+    const pools = { Combat: [player.combatDice, player.combatMax], Skill: [player.skill.dice, player.skill.max], Magic: [player.magic.dice, player.magic.max] } as const;
+    for (const stat of this.character.stats) {
+      stat.current = pools[stat.name][0];
+      stat.max = pools[stat.name][1];
+    }
+    // Active effects with their rounds left, then a Shield (Spec 01, Status; Spec 04).
+    this.character.status = [...player.statuses.map(describeStatus), ...(player.shield > 0 ? [`Shield ${player.shield}`] : [])];
+  }
+
+  /** C: the spell list. Choosing a spell starts the cast. */
+  private openSpells(): void {
+    const game = this.game;
+    if (!game) {
+      this.log.add({ kind: 'system', text: 'There is nothing to cast at in a village.' }, this.turn);
+      return;
+    }
+    const { player } = game.state;
+    const known = player.spells.map((id) => game.spells.get(id)).filter((s): s is Spell => s !== undefined);
+    if (known.length === 0) {
+      this.log.add({ kind: 'system', text: 'You know no spells.' }, this.turn);
+      return;
+    }
+    this.overlays.push(spellMenu(known, player.magic, (spell) => this.beginCast(spell)));
+  }
+
+  /** A self spell, or one around the caster, resolves on choosing; the rest ask for a creature or a cell (Spec 01, Targeting). */
+  private beginCast(spell: Spell): void {
+    const game = this.game!;
+    if (spell.effect === 'blink') {
+      const cells = blinkCells(game, spell);
+      if (cells.length === 0) {
+        this.log.add({ kind: 'system', text: 'There is nowhere to blink to.' }, this.turn);
+        return;
+      }
+      this.casting = spell;
+      this.cursor = new CellCursor(game, (at) => canBlinkTo(game, spell, at), cells);
+      return;
+    }
+    if (game.castsAtOnce(spell)) return this.finishCast(game.cast(spell));
+    const targets = spellTargets(game, spell);
+    if (targets.length === 0) {
+      this.log.add({ kind: 'system', text: 'There is no valid target.' }, this.turn);
+      return;
+    }
+    this.casting = spell;
+    this.targeting = new Targeting(game, targetSpecOf(spell), targets);
+    this.showTarget();
+  }
+
+  private finishCast(result: { messages: LogMessage[] }): void {
+    for (const m of result.messages) this.log.add(m, this.game!.state.round);
+    this.afterAction();
+  }
+
+  // Keys while choosing Blink's cell: W A S D move the cursor, Enter confirms, Esc cancels with no turn spent.
+  private chooseCell(command: Command): void {
+    const cursor = this.cursor!;
+    switch (command.type) {
+      case 'move':
+        cursor.move(command.dx, command.dy);
+        return;
+      case 'confirm': {
+        if (!cursor.ok) {
+          this.log.add({ kind: 'system', text: 'You cannot blink there.' }, this.turn);
+          return;
+        }
+        const spell = this.casting!;
+        this.cursor = null;
+        this.casting = null;
+        this.finishCast(this.game!.cast(spell, { ...cursor.at }));
+        return;
+      }
+      case 'cancel':
+        this.cursor = null;
+        this.casting = null;
+        return;
+      default:
+        return;
     }
   }
 
@@ -173,14 +266,17 @@ export class Shell {
         break;
       case 'confirm':
       {
-        const result = this.game!.fire(t.selected);
+        const spell = this.casting;
+        const result = spell ? this.game!.cast(spell, t.selected) : this.game!.fire(t.selected);
         this.targeting = null;
+        this.casting = null;
         for (const m of result.messages) this.log.add(m, this.game!.state.round);
         this.afterAction();
         break;
       }
       case 'cancel':
         this.targeting = null;
+        this.casting = null;
         break;
       default:
         return;
@@ -191,7 +287,7 @@ export class Shell {
   /** Draw the whole screen: panes, character, log, then any overlay on top. */
   draw(grid: Grid): void {
     drawPanes(grid, this.title);
-    if (this.game) drawMap(grid, this.game.state, this.targeting);
+    if (this.game) drawMap(grid, this.game.state, this.targeting, this.cursor);
     else if (this.village) this.village.draw(grid);
     else grid.text(inner(MAIN_PANE).x + 2, inner(MAIN_PANE).y + 1, 'No level loaded.', UI.label, UI.background);
     drawCharacterPane(grid, this.character);

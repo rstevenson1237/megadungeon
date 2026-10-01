@@ -29,22 +29,26 @@ export interface MeleeExchange extends MeleeOutcome {
  * Player melee: one Combat die against the monster's d6 plus modifier. An unaware or asleep
  * monster rolls with disadvantage (Spec 04). Higher hits; a tie hits both.
  */
-export function playerMelee(rng: Rng, combat: DieSource, monster: { modifier: number; unaware: boolean }): MeleeExchange {
-  const attacker = poolDie(rng, combat);
+export function playerMelee(rng: Rng, combat: DieSource, monster: { modifier: number; unaware: boolean; asleep?: boolean }): MeleeExchange {
+  // Melee against an Asleep creature has advantage (Spec 04, Status effects).
+  const attacker = poolDie(rng, combat, monster.asleep ? 'advantage' : 'normal');
   const defender = monsterDie(rng, monster.modifier, monster.unaware ? 'disadvantage' : 'normal');
   return { ...meleeOutcome(attacker, defender), attacker, defender };
 }
 
-/** Monster melee: d6 plus modifier against one Combat die. `ambush` is advantage on the first attack of an ambusher. */
-export function monsterMelee(rng: Rng, monster: { modifier: number; ambush: boolean }, combat: DieSource): MeleeExchange {
-  const attacker = monsterDie(rng, monster.modifier, monster.ambush ? 'advantage' : 'normal');
+/**
+ * Monster melee: d6 plus modifier against one Combat die. `ambush` is advantage on the first attack of an
+ * ambusher, and so is attacking a player who is Asleep.
+ */
+export function monsterMelee(rng: Rng, monster: { modifier: number; ambush: boolean }, combat: DieSource, playerAsleep = false): MeleeExchange {
+  const attacker = monsterDie(rng, monster.modifier, monster.ambush || playerAsleep ? 'advantage' : 'normal');
   const defender = poolDie(rng, combat);
   return { ...meleeOutcome(attacker, defender), attacker, defender };
 }
 
 /** Two creatures fighting each other (a rival and a monster): both roll d6 plus modifier. */
-export function creatureMelee(rng: Rng, a: { modifier: number; unaware?: boolean }, b: { modifier: number; unaware?: boolean }): MeleeExchange {
-  const attacker = monsterDie(rng, a.modifier, a.unaware ? 'disadvantage' : 'normal');
+export function creatureMelee(rng: Rng, a: { modifier: number; unaware?: boolean }, b: { modifier: number; unaware?: boolean; asleep?: boolean }): MeleeExchange {
+  const attacker = monsterDie(rng, a.modifier, a.unaware ? 'disadvantage' : b.asleep ? 'advantage' : 'normal');
   const defender = monsterDie(rng, b.modifier, b.unaware ? 'disadvantage' : 'normal');
   return { ...meleeOutcome(attacker, defender), attacker, defender };
 }

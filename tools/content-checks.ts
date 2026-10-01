@@ -28,6 +28,7 @@ export const REFERENCE_RULES: Record<string, readonly RefRule[]> = {
     { field: 'loot.roll', target: 'table' },
   ],
   bosses: [{ field: 'behaviour', target: { registry: 'behaviours' } }],
+  spells: [{ field: 'effect', target: { registry: 'effects' } }],
 };
 
 /** The table that defines theme ids; `themes:` keys are checked against it once it exists. */
@@ -67,6 +68,7 @@ export const SINGLE_LINE_FIELDS: Record<string, readonly string[]> = {
   quest_items: ['name'],
   classes: ['name'],
   minor_abilities: ['name'],
+  spells: ['name'],
 };
 
 function getPath(entry: Entry, path: string): unknown {
@@ -113,6 +115,7 @@ export function checkReferences(bundle: ContentBundle): string[] {
   errors.push(...checkThemeIds(bundle));
   errors.push(...checkThemeVariants(bundle));
   errors.push(...checkMinorAbilityClasses(bundle));
+  errors.push(...checkClassSpells(bundle));
   return errors;
 }
 
@@ -126,6 +129,20 @@ function checkMinorAbilityClasses(bundle: ContentBundle): string[] {
       if (!known.has(cls)) errors.push(`minor_abilities "${String(entry.id)}": classes "${cls}" is not a class`);
     }
     if (new Set(listed).size !== listed.length) errors.push(`minor_abilities "${String(entry.id)}": a class is listed twice`);
+  }
+  return errors;
+}
+
+/** A class's guaranteed spell must exist, and must fit inside the number of spells it starts with (Spec 04). */
+function checkClassSpells(bundle: ContentBundle): string[] {
+  const known = new Set(entriesOf(bundle, 'spells').map((e) => String(e.id)));
+  const errors: string[] = [];
+  for (const entry of entriesOf(bundle, 'classes')) {
+    const spells = entry.spells as { count: number; always?: string } | undefined;
+    if (spells?.always !== undefined && !known.has(spells.always)) {
+      errors.push(`classes "${String(entry.id)}": spells.always "${spells.always}" is not a spell`);
+    }
+    if (spells && spells.count > known.size) errors.push(`classes "${String(entry.id)}": starts with ${spells.count} spells but only ${known.size} exist`);
   }
   return errors;
 }
