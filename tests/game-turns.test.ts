@@ -78,18 +78,6 @@ describe('turn loop (Spec 04, Turns and timing)', () => {
       .map((m) => m.id);
     expect(unmoved.sort((a, b) => a - b)).toEqual(farthest.sort((a, b) => a - b));
   });
-
-  it('keeps stub monsters idle until the player sees them, then hunts', () => {
-    const game = gameOn(room(30, 3, 1, 2));
-    const near = monsterAt(5, 2);
-    const far = monsterAt(28, 2);
-    game.state.monsters.push(near, far);
-    game.act({ type: 'wait' });
-    expect(near.alert).toBe(true); // in sight within 8
-    expect(near.x).toBe(4);
-    expect(far.alert).toBe(false);
-    expect(far.x).toBe(28);
-  });
 });
 
 describe('doors (Spec 06, Doors and locks)', () => {
@@ -240,11 +228,12 @@ describe('spawning placed monsters (Spec 02, step 8)', () => {
     dice: 3, modifier: 1, speed: 'normal' as const, behaviour: 'stub', group: 0, role: 'normal' as const,
   };
 
-  it('brings a placed monster to life at full health, not yet alert, with its table colour', () => {
+  it('brings a placed monster to life at full health, not alert, with its table colour', () => {
     const level = { ...room(8, 3, 1, 2), monsters: [placed, { ...placed, x: 5, colour: 'unheard-of', speed: 'fast' as const }] };
     const monsters = spawnAll(level);
     expect(monsters.map((m) => m.id)).toEqual([0, 1]);
-    expect(monsters[0]).toMatchObject({ name: 'stub goblin', glyph: 'g', x: 4, y: 2, dice: 3, maxDice: 3, modifier: 1, alert: false });
+    expect(monsters[0]).toMatchObject({ name: 'stub goblin', glyph: 'g', x: 4, y: 2, dice: 3, maxDice: 3, modifier: 1, kind: 'monster', behaviour: 'stub', home: { x: 4, y: 2 } });
+    expect(monsters[0]!.awareness).not.toBe('alert');
     expect(monsters[0]!.colour).toBe(MONSTER_COLOURS.moss);
     expect(monsters[1]).toMatchObject({ speed: 'fast', colour: DEFAULT_MONSTER_COLOUR });
   });

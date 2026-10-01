@@ -130,6 +130,7 @@ export function placedFrom(row: Monster, at: Point, group: number, role: PlacedM
     modifier,
     speed: row.speed ?? 'normal',
     behaviour: row.behaviour,
+    ...(row.tags?.some((t) => t === 'undead' || t === 'construct') ? { fearless: true } : {}),
     group,
     role,
   };

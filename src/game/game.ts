@@ -1,21 +1,19 @@
-// The turn loop (Spec 04, "Turns and timing"): strictly turn-based. Nothing moves until the
-// player spends an action; then every monster acts, nearest first, up to 50 per round.
-// Task 1.8 builds the loop, movement, doors and a stub melee fight. Awareness rolls, the six
-// behaviours, items and the full character come with tasks 2.5 to 2.9.
+// The turn loop (Spec 04, "Turns and timing"): strictly turn-based. Nothing moves until the player
+// spends an action; then every creature acts, nearest first, up to 50 per round (game/ai.ts).
+// Spells, items and class abilities come with tasks 2.8 to 2.10.
 
 import type { LogMessage } from '../core/log.ts';
 import { createRng, hash32, levelSeed, type Rng } from '../core/rng.ts';
+import type { Pool } from '../rules/character/dice.ts';
 import { waitRound } from '../rules/character/health.ts';
-import { meleeOutcome, monsterRoll, rollDie } from '../rules/combat/melee.ts';
-import { distancesFrom } from '../rules/world/grid.ts';
-import { distanceSq } from '../rules/world/geometry.ts';
-import { TILE, type Level, type Point } from '../rules/world/level.ts';
+import { TILE, type Level, type Pile } from '../rules/world/level.ts';
+import { MAX_SIMULATED, actionsInRound, creaturesAct } from './ai.ts';
+import { playerAttacks, playerFires } from './combat.ts';
 import type { Command } from './commands.ts';
 import { type MapState, TERRAIN_BLOCKED, TERRAIN_OPEN, createMapState, isOpen, refreshSight } from './map-state.ts';
-import { type Monster, type Speed, spawnAll } from './monsters.ts';
+import { type Monster, spawnAll } from './monsters.ts';
 
-/** At most this many creatures act per round, nearest first (Spec 04). */
-export const MAX_SIMULATED = 50;
+export { MAX_SIMULATED, actionsInRound };
 
 const NESW: readonly (readonly [number, number])[] = [
   [0, -1],
@@ -29,18 +27,38 @@ export interface PlayerState {
   combatStep: number;
   combatDice: number;
   combatMax: number;
+  /** Skill and Magic pools: the dice a monster's ranged attack or spell is rolled against (Spec 04), and fuel (Spec 03). */
+  skill: Pool;
+  magic: Pool;
+  /** Carried gold, which bandits steal from (Spec 04). Gems, jewelry and items arrive with task 2.9. */
+  coins: number;
+  /** A stealth buff gives monsters disadvantage on their notice roll (Spec 04). */
+  stealth: boolean;
   dead: boolean;
   /** Consecutive rounds spent waiting; 10 restore a Combat die, an action or move resets it (Spec 03). */
   waited: number;
   /** Direction of the last move, so closing a door prefers the one the player faces. */
   facing: { dx: number; dy: number };
-  /** The readied ranged weapon, if any; its range sets how far targeting reaches (Spec 05). */
-  ranged: { name: string; range: number } | null;
+  /** The readied ranged weapon, if any: its range sets how far targeting reaches and each shot spends one ammunition (Spec 04, 05). */
+  ranged: { name: string; range: number; ammo: number } | null;
 }
 
-/** A living player with the given Combat pool, facing south. */
-export function createPlayer(pool: Pick<PlayerState, 'combatStep' | 'combatDice' | 'combatMax' | 'ranged'>): PlayerState {
-  return { ...pool, dead: false, waited: 0, facing: { dx: 0, dy: 1 } };
+type PlayerSetup = Pick<PlayerState, 'combatStep' | 'combatDice' | 'combatMax'> &
+  Partial<Pick<PlayerState, 'skill' | 'magic' | 'coins' | 'stealth' | 'ranged'>>;
+
+/** A living player with the given Combat pool, facing south. Skill and Magic default to one d6 each. */
+export function createPlayer(setup: PlayerSetup): PlayerState {
+  return {
+    skill: { step: 6, dice: 1, max: 1 },
+    magic: { step: 6, dice: 1, max: 1 },
+    coins: 0,
+    stealth: false,
+    ranged: null,
+    ...setup,
+    dead: false,
+    waited: 0,
+    facing: { dx: 0, dy: 1 },
+  };
 }
 
 export interface GameState {
@@ -49,6 +67,10 @@ export interface GameState {
   player: PlayerState;
   /** Rounds begin at 1. */
   round: number;
+  /** What dead bandits and rivals dropped, on the cell where they fell (Spec 04). Picking it up comes with task 2.10. */
+  drops: Pile[];
+  /** Containers (indices into `level.features`) and floor piles (into `level.piles`) a rival has emptied (Spec 04, task 2.7). */
+  looted: { features: number[]; piles: number[] };
 }
 
 export interface ActResult {
@@ -66,10 +88,13 @@ export interface LevelDelta {
   /** Cell indices of open doors. */
   openDoors: number[];
   /**
-   * The monsters still alive, as the player left them: where they stand, how hurt and whether
-   * alert (Spec 04: they stay where they were). A generated monster missing here is dead.
+   * The creatures still alive, as the player left them: where they stand, how hurt and how aware
+   * (Spec 04: they stay where they were). A generated monster missing here is dead.
    */
   monsters: Monster[];
+  /** What dead creatures dropped and what rivals took. */
+  drops: Pile[];
+  looted: { features: number[]; piles: number[] };
   /** The round the player left, for restocking (task 2.12). */
   turnLeft: number;
 }
@@ -80,13 +105,6 @@ export interface ArrivalOptions {
   delta?: LevelDelta;
   /** The run's round counter on arrival; 1 for a new run. */
   round?: number;
-}
-
-/** How many times a creature acts in the given round (Spec 04): fast twice, normal once, slow every other round. */
-export function actionsInRound(speed: Speed, round: number): number {
-  if (speed === 'fast') return 2;
-  if (speed === 'normal') return 1;
-  return round % 2 === 0 ? 1 : 0;
 }
 
 export class Game {
@@ -104,19 +122,24 @@ export class Game {
     const at = arrival.stair === 'down' ? level.downStair ?? level.upStair : level.upStair;
     this.state = {
       map: createMapState(level, { at, openDoors: delta?.openDoors.slice(), explored: delta?.explored.slice() }),
-      monsters: delta ? delta.monsters.map((m) => ({ ...m })) : spawnAll(level),
+      // Which monsters start asleep is rolled from the level's own seed, so it is the same whenever the level is first entered.
+      monsters: delta ? structuredClone(delta.monsters) : spawnAll(level, createRng(hash32('awareness', seed))),
       player,
       round,
+      drops: delta ? structuredClone(delta.drops) : [],
+      looted: delta ? structuredClone(delta.looted) : { features: [], piles: [] },
     };
   }
 
-  /** Snapshot what a revisit must replay: doors, explored cells and the living monsters. */
+  /** Snapshot what a revisit must replay: doors, explored cells, the living creatures and what they dropped or took. */
   captureDelta(): LevelDelta {
-    const { map, monsters, round } = this.state;
+    const { map, monsters, round, drops, looted } = this.state;
     return {
       explored: map.exploration.explored.slice(),
       openDoors: map.openDoors.slice(),
-      monsters: monsters.map((m) => ({ ...m })),
+      monsters: structuredClone(monsters),
+      drops: structuredClone(drops),
+      looted: structuredClone(looted),
       turnLeft: round,
     };
   }
@@ -148,6 +171,27 @@ export class Game {
     }
   }
 
+  /**
+   * Fire the readied ranged weapon at a creature (Spec 04): one Skill die as a skill use and one
+   * shot of ammunition, hit or miss. With none left the weapon cannot fire and no round passes.
+   */
+  fire(target: Monster): ActResult {
+    const { player } = this.state;
+    const messages: LogMessage[] = [];
+    if (player.dead) return { messages: [{ kind: 'system', text: 'You are dead.' }], spent: false };
+    if (!player.ranged) {
+      messages.push({ kind: 'system', text: 'You have no ranged weapon readied.' });
+      return { messages, spent: false };
+    }
+    if (player.ranged.ammo <= 0) {
+      messages.push({ kind: 'system', text: `Your ${player.ranged.name} is out of ammunition.` });
+      return { messages, spent: false };
+    }
+    player.ranged.ammo--;
+    playerFires(this, target, messages);
+    return this.endRound(messages);
+  }
+
   /** Interact on a stair: ask the run to change level. Using stairs ends any pursuit, so the monsters do not act (Spec 04). */
   private useStairs(messages: LogMessage[]): ActResult | undefined {
     const { map } = this.state;
@@ -169,7 +213,7 @@ export class Game {
 
     const monster = this.monsterAt(x, y);
     if (monster) {
-      this.playerAttacks(monster, messages);
+      playerAttacks(this, monster, messages);
       return this.endRound(messages);
     }
     const cell = y * level.width + x;
@@ -213,55 +257,14 @@ export class Game {
     return undefined;
   }
 
-  // One exchange of the opposed Combat roll (Spec 03, Melee).
-  private playerAttacks(monster: Monster, messages: LogMessage[]): void {
-    const { player } = this.state;
-    const mine = rollDie(this.rng, player.combatStep, player.combatDice === 0);
-    const theirs = monsterRoll(this.rng, monster.modifier);
-    const outcome = meleeOutcome(mine, theirs);
-    if (outcome.defenderHit) this.hitMonster(monster, messages);
-    if (outcome.attackerHit) this.hitPlayer(monster, messages);
-  }
-
-  private monsterAttacks(monster: Monster, messages: LogMessage[]): void {
-    const { player } = this.state;
-    const mine = monsterRoll(this.rng, monster.modifier);
-    const theirs = rollDie(this.rng, player.combatStep, player.combatDice === 0);
-    const outcome = meleeOutcome(mine, theirs);
-    if (outcome.defenderHit) this.hitPlayer(monster, messages);
-    if (outcome.attackerHit) this.hitMonster(monster, messages);
-  }
-
-  private hitMonster(monster: Monster, messages: LogMessage[]): void {
-    monster.dice--;
-    if (monster.dice > 0) {
-      messages.push({ kind: 'combat', text: `You hit the ${monster.name}.` });
-      return;
-    }
-    messages.push({ kind: 'combat', text: `You kill the ${monster.name}.` });
-    this.state.monsters.splice(this.state.monsters.indexOf(monster), 1);
-  }
-
-  /** A hit removes one Combat die; a hit with none left is fatal (Spec 03). */
-  private hitPlayer(monster: Monster, messages: LogMessage[]): void {
-    const { player } = this.state;
-    if (player.combatDice === 0) {
-      player.dead = true;
-      messages.push({ kind: 'combat', text: `The ${monster.name} kills you.` });
-      return;
-    }
-    player.combatDice--;
-    messages.push({ kind: 'combat', text: `The ${monster.name} hits you.` });
-  }
-
   /**
-   * The player has spent an action: every monster acts, then the round ends. Waiting counts toward
+   * The player has spent an action: every creature acts, then the round ends. Waiting counts toward
    * the next Combat die; any other action or move resets the count (Spec 03, Waiting).
    */
   private endRound(messages: LogMessage[], waiting = false): ActResult {
     const { player } = this.state;
     if (!waiting) player.waited = 0;
-    this.monstersAct(messages);
+    creaturesAct(this, messages);
     if (waiting && !player.dead) {
       const pool = { dice: player.combatDice, max: player.combatMax };
       const wait = waitRound(player.waited, pool);
@@ -271,47 +274,5 @@ export class Game {
     }
     this.state.round++;
     return { messages, spent: true };
-  }
-
-  // Stub behaviour (until task 2.7): a monster waits until the player sees it, then hunts by
-  // the shortest path and attacks when next to the player. Doors stay shut to it.
-  private monstersAct(messages: LogMessage[]): void {
-    const { map, monsters, round, player } = this.state;
-    const at = map.player;
-    const { width, height } = map.level;
-    const order = monsters
-      .slice()
-      .sort((a, b) => distanceSq(a, at) - distanceSq(b, at) || a.id - b.id)
-      .slice(0, MAX_SIMULATED);
-    let dist: Int32Array | null = null;
-    for (const m of order) {
-      for (let n = actionsInRound(m.speed, round); n > 0; n--) {
-        if (player.dead) return;
-        if (!m.alert && map.visible[m.y * width + m.x]) m.alert = true;
-        if (!m.alert) break;
-        if (Math.abs(m.x - at.x) + Math.abs(m.y - at.y) === 1) {
-          this.monsterAttacks(m, messages);
-          continue;
-        }
-        dist ??= distancesFrom(map.terrain, width, height, at, (t) => t === TERRAIN_OPEN);
-        const here = dist[m.y * width + m.x]!;
-        if (here < 0) break;
-        let best: Point | null = null;
-        let bestDist = here;
-        for (const [dx, dy] of NESW) {
-          const nx = m.x + dx;
-          const ny = m.y + dy;
-          if (nx < 0 || ny < 0 || nx >= width || ny >= height) continue;
-          const d = dist[ny * width + nx]!;
-          if (d < 0 || d >= bestDist || this.monsterAt(nx, ny) || (nx === at.x && ny === at.y)) continue;
-          best = { x: nx, y: ny };
-          bestDist = d;
-        }
-        if (best) {
-          m.x = best.x;
-          m.y = best.y;
-        }
-      }
-    }
   }
 }

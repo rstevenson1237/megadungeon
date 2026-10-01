@@ -1,7 +1,7 @@
 import { Game, type PlayerState, createPlayer } from '../src/game/game.ts';
 import { Run } from '../src/game/run.ts';
 import { GENERATOR_VERSION, emptyPlacements, type Level, type Point } from '../src/rules/world/level.ts';
-import type { Monster } from '../src/game/monsters.ts';
+import { creature, type Monster } from '../src/game/monsters.ts';
 import type { CharacterPaneData } from '../src/ui/character-pane.ts';
 import { CP437_TO_UNICODE } from '../src/ui/cp437.ts';
 import { COLS, Grid } from '../src/ui/grid.ts';
@@ -33,15 +33,16 @@ export function room(w: number, h: number, px: number, py: number): Level {
 
 /** A game on a hand-built level with no monsters, a Combat d6 pool of 2 and a sling. */
 export const testPlayer = (extra: Partial<PlayerState> = {}): PlayerState =>
-  ({ ...createPlayer({ combatStep: 6, combatDice: 2, combatMax: 2, ranged: { name: 'Sling', range: 6 } }), ...extra });
+  ({ ...createPlayer({ combatStep: 6, combatDice: 2, combatMax: 2, ranged: { name: 'Sling', range: 6, ammo: 20 } }), ...extra });
 
 export function gameOn(level: Level, player: Partial<PlayerState> = {}): Game {
   return new Game(1, level, testPlayer(player));
 }
 
-/** A monster with sensible defaults: one die, normal speed, not yet alert. */
-export function monsterAt(x: number, y: number, extra: Partial<Monster> = {}): Monster {
-  return { id: x * 1000 + y, name: 'goblin', glyph: 'g', colour: 0x7fc75a, x, y, dice: 1, maxDice: 1, modifier: 0, speed: 'normal', alert: false, ...extra };
+/** A monster with sensible defaults: one die, normal speed, a brute, unaware unless `alert` is set. */
+export function monsterAt(x: number, y: number, extra: Partial<Monster> & { alert?: boolean } = {}): Monster {
+  const { alert, ...rest } = extra;
+  return creature({ id: x * 1000 + y, name: 'goblin', glyph: 'g', colour: 0x7fc75a, x, y, dice: 1, modifier: 0, ...(alert ? { awareness: 'alert' as const } : {}), ...rest });
 }
 
 /** Move the player by repeated orthogonal steps, e.g. step(game, 'd', 5). */

@@ -593,7 +593,10 @@ describe('the game on placed levels', () => {
       const run = new Run(seed, testPlayer(), { ...runOptionsFor(BUNDLE, seed), startDepth: 1 });
       const game = run.game!;
       const level = game.state.map.level;
-      expect(game.state.monsters.map((m) => [m.x, m.y, m.dice])).toEqual(level.monsters.map((m) => [m.x, m.y, m.dice]));
+      const fighters = level.npcs.filter((n) => n.kind === 'bandit' || n.kind === 'rival');
+      expect(game.state.monsters.slice(0, level.monsters.length).map((m) => [m.x, m.y, m.dice])).toEqual(level.monsters.map((m) => [m.x, m.y, m.dice]));
+      // Bandits and rivals join the monsters as creatures; traders, hermits and captives do not fight.
+      expect(game.state.monsters.slice(level.monsters.length).map((m) => [m.kind, m.name])).toEqual(fighters.map((n) => [n.kind, n.name]));
       expect(level.monsters.length).toBeGreaterThanOrEqual(MONSTER_COUNTS[level.size][0]);
       for (const door of level.doors) {
         const tile = level.tiles[door.y]![door.x];
