@@ -1,7 +1,7 @@
 // Weapons, armour and shields (Spec 05, "Quality, durability and repair", "Weapons and ammunition" and
 // "Armour and shields"): making gear from its base, breaking, and what a set of equipment does to the rolls.
 
-import type { GearTrait } from '../../core/catalog.ts';
+import type { GearTrait, Passive } from '../../core/catalog.ts';
 import type { Rng } from '../../core/rng.ts';
 import type { EquipmentBase } from '../../core/schemas.ts';
 import type { RollMode } from '../character/dice.ts';
@@ -33,8 +33,8 @@ export function rollQuality(rng: Rng): Exclude<Quality, 'artifact'> {
 
 /** A piece of gear from its base row, unbroken, not cursed and not magic. */
 export function makeGear(base: EquipmentBase, uid: number, quality: Quality = 'normal'): GearItem {
-  const kind = base.type === 'melee' ? 'weapon' : base.type === 'ammo' ? undefined : base.type;
-  if (!kind) throw new RangeError(`"${base.id}" is ammunition, not gear`);
+  const kind = base.type === 'melee' ? 'weapon' : base.type === 'ammo' || base.type === 'tool' ? undefined : base.type;
+  if (!kind) throw new RangeError(`"${base.id}" is ammunition or a tool, not gear`);
   return {
     kind,
     uid,
@@ -107,8 +107,14 @@ const BARE_HANDS = -1;
 
 const worn = (e: Equipment) => Object.values(e).filter((i) => i !== undefined);
 
+/** A lasting buff the player has earned, such as a completed shrine set's (Spec 06): it acts like an uncursed worn passive. */
+export interface Buff {
+  passive: Passive;
+  amount?: number | undefined;
+}
+
 /** Compute what the equipment gives; `stealthBuff` is any stealth the character has from elsewhere. Pure: nothing is changed. */
-export function derive(equipment: Equipment, stealthBuff = false): Derived {
+export function derive(equipment: Equipment, stealthBuff = false, buffs: readonly Buff[] = []): Derived {
   const main = equipment.main;
   const weapon = main?.kind === 'weapon' && works(main) ? main : undefined;
   let melee = BARE_HANDS;
@@ -137,8 +143,11 @@ export function derive(equipment: Equipment, stealthBuff = false): Derived {
     const next: RollMode = cursed ? 'disadvantage' : 'advantage';
     return now === 'normal' || now === next ? next : 'normal';
   };
-  for (const item of worn(equipment)) {
-    if (item.kind !== 'ring' && item.kind !== 'clothing' && item.kind !== 'artifact') continue;
+  const sources: { passive: Passive | undefined; amount: number | undefined; cursed: boolean }[] = [
+    ...worn(equipment).flatMap((item) => (item.kind === 'ring' || item.kind === 'clothing' || item.kind === 'artifact' ? [{ passive: item.passive, amount: item.amount, cursed: item.cursed }] : [])),
+    ...buffs.map((b) => ({ passive: b.passive, amount: b.amount, cursed: false })),
+  ];
+  for (const item of sources) {
     const cursed = item.cursed;
     switch (item.passive) {
       case 'melee':

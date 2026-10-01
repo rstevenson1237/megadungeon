@@ -24,12 +24,16 @@ import { applyStatus, removeStatus } from '../rules/magic/status.ts';
 import type { Loot, Point } from '../rules/world/level.ts';
 import { combatAt, damage, nameOf, provoke, removeDie } from './combat.ts';
 import type { Game, PlayerState } from './game.ts';
+import { mapLevel } from './features/fixtures.ts';
 import { type Aim, castSpell, spellAimError } from './magic.ts';
 import { TERRAIN_OPEN } from './map-state.ts';
 import type { Monster } from './monsters.ts';
 
-/** What the player's equipment currently gives, with any stealth buff the character has from elsewhere. */
-export const derived = (game: Game): Derived => derive(game.state.player.equipment, game.state.player.stealth);
+/** What a player's equipment and lasting buffs give, with any stealth buff the character has from elsewhere. */
+export const derivedFor = (player: PlayerState): Derived => derive(player.equipment, player.stealth, player.buffs);
+
+/** What the player's equipment currently gives. */
+export const derived = (game: Game): Derived => derivedFor(game.state.player);
 
 /** What the player knows of their items: kinds found out by use, and this run's disguises. */
 export function knowledge(game: Game): Knowledge {
@@ -211,12 +215,46 @@ function itemFromLoot(game: Game, loot: Loot, uid: number, rng: Rng): Item | und
   }
 }
 
+/** The item a piece of loot becomes, with the seed that makes it: fixed by the run, the level, where it lay and its place in the heap. */
+function itemAt(game: Game, loot: Loot, index: number, at: Point): Item | undefined {
+  const uid = hash32('loot', game.runSeed >>> 0, game.state.map.level.depth, at.x, at.y, index, loot.kind);
+  return itemFromLoot(game, loot, uid, createRng(uid));
+}
+
+/** What the pick-up list shows for a piece of loot: coins as gold, anything else as it would be named in the pack. */
+export function lootLine(game: Game, loot: Loot, index: number, at: Point): string {
+  if (loot.kind === 'coins') return `${loot.amount} gp`;
+  const item = itemAt(game, loot, index, at);
+  return item ? describeItem(item, knowledge(game)) : loot.kind;
+}
+
+/**
+ * Take one piece of loot into the pack. Returns what is left of it: nothing when it was all taken, the rest of a stack
+ * that did not fit, or the whole piece when the pack is full (`full`).
+ */
+export function takeLoot(game: Game, loot: Loot, index: number, at: Point, messages: LogMessage[]): { left?: Loot; full: boolean } {
+  const { player } = game.state;
+  const capacity = player.packSlots;
+  if (loot.kind === 'coins') {
+    const got = addCoins(player, capacity, loot.amount);
+    if (got > 0) messages.push({ kind: 'loot', text: `You pick up ${got} gp.` });
+    return got < loot.amount ? { left: { kind: 'coins', amount: loot.amount - got }, full: true } : { full: false };
+  }
+  const item = itemAt(game, loot, index, at);
+  if (!item) return { left: loot, full: false }; // nothing the tables can make of it
+  const want = 'count' in item ? item.count : 1;
+  const got = addToPack(player, capacity, item);
+  if (got > 0) messages.push({ kind: 'loot', text: `You pick up ${describeItem(got === want ? item : ({ ...item, count: got } as Item), knowledge(game))}.` });
+  if (got >= want) return { full: false };
+  return { left: got === 0 ? loot : { kind: 'item', item: { ...item, count: want - got } as Item }, full: true };
+}
+
 /**
  * Pick up what lies on the player's cell (Spec 05; costs a round when anything is taken). Generated piles move
  * into the level's loose piles first, so what is left behind is kept. What does not fit stays on the floor.
  */
 export function pickUp(game: Game, messages: LogMessage[]): 'none' | 'full' | 'taken' {
-  const { player, drops, looted, map } = game.state;
+  const { drops, looted, map } = game.state;
   const here = map.player;
   map.level.piles.forEach((p, i) => {
     if (p.x !== here.x || p.y !== here.y || looted.piles.includes(i) || p.contents.length === 0) return;
@@ -228,39 +266,15 @@ export function pickUp(game: Game, messages: LogMessage[]): 'none' | 'full' | 't
     messages.push({ kind: 'system', text: 'There is nothing here to pick up.' });
     return 'none';
   }
-  const capacity = player.packSlots;
   const left: Loot[] = [];
   let taken = 0;
   let refused = false;
   pile.contents.forEach((loot, index) => {
-    if (loot.kind === 'coins') {
-      const got = addCoins(player, capacity, loot.amount);
-      if (got > 0) {
-        taken++;
-        messages.push({ kind: 'loot', text: `You pick up ${got} gp.` });
-      }
-      if (got < loot.amount) {
-        refused = true;
-        left.push({ kind: 'coins', amount: loot.amount - got });
-      }
-      return;
-    }
-    const uid = hash32('loot', game.runSeed >>> 0, map.level.depth, here.x, here.y, index, loot.kind);
-    const item = itemFromLoot(game, loot, uid, createRng(uid));
-    if (!item) {
-      left.push(loot); // nothing the tables can make of it
-      return;
-    }
-    const want = 'count' in item ? item.count : 1;
-    const got = addToPack(player, capacity, item);
-    if (got > 0) {
-      taken++;
-      messages.push({ kind: 'loot', text: `You pick up ${describeItem(got === want ? item : { ...item, count: got } as Item, knowledge(game))}.` });
-    }
-    if (got < want) {
-      refused = true;
-      left.push(got === 0 ? loot : { kind: 'item', item: { ...item, count: want - got } as Item });
-    }
+    const before = messages.length;
+    const result = takeLoot(game, loot, index, here, messages);
+    if (messages.length > before) taken++;
+    if (result.full) refused = true;
+    if (result.left) left.push(result.left);
   });
   pile.contents = left;
   if (left.length === 0) drops.splice(drops.indexOf(pile), 1);
@@ -322,7 +336,7 @@ export function dropItem(game: Game, item: Item, messages: LogMessage[]): boolea
 }
 
 /** Restore dice to a pool of the player's, up to its maximum. */
-function restore(player: PlayerState, pool: 'combat' | 'skill' | 'magic', dice: number): number {
+export function restore(player: PlayerState, pool: 'combat' | 'skill' | 'magic', dice: number): number {
   if (pool === 'combat') {
     const gained = Math.max(0, Math.min(dice, player.combatMax - player.combatDice));
     player.combatDice += gained;
@@ -424,6 +438,13 @@ export function useItem(game: Game, item: Item, aim: Aim | undefined, messages: 
       applyStatus(player.statuses, item.power.status, item.power.rounds);
       item.usedDepth = map.level.depth;
       say(`You feel the power of your ${itemName(ctxOf(game), item)}.`);
+      return true;
+    }
+    case 'map_fragment': {
+      takeFromPack(player.pack, item, 1);
+      if (!player.mapped.includes(item.mappedLevel)) player.mapped.push(item.mappedLevel);
+      if (item.mappedLevel === map.level.depth) mapLevel(game);
+      say(`The torn map shows the layout of level ${item.mappedLevel}.`, 'discovery');
       return true;
     }
     case 'spellbook':

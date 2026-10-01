@@ -2,10 +2,12 @@ import { z } from 'zod';
 import {
   AMMO_TYPES,
   BASE_TYPES,
+  BLESSINGS,
   CAVE_STAMPS,
   DISGUISED_KINDS,
   DOOR_WEIGHT_KEYS,
   FEATURE_KEYS,
+  FOUNTAIN_EFFECTS,
   GEAR_TRAITS,
   GEM_KINDS,
   ITEM_EFFECTS,
@@ -19,6 +21,7 @@ import {
   SPELL_EFFECTS,
   SPELL_SHAPES,
   STATUS_IDS,
+  TRAP_EFFECTS,
   TRAP_KINDS,
   WORN_SLOTS,
 } from './catalog.ts';
@@ -92,8 +95,60 @@ export const artifactSchema = z.strictObject({
 const named = { ...baseFields, name: z.string().min(1) };
 const text = { ...baseFields, text: z.string().min(1) };
 
-export const trapSchema = z.strictObject({ ...named, kind: z.enum(TRAP_KINDS) });
-export const altarGodSchema = z.strictObject(named);
+// Traps (Spec 06, "Traps"): where it springs (floor or container) and what it does. `heavy` traps cost two dice below level 50.
+export const trapSchema = z
+  .strictObject({
+    ...named,
+    kind: z.enum(TRAP_KINDS),
+    effect: z.enum(TRAP_EFFECTS),
+    dice: z.number().int().positive().optional(),
+    heavy: z.boolean().optional(),
+    status: z.enum(STATUS_IDS).optional(),
+    rounds: z.number().int().positive().optional(),
+  })
+  .superRefine((trap, ctx) => {
+    const bad = (message: string): void => void ctx.addIssue({ code: 'custom', message });
+    if (trap.effect === 'lose_dice' && !trap.dice) bad('lose_dice needs `dice`');
+    if (trap.effect === 'status' && !trap.status) bad('a status trap needs `status`');
+    if ((trap.effect === 'collapse' || trap.effect === 'deep_pit') && !trap.dice) bad(`${trap.effect} needs \`dice\``);
+  });
+
+// Fountain effects (Spec 06, "Fixtures"): one is rolled on each drink.
+export const fountainEffectSchema = z
+  .strictObject({
+    ...named,
+    effect: z.enum(FOUNTAIN_EFFECTS),
+    pool: z.enum(['combat', 'skill', 'magic']).optional(),
+    dice: z.number().int().positive().optional(),
+    amount: z.tuple([z.number().int().positive(), z.number().int().positive()]).optional(),
+  })
+  .superRefine((f, ctx) => {
+    const bad = (message: string): void => void ctx.addIssue({ code: 'custom', message });
+    if (f.effect === 'restore_dice' && (!f.pool || !f.dice)) bad('restore_dice needs `pool` and `dice`');
+    if (f.effect === 'coins' && !f.amount) bad('coins needs an `amount` range');
+  });
+
+// Debris finds (Spec 06, "Searching and hidden things"): coins scaled by depth, or a small item by id.
+export const debrisFindSchema = z
+  .strictObject({
+    ...named,
+    find: z.enum(['coins', 'item']),
+    amount: z.tuple([z.number().int().positive(), z.number().int().positive()]).optional(),
+    item: id.optional(),
+    count: z.number().int().positive().optional(),
+  })
+  .superRefine((d, ctx) => {
+    const bad = (message: string): void => void ctx.addIssue({ code: 'custom', message });
+    if (d.find === 'coins' && !d.amount) bad('coins needs an `amount` range');
+    if (d.find === 'item' && !d.item) bad('an item find needs an `item` id');
+  });
+
+// Altar gods (Spec 06, "Fixtures"): what a good offering gives, and the lasting buff of a completed shrine set.
+export const altarGodSchema = z.strictObject({
+  ...named,
+  blessing: z.enum(BLESSINGS),
+  buff: z.strictObject({ passive: z.enum(PASSIVES), amount: z.number().int().positive().optional() }),
+});
 // A rune-word letter is one capital letter; a rune without one is an effect rune (Spec 06).
 export const runeSchema = z.strictObject({ ...named, letter: z.string().regex(/^[A-Z]$/).optional() });
 export const bookSchema = z.strictObject(text);
@@ -129,6 +184,7 @@ export const equipmentBaseSchema = z
     if (base.type !== 'ranged' && base.range) bad('only a ranged weapon has `range`');
     if (base.type !== 'ranged' && base.type !== 'ammo' && base.ammo) bad('only a ranged weapon or ammunition has `ammo`');
     if (base.type === 'ammo' && (base.modifier || base.traits)) bad('ammunition has no modifier or traits');
+    if (base.type === 'tool' && (base.modifier || base.traits || base.hands || base.range || base.ammo)) bad('a tool is just a name and a price');
   });
 
 // Disguise names (Spec 05, "Magic items, identification and curses"): the unidentified look of a potion, ring,
@@ -285,6 +341,9 @@ export const questTemplateSchema = z.strictObject({
 export type Spell = z.infer<typeof spellSchema>;
 export type EquipmentBase = z.infer<typeof equipmentBaseSchema>;
 export type DisguiseName = z.infer<typeof disguiseNameSchema>;
+export type FountainEffectRow = z.infer<typeof fountainEffectSchema>;
+export type DebrisFind = z.infer<typeof debrisFindSchema>;
+export type AltarGod = z.infer<typeof altarGodSchema>;
 export type ClassEntry = z.infer<typeof classSchema>;
 export type MinorAbilityEntry = z.infer<typeof minorAbilitySchema>;
 export type VillageName = z.infer<typeof villageNameSchema>;
@@ -326,6 +385,8 @@ export const tableSchemas = {
   spells: spellSchema,
   equipment_bases: equipmentBaseSchema,
   disguise_names: disguiseNameSchema,
+  fountain_effects: fountainEffectSchema,
+  debris_finds: debrisFindSchema,
 } as const;
 
 export type TableName = keyof typeof tableSchemas;

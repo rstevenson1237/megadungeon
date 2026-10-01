@@ -6,7 +6,7 @@ import { DISGUISED_KINDS } from '../../core/catalog.ts';
 import { createRng, hash32, type Rng } from '../../core/rng.ts';
 import type { Artifact, ContentBundle, DisguiseName, EquipmentBase, MagicItem } from '../../core/schemas.ts';
 import { makeGear, rollQuality } from './gear.ts';
-import type { AmmoItem, Equipment, GearItem, Item, WornItem } from './types.ts';
+import type { AmmoItem, Equipment, GearItem, Item, LockpickItem, WornItem } from './types.ts';
 
 /** Roughly one magic item in ten that can be worn is cursed (Spec 05). */
 export const CURSE_ONE_IN = 10;
@@ -33,6 +33,12 @@ export function itemDataFrom(bundle: ContentBundle): ItemData {
 export function makeAmmo(base: EquipmentBase, uid: number, count: number): AmmoItem {
   if (base.type !== 'ammo' || !base.ammo || !base.per) throw new RangeError(`"${base.id}" is not ammunition`);
   return { kind: 'ammo', uid, id: base.id, name: base.name, value: base.price, ammo: base.ammo, per: base.per, count };
+}
+
+/** A bundle of lockpicks from the tool's base row (Spec 06). */
+export function makeLockpicks(base: EquipmentBase, uid: number, count: number): LockpickItem {
+  if (base.type !== 'tool') throw new RangeError(`"${base.id}" is not a tool`);
+  return { kind: 'lockpicks', uid, id: base.id, name: base.name, value: base.price, count };
 }
 
 /**

@@ -17,8 +17,8 @@ export const REGISTRIES: Record<string, readonly string[]> = {
 export interface RefRule {
   /** Dotted path into the entry, e.g. `loot.roll`. */
   field: string;
-  /** `table`: the value names another table in the bundle. `ids`: the value is an id in the named table. Otherwise a code registry name. */
-  target: 'table' | { ids: string } | { registry: keyof typeof REGISTRIES };
+  /** `table`: the value names another table in the bundle. `ids`: the value is an id in the named table (or in any of the named tables). Otherwise a code registry name. */
+  target: 'table' | { ids: string | readonly string[] } | { registry: keyof typeof REGISTRIES };
 }
 
 /** Each table's reference fields. A task that adds a table with `effect:` or `roll:` adds its rule here. */
@@ -29,6 +29,9 @@ export const REFERENCE_RULES: Record<string, readonly RefRule[]> = {
   ],
   bosses: [{ field: 'behaviour', target: { registry: 'behaviours' } }],
   spells: [{ field: 'effect', target: { registry: 'effects' } }],
+  traps: [{ field: 'effect', target: { registry: 'effects' } }],
+  fountain_effects: [{ field: 'effect', target: { registry: 'effects' } }],
+  debris_finds: [{ field: 'item', target: { ids: ['equipment_bases', 'magic_items'] } }],
   magic_items: [
     { field: 'effect', target: { registry: 'effects' } },
     { field: 'spell', target: { ids: 'spells' } },
@@ -76,6 +79,8 @@ export const SINGLE_LINE_FIELDS: Record<string, readonly string[]> = {
   spells: ['name'],
   equipment_bases: ['name'],
   disguise_names: ['name'],
+  fountain_effects: ['name'],
+  debris_finds: ['name'],
 };
 
 function getPath(entry: Entry, path: string): unknown {
@@ -109,8 +114,9 @@ export function checkReferences(bundle: ContentBundle): string[] {
             edges.get(table)!.add(name);
           }
         } else if ('ids' in rule.target) {
-          const known = new Set(entriesOf(bundle, rule.target.ids).map((e) => String(e.id)));
-          if (!known.has(String(value))) errors.push(`${where} "${String(value)}" is not an id in ${rule.target.ids}`);
+          const tables = typeof rule.target.ids === 'string' ? [rule.target.ids] : rule.target.ids;
+          const known = new Set(tables.flatMap((t) => entriesOf(bundle, t).map((e) => String(e.id))));
+          if (!known.has(String(value))) errors.push(`${where} "${String(value)}" is not an id in ${tables.join(' or ')}`);
         } else {
           const registry = REGISTRIES[rule.target.registry]!;
           if (!registry.includes(String(value))) {

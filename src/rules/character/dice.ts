@@ -23,6 +23,17 @@ export interface Pool {
 
 export type RollMode = 'normal' | 'advantage' | 'disadvantage';
 
+/**
+ * Several sources of advantage and disadvantage on one roll: any advantage with any disadvantage cancel to a
+ * plain roll, and otherwise whichever is present stands. Never more than one die is lost however many apply
+ * (Spec 03; Spec 06, clarifications of task 2.10).
+ */
+export function combineModes(...modes: readonly RollMode[]): RollMode {
+  const adv = modes.includes('advantage');
+  const dis = modes.includes('disadvantage');
+  return adv === dis ? 'normal' : adv ? 'advantage' : 'disadvantage';
+}
+
 /** The next step up, capped at d12. */
 export function stepUp(step: Step): Step {
   return STEPS[Math.min(STEPS.indexOf(step) + 1, STEPS.length - 1)]!;

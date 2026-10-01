@@ -21,7 +21,9 @@ import { ratingText } from '../game/monsters.ts';
 import { blinkCells, canBlinkTo, spellTargets, targetSpecOf } from '../game/magic.ts';
 import type { Spell } from '../core/schemas.ts';
 import { describeStatus } from '../rules/magic/status.ts';
-import { InventoryOverlay, type InventoryHost } from './inventory.ts';
+import { InventoryOverlay, TextWindow, type InventoryHost } from './inventory.ts';
+import { JournalOverlay, LootOverlay, type LootHost, type OfferHost, offerMenu } from './features.ts';
+import { offeringCost } from '../game/features/index.ts';
 import { spellMenu } from './spells.ts';
 import { type ItemCtx, ctxOf, drinkPotion, equipItem, itemName, unequipSlot } from '../game/items.ts';
 import type { ActResult } from '../game/game.ts';
@@ -82,10 +84,40 @@ export class Shell {
   }
 
   private travel(direction: 'up' | 'down'): void {
-    const run = this.run!;
-    const messages = run.travel(direction);
-    for (const m of messages) this.log.add(m, run.round);
+    this.moved(this.run!.travel(direction));
+  }
+
+  /** The run changed level or village (stairs, a teleporter, a fall): say so, and bring everything in line. */
+  private moved(messages: LogMessage[]): void {
+    for (const m of messages) this.log.add(m, this.run!.round);
+    this.stopAiming();
     this.arrived();
+  }
+
+  /**
+   * Show what an action did: its messages, a change of level if it asked for one, the pane, and whatever it opened
+   * for the player to look at or choose from (a pick-up list, an altar's offering, text to read).
+   */
+  private applyResult(result: ActResult): void {
+    for (const m of result.messages) this.log.add(m, this.game ? this.game.state.round : this.turn);
+    if (result.stairs) return this.travel(result.stairs);
+    if (result.teleport !== undefined) return this.moved(this.run!.teleport(result.teleport));
+    if (result.fall) return this.moved(this.run!.fall());
+    if (this.game) this.afterAction();
+    else this.syncCharacter();
+    const game = this.game;
+    if (!game) return;
+    if (result.opened !== undefined) this.overlays.push(new LootOverlay(game, result.opened, this.lootHost()));
+    if (result.offer !== undefined) this.overlays.push(offerMenu(ctxOf(game), result.offer, offeringCost(game), this.offerHost()));
+    if (result.read) this.overlays.push(new TextWindow(result.read.title, result.read.lines));
+  }
+
+  private lootHost(): LootHost {
+    return { take: (index, which) => this.applyResult(this.game!.take(index, which)) };
+  }
+
+  private offerHost(): OfferHost {
+    return { offer: (index, what) => this.applyResult(this.game!.offerAt(index, what)) };
   }
 
   /** Handle a key press. Returns true if the key is in the key map, so the caller can stop the browser acting on it. */
@@ -140,12 +172,13 @@ export class Shell {
       case 'inventory':
         this.openInventory();
         return;
+      case 'journal':
+        this.overlays.push(new JournalOverlay(() => this.run?.player.journal ?? []));
+        return;
       default: {
         const result = this.game?.act(command);
         if (result) {
-          for (const m of result.messages) this.log.add(m, this.game!.state.round);
-          if (result.stairs) this.travel(result.stairs);
-          else this.afterAction();
+          this.applyResult(result);
           return;
         }
       }
@@ -204,9 +237,7 @@ export class Shell {
 
   /** Log what an action said and bring the pane and round counter in line. */
   private done(result: ActResult): void {
-    for (const m of result.messages) this.log.add(m, this.game ? this.game.state.round : this.turn);
-    if (this.game) this.afterAction();
-    else this.syncCharacter();
+    this.applyResult(result);
   }
 
   /** In a village an item action takes no round: it just says what happened. */
@@ -303,9 +334,8 @@ export class Shell {
     this.showTarget();
   }
 
-  private finishCast(result: { messages: LogMessage[] }): void {
-    for (const m of result.messages) this.log.add(m, this.game!.state.round);
-    this.afterAction();
+  private finishCast(result: ActResult): void {
+    this.applyResult(result);
   }
 
   /** Forget what was being aimed. */
@@ -383,8 +413,7 @@ export class Shell {
         const item = this.usingItem;
         const result = item ? this.game!.use(item, t.selected) : spell ? this.game!.cast(spell, t.selected) : this.game!.fire(t.selected);
         this.stopAiming();
-        for (const m of result.messages) this.log.add(m, this.game!.state.round);
-        this.afterAction();
+        this.applyResult(result);
         break;
       }
       case 'cancel':

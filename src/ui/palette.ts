@@ -52,9 +52,18 @@ export const MAP = {
   deepWater: { visible: 0x2a5aa8, remembered: 0x162c52 },
   lava: { visible: 0xe05a20, remembered: 0x6a2a10 },
   trap: { visible: 0xe05a5a, remembered: 0x6a2e2e },
+  container: { visible: 0xd0a458, remembered: 0x54442a },
+  fixture: { visible: 0x78b8c8, remembered: 0x2c4a52 },
+  debris: { visible: 0x8a7a5c, remembered: 0x3a3226 },
+  sign: { visible: 0xd8d878, remembered: 0x58582e },
+  rune: { visible: 0xc888e8, remembered: 0x502e5c },
+  special: { visible: 0xe090ff, remembered: 0x58305e },
   player: 0xffffff,
   background: 0x000000,
 } as const;
+
+/** Loose items on the floor (Spec 01 core glyph table): coins in gold, the rest plain. */
+export const ITEM_COLOURS = { coins: 0xf0c840, other: 0xe0e0e0 } as const;
 
 /** Targeting overlay on the main view (Spec 01 "Targeting"), from the mockup. */
 export const TARGET = {

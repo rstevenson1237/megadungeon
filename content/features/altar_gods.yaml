@@ -1,8 +1,18 @@
-# Stub entries for task 2.4 (Spec 02, "Shrine sets"). Blessings and shrine buffs arrive with task 2.10;
-# the launch table of 8 is written in Phase 3 (task 3.7).
+# Stub entries (Spec 08): each god gives a blessing for a good offering (Blessed for the level, a curse lifted, or one
+# item identified) and a lasting buff when all three altars of its shrine set are won (Spec 02, "Shrine sets";
+# Spec 06, "Fixtures"). The launch table of 8 is written in Phase 3 (task 3.7).
 - id: god_stub_01
   name: the Pale Lantern
+  blessing: bless
+  buff: { passive: search }
+  tags: [stub]
 - id: god_stub_02
   name: the Iron Mother
+  blessing: lift_curse
+  buff: { passive: melee, amount: 1 }
+  tags: [stub]
 - id: god_stub_03
   name: the Quiet Tide
+  blessing: identify
+  buff: { passive: wait, amount: 8 }
+  tags: [stub]

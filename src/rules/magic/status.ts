@@ -19,6 +19,8 @@ export interface StatusEffect {
   clock: number;
   /** What a frightened creature runs from: the caster, or whatever scared the player. */
   source?: Point;
+  /** Ends when the player leaves the level (an altar's blessing, Spec 06). */
+  bound?: boolean;
 }
 
 export const STATUS_NAMES: Readonly<Record<StatusId, string>> = {
@@ -53,6 +55,19 @@ export function applyStatus(list: StatusEffect[], id: StatusId, rounds: number |
   if (have.rounds === null || (rounds !== null && rounds <= have.rounds)) return 'kept';
   have.rounds = rounds;
   return 'extended';
+}
+
+/** Apply an effect that lasts until the player leaves the level. */
+export function applyBound(list: StatusEffect[], id: StatusId): void {
+  applyStatus(list, id, null);
+  statusOf(list, id)!.bound = true;
+}
+
+/** The player leaves a level: effects bound to it end. Returns the ones that did. */
+export function endBound(list: StatusEffect[]): StatusId[] {
+  const ended = list.filter((e) => e.bound).map((e) => e.id);
+  for (const id of ended) removeStatus(list, id);
+  return ended;
 }
 
 /** Remove an effect; true if it was there. */

@@ -83,8 +83,8 @@ describe('every key acts or logs "not yet available"', () => {
 
   it('names the missing feature in the message and spends no turn', () => {
     const shell = newShell();
-    press(shell, 'j');
-    expect(shell.log.lines(1).map((l) => l.text)).toEqual(['Journal is not yet available.']);
+    press(shell, 'l');
+    expect(shell.log.lines(1).map((l) => l.text)).toEqual(['Looking is not yet available.']);
     expect(shell.turn).toBe(1);
   });
 

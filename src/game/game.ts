@@ -6,9 +6,10 @@ import type { LogMessage } from '../core/log.ts';
 import { createRng, hash32, levelSeed, type Rng } from '../core/rng.ts';
 import type { Spell } from '../core/schemas.ts';
 import { type Item, type Equipment, type EquipSlot } from '../rules/items/types.ts';
-import { derive } from '../rules/items/gear.ts';
+import { type Buff, derive } from '../rules/items/gear.ts';
 import { type ItemData, disguisesFor, itemDataFrom, type Knowledge } from '../rules/items/magic.ts';
 import { PACK_BASE } from '../rules/items/inventory.ts';
+import { type GameContent, noContent } from './content.ts';
 import type { Pool } from '../rules/character/dice.ts';
 import { waitRound } from '../rules/character/health.ts';
 import { BOOK_CURSE_ROUNDS, readSpellbook, readiness, type Spellbook } from '../rules/magic/learning.ts';
@@ -25,12 +26,15 @@ import {
   tickStatuses,
 } from '../rules/magic/status.ts';
 import { distanceSq } from '../rules/world/geometry.ts';
-import { TILE, type Level, type Pile, type Point } from '../rules/world/level.ts';
+import { TILE, type Level, type Loot, type Pile, type Point } from '../rules/world/level.ts';
 import { MAX_SIMULATED, actionsInRound, creaturesAct } from './ai.ts';
 import { nameOf, playerAttacks, removeDie } from './combat.ts';
 import type { Command } from './commands.ts';
 import { ctxOf, dropItem, equipItem, fireRanged, pickUp, rangedOption, throwableDagger, unequipSlot, useItem } from './items.ts';
 import { type MapState, TERRAIN_BLOCKED, TERRAIN_OPEN, createMapState, isOpen, refreshSight } from './map-state.ts';
+import { interact, lockedDoorAt, offer, readLoreBook, search, stepEnds, takeFromContainer, trapAt, walkIntoLocked } from './features/index.ts';
+import { mapLevel } from './features/fixtures.ts';
+import { teleportPlayer } from './features/spawn.ts';
 import { type Aim, castSpell, spellAimError } from './magic.ts';
 import { type Monster, spawnAll } from './monsters.ts';
 
@@ -42,6 +46,15 @@ const NESW: readonly (readonly [number, number])[] = [
   [0, 1],
   [-1, 0],
 ];
+
+/** One thing the player has read (Spec 06, "Lore"): kept once, grouped by level in the journal. */
+export interface JournalEntry {
+  depth: number;
+  kind: 'sign' | 'graffiti' | 'book' | 'rune' | 'rumour' | 'quest';
+  /** What it is: a table row id, with the place for a wall mark, so the same text read on two levels is two entries. */
+  id: string;
+  text: string;
+}
 
 export interface PlayerState {
   /** Sides of each Combat die, and the dice left and at most held. The Combat pool is health. */
@@ -71,6 +84,16 @@ export interface PlayerState {
   invisible: number;
   /** Rounds until a crossbow is loaded again (Spec 05). */
   reload: number;
+  /** Lasting buffs earned, such as a completed shrine set's (Spec 06). */
+  buffs: Buff[];
+  /** Everything read: signs, graffiti, books and runes, and later rumours and quests (Spec 06, the journal). */
+  journal: JournalEntry[];
+  /** Rune-word letters learned, by the link's id and the letter's place in the word (Spec 02, Spec 06). */
+  letters: Record<string, Record<number, string>>;
+  /** Successful offerings at a shrine set's altars, by link (Spec 06). */
+  shrines: Record<string, number>;
+  /** Levels a map fragment has mapped (Spec 02): their layout shows on arrival. */
+  mapped: number[];
   /** Active status effects (Spec 04, "Status effects"). */
   statuses: StatusEffect[];
   /** Rounds left of a Shield, which absorbs the next hit (Spec 04, task 2.8); 0 when there is none. */
@@ -104,6 +127,11 @@ export function createPlayer(setup: PlayerSetup): PlayerState {
     ...setup,
     invisible: 0,
     reload: 0,
+    buffs: [],
+    journal: [],
+    letters: {},
+    shrines: {},
+    mapped: [],
     dead: false,
     waited: 0,
     facing: { dx: 0, dy: 1 },
@@ -128,6 +156,42 @@ export function takeRest(player: PlayerState): void {
   player.rests++;
 }
 
+/** What the player did to one feature of a level (Spec 06): recorded by its number in `level.features`. */
+export interface FeatureState {
+  /** A locked chest has been opened with a key, picks or force. */
+  unlocked?: boolean;
+  /** The container's trap is gone: disarmed or sprung. */
+  trapGone?: boolean;
+  /** Fountain: drinks taken, and how many it gives. */
+  drinks?: number;
+  limit?: number;
+  /** An altar has had its offering, a sarcophagus lid is up, a floor rune is spent, a lever is pulled. */
+  done?: boolean;
+  /** What is left in a container, sarcophagus or the like once it has been opened (a copy of `contents`). */
+  left?: Loot[];
+}
+
+/** What the player has found, noticed, searched, disarmed, forced or used on a level (Spec 06, task 2.10). Saved as part of the level delta. */
+export interface UsedState {
+  /** Cells whose hidden thing has had its free passive check. */
+  noticed: number[];
+  /** Debris cells searched. */
+  searched: number[];
+  /** Floor trap cells disarmed or sprung. */
+  disarmed: number[];
+  /** Cells a collapse turned into debris. */
+  collapsed: number[];
+  /** Door cells forced open for good. */
+  broken: number[];
+  features: Record<number, FeatureState>;
+  /** Indices into `level.lore` of wall marks read as runes and spent. */
+  marks: number[];
+  /** The level's lever has been pulled. */
+  lever: boolean;
+}
+
+export const freshUsed = (): UsedState => ({ noticed: [], searched: [], disarmed: [], collapsed: [], broken: [], features: {}, marks: [], lever: false });
+
 export interface GameState {
   map: MapState;
   monsters: Monster[];
@@ -140,9 +204,24 @@ export interface GameState {
   looted: { features: number[]; piles: number[] };
   /** Cells (y * width + x) of hidden things the player has found: floor traps, container traps and secret doors (Spec 04, Detect; Spec 06). */
   revealed: number[];
+  used: UsedState;
 }
 
-export interface ActResult {
+/** What an action leaves for the shell and the run to carry out (Spec 06): a level change, or something to show. */
+export interface PendingEffects {
+  /** A deep pit: fall to the level below at a random cell. */
+  fall?: boolean;
+  /** A teleporter: go to the paired level. */
+  teleport?: number;
+  /** A container or sarcophagus opened: its feature number, for the pick-up list. */
+  opened?: number;
+  /** An altar waits for an offering. */
+  offer?: number;
+  /** Text to show in a window: a sign, a book, a rune. */
+  read?: { title: string; lines: string[] };
+}
+
+export interface ActResult extends PendingEffects {
   messages: LogMessage[];
   /** True when the action cost a round, so the monsters acted. */
   spent: boolean;
@@ -166,6 +245,9 @@ export interface LevelDelta {
   looted: { features: number[]; piles: number[] };
   /** Hidden things found on this level (Spec 06: once found, always found). */
   revealed: number[];
+  used: UsedState;
+  /** Pottery cells smashed, which can be walked over. */
+  cleared: number[];
   /** The round the player left, for restocking (task 2.12). */
   turnLeft: number;
 }
@@ -173,6 +255,8 @@ export interface LevelDelta {
 export interface ArrivalOptions {
   /** Which stair the player arrives on; the up stair by default (arriving from above). */
   stair?: 'up' | 'down';
+  /** A cell to arrive on instead of a stair: a teleporter or the landing of a collapsed passage (Spec 02). */
+  at?: Point;
   delta?: LevelDelta;
   /** The run's round counter on arrival; 1 for a new run. */
   round?: number;
@@ -180,6 +264,8 @@ export interface ArrivalOptions {
   spells?: readonly Spell[];
   /** The item tables, so loot can be made into items (Spec 05). */
   items?: ItemData;
+  /** The tables features roll from: traps, fountains, debris, gods, books, monsters (Spec 06). */
+  content?: GameContent;
 }
 
 export class Game {
@@ -191,6 +277,10 @@ export class Game {
   /** The item tables and this run's disguises. Derived from the content and the seed, so never saved. */
   readonly items: ItemData;
   readonly disguises: ReadonlyMap<string, string>;
+  /** The tables features roll from. Derived from the content, so never saved. */
+  readonly content: GameContent;
+  /** What the last action asked the run to do next: change level by a fall or a teleport, or show something. Not saved. */
+  pending: PendingEffects = {};
 
   constructor(
     readonly runSeed: number,
@@ -206,10 +296,11 @@ export class Game {
     this.rng = createRng(hash32('runtime', seed, round));
     this.spells = new Map((arrival.spells ?? []).map((sp) => [sp.id, sp]));
     this.items = arrival.items ?? itemDataFrom({ tables: {} });
+    this.content = arrival.content ?? noContent();
     this.disguises = disguisesFor(runSeed, this.items.magic.values(), this.items.disguiseNames);
-    const at = arrival.stair === 'down' ? level.downStair ?? level.upStair : level.upStair;
+    const at = arrival.at ?? (arrival.stair === 'down' ? level.downStair ?? level.upStair : level.upStair);
     this.state = {
-      map: createMapState(level, { at, openDoors: delta?.openDoors.slice(), explored: delta?.explored.slice() }),
+      map: createMapState(level, { at, openDoors: delta?.openDoors.slice(), explored: delta?.explored.slice(), cleared: delta?.cleared.slice() }),
       // Which monsters start asleep is rolled from the level's own seed, so it is the same whenever the level is first entered.
       monsters: delta ? structuredClone(delta.monsters) : spawnAll(level, createRng(hash32('awareness', seed))),
       player,
@@ -217,12 +308,15 @@ export class Game {
       drops: delta ? structuredClone(delta.drops) : [],
       looted: delta ? structuredClone(delta.looted) : { features: [], piles: [] },
       revealed: delta ? delta.revealed.slice() : [],
+      used: delta ? structuredClone(delta.used) : freshUsed(),
     };
+    // A level a map fragment has mapped shows its layout the first time it is entered (Spec 02, task 2.10).
+    if (!delta && player.mapped.includes(level.depth)) mapLevel(this);
   }
 
   /** Snapshot what a revisit must replay: doors, explored cells, the living creatures and what they dropped or took. */
   captureDelta(): LevelDelta {
-    const { map, monsters, round, drops, looted, revealed } = this.state;
+    const { map, monsters, round, drops, looted, revealed, used } = this.state;
     return {
       explored: map.exploration.explored.slice(),
       openDoors: map.openDoors.slice(),
@@ -230,8 +324,15 @@ export class Game {
       drops: structuredClone(drops),
       looted: structuredClone(looted),
       revealed: revealed.slice(),
+      used: structuredClone(used),
+      cleared: map.cleared.slice(),
       turnLeft: round,
     };
+  }
+
+  /** Land on a random walkable cell, as after a fall (Spec 06): no creature, no trap. */
+  landAnywhere(): void {
+    teleportPlayer(this, []);
   }
 
   /** Recompute what the player sees after the player moves or a door opens (Blink uses it). */
@@ -254,21 +355,32 @@ export class Game {
       return { messages: [{ kind: 'system', text: 'You are dead. Death options arrive in task 2.13.' }], spent: false };
     }
     const messages: LogMessage[] = [];
-    if (['move', 'wait', 'interact', 'pickup'].includes(command.type)) {
+    if (['move', 'wait', 'interact', 'pickup', 'search'].includes(command.type)) {
       const helpless = this.helpless(messages);
       if (helpless) return helpless;
     }
     switch (command.type) {
       case 'move':
-        return this.move(command.dx, command.dy, messages);
+        return this.finish(this.move(command.dx, command.dy, messages));
       case 'wait':
         return this.endRound(messages, true);
-      case 'interact':
-        return this.useStairs(messages) ?? this.closeDoor(messages);
+      case 'interact': {
+        const stairs = this.useStairs(messages);
+        if (stairs) return stairs;
+        const spent = interact(this, messages);
+        if (spent === undefined) {
+          messages.push({ kind: 'system', text: 'There is nothing here to use.' });
+          return this.finish({ messages, spent: false });
+        }
+        return this.finish(spent ? this.endRound(messages) : { messages, spent: false });
+      }
+      case 'search':
+        search(this, messages); // one round (Spec 06)
+        return this.finish(this.endRound(messages));
       case 'pickup': {
         // Picking up costs a round when something is taken (Spec 04, Spec 05).
         const taken = pickUp(this, messages);
-        return taken === 'taken' ? this.endRound(messages) : { messages, spent: false };
+        return this.finish(taken === 'taken' ? this.endRound(messages) : { messages, spent: false });
       }
       default:
         return undefined;
@@ -297,6 +409,20 @@ export class Game {
     if (helpless) return helpless;
     fireRanged(this, target, messages);
     return this.endRound(messages);
+  }
+
+  /** Take from an opened container's list: free (Spec 06). `which` is a line of the list, or everything that fits. */
+  take(index: number, which: number | 'all'): ActResult {
+    const messages: LogMessage[] = [];
+    takeFromContainer(this, index, which, messages);
+    return { messages, spent: false };
+  }
+
+  /** Make the offering at an altar (Spec 06): one round when it is made. */
+  offerAt(index: number, what: 'gold' | Item): ActResult {
+    const messages: LogMessage[] = [];
+    if (this.state.player.dead) return { messages: [{ kind: 'system', text: 'You are dead.' }], spent: false };
+    return this.finish(offer(this, index, what, messages) ? this.endRound(messages) : { messages, spent: false });
   }
 
   /** What F would fire right now: the readied weapon, or a dagger to throw; undefined when there is nothing. */
@@ -344,7 +470,8 @@ export class Game {
     }
     const helpless = this.helpless(messages);
     if (helpless) return helpless;
-    return useItem(this, item, aim, messages) ? this.endRound(messages) : { messages, spent: false };
+    if (item.kind === 'book') return this.finish(readLoreBook(this, item, messages) ? this.endRound(messages) : { messages, spent: false });
+    return this.finish(useItem(this, item, aim, messages) ? this.endRound(messages) : { messages, spent: false });
   }
 
   /**
@@ -445,45 +572,27 @@ export class Game {
       messages.push({ kind: 'warning', text: 'You are too frightened to go that way.' });
       return { messages, spent: false };
     }
+    // A found trap is walked around or disarmed, never stepped on (Spec 06, task 2.10).
+    if (trapAt(this, x, y) && this.state.revealed.includes(cell)) {
+      messages.push({ kind: 'warning', text: 'There is a trap there. Walk around it, or disarm it with E.' });
+      return { messages, spent: false };
+    }
     const foundSecret = this.state.revealed.includes(cell) && level.doors.some((d) => d.x === x && d.y === y && d.kind === 'secret');
     if ((level.tiles[y]![x] === TILE.door || foundSecret) && !isOpen(map, x, y)) {
-      // Locked and sealed doors stay shut until keys and picking arrive (task 2.10); trying one is free.
-      if (level.doors.some((d) => d.x === x && d.y === y && (d.kind === 'locked' || d.kind === 'sealed'))) {
-        messages.push({ kind: 'system', text: 'The door is locked.' });
-        return { messages, spent: false };
-      }
+      // A locked door opens to a key, which is used up; without one trying it is free. A sealed one needs its vault key (Spec 06).
+      const locked = lockedDoorAt(this, x, y);
+      if (locked) return walkIntoLocked(this, locked, messages) ? this.endRound(messages) : { messages, spent: false };
       // A normal door opens when moved into; it costs the move (Spec 06).
       map.openDoors.push(cell);
       map.terrain[cell] = TERRAIN_OPEN;
       refreshSight(map);
       return this.endRound(messages);
     }
-    if (!isOpen(map, x, y)) return { messages, spent: false }; // bumping a wall is free
+    if (!isOpen(map, x, y)) return { messages, spent: false }; // bumping a wall, or a chest, is free
     map.player = { x, y };
     refreshSight(map);
+    stepEnds(this, messages); // a hidden trap underfoot, a rune, what lies beside (Spec 06)
     return this.endRound(messages);
-  }
-
-  /** Close an adjacent open door: the one the player faces, else the first found (Spec 06, "Closing a door is an interact action"). */
-  private closeDoor(messages: LogMessage[]): ActResult | undefined {
-    const { map, player } = this.state;
-    const { level } = map;
-    const around = [[player.facing.dx, player.facing.dy] as const, ...NESW];
-    for (const [dx, dy] of around) {
-      const x = map.player.x + dx;
-      const y = map.player.y + dy;
-      const cell = y * level.width + x;
-      if (!map.openDoors.includes(cell)) continue;
-      if (this.monsterAt(x, y)) {
-        messages.push({ kind: 'system', text: 'Something is in the doorway.' });
-        return { messages, spent: false };
-      }
-      map.openDoors.splice(map.openDoors.indexOf(cell), 1);
-      map.terrain[cell] = TERRAIN_BLOCKED;
-      refreshSight(map);
-      return this.endRound(messages);
-    }
-    return undefined;
   }
 
   /**
@@ -500,8 +609,17 @@ export class Game {
       return { messages, spent: true };
     }
     player.halfRound = false;
+    // A fall or a teleport leaves the level before anything else moves.
+    if (this.pending.fall || this.pending.teleport !== undefined) return { messages, spent: true };
     for (let rounds = speed === 'slow' ? 2 : 1; rounds > 0 && !player.dead; rounds--) this.runRound(messages, waiting);
     return { messages, spent: true };
+  }
+
+  /** Hand what the action left for the shell and the run (a fall, a teleport, a list or text to show) to its result, and clear it. */
+  private finish(result: ActResult): ActResult {
+    Object.assign(result, this.pending);
+    this.pending = {};
+    return result;
   }
 
   /** One round of the level: every creature acts, effects tick down, waiting counts, and the round number goes up. */

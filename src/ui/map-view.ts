@@ -3,12 +3,14 @@
 // monster or player, then the targeting overlay.
 
 import type { GameState } from '../game/game.ts';
+import type { Item } from '../rules/items/types.ts';
+import type { Loot } from '../rules/world/level.ts';
 import type { CellCursor, Targeting } from '../game/targeting.ts';
 import { TILE } from '../rules/world/level.ts';
-import { toCp437 } from './cp437.ts';
+import { GLYPH, toCp437 } from './cp437.ts';
 import { cameraOrigin } from './camera.ts';
 import { COLS, type Grid } from './grid.ts';
-import { MAP, TARGET } from './palette.ts';
+import { ITEM_COLOURS, MAP, TARGET } from './palette.ts';
 import { MAIN_PANE, inner } from './panes.ts';
 
 const GLYPH_PLAYER = 64;
@@ -53,9 +55,17 @@ export function drawMap(grid: Grid, state: GameState, targeting: Targeting | nul
   // Hidden things the player has found (Spec 04, Detect; Spec 06): secret doors draw as doors, traps as ^.
   const found = new Set(state.revealed);
   const secrets = new Set(level.doors.filter((d) => d.kind === 'secret' && found.has(d.y * level.width + d.x)).map((d) => d.y * level.width + d.x));
+  // A found trap that is still there draws as ^ (disarmed and sprung ones are gone).
   const traps = new Set(
-    [...level.traps, ...level.features.filter((f) => f.type === 'container' && f.trap)].map((p) => p.y * level.width + p.x).filter((i) => found.has(i)),
+    [
+      ...level.traps.filter((t) => !state.used.disarmed.includes(t.y * level.width + t.x)),
+      ...level.features.filter((f, i) => f.type === 'container' && f.trap && !state.used.features[i]?.trapGone),
+    ]
+      .map((p) => p.y * level.width + p.x)
+      .filter((i) => found.has(i)),
   );
+  const things = featureGlyphs(state);
+  const piles = pileGlyphs(state);
   // Level cell to screen cell, or null when off the window.
   const screen = (x: number, y: number): [number, number] | null => {
     const sx = x - origin.x;
@@ -75,6 +85,14 @@ export function drawMap(grid: Grid, state: GameState, targeting: Targeting | nul
       const [glyph, fg] = terrain(tile, visible[i] === 1, open.has(i));
       grid.set(view.x + vx, view.y + vy, glyph, fg, MAP.background);
       if (traps.has(i)) grid.set(view.x + vx, view.y + vy, GLYPH_TRAP, MAP.trap[visible[i] === 1 ? 'visible' : 'remembered'], MAP.background);
+      // Features, then loose items (visible cells only), under any monster (Spec 01, draw order).
+      const thing = things.get(i);
+      if (thing) {
+        const light = visible[i] === 1 && !thing.dim ? 'visible' : 'remembered';
+        grid.set(view.x + vx, view.y + vy, thing.glyph, thing.colour[light], MAP.background);
+      }
+      const pile = visible[i] === 1 ? piles.get(i) : undefined;
+      if (pile) grid.set(view.x + vx, view.y + vy, pile.glyph, pile.colour, MAP.background);
     }
   }
 
@@ -115,4 +133,110 @@ function drawTargeting(grid: Grid, t: Targeting, screen: (x: number, y: number) 
   }
   const sel = screen(t.selected.x, t.selected.y);
   if (sel) grid.set(sel[0], sel[1], toCp437(t.selected.glyph), TARGET.selectedFg, TARGET.selectedBg);
+}
+
+interface Thing {
+  glyph: number;
+  colour: { visible: number; remembered: number };
+  /** Drawn dimmed even when seen: a looted container or a spent rune (Spec 06). */
+  dim?: boolean;
+}
+
+const CONTAINER_GLYPH = { chest: GLYPH.chest, sack: GLYPH.sack, pottery: GLYPH.pottery, rack: GLYPH.weaponRack } as const;
+const FIXTURE_GLYPH = { fountain: GLYPH.fountain, altar: GLYPH.altar, sarcophagus: GLYPH.sarcophagus, rune: GLYPH.rune } as const;
+
+/** What stands on each cell of the level besides terrain: containers, fixtures, debris, wall marks and specials (Spec 01, core glyph table). */
+function featureGlyphs(state: GameState): Map<number, Thing> {
+  const { level } = state.map;
+  const { looted, used } = state;
+  const at = (p: { x: number; y: number }): number => p.y * level.width + p.x;
+  const things = new Map<number, Thing>();
+  for (const cell of used.collapsed) things.set(cell, { glyph: GLYPH.debris, colour: MAP.debris });
+  level.features.forEach((f, i) => {
+    if (f.type === 'debris') things.set(at(f), { glyph: GLYPH.debris, colour: MAP.debris });
+    else if (f.type === 'container') things.set(at(f), { glyph: CONTAINER_GLYPH[f.kind], colour: MAP.container, dim: looted.features.includes(i) });
+    else things.set(at(f), { glyph: FIXTURE_GLYPH[f.kind], colour: f.kind === 'rune' ? MAP.rune : MAP.fixture, dim: used.features[i]?.done === true });
+  });
+  for (const m of level.lore) things.set(at(m), { glyph: m.kind === 'rune' ? GLYPH.rune : GLYPH.sign, colour: m.kind === 'rune' ? MAP.rune : MAP.sign, dim: m.kind === 'rune' && used.marks.includes(level.lore.indexOf(m)) });
+  for (const s of level.specials) {
+    if (s.kind === 'teleporter') things.set(at(s), { glyph: GLYPH.teleporter, colour: MAP.special });
+    else if (s.kind === 'lever') things.set(at(s), { glyph: GLYPH.rod, colour: MAP.special, dim: used.lever });
+  }
+  return things;
+}
+
+/** The glyph of an item on the floor, by what it is. */
+function itemGlyph(item: Item): number {
+  switch (item.kind) {
+    case 'weapon':
+    case 'ranged':
+    case 'ammo':
+      return GLYPH.weapon;
+    case 'armour':
+    case 'shield':
+      return GLYPH.armour;
+    case 'clothing':
+      return GLYPH.clothing;
+    case 'ring':
+      return GLYPH.ring;
+    case 'potion':
+      return GLYPH.potion;
+    case 'wand':
+    case 'rod':
+    case 'staff':
+      return GLYPH.rod;
+    case 'key':
+    case 'vault_key':
+      return GLYPH.key;
+    case 'gem':
+      return GLYPH.gems;
+    case 'jewelry':
+      return GLYPH.jewelry;
+    case 'book':
+    case 'spellbook':
+    case 'map_fragment':
+      return GLYPH.book;
+    default:
+      return 42; // *
+  }
+}
+
+function lootGlyph(loot: Loot): number {
+  switch (loot.kind) {
+    case 'coins':
+      return GLYPH.coins;
+    case 'gem':
+      return GLYPH.gems;
+    case 'jewelry':
+      return GLYPH.jewelry;
+    case 'magic':
+      return GLYPH.potion;
+    case 'book':
+    case 'map_fragment':
+      return GLYPH.book;
+    case 'weapon':
+      return GLYPH.weapon;
+    case 'key':
+    case 'vault_key':
+      return GLYPH.key;
+    case 'item':
+      return itemGlyph(loot.item);
+    default:
+      return 42;
+  }
+}
+
+/** Loose piles on the floor: the level's own that nobody has emptied, and what was dropped, thrown or fell from the dead. */
+function pileGlyphs(state: GameState): Map<number, { glyph: number; colour: number }> {
+  const { level } = state.map;
+  const piles = new Map<number, { glyph: number; colour: number }>();
+  const add = (p: { x: number; y: number; contents: Loot[] }): void => {
+    const first = p.contents[0];
+    if (first) piles.set(p.y * level.width + p.x, { glyph: lootGlyph(first), colour: first.kind === 'coins' ? ITEM_COLOURS.coins : ITEM_COLOURS.other });
+  };
+  level.piles.forEach((p, i) => {
+    if (!state.looted.piles.includes(i)) add(p);
+  });
+  for (const p of state.drops) add(p);
+  return piles;
 }

@@ -149,7 +149,7 @@ describe('coverage report', () => {
   it('lists every catalog table against its launch minimum', () => {
     expect(report.tables.map((t) => t.table)).toEqual(CATALOG.map((c) => c.table));
     expect(report.tables).toHaveLength(28);
-    expect(byTable('monsters')).toMatchObject({ count: 4, minimum: 150, present: true, ok: false });
+    expect(byTable('monsters')).toMatchObject({ count: 6, minimum: 150, present: true, ok: false });
     expect(byTable('spells')).toMatchObject({ count: 15, minimum: 15, present: true, ok: true });
     expect(byTable('minor_abilities')).toMatchObject({ minimum: 240, unit: 'slots' });
     expect(byTable('rumours').minimum).toBe(60);
@@ -170,7 +170,7 @@ describe('coverage report', () => {
   it('counts monsters per rating', () => {
     const groups = byTable('monsters').groups;
     expect(groups).toHaveLength(20);
-    expect(groups[0]).toEqual({ label: 'rating 1', count: 2, minimum: 5 });
+    expect(groups[0]).toEqual({ label: 'rating 1', count: 4, minimum: 5 });
     expect(groups[7]).toEqual({ label: 'rating 8', count: 1, minimum: 5 });
     expect(groups[8]).toEqual({ label: 'rating 9', count: 0, minimum: 5 });
   });
@@ -254,7 +254,7 @@ describe('coverage report', () => {
   it('writes a page that names every table', () => {
     const html = renderCoverageHtml(report);
     for (const t of CATALOG) expect(html).toContain(t.table);
-    expect(html).toContain('4 / 150 entries');
+    expect(html).toContain('6 / 150 entries');
     expect(html).toContain('3 / 40 entries');
     expect(html.startsWith('<!doctype html>')).toBe(true);
   });

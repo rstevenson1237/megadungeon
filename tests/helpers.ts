@@ -10,10 +10,11 @@ import { CP437_TO_UNICODE } from '../src/ui/cp437.ts';
 import { COLS, Grid } from '../src/ui/grid.ts';
 import { Shell } from '../src/ui/shell.ts';
 import { buildContent } from '../tools/content-build.ts';
+import { gameContentOf } from '../src/game/content.ts';
 import { spellsFrom } from '../src/rules/magic/spells.ts';
 import { ammoCount } from '../src/rules/items/inventory.ts';
 import { startingKit } from '../src/rules/items/kit.ts';
-import { itemDataFrom, makeAmmo, makeMagicItem } from '../src/rules/items/magic.ts';
+import { itemDataFrom, makeAmmo, makeLockpicks, makeMagicItem } from '../src/rules/items/magic.ts';
 import { makeGear } from '../src/rules/items/gear.ts';
 import type { GearItem, Item, Quality } from '../src/rules/items/types.ts';
 import { createRng } from '../src/core/rng.ts';
@@ -48,6 +49,7 @@ export const content = () => (built ??= buildContent(resolve(import.meta.dirname
 export const SPELLS: Spell[] = spellsFrom(content().bundle);
 export const spell = (id: string): Spell => SPELLS.find((s) => s.id === id)!;
 export const ITEMS = itemDataFrom(content().bundle);
+export const CONTENT = gameContentOf(content().bundle);
 
 let nextUid = 1;
 /** A piece of gear from its base. Artifact quality by default, so a rigged roll is never eaten by a break roll. */
@@ -70,7 +72,7 @@ export const testPlayer = (extra: Partial<PlayerState> = {}): PlayerState =>
   ({ ...createPlayer({ combatStep: 6, combatDice: 2, combatMax: 2, ...slingKit() }), ...extra });
 
 export function gameOn(level: Level, player: Partial<PlayerState> = {}, arrival: ArrivalOptions = {}): Game {
-  return new Game(1, level, testPlayer(player), { spells: SPELLS, items: ITEMS, ...arrival });
+  return new Game(1, level, testPlayer(player), { spells: SPELLS, items: ITEMS, content: CONTENT, ...arrival });
 }
 
 /** A caster: three Magic d6 dice, and every spell known. */
@@ -123,7 +125,7 @@ export const testCharacter = (): CharacterPaneData => ({
 /** A shell with a game loaded on the given level. */
 export function shellOn(level: Level, monsters: Monster[] = [], player: Partial<PlayerState> = {}): Shell {
   const shell = new Shell('Test', testCharacter());
-  shell.setRun(new Run(1, testPlayer(player), { startDepth: 1, levelFor: () => level, spells: SPELLS, items: ITEMS }));
+  shell.setRun(new Run(1, testPlayer(player), { startDepth: 1, levelFor: () => level, spells: SPELLS, items: ITEMS, content: CONTENT }));
   shell.game!.state.monsters.push(...monsters);
   return shell;
 }
@@ -192,4 +194,27 @@ export function checkLevel(level: Level): string | null {
     if (at(level.downStair.x, level.downStair.y) !== '>') return 'down stair position';
   }
   return null;
+}
+
+/** A room with features, traps, doors and the like added: the level the feature tests play on. */
+export function withThings(base: Level, things: Partial<Pick<Level, 'features' | 'traps' | 'doors' | 'lore' | 'specials' | 'piles' | 'npcs'>>): Level {
+  return { ...base, ...things };
+}
+
+/** The ids a test needs to find a hidden thing's cell. */
+export const cell = (level: Level, x: number, y: number): number => y * level.width + x;
+
+/** A plain key, or a stack of them. */
+export const keyItem = (count = 1): Item => ({ kind: 'key', uid: nextUid++, id: 'key', name: 'key', value: 0, count });
+/** A bundle of lockpicks. */
+export const picksItem = (count = 3): Item => makeLockpicks(ITEMS.bases.get('lockpicks')!, nextUid++, count);
+/** A vault key naming the vault it opens. */
+export const vaultKeyItem = (link: string): Item => ({ kind: 'vault_key', uid: nextUid++, id: 'vault_key', name: 'vault key', value: 0, link });
+
+/** A game with the player standing at (x, y) rather than on the stair, sight refreshed. */
+export function gameAt(level: Level, x: number, y: number, player: Partial<PlayerState> = {}, arrival: ArrivalOptions = {}): Game {
+  const game = gameOn(level, player, arrival);
+  game.state.map.player = { x, y };
+  game.refreshSight();
+  return game;
 }

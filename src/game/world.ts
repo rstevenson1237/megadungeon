@@ -13,6 +13,7 @@ import type {
   Trap,
   VillageName,
 } from '../core/schemas.ts';
+import { gameContentOf } from './content.ts';
 import { itemDataFrom } from '../rules/items/magic.ts';
 import { spellsFrom } from '../rules/magic/spells.ts';
 import { PLAIN_STYLE } from '../rules/world/generate.ts';
@@ -70,6 +71,7 @@ export function runOptionsFor(bundle: ContentBundle, seed: number): RunOptions {
     layout,
     spells: spellsFrom(bundle),
     items: itemDataFrom(bundle),
+    content: gameContentOf(bundle),
     sizeFor: (depth) => themeAt(depth)?.size ?? 'medium',
     styleFor: (depth) => themeAt(depth) ?? PLAIN_STYLE,
     contentsFor: (depth) => {

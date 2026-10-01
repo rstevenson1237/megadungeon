@@ -1,49 +1,78 @@
-# The floor and container traps of Spec 06, as stub entries for task 2.4. Their effects arrive with task 2.10.
+# The floor and container traps of Spec 06, as the launch set. `effect` is code; the numbers are the spec's: dart,
+# pit, collapse and fire burst lose one Combat die (two below level 50 for the ones marked `heavy`), poison, sleep
+# gas (Asleep 5 rounds) and nets (Held 3 rounds) are statuses, and the deep pit drops the player a level.
 # `themes` follows the intake's feature bias: collapse traps in the Old Mine, spore (poison gas) traps in the
 # Fungal Caverns, fire in the Lava Forges, summoning in the Wizard's Sanctum, magic traps in the Void Halls.
 - id: trap_dart
   name: dart trap
   kind: floor
+  effect: lose_dice
+  dice: 1
+  heavy: true
 - id: trap_pit
   name: pit
   kind: floor
+  effect: lose_dice
+  dice: 1
 - id: trap_poison_gas
   name: poison gas
   kind: floor
+  effect: status
+  status: poisoned
   themes: { fungal_caverns: 3 }
 - id: trap_sleep_gas
   name: sleep gas
   kind: floor
+  effect: status
+  status: asleep
+  rounds: 5
 - id: trap_net
   name: net trap
   kind: floor
+  effect: status
+  status: held
+  rounds: 3
 - id: trap_alarm
   name: alarm
   kind: floor
+  effect: alarm
 - id: trap_teleport
   name: teleport trap
   kind: floor
+  effect: teleport
   themes: { void_halls: 3 }
 - id: trap_collapse
   name: collapse
   kind: floor
+  effect: collapse
+  dice: 1
+  heavy: true
   themes: { old_mine: 3 }
 - id: trap_deep_pit
   name: deep pit
   kind: floor
+  effect: deep_pit
+  dice: 1
   weight: 5
   tags: [deep_pit]
 - id: trap_poison_needle
   name: poison needle
   kind: container
+  effect: status
+  status: poisoned
 - id: trap_fire_burst
   name: fire burst
   kind: container
+  effect: lose_dice
+  dice: 1
+  heavy: true
   themes: { lava_forges: 3 }
 - id: trap_container_alarm
   name: alarm
   kind: container
+  effect: alarm
 - id: trap_summoning
   name: summoning
   kind: container
+  effect: summon
   themes: { wizards_sanctum: 2 }

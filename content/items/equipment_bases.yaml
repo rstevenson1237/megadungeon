@@ -1,6 +1,6 @@
 # The weapon, armour and shield bases of Spec 05 (16 of them) and the three ammunition types. `modifier` is a
 # weapon's melee modifier or armour's defence modifier; `price` is gp for normal quality at the surface (for
-# ammunition, gp per `per` pieces). Traits are defined in code (Spec 05).
+# ammunition, gp per `per` pieces; for a tool, gp each). Traits are defined in code (Spec 05).
 - id: dagger
   name: Dagger
   type: melee
@@ -120,3 +120,7 @@
   ammo: bolt
   per: 20
   price: 8
+- id: lockpicks
+  name: Lockpicks
+  type: tool
+  price: 5

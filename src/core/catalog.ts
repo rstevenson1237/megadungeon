@@ -102,8 +102,8 @@ export type MagicItemKind = (typeof MAGIC_ITEM_KINDS)[number];
 /** The kinds that wear a disguise until identified (Spec 05): potion looks, ring metals, wand, rod and staff woods. */
 export const DISGUISED_KINDS = ['potion', 'ring', 'wand', 'rod', 'staff'] as const;
 
-/** What an equipment base is (Spec 05): the 16 weapon, armour and shield bases, plus ammunition. */
-export const BASE_TYPES = ['melee', 'ranged', 'armour', 'shield', 'ammo'] as const;
+/** What an equipment base is (Spec 05): the 16 weapon, armour and shield bases, plus ammunition and tools (lockpicks). */
+export const BASE_TYPES = ['melee', 'ranged', 'armour', 'shield', 'ammo', 'tool'] as const;
 export type BaseType = (typeof BASE_TYPES)[number];
 
 /** Ammunition types, tracked per type (Spec 04, Spec 05). */
@@ -176,8 +176,20 @@ export const SPELL_EFFECTS = [
 ] as const;
 export type SpellEffect = (typeof SPELL_EFFECTS)[number];
 
+/** What a trap does when it springs (Spec 06, "Traps"); a table row names one and carries its numbers. */
+export const TRAP_EFFECTS = ['lose_dice', 'status', 'alarm', 'teleport', 'collapse', 'deep_pit', 'summon'] as const;
+export type TrapEffect = (typeof TRAP_EFFECTS)[number];
+
+/** What a fountain can do to a drinker (Spec 06, "Fixtures"). `restore_dice` and `cure_poison` are shared with potions. */
+export const FOUNTAIN_EFFECTS = ['restore_dice', 'cure_poison', 'reveal_map', 'coins', 'poison', 'water_creature', 'nothing'] as const;
+export type FountainEffect = (typeof FOUNTAIN_EFFECTS)[number];
+
+/** What an altar's god gives for a good offering (Spec 06, "Fixtures"). */
+export const BLESSINGS = ['bless', 'lift_curse', 'identify'] as const;
+export type Blessing = (typeof BLESSINGS)[number];
+
 /** Effects defined in code. Tables name these (`effect: restore_dice`). */
-export const EFFECTS: readonly string[] = [...SPELL_EFFECTS, ...ITEM_EFFECTS];
+export const EFFECTS: readonly string[] = [...new Set([...SPELL_EFFECTS, ...ITEM_EFFECTS, ...TRAP_EFFECTS, ...FOUNTAIN_EFFECTS])];
 
 /** Launch floors for tables that are checked by group (Spec 08, "Validation and coverage"). */
 export const MONSTERS_PER_RATING = 5;

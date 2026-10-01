@@ -43,7 +43,7 @@ describe('Spec 05: the equipment bases are the tables of the spec', () => {
   });
 
   it('has the 16 bases the catalog asks for', () => {
-    expect([...ITEMS.bases.values()].filter((b) => b.type !== 'ammo')).toHaveLength(16);
+    expect([...ITEMS.bases.values()].filter((b) => b.type !== 'ammo' && b.type !== 'tool')).toHaveLength(16);
   });
 });
 

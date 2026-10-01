@@ -11,6 +11,8 @@ export interface MapState {
   exploration: Exploration;
   /** Cell indices (y * width + x) of doors that are open: the level's door delta. Saved. */
   openDoors: number[];
+  /** Cells of features that no longer block (smashed pottery): part of the level delta. */
+  cleared: number[];
   /**
    * Derived from the level and open doors, so never saved. One byte per cell:
    * 0 where walls and closed doors block movement and sight, 2 where deep water and lava block
@@ -25,7 +27,7 @@ export interface MapState {
  * Terrain map for movement and sight: 0 for walls and closed doors (block both), 1 for open cells,
  * 2 for deep water and lava (block movement, never sight: Spec 02, "Liquids" and "Visibility").
  */
-export function buildTerrain(level: Level, openDoors: readonly number[]): Uint8Array {
+export function buildTerrain(level: Level, openDoors: readonly number[], cleared: readonly number[] = []): Uint8Array {
   const terrain = new Uint8Array(level.width * level.height);
   const open = new Set(openDoors);
   for (let y = 0; y < level.height; y++) {
@@ -40,6 +42,14 @@ export function buildTerrain(level: Level, openDoors: readonly number[]): Uint8A
       else terrain[cell] = TERRAIN_OPEN;
     }
   }
+  // Chests, sacks, racks, pottery, fountains, altars, sarcophagi and levers block movement but not sight (Spec 06).
+  const gone = new Set(cleared);
+  const block = (p: { x: number; y: number }): void => {
+    const cell = p.y * level.width + p.x;
+    if (terrain[cell] === TERRAIN_OPEN && !gone.has(cell)) terrain[cell] = TERRAIN_LIQUID;
+  };
+  for (const f of level.features) if (f.type === 'container' || (f.type === 'fixture' && f.kind !== 'rune')) block(f);
+  for (const sp of level.specials) if (sp.kind === 'lever') block(sp);
   return terrain;
 }
 
@@ -48,6 +58,8 @@ export const TERRAIN_OPEN = 1;
 export const TERRAIN_LIQUID = 2;
 
 export interface MapOptions {
+  /** Pottery cells already smashed (the level's cleared-cells delta). */
+  cleared?: number[];
   /** Doors already open (the level's door delta). */
   openDoors?: number[];
   /** Cells already explored (the level's explored-cells delta). */
@@ -62,8 +74,14 @@ export function createMapState(level: Level, options: MapOptions = {}): MapState
   const exploration = createExploration(level);
   if (options.explored) exploration.explored = options.explored;
   const player = { ...(options.at ?? level.upStair) };
-  const terrain = buildTerrain(level, openDoors);
-  return { level, player, exploration, openDoors, terrain, visible: updateExploration(exploration, player, terrain) };
+  const cleared = options.cleared ?? [];
+  const terrain = buildTerrain(level, openDoors, cleared);
+  return { level, player, exploration, openDoors, cleared, terrain, visible: updateExploration(exploration, player, terrain) };
+}
+
+/** Rebuild the terrain after pottery is smashed. */
+export function refreshTerrain(state: MapState): void {
+  state.terrain = buildTerrain(state.level, state.openDoors, state.cleared);
 }
 
 /** Recompute what is visible after the player moves or a door opens or closes. */

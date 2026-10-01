@@ -198,7 +198,7 @@ describe('the village and the stairs in the shell (Spec 01, Overlays and screens
 
   it('keys with no village action log not yet available; Esc opens the game menu', () => {
     const shell = newShell();
-    press(shell, 'j');
+    press(shell, 'l');
     expect(shell.log.lines(shell.turn).some((l) => l.text.includes('not yet available'))).toBe(true);
     press(shell, 'Escape');
     expect(shell.overlays).toHaveLength(1);

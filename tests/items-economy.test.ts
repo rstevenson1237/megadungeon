@@ -72,7 +72,7 @@ describe('Spec 05: prices follow the depth multiplier and the sell rate', () => 
     expect(itemValue(ammo('sling_stones', 20))).toBe(1);
     expect(itemValue(ammo('arrows', 20))).toBe(5);
     expect(itemValue(ammo('bolts', 20))).toBe(8);
-    expect(ITEMS.bases.size).toBe(19);
+    expect(ITEMS.bases.size).toBe(20); // 16 gear bases, 3 ammunition types and the lockpicks
   });
 });
 

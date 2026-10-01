@@ -30,7 +30,7 @@ describe('turn loop (Spec 04, Turns and timing)', () => {
 
   it('leaves commands it does not handle to the caller', () => {
     const game = gameOn(room(5, 5, 2, 2));
-    for (const type of ['inventory', 'look', 'search', 'cast', 'journal', 'waitLong'] as const) {
+    for (const type of ['inventory', 'look', 'cast', 'journal', 'waitLong'] as const) {
       expect(game.act({ type })).toBeUndefined();
     }
   });
@@ -99,11 +99,13 @@ describe('doors (Spec 06, Doors and locks)', () => {
     expect(map.player).toEqual({ x: 4, y: 1 });
   });
 
-  it('interact closes an adjacent open door, which blocks sight again; nothing to close leaves E to the caller', () => {
+  it('interact closes an adjacent open door, which blocks sight again; with nothing to use it says so', () => {
     const game = gameOn(level());
     expect(game.act({ type: 'interact' })!.stairs).toBe('up'); // standing on the up stair
     walk(game, 'd');
-    expect(game.act({ type: 'interact' })).toBeUndefined(); // no stair, no open door beside
+    const nothing = game.act({ type: 'interact' })!; // no stair, no open door beside: nothing answers, and no round is spent
+    expect(nothing).toMatchObject({ spent: false });
+    expect(nothing.messages.map((m) => m.text)).toEqual(['There is nothing here to use.']);
     walk(game, 'ddd'); // opens the door, then steps through to the door cell
     walk(game, 'd');
     const { map } = game.state;

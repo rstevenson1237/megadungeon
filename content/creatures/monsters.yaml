@@ -9,7 +9,7 @@
   behaviour: stub
   speed: fast
   depth: [1, 5]
-  tags: [stub, pack]
+  tags: [stub, pack, vermin]
 - id: stub_monster_strong
   name: stub ogre
   glyph: O
@@ -35,3 +35,21 @@
   behaviour: stub
   depth: [41, 100]
   tags: [stub]
+# Stub rows the features draw on (Spec 06): an aquatic creature for fountains and an undead for sarcophagi. Low weights keep
+# them rare in ordinary levels; ratings of 1d4 fit every depth.
+- id: stub_monster_eel
+  name: stub eel
+  glyph: e
+  colour: moss
+  rating: 1d4+0
+  behaviour: stub
+  weight: 2
+  tags: [stub, aquatic]
+- id: stub_monster_skeleton
+  name: stub skeleton
+  glyph: s
+  colour: moss
+  rating: 1d4+0
+  behaviour: stub
+  weight: 2
+  tags: [stub, undead]
