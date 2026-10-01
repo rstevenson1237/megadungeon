@@ -19,6 +19,8 @@ const pool12 = (prefix: string) => [
 ];
 const cls = (id: string, start: [Step, Step, Step], steps: ['combat' | 'skill' | 'magic', 'combat' | 'skill' | 'magic', 'combat' | 'skill' | 'magic']): ClassDef => ({
   id,
+  name: id,
+  majorAbility: { id: `${id}_major`, name: id, text: '' },
   start: { combat: start[0], skill: start[1], magic: start[2] },
   steps: { 4: steps[0], 7: steps[1], 9: steps[2] },
   minorAbilities: pool12(id),

@@ -19,6 +19,9 @@ export type StepLevel = (typeof STEP_LEVELS)[number];
 /** What the rules need from a class: starting steps, step changes and its minor ability pool. */
 export interface ClassDef {
   id: string;
+  name: string;
+  /** The major ability every character of the class has from level 1 (Spec 03); its effect is code (Specs 04, 05). */
+  majorAbility: { id: string; name: string; text: string };
   /** Starting step of each pool; the two allowed arrays are all d6, or one each of d4, d6 and d8. */
   start: Record<PoolName, Step>;
   /** The pool that steps up one at each of levels 4, 7 and 9. */
