@@ -1,0 +1,8 @@
+# Stub entries for task 1.1 (Spec 08, "Stub content in Phases 1 and 2").
+# The launch table of 40 village names is written in Phase 3.
+- id: stub_village_one
+  name: Stubton
+- id: stub_village_two
+  name: Placeholder Cross
+- id: stub_village_three
+  name: Testhollow
