@@ -13,6 +13,8 @@ import { MAIN_PANE, drawPanes, inner } from './panes.ts';
 import { UI } from './palette.ts';
 import { drawMap } from './map-view.ts';
 import type { Game } from '../game/game.ts';
+import type { Run } from '../game/run.ts';
+import { VillageScreen } from './village.ts';
 import { type Targeting, startTargeting } from '../game/targeting.ts';
 import { ratingText } from '../game/monsters.ts';
 
@@ -21,8 +23,10 @@ export class Shell {
   readonly overlays: Overlay[] = [];
   /** The round, from the game once a level is loaded; messages from this round draw bright. */
   turn = 1;
-  /** The running game; null until a level is loaded (tasks 1.9 and 1.10 manage levels and runs). */
-  game: Game | null = null;
+  /** The run in progress; null until one starts (the title screen, task 1.10). */
+  run: Run | null = null;
+  /** The village menu, while the run is in a village (Spec 01: no village map). */
+  village: VillageScreen | null = null;
   /** Set while the player is choosing a target (a free action: no round passes). */
   targeting: Targeting | null = null;
 
@@ -30,6 +34,35 @@ export class Shell {
     public title: string,
     public character: CharacterPaneData,
   ) {}
+
+  /** The level being played; null in a village or with no run. */
+  get game(): Game | null {
+    return this.run?.game ?? null;
+  }
+
+  /** Start showing a run: its level or its village, with the header and character pane in step. */
+  setRun(run: Run): void {
+    this.run = run;
+    this.targeting = null;
+    this.arrived();
+  }
+
+  // After the run changes place: header, village menu, round counter and character pane.
+  private arrived(): void {
+    const run = this.run!;
+    this.title = run.title;
+    this.village = run.inVillage ? new VillageScreen(run.depth, (d) => this.travel(d)) : null;
+    this.turn = run.game ? run.game.state.round : run.round;
+    this.syncCharacter();
+    this.character.target = undefined;
+  }
+
+  private travel(direction: 'up' | 'down'): void {
+    const run = this.run!;
+    const messages = run.travel(direction);
+    for (const m of messages) this.log.add(m, run.round);
+    this.arrived();
+  }
 
   /** Handle a key press. Returns true if the key is in the key map, so the caller can stop the browser acting on it. */
   handleKey(e: KeyInput): boolean {
@@ -53,6 +86,10 @@ export class Shell {
       this.target(command);
       return;
     }
+    if (this.village && ['move', 'confirm', 'interact'].includes(command.type)) {
+      this.applyVillage(this.village.handle(command));
+      return;
+    }
     switch (command.type) {
       case 'cancel':
         this.overlays.push(gameMenu());
@@ -73,7 +110,8 @@ export class Shell {
         const result = this.game?.act(command);
         if (result) {
           for (const m of result.messages) this.log.add(m, this.game!.state.round);
-          this.afterAction();
+          if (result.stairs) this.travel(result.stairs);
+          else this.afterAction();
           return;
         }
       }
@@ -81,14 +119,22 @@ export class Shell {
     this.log.add({ kind: 'system', text: `${COMMAND_NAMES[command.type]} is not yet available.` }, this.turn);
   }
 
+  private applyVillage(result: OverlayResult): void {
+    if (result.message) this.log.add(result.message, this.turn);
+  }
+
   /** Bring the round counter and the character pane's Combat pool in line with the game. */
   private afterAction(): void {
-    const game = this.game!;
-    this.turn = game.state.round;
+    this.turn = this.game!.state.round;
+    this.syncCharacter();
+  }
+
+  private syncCharacter(): void {
+    const player = this.run?.player;
     const combat = this.character.stats.find((s) => s.name === 'Combat');
-    if (combat) {
-      combat.current = game.state.player.combatDice;
-      combat.max = game.state.player.combatMax;
+    if (combat && player) {
+      combat.current = player.combatDice;
+      combat.max = player.combatMax;
     }
   }
 
@@ -141,6 +187,7 @@ export class Shell {
   draw(grid: Grid): void {
     drawPanes(grid, this.title);
     if (this.game) drawMap(grid, this.game.state, this.targeting);
+    else if (this.village) this.village.draw(grid);
     else grid.text(inner(MAIN_PANE).x + 2, inner(MAIN_PANE).y + 1, 'No level loaded.', UI.label, UI.background);
     drawCharacterPane(grid, this.character);
     drawLog(grid, this.log, this.turn);

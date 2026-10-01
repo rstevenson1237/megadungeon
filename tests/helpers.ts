@@ -1,4 +1,5 @@
-import { Game, type PlayerState } from '../src/game/game.ts';
+import { Game, type PlayerState, createPlayer } from '../src/game/game.ts';
+import { Run } from '../src/game/run.ts';
 import { GENERATOR_VERSION, type Level, type Point } from '../src/rules/world/level.ts';
 import type { Monster } from '../src/game/monsters.ts';
 import type { CharacterPaneData } from '../src/ui/character-pane.ts';
@@ -30,8 +31,11 @@ export function room(w: number, h: number, px: number, py: number): Level {
 }
 
 /** A game on a hand-built level with no monsters, a Combat d6 pool of 2 and a sling. */
-export function gameOn(level: Level, player: Partial<Omit<PlayerState, 'dead' | 'facing'>> = {}): Game {
-  return new Game(1, level, { combatStep: 6, combatDice: 2, combatMax: 2, ranged: { name: 'Sling', range: 6 }, ...player });
+export const testPlayer = (extra: Partial<PlayerState> = {}): PlayerState =>
+  ({ ...createPlayer({ combatStep: 6, combatDice: 2, combatMax: 2, ranged: { name: 'Sling', range: 6 } }), ...extra });
+
+export function gameOn(level: Level, player: Partial<PlayerState> = {}): Game {
+  return new Game(1, level, testPlayer(player));
 }
 
 /** A monster with sensible defaults: one die, normal speed, not yet alert. */
@@ -55,8 +59,8 @@ export const testCharacter = (): CharacterPaneData => ({
 /** A shell with a game loaded on the given level. */
 export function shellOn(level: Level, monsters: Monster[] = []): Shell {
   const shell = new Shell('Test', testCharacter());
-  shell.game = gameOn(level);
-  shell.game.state.monsters.push(...monsters);
+  shell.setRun(new Run(1, testPlayer(), { startDepth: 1, levelFor: () => level }));
+  shell.game!.state.monsters.push(...monsters);
   return shell;
 }
 

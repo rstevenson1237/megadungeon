@@ -4,7 +4,7 @@
 // behaviours, items and the full character come with tasks 2.5 to 2.9.
 
 import type { LogMessage } from '../core/log.ts';
-import { levelSeed, levelStreams, type Rng } from '../core/rng.ts';
+import { createRng, hash32, levelSeed, levelStreams, type Rng } from '../core/rng.ts';
 import { meleeOutcome, monsterRoll, rollDie } from '../rules/combat/melee.ts';
 import { distancesFrom } from '../rules/world/grid.ts';
 import { distanceSq } from '../rules/world/geometry.ts';
@@ -35,6 +35,11 @@ export interface PlayerState {
   ranged: { name: string; range: number } | null;
 }
 
+/** A living player with the given Combat pool, facing south. */
+export function createPlayer(pool: Pick<PlayerState, 'combatStep' | 'combatDice' | 'combatMax' | 'ranged'>): PlayerState {
+  return { ...pool, dead: false, facing: { dx: 0, dy: 1 } };
+}
+
 export interface GameState {
   map: MapState;
   monsters: Monster[];
@@ -47,6 +52,31 @@ export interface ActResult {
   messages: LogMessage[];
   /** True when the action cost a round, so the monsters acted. */
   spent: boolean;
+  /** Set when the player used the stairs they stand on; the run changes the level (Spec 02). */
+  stairs?: 'up' | 'down';
+}
+
+/** What a revisit replays on top of the regenerated level (Spec 02, Persistence; Spec 09, Level deltas). */
+export interface LevelDelta {
+  /** Cells seen so far, one entry per cell. */
+  explored: number[];
+  /** Cell indices of open doors. */
+  openDoors: number[];
+  /**
+   * The monsters still alive, as the player left them: where they stand, how hurt and whether
+   * alert (Spec 04: they stay where they were). A generated monster missing here is dead.
+   */
+  monsters: Monster[];
+  /** The round the player left, for restocking (task 2.12). */
+  turnLeft: number;
+}
+
+export interface ArrivalOptions {
+  /** Which stair the player arrives on; the up stair by default (arriving from above). */
+  stair?: 'up' | 'down';
+  delta?: LevelDelta;
+  /** The run's round counter on arrival; 1 for a new run. */
+  round?: number;
 }
 
 /** How many times a creature acts in the given round (Spec 04): fast twice, normal once, slow every other round. */
@@ -61,14 +91,31 @@ export class Game {
   /** The level's runtime stream (Spec 02): combat and wandering never share a sequence with layout. */
   readonly rng: Rng;
 
-  constructor(runSeed: number, level: Level, player: Omit<PlayerState, 'dead' | 'facing'>) {
-    const streams = levelStreams(levelSeed(runSeed, level.depth));
-    this.rng = streams.runtime;
+  constructor(runSeed: number, level: Level, player: PlayerState, arrival: ArrivalOptions = {}) {
+    const seed = levelSeed(runSeed, level.depth);
+    const streams = levelStreams(seed);
+    const round = arrival.round ?? 1;
+    const { delta } = arrival;
+    // The runtime stream is mixed with the arrival round, so a revisit does not replay the
+    // dice of the last visit; the contents stream is not, so monsters regenerate identically.
+    this.rng = createRng(hash32('runtime', seed, round));
+    const at = arrival.stair === 'down' ? level.downStair ?? level.upStair : level.upStair;
     this.state = {
-      map: createMapState(level),
-      monsters: placeStubMonsters(level, streams.contents),
-      player: { ...player, dead: false, facing: { dx: 0, dy: 1 } },
-      round: 1,
+      map: createMapState(level, { at, openDoors: delta?.openDoors.slice(), explored: delta?.explored.slice() }),
+      monsters: delta ? delta.monsters.map((m) => ({ ...m })) : placeStubMonsters(level, streams.contents),
+      player,
+      round,
+    };
+  }
+
+  /** Snapshot what a revisit must replay: doors, explored cells and the living monsters. */
+  captureDelta(): LevelDelta {
+    const { map, monsters, round } = this.state;
+    return {
+      explored: map.exploration.explored.slice(),
+      openDoors: map.openDoors.slice(),
+      monsters: monsters.map((m) => ({ ...m })),
+      turnLeft: round,
     };
   }
 
@@ -93,10 +140,19 @@ export class Game {
       case 'wait':
         return this.endRound(messages);
       case 'interact':
-        return this.closeDoor(messages);
+        return this.useStairs(messages) ?? this.closeDoor(messages);
       default:
         return undefined;
     }
+  }
+
+  /** Interact on a stair: ask the run to change level. Using stairs ends any pursuit, so the monsters do not act (Spec 04). */
+  private useStairs(messages: LogMessage[]): ActResult | undefined {
+    const { map } = this.state;
+    const tile = map.level.tiles[map.player.y]![map.player.x];
+    if (tile === TILE.stairsUp) return { messages, spent: false, stairs: 'up' };
+    if (tile === TILE.stairsDown) return { messages, spent: false, stairs: 'down' };
+    return undefined;
   }
 
   private move(dx: number, dy: number, messages: LogMessage[]): ActResult {

@@ -34,10 +34,21 @@ export function buildTerrain(level: Level, openDoors: readonly number[]): Uint8A
   return terrain;
 }
 
-/** Start on the up stair with its surroundings seen. */
-export function createMapState(level: Level, openDoors: number[] = []): MapState {
+export interface MapOptions {
+  /** Doors already open (the level's door delta). */
+  openDoors?: number[];
+  /** Cells already explored (the level's explored-cells delta). */
+  explored?: number[];
+  /** Where the player stands; the up stair when omitted. */
+  at?: Point;
+}
+
+/** Start at `at` (default the up stair) with its surroundings seen, on top of any saved deltas. */
+export function createMapState(level: Level, options: MapOptions = {}): MapState {
+  const openDoors = options.openDoors ?? [];
   const exploration = createExploration(level);
-  const player = { ...level.upStair };
+  if (options.explored) exploration.explored = options.explored;
+  const player = { ...(options.at ?? level.upStair) };
   const terrain = buildTerrain(level, openDoors);
   return { level, player, exploration, openDoors, terrain, visible: updateExploration(exploration, player, terrain) };
 }

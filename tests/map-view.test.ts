@@ -10,7 +10,8 @@ import { drawMap } from '../src/ui/map-view.ts';
 import { MAP } from '../src/ui/palette.ts';
 import { MAIN_PANE, inner } from '../src/ui/panes.ts';
 import { Shell } from '../src/ui/shell.ts';
-import { gameOn, levelFrom, room, walk } from './helpers.ts';
+import { Run } from '../src/game/run.ts';
+import { gameOn, levelFrom, room, testPlayer, walk } from './helpers.ts';
 
 const opaqueOf = (level: Level) => (x: number, y: number): boolean => level.tiles[y]![x] === '#';
 const visibleSet = (level: Level, from: Point, radius?: number): Uint8Array =>
@@ -206,9 +207,9 @@ describe('main view drawing (Spec 01): three cell states', () => {
     });
     shell.handleKey({ key: 'd', shiftKey: false });
     expect(shell.log.lines(shell.turn).some((l) => l.text.includes('not yet available'))).toBe(true);
-    shell.game = gameOn(levelFrom(['#####', '#<..#', '#####']));
+    shell.setRun(new Run(1, testPlayer(), { startDepth: 1, levelFor: () => levelFrom(['#####', '#<..#', '#####']) }));
     shell.handleKey({ key: 'd', shiftKey: false });
-    expect(shell.game.state.map.player).toEqual({ x: 2, y: 1 });
+    expect(shell.game!.state.map.player).toEqual({ x: 2, y: 1 });
     const g = new Grid();
     shell.draw(g);
     expect(g.glyph.includes(64)).toBe(true);

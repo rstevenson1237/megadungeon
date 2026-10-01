@@ -1,14 +1,14 @@
 import './ui/fonts/font.css';
 import type { CharacterPaneData } from './ui/character-pane.ts';
-import { Game } from './game/game.ts';
+import { createPlayer } from './game/game.ts';
+import { Run } from './game/run.ts';
 import { seedOfTheDay } from './core/rng.ts';
-import { generateLevel } from './rules/world/generate.ts';
 import { Grid } from './ui/grid.ts';
 import { mountScreen } from './ui/screen.ts';
 import { Shell } from './ui/shell.ts';
 
-// Task 1.8 demo: the shell with a generated level, turn loop, stub monsters and targeting.
-// The character is test data; levels and runs arrive in tasks 1.9 and 1.10.
+// Task 1.9 demo: a run from the surface village down through generated levels and back up.
+// The character is test data; the title screen and seed choice arrive in task 1.10.
 const testCharacter: CharacterPaneData = {
   name: 'Mara',
   className: 'Thief',
@@ -37,17 +37,17 @@ const testCharacter: CharacterPaneData = {
 
 const app = document.getElementById('app');
 if (app) {
-  const shell = new Shell('Test Level, Level 1', testCharacter);
+  const shell = new Shell('', testCharacter);
   const runSeed = seedOfTheDay(new Date());
   const combat = testCharacter.stats.find((s) => s.name === 'Combat')!;
-  shell.game = new Game(runSeed, generateLevel(runSeed, 1, 'large'), {
+  const player = createPlayer({
     combatStep: combat.step,
     combatDice: combat.current,
     combatMax: combat.max,
     ranged: { name: 'Sling', range: 6 }, // the test character's sling (Spec 05: 6 cells)
   });
-  shell.log.add({ kind: 'discovery', text: 'You enter the test level.' }, 1);
-  shell.log.add({ kind: 'system', text: 'Move with WASD, F to target, ? for help, Esc for the menu.' }, 1);
+  shell.setRun(new Run(runSeed, player)); // starts in the surface village
+  shell.log.add({ kind: 'system', text: 'Go down from the village, then E on a stair to change level. ? for help.' }, 1);
   const grid = new Grid();
   void mountScreen(app, 'Px437 IBM VGA 9x16').then((renderer) => {
     const redraw = (): void => {

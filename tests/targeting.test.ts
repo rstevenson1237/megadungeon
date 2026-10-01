@@ -211,7 +211,7 @@ describe('targeting in the shell (Spec 01): F then Enter is the quick shot', () 
 
   it('without a game, F still logs not yet available', () => {
     const s = shellOn(open());
-    s.game = null;
+    s.run = null;
     press(s, 'f');
     expect(s.log.lines(s.turn).some((l) => l.text.includes('not yet available'))).toBe(true);
   });

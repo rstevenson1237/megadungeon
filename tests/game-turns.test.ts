@@ -115,8 +115,10 @@ describe('doors (Spec 06, Doors and locks)', () => {
 
   it('interact closes an adjacent open door, which blocks sight again; nothing to close leaves E to the caller', () => {
     const game = gameOn(level());
-    expect(game.act({ type: 'interact' })).toBeUndefined();
-    walk(game, 'dddd'); // opens, then steps through to the door cell
+    expect(game.act({ type: 'interact' })!.stairs).toBe('up'); // standing on the up stair
+    walk(game, 'd');
+    expect(game.act({ type: 'interact' })).toBeUndefined(); // no stair, no open door beside
+    walk(game, 'ddd'); // opens the door, then steps through to the door cell
     walk(game, 'd');
     const { map } = game.state;
     expect(map.player).toEqual({ x: 5, y: 1 });

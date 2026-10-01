@@ -21,7 +21,7 @@ One 32-bit run seed determines every level, so a level can always be rebuilt and
 - **Per-level seed:** hash(run seed, level number), so generating level 40 never depends on having generated level 39.
 - **Separate streams:** layout, contents and runtime (combat, wandering monsters) each get their own seeded generator, so a rules change to combat never shifts where walls fall.
 - **Generator:** a small, fast, seedable PRNG (proposed: sfc32). JavaScript's built-in Math.random is never used for game content.
-- **Persistence:** a level generates on first visit. The save stores only deltas: explored cells, opened or broken doors, looted containers, taken items, dead monsters, triggered or found traps, NPC state. Revisiting regenerates the level and replays its deltas.
+- **Persistence:** a level generates on first visit. The save stores only deltas: explored cells, opened or broken doors, looted containers, taken items, dead monsters, where and how hurt the living monsters stand (they stay where they were when the player left, Spec 04), triggered or found traps, NPC state. Revisiting regenerates the level and replays its deltas.
 - **Generator version:** saved with the run. A save made with an older generator keeps using it, so a code update never reshapes a level mid-run.
 
 ## Run layout
