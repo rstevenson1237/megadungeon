@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Megadungeon UI mockup (approved)</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#111;color:#ccc;font-family:system-ui,sans-serif}
+h2{font-weight:600;font-size:16px;margin:24px 24px 8px}
+p{margin:0 24px 12px;font-size:13px;color:#999}
+.screen{margin:0 24px 32px;width:1350px;height:960px;background:#000;overflow:hidden;font-family:'JetBrains Mono','DejaVu Sans Mono',monospace;font-size:22.5px;line-height:24px}
+.row{height:24px;white-space:pre}
+</style></head><body>
+<p>Approved mockup for Spec 01. Grid 100 x 40 cells shown at 1.5x. The font here is a stand-in; the game uses the IBM VGA 9x16 CP437 bitmap font.</p>
+<h2>Dungeon: targeting a goblin</h2><div class="screen" id="main"></div>
+<h2>Surface village: menu, lift chosen</h2><div class="screen" id="village"></div>
+<script>
+function buildMain(){
+    const W = 100, H = 40;
+    const g = [];
+    for (let y = 0; y < H; y++) { const row = []; for (let x = 0; x < W; x++) row.push({ c: ' ', f: '#a8a8a8', b: '#000000' }); g.push(row); }
+    const put = (x, y, s, f, b) => { const ch = Array.from(s); for (let i = 0; i < ch.length; i++) { const xx = x + i; if (xx >= 0 && xx < W && y >= 0 && y < H) { const cell = g[y][xx]; cell.c = ch[i]; if (f) cell.f = f; if (b) cell.b = b; } } };
+    const box = (x, y, w, h, f, title) => {
+      put(x, y, '┌' + '─'.repeat(w - 2) + '┐', f);
+      for (let yy = y + 1; yy < y + h - 1; yy++) { put(x, yy, '│', f); put(x + w - 1, yy, '│', f); }
+      put(x, y + h - 1, '└' + '─'.repeat(w - 2) + '┘', f);
+      if (title) put(x + 2, y, ' ' + title + ' ', '#e8e8e8');
+    };
+
+    // Map: 70 x 28 inside the main view, offset 1,1
+    const MW = 70, MH = 28, OX = 1, OY = 1;
+    const fl = [];
+    for (let y = 0; y < MH; y++) fl.push(new Array(MW).fill(false));
+    const carve = (x0, y0, x1, y1) => { for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) fl[y][x] = true; };
+    carve(4, 3, 15, 8);    // room A (remembered)
+    carve(24, 2, 37, 9);   // room B (player)
+    carve(46, 4, 61, 10);  // room C
+    carve(8, 15, 17, 22);  // room D (remembered)
+    carve(30, 16, 47, 24); // room E (remembered)
+    carve(16, 5, 23, 5);
+    carve(38, 7, 45, 7);
+    carve(30, 10, 30, 15);
+    carve(10, 9, 10, 14);
+    carve(18, 19, 29, 19);
+    const vis = (x, y) => (x >= 23 && x <= 38 && y >= 1 && y <= 10) || (x >= 38 && x <= 45 && y >= 6 && y <= 8) || (x >= 45 && x <= 62 && y >= 3 && y <= 11);
+    const isFloor = (x, y) => x >= 0 && y >= 0 && x < MW && y < MH && fl[y][x];
+    for (let y = 0; y < MH; y++) {
+      for (let x = 0; x < MW; x++) {
+        if (fl[y][x]) { put(OX + x, OY + y, '·', vis(x, y) ? '#6b5638' : '#33291c'); continue; }
+        let near = false;
+        for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) if (isFloor(x + dx, y + dy)) near = true;
+        if (near) put(OX + x, OY + y, '#', vis(x, y) ? '#a07a44' : '#4a3b26');
+      }
+    }
+    const feat = (x, y, ch, f, fd) => put(OX + x, OY + y, ch, vis(x, y) ? f : fd);
+    const seen = (x, y, ch, f) => { if (vis(x, y)) put(OX + x, OY + y, ch, f); };
+    // Doors
+    feat(16, 5, "'", '#d0963c', '#5e4520');
+    feat(23, 5, "'", '#d0963c', '#5e4520');
+    feat(38, 7, "'", '#d0963c', '#5e4520');
+    feat(30, 10, '+', '#d0963c', '#5e4520');
+    feat(10, 9, "'", '#d0963c', '#5e4520');
+    feat(10, 14, "'", '#d0963c', '#5e4520');
+    feat(18, 19, "'", '#d0963c', '#5e4520');
+    feat(29, 19, "'", '#d0963c', '#5e4520');
+    // Remembered features (no items or monsters shown)
+    feat(44, 22, '>', '#f0e6c8', '#6e6858');
+    feat(33, 18, 'Ω', '#b070e0', '#4a3060');
+    feat(12, 18, '∩', '#c8c0b0', '#555048');
+    feat(6, 4, 'Θ', '#60a0e0', '#2c4868');
+    // Visible features and items
+    seen(25, 3, '░', '#6b5638');
+    seen(26, 3, '░', '#6b5638');
+    seen(24, 9, '░', '#6b5638');
+    put(OX + 27, OY + 1, '¶', '#70d0d0');
+    seen(36, 9, '■', '#c89040');
+    seen(32, 8, '$', '#f0c840');
+    seen(47, 7, '^', '#e04848');
+    seen(60, 5, 'δ', '#b08a5a');
+    seen(53, 4, '╥', '#d8d8d8');
+    seen(58, 9, 'Θ', '#60a0e0');
+    // Targeting path from player to selected goblin
+    let x0 = 28, y0 = 6; const x1 = 34, y1 = 4;
+    const dx = Math.abs(x1 - x0), dy = -Math.abs(y1 - y0), sx = x0 < x1 ? 1 : -1, sy = y0 < y1 ? 1 : -1;
+    let err = dx + dy; const path = [];
+    while (!(x0 === x1 && y0 === y1)) { const e2 = 2 * err; if (e2 >= dy) { err += dy; x0 += sx; } if (e2 <= dx) { err += dx; y0 += sy; } path.push([x0, y0]); }
+    path.pop();
+    path.forEach((p) => put(OX + p[0], OY + p[1], '·', '#e8c040'));
+    // Creatures
+    seen(55, 9, 'g', '#7fc75a');
+    seen(50, 6, 'h', '#e07a3a');
+    seen(43, 7, '@', '#5aa8f0');
+    put(OX + 34, OY + 4, 'g', '#ffffff', '#8a6a10');
+    put(OX + 28, OY + 6, '@', '#ffffff');
+
+    // Pane frames
+    const frame = '#707070';
+    box(0, 0, 72, 30, frame, 'Goblin Warrens, Level 7');
+    box(0, 30, 72, 10, frame, 'Log');
+    box(72, 0, 28, 40, frame, 'Character');
+
+    // Character pane
+    const L = '#8a8a8a', V = '#e0e0e0', X = 74;
+    put(X, 2, 'Mara', '#ffffff');
+    put(X, 3, 'Thief, Level 3', V);
+    put(X, 5, 'XP', L); put(X + 7, 5, '5,210 / 8,000', V);
+    put(X, 6, 'Bank', L); put(X + 7, 6, '1,340 gp', V);
+    put(X, 7, 'Carried', L); put(X + 9, 7, '~620 gp', '#f0c840');
+    put(X, 9, 'STATS', L);
+    put(X, 10, 'Combat d6', V); put(X + 11, 10, '■', '#e06050'); put(X + 12, 10, '□', '#6a3a33'); put(X + 15, 10, '1/2', L);
+    put(X, 11, 'Skill  d8', V); put(X + 11, 11, '■■', '#60c070'); put(X + 15, 11, '2/2', L);
+    put(X, 12, 'Magic  d4', V); put(X + 11, 12, '■', '#6090e0'); put(X + 15, 12, '1/1', L);
+    put(X, 14, 'EQUIPMENT', L);
+    put(X, 15, 'Short sword', V); put(X + 13, 15, 'Fine', L);
+    put(X, 16, 'Sling', V); put(X + 13, 16, 'Normal', L);
+    put(X, 17, 'Leather', V); put(X + 13, 17, 'Crude', L);
+    put(X, 18, 'Ring', V); put(X + 13, 18, 'Unknown', L);
+    put(X, 20, 'ABILITIES', L);
+    put(X, 21, 'Backstab', '#ffffff');
+    put(X, 22, 'Keen Eye', V);
+    put(X, 23, 'Light Step', V);
+    put(X, 25, 'STATUS', L);
+    put(X, 26, 'Recover 3/10', V);
+    put(X, 28, 'Slots 7/12', V);
+    put(X, 30, 'TARGET', '#e8c040');
+    put(X, 31, 'Goblin', '#ffffff'); put(X + 13, 31, 'd6', V);
+    put(X, 32, 'Distance 6', V);
+    put(X, 33, 'Target 1 of 3', V);
+    put(X, 35, 'Tab next  Enter fire', L);
+    put(X, 36, 'Esc cancel', L);
+
+    // Log
+    const log = [
+      ['You enter the Goblin Warrens.', '#3f7f80'],
+      ['Scrawled on the wall: "The deep lift is watched."', '#3f7f80'],
+      ['A rival delver slips past you, heading east.', '#807028'],
+      ['You search. (x3)', '#555555'],
+      ['You hit the kobold. It dies.', '#803a30'],
+      ['You pick up 42 gp.', '#806a20'],
+      ['A goblin sees you!', '#f0d050'],
+      ['Target: goblin, 6 away. Tab to cycle, Enter to fire.', '#c8c8c8']
+    ];
+    log.forEach((m, i) => put(2, 31 + i, m[0], m[1]));
+
+    const rows = g.map((row) => {
+      const runs = []; let cur = null;
+      row.forEach((cell) => { if (cur && cur.f === cell.f && cur.b === cell.b) { cur.t += cell.c; } else { cur = { t: cell.c, f: cell.f, b: cell.b }; runs.push(cur); } });
+      return { runs };
+    });
+    return rows;
+}
+function buildVillage(){
+    const W = 100, H = 40;
+    const g = [];
+    for (let y = 0; y < H; y++) { const row = []; for (let x = 0; x < W; x++) row.push({ c: ' ', f: '#a8a8a8', b: '#000000' }); g.push(row); }
+    const put = (x, y, s, f, b) => { const ch = Array.from(s); for (let i = 0; i < ch.length; i++) { const xx = x + i; if (xx >= 0 && xx < W && y >= 0 && y < H) { const cell = g[y][xx]; cell.c = ch[i]; if (f) cell.f = f; if (b) cell.b = b; } } };
+    const box = (x, y, w, h, f, title) => {
+      put(x, y, '┌' + '─'.repeat(w - 2) + '┐', f);
+      for (let yy = y + 1; yy < y + h - 1; yy++) { put(x, yy, '│', f); put(x + w - 1, yy, '│', f); }
+      put(x, y + h - 1, '└' + '─'.repeat(w - 2) + '┘', f);
+      if (title) put(x + 2, y, ' ' + title + ' ', '#e8e8e8');
+    };
+
+    // Main view holds the village menu
+    const L = '#8a8a8a', V = '#e0e0e0';
+    // Village menu (no map): services on the left, the chosen service on the right
+    put(3, 2, 'SURFACE VILLAGE', '#ffffff');
+    put(3, 3, 'Level 0', L);
+    const services = ['Bank', 'Lodging', 'Lift', 'Shop', 'Appraiser', 'Smith', 'Tavern'];
+    services.forEach((s, i) => {
+      if (s === 'Lift') put(2, 5 + i * 2, ('> ' + s).padEnd(21), '#f0d060', '#3a3020');
+      else put(4, 5 + i * 2, s, V);
+    });
+    put(4, 20, 'Enter the dungeon', '#c8a060');
+    for (let y = 1; y <= 28; y++) put(25, y, '│', '#3a3a3a');
+
+    put(28, 2, 'LIFT', '#ffffff');
+    put(28, 3, 'Travel to a visited village.', L);
+    const col = (name, lvl, fare) => name.padEnd(20) + String(lvl).padStart(5) + fare.padStart(10);
+    put(28, 5, col('Village', 'Level', 'Fare'), L);
+    put(28, 7, col('Surface (here)', 0, '-'), '#5c5c5c');
+    put(26, 9, ('> ' + col('Undermarket', 17, '114 gp')).padEnd(40), '#f0d060', '#3a3020');
+    put(28, 11, col('Saltcandle', 33, '274 gp'), V);
+    put(28, 14, '3 villages not yet visited', '#5c5c5c');
+    put(28, 16, 'Fares are random but rise with', L);
+    put(28, 17, 'distance and depth.', L);
+    put(28, 19, 'Paid from the bank (1,960 gp).', L);
+    put(3, 27, 'W/S select  Enter choose  Esc back', L);
+
+    // Pane frames
+    const frame = '#707070';
+    box(0, 0, 72, 30, frame, 'Surface Village');
+    box(0, 30, 72, 10, frame, 'Log');
+    box(72, 0, 28, 40, frame, 'Character');
+
+    // Character pane
+    const X = 74;
+    put(X, 2, 'Mara', '#ffffff');
+    put(X, 3, 'Thief, Level 3', V);
+    put(X, 5, 'XP', L); put(X + 7, 5, '5,830 / 8,000', V);
+    put(X, 6, 'Bank', L); put(X + 7, 6, '1,960 gp', V);
+    put(X, 7, 'Carried', L); put(X + 9, 7, '0 gp', V);
+    put(X, 9, 'STATS', L);
+    put(X, 10, 'Combat d6', V); put(X + 11, 10, '■', '#e06050'); put(X + 12, 10, '□', '#6a3a33'); put(X + 15, 10, '1/2', L);
+    put(X, 11, 'Skill  d8', V); put(X + 11, 11, '■', '#60c070'); put(X + 12, 11, '□', '#2e5a36'); put(X + 15, 11, '1/2', L);
+    put(X, 12, 'Magic  d4', V); put(X + 11, 12, '□', '#2e4270'); put(X + 15, 12, '0/1', L);
+    put(X, 14, 'EQUIPMENT', L);
+    put(X, 15, 'Short sword', V); put(X + 13, 15, 'Fine', L);
+    put(X, 16, 'Sling', V); put(X + 13, 16, 'Normal', L);
+    put(X, 17, 'Leather', V); put(X + 13, 17, 'Crude', L);
+    put(X, 18, 'Ring', V); put(X + 13, 18, 'Unknown', L);
+    put(X, 20, 'ABILITIES', L);
+    put(X, 21, 'Backstab', '#ffffff');
+    put(X, 22, 'Keen Eye', V);
+    put(X, 23, 'Light Step', V);
+    put(X, 25, 'STATUS', L);
+    put(X, 26, 'In village', V);
+    put(X, 28, 'Slots 5/12', V);
+    put(X, 30, 'LOCATION', '#e8c040');
+    put(X, 31, 'Surface village', '#ffffff');
+    put(X, 32, 'Rest 10 gp', V);
+    put(X, 33, 'Lift from 114 gp', V);
+
+    // Log
+    const log = [
+      ['You climb out of the warrens into daylight.', '#3f7f80'],
+      ['Appraiser: ruby worth 150 gp (base 180).', '#806a20'],
+      ['You bank 620 gp of treasure. +620 XP.', '#806a20'],
+      ['Next level at 8,000 XP (2,170 to go).', '#555555'],
+      ['Rumour: the Saltcandle lift keeper takes bribes.', '#3f7040'],
+      ['You step into the lift cage.', '#c8c8c8']
+    ];
+    log.forEach((m2, i) => put(2, 31 + i, m2[0], m2[1]));
+
+    const rows = g.map((row) => {
+      const runs = []; let cur = null;
+      row.forEach((cell) => { if (cur && cur.f === cell.f && cur.b === cell.b) { cur.t += cell.c; } else { cur = { t: cell.c, f: cell.f, b: cell.b }; runs.push(cur); } });
+      return { runs };
+    });
+    return rows;
+}
+function paint(id, rows){
+  const el=document.getElementById(id);
+  rows.forEach(r=>{const d=document.createElement('div');d.className='row';
+    r.runs.forEach(x=>{const s=document.createElement('span');s.textContent=x.t;s.style.color=x.f;s.style.background=x.b;d.appendChild(s);});
+    el.appendChild(d);});
+}
+paint('main', buildMain());
+paint('village', buildVillage());
+</script></body></html>
