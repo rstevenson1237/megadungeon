@@ -13,14 +13,18 @@ export interface MapState {
   openDoors: number[];
   /**
    * Derived from the level and open doors, so never saved. One byte per cell:
-   * 0 where walls and closed doors block movement and sight, 1 elsewhere.
+   * 0 where walls and closed doors block movement and sight, 2 where deep water and lava block
+   * movement only, 1 elsewhere.
    */
   terrain: Uint8Array;
   /** Derived from the player's position, so never saved: 1 where a cell is visible now. */
   visible: Uint8Array;
 }
 
-/** Terrain map for movement and sight: 0 for walls and closed doors, 1 for everything else. */
+/**
+ * Terrain map for movement and sight: 0 for walls and closed doors (block both), 1 for open cells,
+ * 2 for deep water and lava (block movement, never sight: Spec 02, "Liquids" and "Visibility").
+ */
 export function buildTerrain(level: Level, openDoors: readonly number[]): Uint8Array {
   const terrain = new Uint8Array(level.width * level.height);
   const open = new Set(openDoors);
@@ -28,11 +32,20 @@ export function buildTerrain(level: Level, openDoors: readonly number[]): Uint8A
     const row = level.tiles[y]!;
     for (let x = 0; x < level.width; x++) {
       const tile = row[x];
-      terrain[y * level.width + x] = tile === TILE.wall || (tile === TILE.door && !open.has(y * level.width + x)) ? 0 : 1;
+      terrain[y * level.width + x] =
+        tile === TILE.wall || (tile === TILE.door && !open.has(y * level.width + x))
+          ? TERRAIN_BLOCKED
+          : tile === TILE.deepWater || tile === TILE.lava
+            ? TERRAIN_LIQUID
+            : TERRAIN_OPEN;
     }
   }
   return terrain;
 }
+
+export const TERRAIN_BLOCKED = 0;
+export const TERRAIN_OPEN = 1;
+export const TERRAIN_LIQUID = 2;
 
 export interface MapOptions {
   /** Doors already open (the level's door delta). */
@@ -58,8 +71,14 @@ export function refreshSight(state: MapState): void {
   state.visible = updateExploration(state.exploration, state.player, state.terrain);
 }
 
+/** True if sight and shots pass through the cell: everything but walls and closed doors. Water and lava let them by. */
+export function isClear(state: MapState, x: number, y: number): boolean {
+  const { width, height } = state.level;
+  return x >= 0 && y >= 0 && x < width && y < height && state.terrain[y * width + x] !== TERRAIN_BLOCKED;
+}
+
 /** True if movement and sight pass through the cell. Out-of-bounds cells are blocked. */
 export function isOpen(state: MapState, x: number, y: number): boolean {
   const { width, height } = state.level;
-  return x >= 0 && y >= 0 && x < width && y < height && state.terrain[y * width + x] === 1;
+  return x >= 0 && y >= 0 && x < width && y < height && state.terrain[y * width + x] === TERRAIN_OPEN;
 }

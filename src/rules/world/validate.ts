@@ -1,7 +1,7 @@
 // Step 12 of the pipeline, "Validate" (Spec 02), for the rules that exist so far:
-// four-direction connectivity and the stair rules.
+// four-direction connectivity (deep water and lava count as walls) and the stair rules.
 
-import { STAIRS_DOWN, STAIRS_UP, WALL, distancesFrom, toCells } from './grid.ts';
+import { STAIRS_DOWN, STAIRS_UP, WALL, distancesFrom, isWalkable, toCells } from './grid.ts';
 import { MAX_DEPTH, type Level } from './level.ts';
 
 /** True when `dist` is at least 60% of `longest`, the longest walkable distance from the up stair (Spec 02, step 3). */
@@ -35,7 +35,7 @@ export function findProblems(level: Level): string[] {
   const dist = distancesFrom(cells, width, height, level.upStair);
   let longest = 0;
   for (let i = 0; i < cells.length; i++) {
-    if (cells[i] === WALL) continue;
+    if (!isWalkable(cells[i]!)) continue;
     if (dist[i] === -1) {
       problems.push(`cell ${i % width},${Math.floor(i / width)} is not reachable from the up stair`);
       break;

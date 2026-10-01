@@ -48,6 +48,9 @@ export const MAP = {
   wall: { visible: 0xa07a44, remembered: 0x4a3b26 },
   stairs: { visible: 0xf0e6c8, remembered: 0x6e6858 },
   door: { visible: 0xd0963c, remembered: 0x5e4520 },
+  shallowWater: { visible: 0x4a8fd0, remembered: 0x21415e },
+  deepWater: { visible: 0x2a5aa8, remembered: 0x162c52 },
+  lava: { visible: 0xe05a20, remembered: 0x6a2a10 },
   player: 0xffffff,
   background: 0x000000,
 } as const;

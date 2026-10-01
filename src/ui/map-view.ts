@@ -18,6 +18,8 @@ const GLYPH_UP = 60;
 const GLYPH_DOWN = 62;
 const GLYPH_DOOR_CLOSED = 43;
 const GLYPH_DOOR_OPEN = 39;
+const GLYPH_SHALLOW = 126;
+const GLYPH_LIQUID = 247;
 
 /** Glyph and colour pair for a terrain character in one of its two drawn states. */
 function terrain(tile: string, visible: boolean, open: boolean): [number, number] {
@@ -31,6 +33,12 @@ function terrain(tile: string, visible: boolean, open: boolean): [number, number
       return [GLYPH_DOWN, MAP.stairs[state]];
     case TILE.door:
       return [open ? GLYPH_DOOR_OPEN : GLYPH_DOOR_CLOSED, MAP.door[state]];
+    case TILE.shallowWater:
+      return [GLYPH_SHALLOW, MAP.shallowWater[state]];
+    case TILE.deepWater:
+      return [GLYPH_LIQUID, MAP.deepWater[state]];
+    case TILE.lava:
+      return [GLYPH_LIQUID, MAP.lava[state]];
     default:
       return [GLYPH_FLOOR, MAP.floor[state]];
   }

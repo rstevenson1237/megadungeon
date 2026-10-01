@@ -66,6 +66,12 @@ export const LAYOUT_ALGORITHMS = [
 ] as const;
 export type LayoutAlgorithm = (typeof LAYOUT_ALGORITHMS)[number];
 
+/** What a cellular-caves level stamps in, and what its rivers, lakes and channels hold (Spec 02, task 2.3). */
+export const CAVE_STAMPS = ['shafts', 'river', 'lake'] as const;
+export type CaveStamp = (typeof CAVE_STAMPS)[number];
+export const LIQUIDS = ['water', 'lava'] as const;
+export type Liquid = (typeof LIQUIDS)[number];
+
 export const SIZE_CLASSES = ['small', 'medium', 'large'] as const;
 
 /** Rumour kinds (Spec 07, Tavern): what a rumour can say. A rumour template `needs` one. */

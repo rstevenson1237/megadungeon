@@ -61,6 +61,48 @@ describe('reference check', () => {
   });
 });
 
+describe('theme variants (Spec 02, task 2.3)', () => {
+  const themes = (...rows: object[]): ContentBundle => ({ tables: { level_themes: rows as ContentBundle['tables'][string] } });
+
+  it('accepts the variants on the layouts that read them', () => {
+    expect(
+      checkContent(
+        themes(
+          { id: 'a', layout: 'cellular_caves', stamp: 'river', liquid: 'lava' },
+          { id: 'b', layout: 'rooms_and_corridors', pillared: true },
+          { id: 'c', layout: 'channel_grid', liquid: 'water' },
+        ),
+      ),
+    ).toEqual([]);
+  });
+
+  it('rejects a variant on a layout that ignores it, and shafts that hold a liquid', () => {
+    const errors = checkContent(
+      themes(
+        { id: 'a', layout: 'warren_tunnels', stamp: 'lake' },
+        { id: 'b', layout: 'maze_with_crypts', pillared: true },
+        { id: 'c', layout: 'mirrored_halls', liquid: 'water' },
+        { id: 'd', layout: 'cellular_caves', stamp: 'shafts', liquid: 'lava' },
+      ),
+    );
+    expect(errors).toEqual([
+      'level_themes "a": stamp needs the cellular_caves layout, not warren_tunnels',
+      'level_themes "b": pillared needs the rooms_and_corridors layout, not maze_with_crypts',
+      'level_themes "c": liquid needs the cellular_caves or channel_grid layout, not mirrored_halls',
+      'level_themes "d": shafts hold no liquid',
+    ]);
+  });
+
+  it('the real theme table sets them as approved', () => {
+    const byId = new Map((real.bundle.tables['level_themes'] as Record<string, unknown>[]).map((t) => [t['id'], t]));
+    expect(byId.get('old_mine')).toMatchObject({ stamp: 'shafts' });
+    expect(byId.get('fungal_caverns')).toMatchObject({ stamp: 'river' });
+    expect(byId.get('underdark_lake')).toMatchObject({ stamp: 'lake' });
+    expect(byId.get('lava_forges')).toMatchObject({ stamp: 'river', liquid: 'lava' });
+    expect(byId.get('dwarven_hold')).toMatchObject({ pillared: true });
+  });
+});
+
 describe('text check', () => {
   it('fails on an unknown placeholder in a template', () => {
     const dir = contentDir({

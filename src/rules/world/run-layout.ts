@@ -9,6 +9,7 @@ import { createRng, hash32, type Rng } from '../../core/rng.ts';
 import { pickWeighted, rollTable, type Rollable } from '../../core/roller.ts';
 import type { Fact } from '../../core/templates.ts';
 import { treasureBudget } from './depth.ts';
+import type { LevelStyle } from './generate.ts';
 import { MAX_DEPTH, type SizeClass } from './level.ts';
 
 /** Bump for any change that alters the layout a seed produces. */
@@ -42,7 +43,7 @@ export const LINK_COUNTS = {
 export const SPECIALIST_SERVICES = ['smith', 'appraiser', 'trader'] as const;
 export type SpecialistService = (typeof SPECIALIST_SERVICES)[number];
 
-export interface ThemeRow extends Rollable {
+export interface ThemeRow extends Rollable, LevelStyle {
   name: string;
   size: SizeClass;
 }

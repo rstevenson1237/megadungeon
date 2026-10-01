@@ -10,7 +10,7 @@ import { distancesFrom } from '../rules/world/grid.ts';
 import { distanceSq } from '../rules/world/geometry.ts';
 import { TILE, type Level, type Point } from '../rules/world/level.ts';
 import type { Command } from './commands.ts';
-import { type MapState, createMapState, isOpen, refreshSight } from './map-state.ts';
+import { type MapState, TERRAIN_BLOCKED, TERRAIN_OPEN, createMapState, isOpen, refreshSight } from './map-state.ts';
 import { type Monster, type Speed, placeStubMonsters } from './monsters.ts';
 
 /** At most this many creatures act per round, nearest first (Spec 04). */
@@ -173,7 +173,7 @@ export class Game {
     if (level.tiles[y]![x] === TILE.door && !isOpen(map, x, y)) {
       // A normal door opens when moved into; it costs the move (Spec 06).
       map.openDoors.push(cell);
-      map.terrain[cell] = 1;
+      map.terrain[cell] = TERRAIN_OPEN;
       refreshSight(map);
       return this.endRound(messages);
     }
@@ -198,7 +198,7 @@ export class Game {
         return { messages, spent: false };
       }
       map.openDoors.splice(map.openDoors.indexOf(cell), 1);
-      map.terrain[cell] = 0;
+      map.terrain[cell] = TERRAIN_BLOCKED;
       refreshSight(map);
       return this.endRound(messages);
     }
@@ -273,7 +273,7 @@ export class Game {
           this.monsterAttacks(m, messages);
           continue;
         }
-        dist ??= distancesFrom(map.terrain, width, height, at);
+        dist ??= distancesFrom(map.terrain, width, height, at, (t) => t === TERRAIN_OPEN);
         const here = dist[m.y * width + m.x]!;
         if (here < 0) break;
         let best: Point | null = null;
