@@ -28,9 +28,9 @@ const HORIZONTAL = 196;
 const VERTICAL = 179;
 
 /** Draw a single-line border around `r`, with an optional title in the top edge. */
-export function drawFrame(grid: Grid, r: Rect, title?: string): void {
+export function drawFrame(grid: Grid, r: Rect, title?: string, colour: number = UI.frame): void {
   const { x, y, w, h } = r;
-  const f = UI.frame;
+  const f = colour;
   const bg = UI.background;
   grid.set(x, y, CORNER_TL, f, bg);
   grid.set(x + w - 1, y, CORNER_TR, f, bg);

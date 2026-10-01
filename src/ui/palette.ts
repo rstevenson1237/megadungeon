@@ -30,3 +30,11 @@ export const LOG_COLOURS: Record<LogKind, { bright: number; dim: number }> = {
   warning: { bright: 0xf0d050, dim: 0x807028 },
   system: { bright: 0xc8c8c8, dim: 0x555555 },
 };
+
+/** Overlay windows and menus. */
+export const OVERLAY = {
+  frame: 0xe8e8e8,
+  selectedFg: 0xf0d060,
+  selectedBg: 0x3a3020,
+  hint: 0x8a8a8a,
+} as const;

@@ -1,14 +1,11 @@
 import './ui/fonts/font.css';
-import { MessageLog } from './game/log.ts';
-import { drawCharacterPane, type CharacterPaneData } from './ui/character-pane.ts';
+import type { CharacterPaneData } from './ui/character-pane.ts';
 import { Grid } from './ui/grid.ts';
-import { drawLog } from './ui/log-pane.ts';
-import { MAIN_PANE, drawPanes, inner } from './ui/panes.ts';
-import { UI } from './ui/palette.ts';
 import { mountScreen } from './ui/screen.ts';
+import { Shell } from './ui/shell.ts';
 
-// Task 1.4 demo: the three panes, the character pane and the log, drawn from
-// test data as in the approved mockup. The map arrives in tasks 1.6 and 1.7.
+// Task 1.5 demo: the shell with its key map, overlays and log. The character is
+// test data; the map arrives in tasks 1.6 and 1.7.
 const testCharacter: CharacterPaneData = {
   name: 'Mara',
   className: 'Thief',
@@ -35,23 +32,25 @@ const testCharacter: CharacterPaneData = {
   target: { name: 'Goblin', rating: 'd6', distance: 6, index: 1, count: 3 },
 };
 
-const log = new MessageLog();
-log.add({ kind: 'discovery', text: 'You enter the Goblin Warrens.' }, 1);
-log.add({ kind: 'discovery', text: 'Scrawled on the wall: "The deep lift is watched."' }, 2);
-log.add({ kind: 'warning', text: 'A rival delver slips past you, heading east.' }, 3);
-for (let turn = 4; turn <= 6; turn++) log.add({ kind: 'system', text: 'You search.' }, turn);
-log.add({ kind: 'combat', text: 'You hit the kobold. It dies.' }, 7);
-log.add({ kind: 'loot', text: 'You pick up 42 gp.' }, 8);
-log.add({ kind: 'warning', text: 'A goblin sees you!' }, 9);
-log.add({ kind: 'system', text: 'Target: goblin, 6 away. Tab to cycle, Enter to fire.' }, 9);
-
 const app = document.getElementById('app');
 if (app) {
+  const shell = new Shell('Goblin Warrens, Level 7', testCharacter);
+  shell.log.add({ kind: 'discovery', text: 'You enter the Goblin Warrens.' }, 1);
+  shell.log.add({ kind: 'discovery', text: 'Scrawled on the wall: "The deep lift is watched."' }, 1);
+  shell.log.add({ kind: 'warning', text: 'A rival delver slips past you, heading east.' }, 1);
+  shell.log.add({ kind: 'system', text: 'Press ? for help, Esc for the menu.' }, 1);
   const grid = new Grid();
-  drawPanes(grid, 'Goblin Warrens, Level 7');
-  const view = inner(MAIN_PANE);
-  grid.text(view.x + 2, view.y + 1, 'Map goes here (task 1.7).', UI.label, UI.background);
-  drawCharacterPane(grid, testCharacter);
-  drawLog(grid, log, 9);
-  void mountScreen(app, 'Px437 IBM VGA 9x16').then((renderer) => renderer.render(grid));
+  void mountScreen(app, 'Px437 IBM VGA 9x16').then((renderer) => {
+    const redraw = (): void => {
+      shell.draw(grid);
+      renderer.render(grid);
+    };
+    window.addEventListener('keydown', (e) => {
+      if (shell.handleKey(e)) {
+        e.preventDefault();
+        redraw();
+      }
+    });
+    redraw();
+  });
 }
