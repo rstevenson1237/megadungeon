@@ -163,14 +163,17 @@ describe('overlays', () => {
     press(shell, 'ArrowDown');
     expect(menu.selected).toBe(2);
     press(shell, 's');
+    press(shell, 's');
+    expect(menu.selected).toBe(4);
+    press(shell, 's');
     expect(menu.selected).toBe(0); // wraps
     press(shell, 'w');
-    expect(menu.selected).toBe(2);
+    expect(menu.selected).toBe(4);
     press(shell, 'a'); // sideways does nothing
-    expect(menu.selected).toBe(2);
-    press(shell, 'Enter'); // Quit: not yet available, menu closes
+    expect(menu.selected).toBe(4);
+    press(shell, 'Enter'); // Quit, with no title screen to go to here: the menu closes and says so
     expect(shell.overlays).toHaveLength(0);
-    expect(shell.log.lines(1).at(-1)!.text).toBe('Quitting is not yet available.');
+    expect(shell.log.lines(1).at(-1)!.text).toBe('Quitting is not available.');
   });
 
   it('opens Help from the menu, replacing it, and Esc then returns to the map', () => {

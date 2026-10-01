@@ -3,6 +3,7 @@ import { basename, dirname, extname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parse } from 'yaml';
 import type { ZodType } from 'zod';
+import { hash32 } from '../src/core/rng.ts';
 import { tableSchemas, type ContentBundle } from '../src/core/schemas.ts';
 import { checkContent } from './content-checks.ts';
 import { buildCoverage, renderCoverageHtml } from './coverage.ts';
@@ -81,7 +82,7 @@ export function buildContent(contentDir: string): BuildResult {
     tables[table] = entries;
   }
 
-  const bundle: ContentBundle = { tables };
+  const bundle: ContentBundle = { tables, version: hash32(JSON.stringify(tables)).toString(16).padStart(8, '0') };
   errors.push(...checkContent(bundle));
   return { bundle, errors };
 }

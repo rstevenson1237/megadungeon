@@ -2,7 +2,7 @@ import { resolve } from 'node:path';
 import type { Rng } from '../src/core/rng.ts';
 import type { Spell } from '../src/core/schemas.ts';
 import { Game, type ArrivalOptions, type PlayerState, createPlayer } from '../src/game/game.ts';
-import { Run } from '../src/game/run.ts';
+import { Run, type RunOptions } from '../src/game/run.ts';
 import { GENERATOR_VERSION, emptyPlacements, type Level, type Point } from '../src/rules/world/level.ts';
 import { creature, type Monster } from '../src/game/monsters.ts';
 import type { CharacterPaneData } from '../src/ui/character-pane.ts';
@@ -226,11 +226,11 @@ export function gameAt(level: Level, x: number, y: number, player: Partial<Playe
  * A run on the real content and the real run layout of a seed, standing in the village `at` (0 for the surface, else the
  * nth subterranean village), played by a thief with the given player state. XP and levels are tracked.
  */
-export function townRun(seed = 12345, extra: Partial<PlayerState> = {}, at = 0): Run {
+export function townRun(seed = 12345, extra: Partial<PlayerState> = {}, at = 0, more: Partial<RunOptions> = {}): Run {
   const bundle = content().bundle;
   const options = runOptionsFor(bundle, seed);
   const thief = classById(bundle, 'thief');
   const startDepth = at === 0 ? 0 : options.layout!.villages[at - 1]!.level;
   const player = { ...createPlayer({ combatStep: 6, combatDice: 2, combatMax: 3, pack: [], equipment: {} }), ...extra };
-  return new Run(seed, player, { ...options, startDepth, character: createCharacter('Mara', thief), classDef: thief });
+  return new Run(seed, player, { ...options, startDepth, character: createCharacter('Mara', thief), classDef: thief, ...more });
 }

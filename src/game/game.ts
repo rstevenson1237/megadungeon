@@ -58,6 +58,18 @@ export interface JournalEntry {
   text: string;
 }
 
+/** Counts kept for the leaderboard (Spec 09, task 2.13). */
+export interface PlayerStats {
+  /** The lowest dungeon level reached, on foot or by teleporter or fall. */
+  deepest: number;
+  /** Monsters that died on the levels the player was on. */
+  kills: number;
+  /** Arrived on level 100. */
+  won: boolean;
+  /** The final boss on level 100 has died. */
+  finalBoss: boolean;
+}
+
 export interface PlayerState {
   /** Sides of each Combat die, and the dice left and at most held. The Combat pool is health. */
   combatStep: number;
@@ -108,6 +120,10 @@ export interface PlayerState {
   rests: number;
   /** The bank, quests, specialists and shop stock of the run (Spec 07, task 2.11). */
   town: TownState;
+  /** What the leaderboard records (Spec 09): the deepest level reached, monsters killed, and the two ways to win. */
+  stats: PlayerStats;
+  /** What killed the player, for the death screen and the leaderboard (Spec 09). */
+  deathCause?: string;
   /** The first of a hasted pair of actions is done, so the monsters have not yet acted for this round. */
   halfRound: boolean;
 }
@@ -143,6 +159,7 @@ export function createPlayer(setup: PlayerSetup): PlayerState {
     shield: 0,
     rests: 0,
     town: freshTown(),
+    stats: { deepest: 0, kills: 0, won: false, finalBoss: false },
     halfRound: false,
   };
 }
@@ -690,6 +707,7 @@ export class Game {
     if (mine.poisonDue) {
       if (player.combatDice <= 0) {
         player.dead = true;
+        player.deathCause = 'The poison kills you.';
         messages.push({ kind: 'combat', text: 'The poison kills you.' });
       } else {
         player.combatDice--;

@@ -394,4 +394,9 @@ export type TableName = keyof typeof tableSchemas;
 /** The compiled JSON bundle the game loads at start. */
 export interface ContentBundle {
   tables: Record<string, unknown[]>;
+  /** A fingerprint of the tables, set by the content build: a save records the one it was made with (Spec 09). */
+  version?: string;
 }
+
+/** The bundle's version for a save; a bundle built by hand has none. */
+export const contentVersionOf = (bundle: ContentBundle): string => bundle.version ?? 'unversioned';

@@ -8,7 +8,7 @@ import { theftTake } from '../rules/items/treasure.ts';
 import { hasStatus, removeStatus } from '../rules/magic/status.ts';
 import { THEFTS_BEFORE_FLEEING, monsterMelee, playerMelee } from '../rules/combat/attacks.ts';
 import { distanceSq } from '../rules/world/geometry.ts';
-import type { Loot } from '../rules/world/level.ts';
+import { MAX_DEPTH, type Loot } from '../rules/world/level.ts';
 import type { Game } from './game.ts';
 import { wearerHit, weaponHit } from './items.ts';
 import type { Monster } from './monsters.ts';
@@ -87,6 +87,9 @@ export function removeDie(game: Game, m: Monster, messages: LogMessage[], say: D
   if (shown) messages.push({ kind: 'combat', text: say.kill });
   const { monsters, drops, player } = game.state;
   monsters.splice(monsters.indexOf(m), 1);
+  if (m.kind === 'monster') player.stats.kills++;
+  // The final boss on level 100 is the last achievement (Spec 09, task 2.13).
+  if (m.role === 'boss' && game.state.map.level.depth === MAX_DEPTH) player.stats.finalBoss = true;
   // An opponent's death meets its quest's goal, to be paid on the next arrival in a village (Spec 07, task 2.11).
   if (m.quest && !player.town.goals.includes(m.quest)) player.town.goals.push(m.quest);
   if (m.carried.length > 0) {
@@ -116,6 +119,7 @@ export function hurtPlayer(game: Game, messages: LogMessage[], say: DieText): bo
   removeStatus(player.statuses, 'asleep');
   if (player.combatDice <= 0) {
     player.dead = true;
+    player.deathCause = say.kill;
     messages.push({ kind: 'combat', text: say.kill });
     return false;
   }

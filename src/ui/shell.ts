@@ -8,7 +8,7 @@ import type { Grid } from './grid.ts';
 import { type KeyInput, keyToCommand } from './input.ts';
 import { drawLog } from './log-pane.ts';
 import type { Overlay, OverlayResult } from './overlay.ts';
-import { HelpOverlay, HistoryOverlay, gameMenu } from './overlays.ts';
+import { type GameMenuHost, HelpOverlay, HistoryOverlay, gameMenu } from './overlays.ts';
 import { MAIN_PANE, drawPanes, inner } from './panes.ts';
 import { UI } from './palette.ts';
 import { drawMap } from './map-view.ts';
@@ -42,6 +42,11 @@ export class Shell {
   turn = 1;
   /** Called when the player quits from the game menu (returns to the title screen). */
   onQuit: (() => void) | null = null;
+  /** Called when the player dies, arrives on level 100 or kills the final boss: the leaderboard moments (Spec 09). */
+  onMilestone: ((kind: 'death' | 'win' | 'final_boss') => void) | null = null;
+  /** What the game menu offers besides help and quitting (Spec 09). */
+  menuHost: GameMenuHost = {};
+  private announced = { death: false, win: false, final_boss: false };
   /** The run in progress; null until one starts (the title screen, task 1.10). */
   run: Run | null = null;
   /** The village menu, while the run is in a village (Spec 01: no village map). */
@@ -68,6 +73,8 @@ export class Shell {
   /** Start showing a run: its level or its village, with the header and character pane in step. */
   setRun(run: Run): void {
     this.run = run;
+    // A run loaded after it was won has already been recorded.
+    this.announced = { death: false, win: run.player.stats.won, final_boss: run.player.stats.finalBoss };
     this.targeting = null;
     this.cursor = null;
     this.casting = null;
@@ -191,7 +198,7 @@ export class Shell {
     }
     switch (command.type) {
       case 'cancel':
-        this.overlays.push(gameMenu(this.onQuit ?? undefined));
+        this.overlays.push(gameMenu(this.onQuit ?? undefined, this.menuHost));
         return;
       case 'history':
         this.overlays.push(new HistoryOverlay(this.log, this.turn));
@@ -269,7 +276,19 @@ export class Shell {
     this.character.xp = run.character.xp;
     this.character.level = run.character.level;
     this.character.xpNext = LEVEL_XP[run.character.level] ?? null;
+    this.checkMilestones();
     this.character.carried = carriedEstimate(player.coins, player.pack);
+  }
+
+  /** The leaderboard moments, each announced once: the final boss, level 100, death (Spec 09). */
+  private checkMilestones(): void {
+    const { stats, dead } = this.run!.player;
+    for (const [kind, now] of [['final_boss', stats.finalBoss], ['win', stats.won], ['death', dead]] as const) {
+      const key = kind === 'death' ? 'death' : kind === 'win' ? 'win' : 'final_boss';
+      if (!now || this.announced[key]) continue;
+      this.announced[key] = true;
+      this.onMilestone?.(kind);
+    }
   }
 
   /** What the item actions work from: the level's game, or in a village the run alone. */

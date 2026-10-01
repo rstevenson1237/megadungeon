@@ -51,6 +51,12 @@ export interface RunOptions {
   classDef?: ClassDef;
   /** Where the run starts: the surface village by default. */
   startDepth?: number;
+  /** A saved run's level deltas and round counter (Spec 09). */
+  deltas?: Record<number, LevelDelta>;
+  round?: number;
+  /** Who is playing and whether the seed is the seed of the day (a date), for the leaderboard (Spec 09). */
+  characterId?: string;
+  daily?: string;
   /** Supplies the level for a depth. Tests pass hand-built levels; the default generates from the seed. */
   levelFor?: (depth: number) => Level;
 }
@@ -58,7 +64,10 @@ export interface RunOptions {
 export class Run {
   readonly villages: readonly number[];
   readonly layout: RunLayout | undefined;
-  readonly deltas: Record<number, LevelDelta> = {};
+  readonly deltas: Record<number, LevelDelta>;
+  /** The id the leaderboard knows this character by, and the date if the seed is the seed of the day. */
+  readonly characterId: string;
+  readonly daily: string | undefined;
   depth: number;
   /** The level being played; null in a village, where there is no map (Spec 01). */
   game: Game | null = null;
@@ -87,6 +96,10 @@ export class Run {
     readonly player: PlayerState,
     options: RunOptions = {},
   ) {
+    this.deltas = options.deltas ?? {};
+    this.round = options.round ?? 1;
+    this.characterId = options.characterId ?? `${runSeed >>> 0}`;
+    this.daily = options.daily;
     this.layout = options.layout;
     this.contentsFor = options.contentsFor;
     this.spells = options.spells ?? [];
@@ -253,6 +266,10 @@ export class Run {
       return;
     }
     const level = this.levelFor(depth);
+    // The deepest level reached and arriving on level 100 are kept for the leaderboard (Spec 09).
+    const { stats } = this.player;
+    stats.deepest = Math.max(stats.deepest, depth);
+    if (depth === MAX_DEPTH) stats.won = true;
     // A teleporter or a collapsed passage lands the player on its own cell of the level.
     const special = at ? level.specials.find((sp) => sp.kind === at) : undefined;
     const where: Point | undefined = special ? { x: special.x, y: special.y } : undefined;

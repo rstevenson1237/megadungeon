@@ -64,13 +64,13 @@ describe('title screen (Spec 01, Overlays and screens)', () => {
     expect(screen(app).some((l) => l.includes('> Leaderboard'))).toBe(true);
   });
 
-  it('Continue and Leaderboard say they are not yet available and stay on the title', () => {
+  it('with no save slot or leaderboard, Continue and Leaderboard say so and stay on the title', () => {
     const app = make();
     press(app, 's', 's', 'Enter');
     expect(app.shell).toBeNull();
-    expect(text(app)).toContain('Continue is not yet available');
+    expect(text(app)).toContain('There is no saved game yet');
     press(app, 's', 'Enter');
-    expect(text(app)).toContain('The leaderboard is not yet available');
+    expect(text(app)).toContain('The leaderboard is not available');
   });
 
   it('ignores keys with no meaning on the title', () => {
@@ -130,7 +130,7 @@ describe('both seed options start a run (task 1.10)', () => {
     press(app, 'Enter');
     app.shell!.run!.player.combatDice = 0;
     app.shell!.character.stats[0]!.current = 0;
-    press(app, 'Escape', 's', 's', 'Enter'); // game menu, Quit without saving
+    press(app, 'Escape', 'w', 'Enter'); // game menu, Quit without saving (the last item)
     expect(app.shell).toBeNull();
     press(app, 'Enter');
     expect(app.shell!.run!.player.combatDice).toBe(2);
@@ -138,11 +138,11 @@ describe('both seed options start a run (task 1.10)', () => {
   });
 });
 
-describe('quitting returns to the title (Spec 01, Game menu; stub until saves exist)', () => {
+describe('quitting returns to the title (Spec 01, Game menu)', () => {
   it('Quit without saving from the game menu opens a fresh title with a newly drawn random seed', () => {
     const app = make();
     press(app, 'Enter');
-    press(app, 'Escape', 's', 's', 'Enter'); // Help, Leaderboard, Quit
+    press(app, 'Escape', 'w', 'Enter'); // Quit without saving, the last item of the game menu
     expect(app.shell).toBeNull();
     expect(app.title).not.toBeNull();
     expect(text(app)).toContain('DEADBEEF'); // the second random seed
