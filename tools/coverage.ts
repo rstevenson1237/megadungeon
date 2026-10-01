@@ -5,6 +5,7 @@
 import {
   CATALOG,
   MAX_OTHER_STYLE_SHARE,
+  MINOR_ABILITIES_PER_CLASS,
   MONSTERS_PER_RATING,
   QUEST_TEMPLATES_PER_TYPE,
   QUEST_TYPES,
@@ -74,7 +75,7 @@ function countBy(entries: readonly Entry[], key: (e: Entry) => string | number |
   return counts;
 }
 
-function groupsFor(table: string, entries: readonly Entry[]): GroupCoverage[] {
+function groupsFor(table: string, entries: readonly Entry[], bundle: ContentBundle): GroupCoverage[] {
   if (table === 'monsters') {
     const counts = countBy(entries, (e) => ratingDice(e.rating));
     return RATINGS.map((r) => ({ label: `rating ${r}`, count: counts.get(r) ?? 0, minimum: MONSTERS_PER_RATING }));
@@ -86,6 +87,13 @@ function groupsFor(table: string, entries: readonly Entry[]): GroupCoverage[] {
   if (table === 'quest_templates') {
     const counts = countBy(entries, (e) => String(e.needs));
     return QUEST_TYPES.map((t) => ({ label: `type ${t}`, count: counts.get(t) ?? 0, minimum: QUEST_TEMPLATES_PER_TYPE }));
+  }
+  if (table === 'minor_abilities') {
+    // 12 per class, shared entries counting once in every pool they sit in (Spec 03).
+    const counts = new Map<string, number>();
+    for (const e of entries) for (const c of e.classes as string[]) counts.set(c, (counts.get(c) ?? 0) + 1);
+    const classes = ((bundle.tables.classes ?? []) as Entry[]).map((c) => String(c.id));
+    return classes.map((c) => ({ label: `class ${c}`, count: counts.get(c) ?? 0, minimum: MINOR_ABILITIES_PER_CLASS }));
   }
   return [];
 }
@@ -138,7 +146,9 @@ function styleMix(entries: readonly Entry[]): StyleMix {
 function coverFor(spec: CatalogEntry, bundle: ContentBundle, themes: readonly string[] | undefined): TableCoverage {
   const rows = bundle.tables[spec.table];
   const entries = (rows ?? []) as Entry[];
-  const groups = groupsFor(spec.table, entries);
+  const groups = groupsFor(spec.table, entries, bundle);
+  // Minor ability slots: a shared entry fills a slot in every pool it sits in (Spec 03).
+  const count = spec.unit === 'slots' ? entries.reduce((n, e) => n + (e.classes as string[]).length, 0) : entries.length;
   const gaps = spec.depthCoverage && rows ? depthGaps(entries, spec.depthCoverage, themes) : [];
   const cover: TableCoverage = {
     table: spec.table,
@@ -147,7 +157,7 @@ function coverFor(spec: CatalogEntry, bundle: ContentBundle, themes: readonly st
     readBy: spec.readBy,
     unit: spec.unit,
     present: rows !== undefined,
-    count: entries.length,
+    count,
     minimum: spec.minimum,
     groups,
     depthGaps: gaps,
@@ -158,7 +168,7 @@ function coverFor(spec: CatalogEntry, bundle: ContentBundle, themes: readonly st
   }
   if (spec.text && rows) cover.style = styleMix(entries);
   cover.ok =
-    entries.length >= spec.minimum &&
+    count >= spec.minimum &&
     groups.every((g) => g.count >= g.minimum) &&
     cover.depthGaps.length === 0 &&
     !cover.style?.flagged;

@@ -1,0 +1,162 @@
+# The 20 classes (Spec 03, "Classes"). Starting steps, the pool stepped at levels 4, 7 and 9, and the major ability.
+# Ability effects are code (tasks 2.7 to 2.9); the text is the spec's.
+- id: warrior
+  name: Warrior
+  start: { combat: 8, skill: 6, magic: 4 }
+  steps: [combat, combat, skill]
+  ability:
+    id: cleave
+    name: Cleave
+    text: A melee hit that kills carries into an adjacent monster
+- id: mage
+  name: Mage
+  start: { combat: 4, skill: 6, magic: 8 }
+  steps: [magic, magic, skill]
+  ability:
+    id: arcane_bolt
+    name: Arcane Bolt
+    text: A targeted spell that loses no die on 2 to 3
+- id: thief
+  name: Thief
+  start: { combat: 6, skill: 8, magic: 4 }
+  steps: [skill, skill, combat]
+  ability:
+    id: backstab
+    name: Backstab
+    text: A melee attack on an unaware monster hits and removes 2 dice
+- id: priest
+  name: Priest
+  start: { combat: 6, skill: 6, magic: 6 }
+  steps: [magic, combat, magic]
+  ability:
+    id: heal
+    name: Heal
+    text: A spell that restores one Combat die
+- id: barbarian
+  name: Barbarian
+  start: { combat: 8, skill: 6, magic: 4 }
+  steps: [combat, skill, skill]
+  ability:
+    id: rage
+    name: Rage
+    text: For 10 rounds, melee ties hit only the monster
+- id: knight
+  name: Knight
+  start: { combat: 8, skill: 6, magic: 4 }
+  steps: [combat, combat, magic]
+  ability:
+    id: shield_wall
+    name: Shield Wall
+    text: Ignore the first hit taken in each fight
+- id: paladin
+  name: Paladin
+  start: { combat: 6, skill: 6, magic: 6 }
+  steps: [combat, magic, combat]
+  ability:
+    id: smite
+    name: Smite
+    text: After a melee hit, spend a Magic die to remove a second die
+- id: ranger
+  name: Ranger
+  start: { combat: 6, skill: 8, magic: 4 }
+  steps: [skill, combat, magic]
+  ability:
+    id: volley
+    name: Volley
+    text: One ranged roll strikes two targets
+- id: monk
+  name: Monk
+  start: { combat: 6, skill: 6, magic: 6 }
+  steps: [combat, skill, combat]
+  ability:
+    id: flurry
+    name: Flurry
+    text: Winning a melee roll by 3 or more removes 2 dice
+- id: bard
+  name: Bard
+  start: { combat: 6, skill: 6, magic: 6 }
+  steps: [skill, magic, skill]
+  ability:
+    id: fascinate
+    name: Fascinate
+    text: One visible monster cannot act for d6 rounds
+- id: druid
+  name: Druid
+  start: { combat: 6, skill: 6, magic: 6 }
+  steps: [magic, skill, magic]
+  ability:
+    id: wild_shape
+    name: Wild Shape
+    text: +1 Combat step for 20 rounds
+- id: necromancer
+  name: Necromancer
+  start: { combat: 4, skill: 6, magic: 8 }
+  steps: [magic, magic, skill]
+  ability:
+    id: raise
+    name: Raise
+    text: A monster just killed fights beside you for 20 rounds
+- id: sorcerer
+  name: Sorcerer
+  start: { combat: 4, skill: 6, magic: 8 }
+  steps: [magic, magic, combat]
+  ability:
+    id: overchannel
+    name: Overchannel
+    text: Spells lose no die on 2 to 3 once per fight
+- id: illusionist
+  name: Illusionist
+  start: { combat: 4, skill: 8, magic: 6 }
+  steps: [skill, magic, magic]
+  ability:
+    id: decoy
+    name: Decoy
+    text: Monsters attack a phantom for 5 rounds
+- id: warlock
+  name: Warlock
+  start: { combat: 6, skill: 4, magic: 8 }
+  steps: [magic, magic, combat]
+  ability:
+    id: pact
+    name: Pact
+    text: Trade one Combat die for one Magic die
+- id: assassin
+  name: Assassin
+  start: { combat: 6, skill: 8, magic: 4 }
+  steps: [skill, skill, combat]
+  ability:
+    id: mark
+    name: Mark
+    text: Each of your hits on the marked monster removes 2 dice
+- id: alchemist
+  name: Alchemist
+  start: { combat: 4, skill: 8, magic: 6 }
+  steps: [skill, magic, skill]
+  ability:
+    id: brew
+    name: Brew
+    text: Identifies potions on sight and brews one potion per village rest
+- id: shaman
+  name: Shaman
+  start: { combat: 6, skill: 4, magic: 8 }
+  steps: [magic, skill, magic]
+  ability:
+    id: spirit_totem
+    name: Spirit Totem
+    text: Waiting beside the totem restores a Combat die every 5 rounds
+- id: witch_hunter
+  name: Witch Hunter
+  start: { combat: 6, skill: 8, magic: 4 }
+  steps: [skill, combat, skill]
+  ability:
+    id: hex_breaker
+    name: Hex Breaker
+    text: Immune to rune and magic trap effects; ranged hits on casters remove 2 dice
+- id: beastmaster
+  name: Beastmaster
+  start: { combat: 6, skill: 8, magic: 4 }
+  steps: [skill, combat, magic]
+  ability:
+    id: companion
+    name: Companion
+    text: An animal ally (d6, gains a die every 3 levels)

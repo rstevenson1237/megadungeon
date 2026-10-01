@@ -183,13 +183,15 @@ describe('targeting in the shell (Spec 01): F then Enter is the quick shot', () 
     expect(s.overlays).toHaveLength(0); // that Esc cancelled targeting; it did not open the game menu
   });
 
-  it('Enter confirms and says the shot is not yet available, with no turn spent', () => {
+  it('Enter confirms and fires: one round and one ammunition are spent', () => {
     const s = shell();
+    const ammo = s.game!.state.player.ranged!.ammo;
     press(s, 'f');
     press(s, 'Enter');
     expect(s.targeting).toBeNull();
-    expect(s.game!.state.round).toBe(1);
-    expect(s.log.lines(s.turn).some((l) => l.text.includes('not yet available'))).toBe(true);
+    expect(s.game!.state.round).toBe(2);
+    expect(s.game!.state.player.ranged!.ammo).toBe(ammo - 1);
+    expect(s.log.lines(s.turn).some((l) => /shot misses|You (hit|kill)/.test(l.text))).toBe(true);
   });
 
   it('says so and spends no turn when there is no valid target', () => {

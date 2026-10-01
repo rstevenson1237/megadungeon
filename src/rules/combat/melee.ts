@@ -3,14 +3,15 @@
 // tasks 2.5 and 2.7.
 
 import type { Rng } from '../../core/rng.ts';
+import { rollFace, type RollMode } from '../character/dice.ts';
 
 /**
  * Roll one die of `sides`. With disadvantage, roll two and keep the lower
  * (Spec 03 "Advantage and disadvantage").
  */
-export function rollDie(rng: Rng, sides: number, disadvantage = false): number {
-  const first = rng.int(1, sides);
-  return disadvantage ? Math.min(first, rng.int(1, sides)) : first;
+export function rollDie(rng: Rng, sides: number, disadvantage: boolean | RollMode = false): number {
+  const mode: RollMode = disadvantage === true ? 'disadvantage' : disadvantage === false ? 'normal' : disadvantage;
+  return rollFace(rng, sides, mode);
 }
 
 export interface MeleeOutcome {

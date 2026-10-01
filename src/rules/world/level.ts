@@ -109,6 +109,8 @@ export interface PlacedMonster extends Point {
   modifier: number;
   speed: 'slow' | 'normal' | 'fast';
   behaviour: string;
+  /** Never flees: a row tagged undead or construct (Spec 04, Morale). Bosses never flee either. */
+  fearless?: boolean;
   /** Monsters placed together share a group number. */
   group: number;
   role: MonsterRole;

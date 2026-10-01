@@ -1,0 +1,67 @@
+# Minor abilities (Spec 03, "Minor abilities"). These are the examples the spec gives for the four core
+# classes; the full pools of 12 for all 20 classes are written in task 3.4. Effects are code (tasks 2.7 to 2.10).
+- id: hardy
+  name: Hardy
+  text: Waiting restores a Combat die in 8 rounds
+  classes: [warrior]
+- id: weapon_master
+  name: Weapon Master
+  text: +1 on melee with one weapon type
+  classes: [warrior]
+- id: pack_mule
+  name: Pack Mule
+  text: +2 inventory slots
+  classes: [warrior]
+  stackable: true
+- id: second_wind
+  name: Second Wind
+  text: Once per level, regain a Combat die when down to one
+  classes: [warrior]
+- id: focus
+  name: Focus
+  text: Advantage on spell rolls while not adjacent to a monster
+  classes: [mage]
+- id: scholar
+  name: Scholar
+  text: Identify scrolls and books on sight
+  classes: [mage]
+- id: widen
+  name: Widen
+  text: Area spells reach one cell further
+  classes: [mage]
+- id: mana_well
+  name: Mana Well
+  text: Potions that restore Magic dice restore one extra
+  classes: [mage]
+- id: keen_eye
+  name: Keen Eye
+  text: Advantage on search checks
+  classes: [thief]
+- id: light_step
+  name: Light Step
+  text: Floor traps trigger on a 1 only half the time
+  classes: [thief]
+- id: fence
+  name: Fence
+  text: +20% when selling
+  classes: [thief]
+- id: quick_hands
+  name: Quick Hands
+  text: Container traps trigger only on a 1
+  classes: [thief]
+- id: blessed
+  name: Blessed
+  text: Advantage on checks against undead
+  classes: [priest]
+- id: sanctuary
+  name: Sanctuary
+  text: Monsters take -2 on melee rolls against you for 3 rounds
+  classes: [priest]
+- id: tithe
+  name: Tithe
+  text: Village rest is free
+  classes: [priest]
+- id: purify
+  name: Purify
+  text: Remove one curse or poison as a skill use
+  classes: [priest]

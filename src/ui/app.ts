@@ -40,7 +40,7 @@ export class App {
       combatStep: combat.step,
       combatDice: combat.current,
       combatMax: combat.max,
-      ranged: { name: 'Sling', range: 6 }, // the test character's sling (Spec 05: 6 cells)
+      ranged: { name: 'Sling', range: 6, ammo: 20 }, // the test character's sling (Spec 05: 6 cells, 20 sling stones)
     });
     const shell = new Shell('', character);
     shell.onQuit = () => this.openTitle();

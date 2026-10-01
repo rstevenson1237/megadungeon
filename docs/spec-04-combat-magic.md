@@ -125,6 +125,41 @@ Every monster uses one of six behaviours from the bestiary, and bandits and riva
 - **Bosses:** never flee, and are alert as soon as the player enters their room.
 - **Stairs:** monsters never use stairs. Leaving a level always ends a pursuit, and the monsters stay where they were (subject to Spec 02 restocking).
 
+## Clarifications (approved October 1, 2026, task 2.7)
+
+All figures are starting values for playtesting.
+
+**Awareness**
+
+- **Starting state:** each monster rolls asleep or unaware, 1 in 2, from a seeded stream of its level (fixed by the run seed and level number) the first time the level is entered; the result is saved with the level. Ambushers start unaware. Bosses are alert as soon as the player is in their room. Bandits are unaware until the player is in their sight, then alert for good. Rivals never notice the player or wake from noise; they are peaceful until attacked.
+- **"In its line of sight"** means the player and the creature can see each other (the same visibility the main view uses). **"Combat happens"** means any melee or ranged exchange between any two creatures, wherever it is: every other creature within the table's radius of the exchange is alerted.
+- **Notice rolls** are made once per round per creature, before it acts, whether or not it acts that round. An asleep or unaware creature becomes alert at once and may act on that same round.
+- **Unaware creatures wander:** on each action there is a 1 in 2 chance to step to a free orthogonal cell within 3 cells of where the creature was placed. Bosses and ambushers hold their ground.
+- **Unaware or asleep defenders** roll with disadvantage in melee.
+
+**Attacks and ranged reach**
+
+- **Monster ranged reach:** skirmishers, casters and hostile rivals attack from a clear line up to 6 cells away, with one shot each. Adjacent creatures with a ranged attack do not shoot; they step away or, when cornered, fight in melee.
+- **Monster ranged and spell attacks** that tie the player's defence roll miss.
+- **Player ranged attack:** one Skill die as a skill use against an adjacent-disadvantage rule, then one shot of the readied weapon's ammunition is spent (a hit or a miss). With none left the weapon cannot fire. The weapon list and the crossbow's every-other-round rule come with the items task.
+- **Ambusher:** there is no cover; it starts unaware and rolls its first attack with advantage.
+
+**Behaviours**
+
+- **Skirmishers** carry 6 shots; with none left they close in. Casters never run out.
+- **Preferred distance** for skirmishers and casters is 3 to 5 cells. A skirmisher or caster that cannot step farther away (cornered) fights in melee.
+- **Pack:** when one member of a group becomes alert the whole group does. Each member heads for a different free cell next to the player, so the pack closes in on all sides.
+- **Coward:** with the player within 4 cells it steps away, or fights if cornered; beyond 6 cells it closes in; between the two it holds.
+- **Fleeing** (morale, a bandit's second theft, a coward's retreat) means stepping to the neighbouring cell farthest by walking distance from the player; a fleeing creature that cannot get farther away and is next to the player fights. A creature that has been out of the player's sight for 20 rounds stops fleeing and is unaware again.
+- **Morale:** a creature that has lost dice and is reduced to one rolls a d6 each round; on 1 or 2 it flees. Morale applies to every behaviour, a brute's included. Creatures that start with a single die never roll. Undead, constructs (monster rows tagged `undead` or `construct`) and bosses never flee.
+
+**Bandits, rivals and NPCs**
+
+- **Rating:** bandits and rivals have the level's rating ceiling in dice (1 + depth / 5, capped at 20), a modifier of depth / 15 (rounded down, capped at +6) and normal speed.
+- **Theft:** a bandit that wins an exchange against the player removes a Combat die as usual and steals 10% of the carried gold, rounded up and at least 1 gp. A theft that finds no gold takes nothing and does not count. Gems and jewelry join the theft with the items task. After two thefts the bandit flees. A killed bandit drops everything it stole on its cell.
+- **Rivals** walk to the down stair along the shortest path. They take the contents of any container or floor pile within 8 steps of their way (never a cross-level cache or stash) and fight every monster next to them, as an ordinary melee exchange in which both sides roll d6 plus modifier. A rival that reaches the down stair waits beside it; no creature ever uses stairs. Once attacked, a rival is hostile and fights as a skirmisher. A dead rival drops everything it looted on its cell.
+- **Loot taken by rivals** is recorded in the level's delta so the player finds those containers empty (Spec 06 will read it).
+
 ## Acceptance criteria
 
 - [ ] Nothing on the level moves until the player spends an action; free actions (inventory, look, targeting) cost no round.

@@ -65,6 +65,8 @@ export const SINGLE_LINE_FIELDS: Record<string, readonly string[]> = {
   gems_jewelry: ['name'],
   magic_items: ['name'],
   quest_items: ['name'],
+  classes: ['name'],
+  minor_abilities: ['name'],
 };
 
 function getPath(entry: Entry, path: string): unknown {
@@ -110,6 +112,21 @@ export function checkReferences(bundle: ContentBundle): string[] {
   errors.push(...checkRollCycles(edges));
   errors.push(...checkThemeIds(bundle));
   errors.push(...checkThemeVariants(bundle));
+  errors.push(...checkMinorAbilityClasses(bundle));
+  return errors;
+}
+
+/** A minor ability may only sit in the pool of a class that exists, once (Spec 03). */
+function checkMinorAbilityClasses(bundle: ContentBundle): string[] {
+  const known = new Set(entriesOf(bundle, 'classes').map((e) => String(e.id)));
+  const errors: string[] = [];
+  for (const entry of entriesOf(bundle, 'minor_abilities')) {
+    const listed = entry.classes as string[];
+    for (const cls of listed) {
+      if (!known.has(cls)) errors.push(`minor_abilities "${String(entry.id)}": classes "${cls}" is not a class`);
+    }
+    if (new Set(listed).size !== listed.length) errors.push(`minor_abilities "${String(entry.id)}": a class is listed twice`);
+  }
   return errors;
 }
 

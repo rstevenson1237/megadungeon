@@ -118,6 +118,7 @@ export const EFFECTS: readonly string[] = [];
 /** Launch floors for tables that are checked by group (Spec 08, "Validation and coverage"). */
 export const MONSTERS_PER_RATING = 5;
 export const QUEST_TEMPLATES_PER_TYPE = 10;
+export const MINOR_ABILITIES_PER_CLASS = 12;
 export const RUMOURS_PER_KIND = 1;
 export const RATINGS: readonly number[] = Array.from({ length: 20 }, (_, i) => i + 1);
 

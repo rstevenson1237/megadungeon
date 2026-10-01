@@ -96,6 +96,36 @@ export const questItemSchema = z.strictObject({ ...named, needs: z.enum(['belong
 // A lore chain's entries, in the order the player finds them (Spec 02, "Connective elements").
 export const loreChainSchema = z.strictObject({ ...baseFields, entries: z.array(z.string().min(1)).min(6) });
 
+// Classes (Spec 03, "Classes"): starting steps, the pool stepped at levels 4, 7 and 9, and the major ability.
+// Starting dice use one of the two allowed arrays: all d6, or one each of d4, d6 and d8.
+const dieStep = z.union([z.literal(4), z.literal(6), z.literal(8), z.literal(10), z.literal(12)]);
+const poolName = z.enum(['combat', 'skill', 'magic']);
+export const classSchema = z.strictObject({
+  ...baseFields,
+  name: z.string().min(1),
+  start: z
+    .strictObject({ combat: dieStep, skill: dieStep, magic: dieStep })
+    .refine(
+      (s) => {
+        const steps = [s.combat, s.skill, s.magic].sort((a, b) => a - b).join();
+        return steps === '6,6,6' || steps === '4,6,8';
+      },
+      'starting dice are all d6, or one each of d4, d6 and d8',
+    ),
+  steps: z.tuple([poolName, poolName, poolName]),
+  ability: z.strictObject({ id, name: z.string().min(1), text: z.string().min(1) }),
+});
+
+// Minor abilities (Spec 03, "Minor abilities"): one entry may sit in several classes' pools (shared entries).
+export const minorAbilitySchema = z.strictObject({
+  ...baseFields,
+  name: z.string().min(1),
+  text: z.string().min(1),
+  classes: z.array(id).min(1),
+  // May be drawn more than once (such as Pack Mule).
+  stackable: z.boolean().optional(),
+});
+
 const templateText = z.array(z.string().min(1)).min(1, 'a template needs at least one phrasing');
 
 // Rumour templates (Spec 08, "Text templates"): `needs` is the kind of fact the run layout must hold.
@@ -112,6 +142,8 @@ export const questTemplateSchema = z.strictObject({
   text: templateText,
 });
 
+export type ClassEntry = z.infer<typeof classSchema>;
+export type MinorAbilityEntry = z.infer<typeof minorAbilitySchema>;
 export type VillageName = z.infer<typeof villageNameSchema>;
 export type Monster = z.infer<typeof monsterSchema>;
 export type LevelTheme = z.infer<typeof levelThemeSchema>;
@@ -146,6 +178,8 @@ export const tableSchemas = {
   magic_items: magicItemSchema,
   quest_items: questItemSchema,
   lore_chains: loreChainSchema,
+  classes: classSchema,
+  minor_abilities: minorAbilitySchema,
 } as const;
 
 export type TableName = keyof typeof tableSchemas;

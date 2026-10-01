@@ -172,10 +172,13 @@ export class Shell {
         t.prev();
         break;
       case 'confirm':
-        // The shot itself needs weapons and ammunition (task 2.9); no turn is spent.
-        this.log.add({ kind: 'system', text: `You aim at the ${t.selected.name}. Ranged attacks are not yet available.` }, this.turn);
+      {
+        const result = this.game!.fire(t.selected);
         this.targeting = null;
+        for (const m of result.messages) this.log.add(m, this.game!.state.round);
+        this.afterAction();
         break;
+      }
       case 'cancel':
         this.targeting = null;
         break;

@@ -33,3 +33,12 @@ export const PLACEMENT_COUNTS = {
   debris: { small: [4, 8], medium: [6, 12], large: [10, 18] },
   floorTraps: { small: [3, 6], medium: [5, 10], large: [8, 16] },
 } as const satisfies Record<string, Record<SizeClass, Range>>;
+
+/**
+ * A bandit's or rival's rating (Spec 04, clarifications of task 2.7): the level's rating ceiling in dice and a modifier
+ * of depth / 15 (rounded down, capped at +6).
+ */
+export const npcRating = (depth: number): { dice: number; modifier: number } => ({
+  dice: ratingCeiling(depth),
+  modifier: Math.min(6, Math.floor(depth / 15)),
+});
