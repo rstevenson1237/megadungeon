@@ -10,6 +10,8 @@
   "scripts": {
     "content:check": "tsx tools/content-build.ts --check",
     "content:build": "tsx tools/content-build.ts",
+    "content:report": "tsx tools/content-build.ts --report",
+    "content:strict": "tsx tools/content-build.ts --check --strict",
     "typecheck": "npm run content:build && tsc --noEmit",
     "test": "vitest run",
     "dev": "npm run content:build && vite",

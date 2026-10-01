@@ -1,0 +1,18 @@
+# Stub entries for task 2.1: one template per quest type. The launch table (10 per quest type)
+# is written in Phase 3 (task 3.9).
+- id: stub_quest_captive
+  needs: captive
+  text:
+    - "A captive waits on level {level}, guarded by {monsters}. Bring them to any village."
+- id: stub_quest_belonging
+  needs: belonging
+  text:
+    - "{Item} was lost on level {level}. Hand it in at {village}."
+- id: stub_quest_magic_item
+  needs: magic_item
+  text:
+    - "Bring {a:item} from level {level} to {village}."
+- id: stub_quest_opponent
+  needs: opponent
+  text:
+    - "{Monster} lairs on level {level}. Kill it."

@@ -1,0 +1,76 @@
+// The table catalog (Spec 08, "Table catalog"): every table the game needs, with its launch
+// minimum. The coverage report lists all of these, whether or not a file exists yet.
+
+export type Area = 'world' | 'creatures' | 'people' | 'classes' | 'items' | 'magic' | 'features' | 'lore';
+
+export interface CatalogEntry {
+  /** Table name: the YAML file name without extension. */
+  table: string;
+  area: Area;
+  label: string;
+  /** Launch minimum, in `unit`. */
+  minimum: number;
+  unit: 'entries' | 'slots';
+  readBy: string;
+  /**
+   * Levels the table must cover. Set for the tables Spec 02 rolls by depth: monsters (step 8),
+   * bosses (level 100 holds the final boss), magic items (step 9) and gems (tiered by depth).
+   */
+  depthCoverage?: readonly [number, number];
+  /** A text table: the coverage report shows its style mix (Spec 08, "Style mix"). */
+  text?: true;
+}
+
+export const CATALOG: readonly CatalogEntry[] = [
+  { table: 'level_themes', area: 'world', label: 'Level themes', minimum: 13, unit: 'entries', readBy: 'Spec 02' },
+  { table: 'village_names', area: 'world', label: 'Village names', minimum: 40, unit: 'entries', readBy: 'Spec 07', text: true },
+  { table: 'monsters', area: 'creatures', label: 'Monsters', minimum: 150, unit: 'entries', readBy: 'Specs 02, 04', depthCoverage: [1, 100] },
+  { table: 'bosses', area: 'creatures', label: 'Bosses', minimum: 40, unit: 'entries', readBy: 'Specs 02, 04', depthCoverage: [1, 99] },
+  { table: 'npc_names', area: 'creatures', label: 'NPC names', minimum: 300, unit: 'entries', readBy: 'Specs 04, 07', text: true },
+  { table: 'rivals', area: 'creatures', label: 'Named rivals', minimum: 30, unit: 'entries', readBy: 'Spec 02' },
+  { table: 'character_names', area: 'people', label: 'Character names', minimum: 150, unit: 'entries', readBy: 'Spec 03', text: true },
+  { table: 'classes', area: 'classes', label: 'Classes', minimum: 20, unit: 'entries', readBy: 'Spec 03' },
+  { table: 'minor_abilities', area: 'classes', label: 'Minor abilities', minimum: 240, unit: 'slots', readBy: 'Spec 03' },
+  { table: 'equipment_bases', area: 'items', label: 'Weapon, armour and shield bases', minimum: 16, unit: 'entries', readBy: 'Spec 05' },
+  { table: 'magic_items', area: 'items', label: 'Magic items', minimum: 130, unit: 'entries', readBy: 'Spec 05', depthCoverage: [1, 100] },
+  { table: 'artifacts', area: 'items', label: 'Artifacts', minimum: 40, unit: 'entries', readBy: 'Specs 02, 05' },
+  { table: 'disguise_names', area: 'items', label: 'Disguise names', minimum: 100, unit: 'entries', readBy: 'Spec 05' },
+  { table: 'gems_jewelry', area: 'items', label: 'Gems and jewelry', minimum: 50, unit: 'entries', readBy: 'Spec 05', depthCoverage: [1, 100] },
+  { table: 'spells', area: 'magic', label: 'Spells', minimum: 15, unit: 'entries', readBy: 'Spec 04' },
+  { table: 'fountain_effects', area: 'features', label: 'Fountain effects', minimum: 12, unit: 'entries', readBy: 'Spec 06' },
+  { table: 'altar_gods', area: 'features', label: 'Altar gods', minimum: 8, unit: 'entries', readBy: 'Specs 02, 06' },
+  { table: 'runes', area: 'features', label: 'Rune effects and rune-word letters', minimum: 10, unit: 'entries', readBy: 'Specs 02, 06' },
+  { table: 'traps', area: 'features', label: 'Traps', minimum: 12, unit: 'entries', readBy: 'Spec 06' },
+  { table: 'debris_finds', area: 'features', label: 'Debris finds', minimum: 20, unit: 'entries', readBy: 'Spec 06' },
+  { table: 'books', area: 'lore', label: 'Books', minimum: 200, unit: 'entries', readBy: 'Spec 06', text: true },
+  { table: 'graffiti', area: 'lore', label: 'Graffiti', minimum: 300, unit: 'entries', readBy: 'Spec 06', text: true },
+  { table: 'signs', area: 'lore', label: 'Signs', minimum: 120, unit: 'entries', readBy: 'Spec 06', text: true },
+  { table: 'lore_chains', area: 'lore', label: 'Lore chains', minimum: 25, unit: 'entries', readBy: 'Specs 02, 06', text: true },
+  { table: 'rumours', area: 'lore', label: 'Rumour templates', minimum: 60, unit: 'entries', readBy: 'Spec 07', text: true },
+  { table: 'quest_templates', area: 'lore', label: 'Quest templates', minimum: 40, unit: 'entries', readBy: 'Specs 02, 07', text: true },
+  { table: 'quest_items', area: 'lore', label: 'Named quest items', minimum: 60, unit: 'entries', readBy: 'Specs 02, 07', text: true },
+  { table: 'vault_names', area: 'lore', label: 'Vault and shrine names', minimum: 30, unit: 'entries', readBy: 'Spec 02', text: true },
+];
+
+/** Rumour kinds (Spec 07, Tavern): what a rumour can say. A rumour template `needs` one. */
+export const RUMOUR_KINDS = ['vault', 'boss', 'teleporter', 'rival_stash', 'trap_level', 'fountain'] as const;
+export type RumourKind = (typeof RUMOUR_KINDS)[number];
+
+/** Quest types (Spec 02, Quest goals). A quest template `needs` one. */
+export const QUEST_TYPES = ['captive', 'belonging', 'magic_item', 'opponent'] as const;
+export type QuestType = (typeof QUEST_TYPES)[number];
+
+/** Monster behaviours defined in code (Spec 04). `stub` serves the Phase 1 stub monsters until task 2.7. */
+export const BEHAVIOURS = ['brute', 'skirmisher', 'caster', 'ambusher', 'pack', 'coward', 'stub'] as const;
+
+/** Effects defined in code. Tables name these (`effect: restore_die`); none exist until tasks 2.8 and 2.9. */
+export const EFFECTS: readonly string[] = [];
+
+/** Launch floors for tables that are checked by group (Spec 08, "Validation and coverage"). */
+export const MONSTERS_PER_RATING = 5;
+export const QUEST_TEMPLATES_PER_TYPE = 10;
+export const RUMOURS_PER_KIND = 1;
+export const RATINGS: readonly number[] = Array.from({ length: 20 }, (_, i) => i + 1);
+
+/** Style mix: no text table may have more than this share of entries in a non-baseline style. */
+export const MAX_OTHER_STYLE_SHARE = 0.2;

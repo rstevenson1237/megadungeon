@@ -13,7 +13,9 @@ Requires Node 22 or newer.
 ```
 npm ci               # install
 npm run dev          # build content, start the Vite dev server
-npm run content:check  # check the YAML content (schema, ids)
+npm run content:check  # check the YAML content (schema, ids, references, template text)
+npm run content:report # write coverage/content-coverage.html (tables against launch minimums, gaps)
+npm run content:strict # content check plus the launch bar: fails on any short table or gap (Phase 3)
 npm run content:build  # compile content/ to src/generated/content-bundle.json
 npm run typecheck
 npm test
