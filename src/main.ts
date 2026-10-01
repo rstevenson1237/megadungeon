@@ -1,5 +1,6 @@
 import rawBundle from './generated/content-bundle.json';
 import type { ContentBundle } from './core/schemas.ts';
+import './ui/fonts/font.css';
 import { GLYPH } from './ui/cp437.ts';
 import { COLS, Grid } from './ui/grid.ts';
 import { mountScreen } from './ui/screen.ts';
@@ -28,11 +29,11 @@ if (app) {
     x += label.length + 4;
   }
   row += 2;
-  const box = '┌──────────┐│          │└──────────┘';
-  for (let r = 0; r < 3; r++) grid.text(2, row + r, [...box].slice(r * 12, r * 12 + 12).join(''), white, 0);
-  grid.text(15, row + 1, 'Ω ≈ ░▒▓█ ☺', 0x55ff55, 0);
+  const boxes = ['┌──────────┐', '│          │', '└──────────┘', '╔══════════╗', '║          ║', '╚══════════╝'];
+  boxes.forEach((line, r) => grid.text(2 + (r > 2 ? 15 : 0), row + (r % 3), line, white, 0));
+  grid.text(3, row + 1, 'Ω ≈ ░▒▓█ ☺', 0x55ff55, 0);
+  grid.text(18, row + 1, 'Hello Mara', 0x55ff55, 0);
 
   app.replaceChildren();
-  const family = '"Px437 IBM VGA 9x16", "DejaVu Sans Mono", monospace';
-  mountScreen(app, family).render(grid);
+  void mountScreen(app, 'Px437 IBM VGA 9x16').then((renderer) => renderer.render(grid));
 }

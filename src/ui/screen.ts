@@ -1,12 +1,18 @@
 // Browser glue: one canvas at native size, scaled to fit the window.
 
 import { CanvasAtlas, fontMaskSource } from './atlas.ts';
-import { NATIVE_H, NATIVE_W } from './grid.ts';
+import { CELL_H, NATIVE_H, NATIVE_W } from './grid.ts';
 import { Renderer } from './renderer.ts';
 import { fitScale } from './viewport.ts';
 
-/** Create the canvas inside `parent`, keep it fitted to the window, and return a renderer for it. */
-export function mountScreen(parent: HTMLElement, fontFamily: string): Renderer {
+/**
+ * Create the canvas inside `parent`, keep it fitted to the window, and return a
+ * renderer for it. Waits for the font so the atlas is baked from the real glyphs.
+ */
+export async function mountScreen(parent: HTMLElement, fontFamily: string): Promise<Renderer> {
+  await document.fonts.load(`${CELL_H}px "${fontFamily}"`);
+  if (!document.fonts.check(`${CELL_H}px "${fontFamily}"`)) throw new Error(`Font not available: ${fontFamily}`);
+
   const canvas = document.createElement('canvas');
   canvas.width = NATIVE_W;
   canvas.height = NATIVE_H;
@@ -29,7 +35,7 @@ export function mountScreen(parent: HTMLElement, fontFamily: string): Renderer {
     c.width = w;
     c.height = h;
     return c;
-  }, fontMaskSource(fontFamily));
+  }, fontMaskSource(`"${fontFamily}"`));
   const ctx = canvas.getContext('2d');
   if (!ctx) throw new Error('2D canvas is not available');
   return new Renderer(ctx, atlas);

@@ -2,7 +2,6 @@
 // once into a sheet, then tinted per foreground colour and copied to the grid.
 
 import { CP437_TO_UNICODE } from './cp437.ts';
-import { glyphRects } from './boxdraw.ts';
 import { CELL_H, CELL_W } from './grid.ts';
 
 const SHEET_COLS = 16;
@@ -25,29 +24,25 @@ export interface MaskSource {
 }
 
 /**
- * Glyphs from a font family, with shades, blocks and box lines drawn
- * procedurally so borders join. With the approved Px437 IBM VGA 9x16 font
- * loaded (see README, "Font"), pass its family name; until then any monospace
- * family works as a stand-in.
+ * Glyphs from a 9 x 16 CP437 font such as Px437 IBM VGA 9x16 (see
+ * src/ui/fonts/NOTICE.md). At 16px that font's advance is 9px and its ascent
+ * 12px, so each glyph lands exactly on its cell. Its own box-drawing and block
+ * glyphs fill the cell, so borders join with no special handling.
  */
 export function fontMaskSource(family: string, sizePx = CELL_H): MaskSource {
+  const baseline = Math.round(sizePx * 0.75);
   return {
     paint(ctx, code, x, y) {
-      ctx.fillStyle = '#fff';
-      const rects = glyphRects(code);
-      if (rects) {
-        for (const [rx, ry, rw, rh] of rects) ctx.fillRect(x + rx, y + ry, rw, rh);
-        return;
-      }
       if (code === 0 || code === 32 || code === 255) return;
+      ctx.fillStyle = '#fff';
       ctx.save();
       ctx.beginPath();
       ctx.rect(x, y, CELL_W, CELL_H);
       ctx.clip();
       ctx.font = `${sizePx}px ${family}`;
-      ctx.textAlign = 'center';
+      ctx.textAlign = 'left';
       ctx.textBaseline = 'alphabetic';
-      ctx.fillText(CP437_TO_UNICODE[code]!, x + CELL_W / 2, y + CELL_H * 0.78);
+      ctx.fillText(CP437_TO_UNICODE[code]!, x, y + baseline);
       ctx.restore();
     },
   };

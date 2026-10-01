@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
 import type { Atlas } from '../src/ui/atlas.ts';
-import { glyphRects } from '../src/ui/boxdraw.ts';
 import { CP437_TO_UNICODE, GLYPH, toCp437 } from '../src/ui/cp437.ts';
 import { CELL_H, CELL_W, COLS, Grid, NATIVE_H, NATIVE_W, ROWS } from '../src/ui/grid.ts';
 import { Renderer, type RenderContext } from '../src/ui/renderer.ts';
@@ -169,53 +168,5 @@ describe('Renderer', () => {
     expect(renderer.render(g)).toBe(0);
     g.set(2, 2, 0, 0xff0000, 0x0000ff); // but a new background shows
     expect(renderer.render(g)).toBe(1);
-  });
-});
-
-describe('procedural box drawing', () => {
-  const covers = (code: number, px: number, py: number): boolean =>
-    glyphRects(code)!.some(([x, y, w, h]) => px >= x && px < x + w && py >= y && py < y + h);
-
-  it('only handles codes 176-223', () => {
-    expect(glyphRects(65)).toBeUndefined();
-    expect(glyphRects(175)).toBeUndefined();
-    expect(glyphRects(224)).toBeUndefined();
-    for (let c = 176; c <= 223; c++) expect(glyphRects(c)).toBeDefined();
-  });
-
-  it('keeps every rectangle inside the 9 x 16 cell', () => {
-    for (let c = 176; c <= 223; c++) {
-      for (const [x, y, w, h] of glyphRects(c)!) {
-        expect(x).toBeGreaterThanOrEqual(0);
-        expect(y).toBeGreaterThanOrEqual(0);
-        expect(x + w).toBeLessThanOrEqual(CELL_W);
-        expect(y + h).toBeLessThanOrEqual(CELL_H);
-      }
-    }
-  });
-
-  it('joins lines across neighbouring cells', () => {
-    // ─ reaches both side edges on one row; │ reaches both top and bottom edges on one column.
-    const row = [...Array(CELL_H).keys()].find((y) => covers(196, 0, y))!;
-    expect(covers(196, CELL_W - 1, row)).toBe(true);
-    const col = [...Array(CELL_W).keys()].find((x) => covers(179, x, 0))!;
-    expect(covers(179, col, CELL_H - 1)).toBe(true);
-    // ┌ sends a line right on the same row as ─, and down on the same column as │.
-    expect(covers(218, CELL_W - 1, row)).toBe(true);
-    expect(covers(218, col, CELL_H - 1)).toBe(true);
-    // ┘ sends a line left on that row and up on that column.
-    expect(covers(217, 0, row)).toBe(true);
-    expect(covers(217, col, 0)).toBe(true);
-    // ═ and ║ do the same on their own two lines.
-    expect(covers(205, 0, row - 1) && covers(205, CELL_W - 1, row + 1)).toBe(true);
-    expect(covers(186, col - 1, 0) && covers(186, col + 1, CELL_H - 1)).toBe(true);
-  });
-
-  it('draws the full block solid and the shades in increasing density', () => {
-    const area = (code: number) => glyphRects(code)!.reduce((a, [, , w, h]) => a + w * h, 0);
-    expect(area(219)).toBe(CELL_W * CELL_H);
-    expect(area(176)).toBeLessThan(area(177));
-    expect(area(177)).toBeLessThan(area(178));
-    expect(area(178)).toBeLessThan(area(219));
   });
 });
