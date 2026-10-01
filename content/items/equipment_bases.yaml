@@ -1,0 +1,126 @@
+# The weapon, armour and shield bases of Spec 05 (16 of them) and the three ammunition types. `modifier` is a
+# weapon's melee modifier or armour's defence modifier; `price` is gp for normal quality at the surface (for
+# ammunition, gp per `per` pieces; for a tool, gp each). Traits are defined in code (Spec 05).
+- id: dagger
+  name: Dagger
+  type: melee
+  hands: 1
+  modifier: 0
+  traits: [light, throwable]
+  price: 5
+- id: short_sword
+  name: Short sword
+  type: melee
+  hands: 1
+  modifier: 0
+  traits: [light]
+  price: 15
+- id: mace
+  name: Mace
+  type: melee
+  hands: 1
+  modifier: 1
+  traits: [stun]
+  price: 30
+- id: long_sword
+  name: Long sword
+  type: melee
+  hands: 1
+  modifier: 1
+  price: 40
+- id: quarterstaff
+  name: Quarterstaff
+  type: melee
+  hands: 2
+  modifier: 0
+  traits: [defence]
+  price: 10
+- id: spear
+  name: Spear
+  type: melee
+  hands: 2
+  modifier: 1
+  traits: [reach]
+  price: 20
+- id: great_axe
+  name: Great axe
+  type: melee
+  hands: 2
+  modifier: 2
+  price: 60
+- id: sling
+  name: Sling
+  type: ranged
+  range: 6
+  ammo: stone
+  price: 5
+- id: shortbow
+  name: Shortbow
+  type: ranged
+  range: 8
+  ammo: arrow
+  price: 30
+- id: longbow
+  name: Longbow
+  type: ranged
+  range: 10
+  ammo: arrow
+  price: 75
+- id: crossbow
+  name: Crossbow
+  type: ranged
+  range: 8
+  ammo: bolt
+  traits: [reload, heavy]
+  price: 60
+- id: leather
+  name: Leather
+  type: armour
+  modifier: 1
+  price: 20
+- id: chain
+  name: Chain
+  type: armour
+  modifier: 2
+  traits: [no_stealth_buff]
+  price: 80
+- id: plate
+  name: Plate
+  type: armour
+  modifier: 3
+  traits: [notice_advantage, spell_penalty]
+  large: true
+  price: 250
+- id: round_shield
+  name: Shield
+  type: shield
+  modifier: 1
+  price: 10
+- id: tower_shield
+  name: Tower shield
+  type: shield
+  modifier: 2
+  traits: [ranged_penalty]
+  price: 40
+- id: sling_stones
+  name: Sling stones
+  type: ammo
+  ammo: stone
+  per: 20
+  price: 1
+- id: arrows
+  name: Arrows
+  type: ammo
+  ammo: arrow
+  per: 20
+  price: 5
+- id: bolts
+  name: Bolts
+  type: ammo
+  ammo: bolt
+  per: 20
+  price: 8
+- id: lockpicks
+  name: Lockpicks
+  type: tool
+  price: 5

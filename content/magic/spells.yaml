@@ -1,0 +1,108 @@
+# The 15 starting spells (Spec 04, "Starting spell list"). Each row names an effect defined in code and
+# carries its numbers: shape, reach in cells, footprint and duration. More spells come in task 3.6.
+- id: heal
+  name: Heal
+  shape: self
+  effect: restore_die
+  text: Restore one Combat die.
+- id: shield
+  name: Shield
+  shape: self
+  effect: shield
+  rounds: 10
+  text: Ignore the next hit taken within 10 rounds.
+- id: haste
+  name: Haste
+  shape: self
+  effect: status
+  status: hasted
+  rounds: 3
+  text: Act twice per round for 3 rounds.
+- id: light
+  name: Light
+  shape: self
+  effect: light
+  reach: 8
+  text: Light the current room or 8 cells around you, revealing it.
+- id: detect
+  name: Detect
+  shape: self
+  effect: detect
+  reach: 8
+  text: Reveal traps and secret doors within 8 cells.
+- id: blink
+  name: Blink
+  shape: self
+  effect: blink
+  reach: 5
+  text: Move instantly to a visible cell within 5 cells.
+- id: arcane_bolt
+  name: Arcane Bolt
+  shape: target
+  effect: remove_die
+  reach: 8
+  text: Remove one die from the target.
+- id: sleep
+  name: Sleep
+  shape: target
+  effect: status
+  status: asleep
+  rounds: d6
+  reach: 6
+  text: An unaware or alert target falls asleep for d6 rounds.
+- id: hold
+  name: Hold
+  shape: target
+  effect: status
+  status: held
+  rounds: 3
+  reach: 6
+  text: The target cannot act for 3 rounds.
+- id: drain
+  name: Drain
+  shape: target
+  effect: drain
+  reach: 4
+  text: Remove one die from the target and restore one Combat die to you.
+- id: fear
+  name: Fear
+  shape: target
+  effect: status
+  status: frightened
+  rounds: 5
+  reach: 6
+  text: The target flees for 5 rounds.
+- id: fireball
+  name: Fireball
+  shape: area
+  effect: remove_die
+  size: 3
+  reach: 8
+  text: Remove one die from every creature in a 3 x 3 area.
+- id: blizzard
+  name: Blizzard
+  shape: area
+  effect: status
+  status: slowed
+  rounds: 5
+  size: 5
+  reach: 8
+  text: Every creature in a 5 x 5 area is slowed for 5 rounds.
+- id: thunderclap
+  name: Thunderclap
+  shape: area
+  effect: push
+  centred: true
+  distance: 2
+  reach: 1
+  text: Push every adjacent creature 2 cells away.
+- id: turn_undead
+  name: Turn Undead
+  shape: area
+  effect: status
+  status: frightened
+  rounds: 10
+  centred: true
+  reach: 6
+  affects: [undead]
+  text: Undead within range flee for 10 rounds.

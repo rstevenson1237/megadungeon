@@ -4,10 +4,11 @@
 
 import type { Rng } from '../core/rng.ts';
 import type { Awareness } from '../rules/combat/awareness.ts';
+import type { Speed, StatusEffect } from '../rules/magic/status.ts';
 import { npcRating } from '../rules/world/depth.ts';
 import type { Level, Loot, MonsterRole, PlacedMonster } from '../rules/world/level.ts';
 
-export type Speed = 'slow' | 'normal' | 'fast';
+export type { Speed };
 export type CreatureKind = 'monster' | 'bandit' | 'rival';
 
 /** Shots a skirmisher (or a hostile rival) carries before it closes in (Spec 04, task 2.7). */
@@ -32,6 +33,12 @@ export interface Monster {
   role: MonsterRole;
   /** Never flees: undead, constructs and bosses (Spec 04, Morale). */
   fearless: boolean;
+  /** A row tagged undead: Turn Undead reaches it (Spec 04). */
+  undead: boolean;
+  /** Stunned by a mace: it loses its next action (Spec 05). */
+  stunned: boolean;
+  /** Active status effects (Spec 04, "Status effects"). */
+  statuses: StatusEffect[];
   awareness: Awareness;
   /** Rounds spent alert with the player out of sight (Spec 04, Awareness). */
   lost: number;
@@ -52,6 +59,8 @@ export interface Monster {
   group: number;
   /** Where it was placed: unaware creatures wander within 3 cells of here. */
   home: { x: number; y: number };
+  /** The quest whose opponent it is: its death meets that quest's goal (Spec 07, task 2.11). */
+  quest?: string;
 }
 
 /** Colour names used by the monster tables (Spec 08), as 24-bit colours; any other name draws light grey. */
@@ -76,6 +85,9 @@ export function creature(base: Pick<Monster, 'id' | 'name' | 'glyph' | 'colour' 
     kind: 'monster',
     role: 'normal',
     fearless: false,
+    undead: false,
+    stunned: false,
+    statuses: [],
     awareness: 'unaware',
     lost: 0,
     fleeing: false,
@@ -112,9 +124,13 @@ export const spawn = (p: PlacedMonster, id: number, rng?: Rng): Monster => {
     behaviour: p.behaviour,
     role: p.role,
     fearless: p.fearless === true || p.role === 'boss',
+    undead: p.undead === true,
     awareness: ambusher || p.role === 'boss' ? 'unaware' : roll ? 'asleep' : 'unaware',
     ambush: ambusher,
     group: p.group,
+    // A boss carries its artifact and drops it where it dies (Spec 05, task 2.9).
+    carried: [...(p.artifact ? [{ kind: 'artifact' as const, id: p.artifact.id, name: p.artifact.name }] : []), ...(p.liftToken ? [{ kind: 'lift_token' as const }] : [])],
+    ...(p.quest ? { quest: p.quest } : {}),
   });
 };
 

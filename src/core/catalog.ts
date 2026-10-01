@@ -97,6 +97,48 @@ export type TrapKind = (typeof TRAP_KINDS)[number];
 
 /** Kinds of magic item (Spec 05, "Magic items"). */
 export const MAGIC_ITEM_KINDS = ['potion', 'ring', 'wand', 'rod', 'staff', 'clothing', 'weapon', 'armour'] as const;
+export type MagicItemKind = (typeof MAGIC_ITEM_KINDS)[number];
+
+/** The kinds that wear a disguise until identified (Spec 05): potion looks, ring metals, wand, rod and staff woods. */
+export const DISGUISED_KINDS = ['potion', 'ring', 'wand', 'rod', 'staff'] as const;
+
+/** What an equipment base is (Spec 05): the 16 weapon, armour and shield bases, plus ammunition and tools (lockpicks). */
+export const BASE_TYPES = ['melee', 'ranged', 'armour', 'shield', 'ammo', 'tool'] as const;
+export type BaseType = (typeof BASE_TYPES)[number];
+
+/** Ammunition types, tracked per type (Spec 04, Spec 05). */
+export const AMMO_TYPES = ['stone', 'arrow', 'bolt'] as const;
+export type AmmoType = (typeof AMMO_TYPES)[number];
+
+/** Gear traits defined in code (Spec 05); a table row names the ones it has. `flame` is a magic weapon's. */
+export const GEAR_TRAITS = [
+  'light',
+  'throwable',
+  'stun',
+  'defence',
+  'reach',
+  'reload',
+  'heavy',
+  'no_stealth_buff',
+  'notice_advantage',
+  'spell_penalty',
+  'ranged_penalty',
+  'flame',
+] as const;
+export type GearTrait = (typeof GEAR_TRAITS)[number];
+
+/** Passive effects of rings, clothing and artifacts that are always on (Spec 05, "Magic items"). */
+export const PASSIVES = ['search', 'stealth', 'melee', 'wait', 'lockpick'] as const;
+export type Passive = (typeof PASSIVES)[number];
+
+/** Where clothing and artifacts are worn (Spec 05, "Equipment slots"). */
+export const WORN_SLOTS = ['cloak', 'boots', 'gloves', 'hat', 'ring'] as const;
+export type WornSlot = (typeof WORN_SLOTS)[number];
+
+/** Effects of potions and worn powers, defined in code (Spec 05). Spell effects are in `SPELL_EFFECTS`. */
+export const ITEM_EFFECTS = ['restore_dice', 'grant_status', 'cure_poison', 'invisibility', 'remove_curse'] as const;
+export type ItemEffect = (typeof ITEM_EFFECTS)[number];
+
 export const GEM_KINDS = ['gem', 'jewelry'] as const;
 export const NPC_KINDS = ['rival', 'trader', 'bandit', 'hermit', 'captive'] as const;
 export type NpcKind = (typeof NPC_KINDS)[number];
@@ -112,8 +154,42 @@ export type QuestType = (typeof QUEST_TYPES)[number];
 /** Monster behaviours defined in code (Spec 04). `stub` serves the Phase 1 stub monsters until task 2.7. */
 export const BEHAVIOURS = ['brute', 'skirmisher', 'caster', 'ambusher', 'pack', 'coward', 'stub'] as const;
 
-/** Effects defined in code. Tables name these (`effect: restore_die`); none exist until tasks 2.8 and 2.9. */
-export const EFFECTS: readonly string[] = [];
+/** The eight status effects (Spec 04, "Status effects"). */
+export const STATUS_IDS = ['poisoned', 'slowed', 'hasted', 'asleep', 'held', 'frightened', 'blessed', 'cursed'] as const;
+export type StatusId = (typeof STATUS_IDS)[number];
+
+/** The three spell shapes (Spec 04, "Starting spell list"). */
+export const SPELL_SHAPES = ['self', 'target', 'area'] as const;
+export type SpellShape = (typeof SPELL_SHAPES)[number];
+
+/** Spell effects defined in code (Spec 08: tables name effects, never scripts). Item effects arrive with task 2.9. */
+export const SPELL_EFFECTS = [
+  'restore_die',
+  'shield',
+  'status',
+  'light',
+  'detect',
+  'blink',
+  'remove_die',
+  'drain',
+  'push',
+] as const;
+export type SpellEffect = (typeof SPELL_EFFECTS)[number];
+
+/** What a trap does when it springs (Spec 06, "Traps"); a table row names one and carries its numbers. */
+export const TRAP_EFFECTS = ['lose_dice', 'status', 'alarm', 'teleport', 'collapse', 'deep_pit', 'summon'] as const;
+export type TrapEffect = (typeof TRAP_EFFECTS)[number];
+
+/** What a fountain can do to a drinker (Spec 06, "Fixtures"). `restore_dice` and `cure_poison` are shared with potions. */
+export const FOUNTAIN_EFFECTS = ['restore_dice', 'cure_poison', 'reveal_map', 'coins', 'poison', 'water_creature', 'nothing'] as const;
+export type FountainEffect = (typeof FOUNTAIN_EFFECTS)[number];
+
+/** What an altar's god gives for a good offering (Spec 06, "Fixtures"). */
+export const BLESSINGS = ['bless', 'lift_curse', 'identify'] as const;
+export type Blessing = (typeof BLESSINGS)[number];
+
+/** Effects defined in code. Tables name these (`effect: restore_dice`). */
+export const EFFECTS: readonly string[] = [...new Set([...SPELL_EFFECTS, ...ITEM_EFFECTS, ...TRAP_EFFECTS, ...FOUNTAIN_EFFECTS])];
 
 /** Launch floors for tables that are checked by group (Spec 08, "Validation and coverage"). */
 export const MONSTERS_PER_RATING = 5;

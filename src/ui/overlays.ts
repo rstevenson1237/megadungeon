@@ -81,18 +81,30 @@ export class HelpOverlay implements Overlay {
   }
 }
 
+/** What the game menu can offer beyond help and quitting: the app provides each, or the item says it is not available. */
+export interface GameMenuHost {
+  /** The leaderboard window. */
+  leaderboard?: () => Overlay;
+  /** Download the save as a file. */
+  exportSave?: () => void;
+  /** Load a save from a file, replacing the one in the browser. */
+  importSave?: () => void;
+}
+
 /**
- * The game menu Esc opens when there is nothing to cancel. `onQuit` abandons the run and returns
- * to the title screen; there is no save to fall back to until task 2.13, so for now everything is lost.
+ * The game menu Esc opens when there is nothing to cancel (Spec 01, Spec 09). `onQuit` returns to the title screen
+ * without saving: everything since the last rest is lost, and Continue loads that rest.
  */
-export function gameMenu(onQuit?: () => void): Menu {
+export function gameMenu(onQuit?: () => void, host: GameMenuHost = {}): Menu {
   const unavailable = (what: string): OverlayResult => ({
     close: true,
-    message: { kind: 'system', text: `${what} is not yet available.` },
+    message: { kind: 'system', text: `${what} is not available.` },
   });
   return new Menu('Game Menu', [
     { label: 'Help', choose: () => ({ close: true, open: new HelpOverlay() }) },
-    { label: 'Leaderboard', choose: () => unavailable('The leaderboard') },
+    { label: 'Leaderboard', choose: () => (host.leaderboard ? { close: true, open: host.leaderboard() } : unavailable('The leaderboard')) },
+    { label: 'Export save to a file', choose: () => (host.exportSave ? (host.exportSave(), { close: true }) : unavailable('Export')) },
+    { label: 'Import save from a file', choose: () => (host.importSave ? (host.importSave(), { close: true }) : unavailable('Import')) },
     {
       label: 'Quit without saving',
       choose: () => (onQuit ? (onQuit(), { close: true }) : unavailable('Quitting')),

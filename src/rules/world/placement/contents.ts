@@ -131,6 +131,7 @@ export function placedFrom(row: Monster, at: Point, group: number, role: PlacedM
     speed: row.speed ?? 'normal',
     behaviour: row.behaviour,
     ...(row.tags?.some((t) => t === 'undead' || t === 'construct') ? { fearless: true } : {}),
+    ...(row.tags?.includes('undead') ? { undead: true } : {}),
     group,
     role,
   };

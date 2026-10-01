@@ -129,6 +129,38 @@ Gold flow (diagram as text):
 
 Traders and hermits sit outside this loop: they take carried coins in the dungeon, which trades XP the player could have banked for help right now.
 
+## Clarifications (task 2.11, proposed October 1, 2026, awaiting approval)
+
+All figures are starting values for playtesting. Where the spec above is silent these fill the gap so the build can proceed; any the owner changes goes back here first.
+
+**Villages, prices and the bank**
+
+- **Village numbers:** a village's number is how many villages lie below the surface down to it (the surface is 0). The price multiplier is 1 + 0.2 times that number. Traders and hermits use the number of the nearest village above their level.
+- **Services** are rolled once per village from the run seed and its level. A rescued trader adds a missing Shop; a rescued smith or appraiser adds theirs. A specialist taken to a village that already has the service keeps following the player until one lacks it.
+- **Deposit** takes every carried coin and every appraised gem and jewelry piece; unappraised pieces stay in the pack with a message. XP is counted in the same step, and the level-up screens open straight away, one per level crossed, in order.
+- **Starting bank** is 20 gp.
+
+**Lodging, lift and shops**
+
+- **Resting** ends every status except Cursed, and also a Shield, Invisibility and a crossbow reload. The 200 turns are added to the run's round counter, which is what level restocking measures time away by (task 2.12). The save itself belongs to task 2.13; the rest calls the run's save hook.
+- **Lift fares** are rounded to the nearest gp. The seeded factor moves in steps of 0.001. A trip takes no rounds. **The lift keeper's token** (carried by one boss, taken from its drop with no inventory slot) halves every fare, rounded up; the spec's "free or cheaper" is taken as cheaper.
+- **Shop stock** is rolled for a village and the player's rest count, kept until the next rest, and an item bought leaves it. The surface sells every weapon (melee and ranged), armour and shield base at normal quality, every ammunition type as one bundle, and Healing, Clarity and Cure. A village with number N adds N+1 fine pieces (distinct bases), N more potion kinds, a bundle of 3 lockpicks and, one time in three, a spellbook of a random spell at 150 gp. Items the player sells are not offered again. A potion bought is known for what it is.
+- **Selling:** any pack item or worn item (not a cursed one). A stack sells whole. An unidentified item pays as a plain item of its kind: enchanted gear as its base at its quality, and a potion, ring, clothing, wand, rod or staff as the cheapest of its kind in the tables. Artifacts, quest items and keys have no value and are not bought.
+- **Identify** works on anything carried or worn that is not yet known, potions and wands included. **Repair** works on broken weapons, armour and shields.
+
+**Tavern**
+
+- **Rumours:** one new rumour per rest per tavern at 25 gp times the multiplier; asking again before the next rest repeats it free. A rumour is filed in the journal under the level it is about. The facts a tavern may use are those about the levels it serves: a vault, a boss and its artifact, a teleporter, a rival's stash (from the run layout), the most trapped of those levels, and each of them that has a fountain (from the generated levels). If it has none the barkeep has nothing to tell and charges nothing.
+- **Quests:** the board shows the first 3 quests of the village's list that are still open and whose goal was actually placed on its level; a quest whose goal found no place is never offered. The text is filled from what the level holds. An abandoned or failed quest is gone for good. Taking a quest writes it in the journal; it can be abandoned from the journal (Enter) or from the tavern.
+- **Finishing:** an opponent's death meets its goal; a captive brought to any village finishes it on arrival; a belonging or magic item is handed in on arriving in the village that posted the quest while carrying it (the item is taken). The reward is paid on arrival in a village into the bank, so it earns XP, and one time in four an item from the magic table for that depth is given as well when the pack has room.
+
+**People in the dungeon**
+
+- **Captives** follow as escorts, not as creatures on the map: they keep close and are not drawn. With a captive following, one blow in three that would hit the player falls on the captive, who dies at the second blow (a captive who dies fails the quest or is lost). Spec 04 gives no rule for this; the numbers are the build's.
+- **Talk:** E or walking into a trader, hermit or captive opens their menu without spending a round; freeing a captive spends one. People are drawn as @ in a colour by role.
+- **Trader stock** is 3 to 6 things rolled from the level and the trader's cell, each one time in two a magic item, otherwise normal gear or ammunition. Price is 150% of value times the village multiplier above. Bought stock stays bought on a return to the level.
+- **Hermit** prices are 100, 25, 100 and 25 gp times that multiplier. **Lift a curse** lifts every curse worn or carried and the Cursed status. Each service is offered once per visit to the level; a visit is each time the level is entered.
+
 ## Acceptance criteria
 
 - [ ] Every subterranean village has bank, lodging and lift, and its other services match its seeded rolls.

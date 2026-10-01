@@ -1,0 +1,9 @@
+# Stub entries (Spec 08): what searching debris can turn up (Spec 06, "Searching and hidden things"): a few coins
+# (the range is multiplied by the level's depth) or a minor item by id. The launch table of 20 is written in
+# Phase 3 (task 3.7).
+- { id: debris_coins_few, name: a few coins, find: coins, amount: [1, 4], weight: 20, tags: [stub] }
+- { id: debris_coins_purse, name: a lost purse, find: coins, amount: [3, 8], weight: 8, tags: [stub] }
+- { id: debris_stones, name: sling stones, find: item, item: sling_stones, count: 10, weight: 6, tags: [stub] }
+- { id: debris_arrows, name: a few arrows, find: item, item: arrows, count: 6, weight: 6, tags: [stub] }
+- { id: debris_lockpicks, name: a bent set of picks, find: item, item: lockpicks, count: 3, weight: 8, tags: [stub] }
+- { id: debris_potion, name: a dusty flask, find: item, item: potion_healing, weight: 3, tags: [stub] }

@@ -8,15 +8,32 @@ import type { Grid } from './grid.ts';
 import { type KeyInput, keyToCommand } from './input.ts';
 import { drawLog } from './log-pane.ts';
 import type { Overlay, OverlayResult } from './overlay.ts';
-import { HelpOverlay, HistoryOverlay, gameMenu } from './overlays.ts';
+import { type GameMenuHost, HelpOverlay, HistoryOverlay, gameMenu } from './overlays.ts';
 import { MAIN_PANE, drawPanes, inner } from './panes.ts';
 import { UI } from './palette.ts';
 import { drawMap } from './map-view.ts';
 import type { Game } from '../game/game.ts';
 import type { Run } from '../game/run.ts';
-import { VillageScreen } from './village.ts';
-import { type Targeting, startTargeting } from '../game/targeting.ts';
+import { VillageScreen, type TownHost } from './town.ts';
+import { LevelUpMenu, levelUpMenu, talkMenu, type PeopleHost } from './people.ts';
+import { LEVEL_XP, poolsWithRoom } from '../rules/character/progression.ts';
+import type { LogMessage } from '../core/log.ts';
+import { CellCursor, Targeting, startTargeting } from '../game/targeting.ts';
 import { ratingText } from '../game/monsters.ts';
+import { blinkCells, canBlinkTo, spellTargets, targetSpecOf } from '../game/magic.ts';
+import type { Spell } from '../core/schemas.ts';
+import { describeStatus } from '../rules/magic/status.ts';
+import { InventoryOverlay, TextWindow, type InventoryHost } from './inventory.ts';
+import { JournalOverlay, LootOverlay, type LootHost, type OfferHost, offerMenu } from './features.ts';
+import { offeringCost } from '../game/features/index.ts';
+import { spellMenu } from './spells.ts';
+import { type ItemCtx, ctxOf, drinkPotion, equipItem, itemName, unequipSlot } from '../game/items.ts';
+import type { ActResult } from '../game/game.ts';
+import { carriedEstimate } from '../rules/items/treasure.ts';
+import { equipped, slotsUsed } from '../rules/items/inventory.ts';
+import { isIdentified, displayName } from '../rules/items/magic.ts';
+import { type Item } from '../rules/items/types.ts';
+import { resolvesAtOnce, needsCell } from '../rules/magic/spells.ts';
 
 export class Shell {
   readonly log = new MessageLog();
@@ -25,12 +42,23 @@ export class Shell {
   turn = 1;
   /** Called when the player quits from the game menu (returns to the title screen). */
   onQuit: (() => void) | null = null;
+  /** Called when the player dies, arrives on level 100 or kills the final boss: the leaderboard moments (Spec 09). */
+  onMilestone: ((kind: 'death' | 'win' | 'final_boss') => void) | null = null;
+  /** What the game menu offers besides help and quitting (Spec 09). */
+  menuHost: GameMenuHost = {};
+  private announced = { death: false, win: false, final_boss: false };
   /** The run in progress; null until one starts (the title screen, task 1.10). */
   run: Run | null = null;
   /** The village menu, while the run is in a village (Spec 01: no village map). */
   village: VillageScreen | null = null;
   /** Set while the player is choosing a target (a free action: no round passes). */
   targeting: Targeting | null = null;
+  /** The spell being aimed, while targeting or choosing a cell for it; null when the target is for the ranged weapon. */
+  casting: Spell | null = null;
+  /** The wand, rod or staff being aimed, when the spell is cast from its charges. */
+  usingItem: Item | null = null;
+  /** Set while the player is choosing the cell Blink goes to. */
+  cursor: CellCursor | null = null;
 
   constructor(
     public title: string,
@@ -45,7 +73,12 @@ export class Shell {
   /** Start showing a run: its level or its village, with the header and character pane in step. */
   setRun(run: Run): void {
     this.run = run;
+    // A run loaded after it was won has already been recorded.
+    this.announced = { death: false, win: run.player.stats.won, final_boss: run.player.stats.finalBoss };
     this.targeting = null;
+    this.cursor = null;
+    this.casting = null;
+    this.usingItem = null;
     this.arrived();
   }
 
@@ -53,17 +86,83 @@ export class Shell {
   private arrived(): void {
     const run = this.run!;
     this.title = run.title;
-    this.village = run.inVillage ? new VillageScreen(run.depth, (d) => this.travel(d)) : null;
+    this.village = run.inVillage ? new VillageScreen(run, this.townHost()) : null;
     this.turn = run.game ? run.game.state.round : run.round;
     this.syncCharacter();
     this.character.target = undefined;
   }
 
+  /** What the village screens call: leave, log, refresh and run level ups, and arrive by lift. */
+  private townHost(): TownHost {
+    return {
+      go: (direction) => this.travel(direction),
+      log: (messages) => this.say(messages),
+      changed: () => this.refreshed(),
+      moved: (messages) => this.moved(messages),
+    };
+  }
+
+  private peopleHost(): PeopleHost {
+    return {
+      log: (messages) => this.say(messages),
+      changed: () => this.refreshed(),
+      free: (index) => this.applyResult(this.game!.free(index)),
+    };
+  }
+
+  private say(messages: readonly LogMessage[]): void {
+    for (const m of messages) this.log.add(m, this.game ? this.game.state.round : this.run?.round ?? this.turn);
+  }
+
+  /** The pane follows what the services did, and any level up owed is run, one screen per level (Spec 03). */
+  private refreshed(): void {
+    this.syncCharacter();
+    const run = this.run;
+    if (!run || run.levelsOwed <= 0 || poolsWithRoom(run.character).length === 0 || this.overlays.some((o) => o instanceof LevelUpMenu)) return;
+    const menu = levelUpMenu(run, { log: (m) => this.say(m), changed: () => this.syncCharacter() });
+    this.overlays.push(menu);
+  }
+
   private travel(direction: 'up' | 'down'): void {
-    const run = this.run!;
-    const messages = run.travel(direction);
-    for (const m of messages) this.log.add(m, run.round);
+    this.moved(this.run!.travel(direction));
+  }
+
+  /** The run changed level or village (stairs, a teleporter, a fall): say so, and bring everything in line. */
+  private moved(messages: readonly LogMessage[]): void {
+    for (const m of messages) this.log.add(m, this.run!.round);
+    this.stopAiming();
     this.arrived();
+    this.refreshed();
+  }
+
+  /**
+   * Show what an action did: its messages, a change of level if it asked for one, the pane, and whatever it opened
+   * for the player to look at or choose from (a pick-up list, an altar's offering, text to read).
+   */
+  private applyResult(result: ActResult): void {
+    for (const m of result.messages) this.log.add(m, this.game ? this.game.state.round : this.turn);
+    if (result.stairs) return this.travel(result.stairs);
+    if (result.teleport !== undefined) return this.moved(this.run!.teleport(result.teleport));
+    if (result.fall) return this.moved(this.run!.fall());
+    if (this.game) this.afterAction();
+    else this.syncCharacter();
+    const game = this.game;
+    if (!game) return;
+    if (result.opened !== undefined) this.overlays.push(new LootOverlay(game, result.opened, this.lootHost()));
+    if (result.offer !== undefined) this.overlays.push(offerMenu(ctxOf(game), result.offer, offeringCost(game), this.offerHost()));
+    if (result.read) this.overlays.push(new TextWindow(result.read.title, result.read.lines));
+    if (result.npc !== undefined) {
+      const talk = talkMenu(game, result.npc, this.peopleHost());
+      if (talk) this.overlays.push(talk);
+    }
+  }
+
+  private lootHost(): LootHost {
+    return { take: (index, which) => this.applyResult(this.game!.take(index, which)) };
+  }
+
+  private offerHost(): OfferHost {
+    return { offer: (index, what) => this.applyResult(this.game!.offerAt(index, what)) };
   }
 
   /** Handle a key press. Returns true if the key is in the key map, so the caller can stop the browser acting on it. */
@@ -78,6 +177,7 @@ export class Shell {
 
   private apply(result: OverlayResult, from: Overlay): void {
     if (result.message) this.log.add(result.message, this.turn);
+    if (result.messages) this.say(result.messages);
     if (result.close) this.overlays.splice(this.overlays.indexOf(from), 1);
     if (result.open) this.overlays.push(result.open);
   }
@@ -88,13 +188,17 @@ export class Shell {
       this.target(command);
       return;
     }
+    if (this.cursor) {
+      this.chooseCell(command);
+      return;
+    }
     if (this.village && ['move', 'confirm', 'interact'].includes(command.type)) {
       this.applyVillage(this.village.handle(command));
       return;
     }
     switch (command.type) {
       case 'cancel':
-        this.overlays.push(gameMenu(this.onQuit ?? undefined));
+        this.overlays.push(gameMenu(this.onQuit ?? undefined, this.menuHost));
         return;
       case 'history':
         this.overlays.push(new HistoryOverlay(this.log, this.turn));
@@ -108,12 +212,24 @@ export class Shell {
           return;
         }
         break;
+      case 'cast':
+        this.openSpells();
+        return;
+      case 'inventory':
+        this.openInventory();
+        return;
+      case 'journal':
+        this.overlays.push(
+          new JournalOverlay(
+            () => this.run?.player.journal ?? [],
+            this.run ? { quests: () => this.run!.town.active().map((o) => ({ id: o.quest.id, text: o.text })), abandon: (id) => this.say(this.run!.town.abandon(id).messages) } : undefined,
+          ),
+        );
+        return;
       default: {
         const result = this.game?.act(command);
         if (result) {
-          for (const m of result.messages) this.log.add(m, this.game!.state.round);
-          if (result.stairs) this.travel(result.stairs);
-          else this.afterAction();
+          this.applyResult(result);
           return;
         }
       }
@@ -123,6 +239,8 @@ export class Shell {
 
   private applyVillage(result: OverlayResult): void {
     if (result.message) this.log.add(result.message, this.turn);
+    if (result.messages) this.say(result.messages);
+    if (result.open) this.overlays.push(result.open);
   }
 
   /** Bring the round counter and the character pane's Combat pool in line with the game. */
@@ -133,21 +251,210 @@ export class Shell {
 
   private syncCharacter(): void {
     const player = this.run?.player;
-    const combat = this.character.stats.find((s) => s.name === 'Combat');
-    if (combat && player) {
-      combat.current = player.combatDice;
-      combat.max = player.combatMax;
+    if (!player) return;
+    const pools = { Combat: [player.combatDice, player.combatMax], Skill: [player.skill.dice, player.skill.max], Magic: [player.magic.dice, player.magic.max] } as const;
+    for (const stat of this.character.stats) {
+      stat.current = pools[stat.name][0];
+      stat.max = pools[stat.name][1];
+    }
+    // Active effects with their rounds left, then a Shield (Spec 01, Status; Spec 04).
+    this.character.status = [...player.statuses.map(describeStatus), ...(player.shield > 0 ? [`Shield ${player.shield}`] : [])];
+    // What is worn and wielded with its quality, the slots in use and the carried estimate (Spec 01, Spec 05).
+    const ctx = this.itemCtx();
+    if (ctx) {
+      this.character.equipment = equipped(player.equipment).map(({ item }) => ({
+        name: displayName(item, ctx.knowledge),
+        quality: item.kind === 'weapon' || item.kind === 'ranged' || item.kind === 'armour' || item.kind === 'shield'
+          ? item.broken ? 'Broken' : item.quality[0]!.toUpperCase() + item.quality.slice(1)
+          : isIdentified(item, player.known) ? '' : 'Unknown',
+      }));
+    }
+    this.character.inventory = { used: slotsUsed(player), total: player.packSlots };
+    // The bank, XP and level come from the run (Spec 01, Spec 03, Spec 07).
+    const run = this.run!;
+    this.character.bank = player.town.bank;
+    this.character.xp = run.character.xp;
+    this.character.level = run.character.level;
+    this.character.xpNext = LEVEL_XP[run.character.level] ?? null;
+    this.checkMilestones();
+    this.character.carried = carriedEstimate(player.coins, player.pack);
+  }
+
+  /** The leaderboard moments, each announced once: the final boss, level 100, death (Spec 09). */
+  private checkMilestones(): void {
+    const { stats, dead } = this.run!.player;
+    for (const [kind, now] of [['final_boss', stats.finalBoss], ['win', stats.won], ['death', dead]] as const) {
+      const key = kind === 'death' ? 'death' : kind === 'win' ? 'win' : 'final_boss';
+      if (!now || this.announced[key]) continue;
+      this.announced[key] = true;
+      this.onMilestone?.(kind);
+    }
+  }
+
+  /** What the item actions work from: the level's game, or in a village the run alone. */
+  private itemCtx(): ItemCtx | null {
+    return this.game ? ctxOf(this.game) : this.run ? this.run.ctx() : null;
+  }
+
+  /** I: the inventory, anywhere. Equipping and inspecting work in a village too; the rest need a level. */
+  private openInventory(): void {
+    const ctx = this.itemCtx();
+    if (!ctx) {
+      this.log.add({ kind: 'system', text: 'There is nothing to carry yet.' }, this.turn);
+      return;
+    }
+    this.overlays.push(new InventoryOverlay(ctx, this.inventoryHost()));
+  }
+
+  /** Log what an action said and bring the pane and round counter in line. */
+  private done(result: ActResult): void {
+    this.applyResult(result);
+  }
+
+  /** In a village an item action takes no round: it just says what happened. */
+  private free(run: (messages: LogMessage[]) => unknown): void {
+    const messages: LogMessage[] = [];
+    run(messages);
+    this.done({ messages, spent: false });
+  }
+
+  private inventoryHost(): InventoryHost {
+    return {
+      equip: (item) => {
+        const g = this.game;
+        if (g) this.done(g.equip(item));
+        else this.free((m) => equipItem(this.run!.ctx(), item, m));
+      },
+      unequip: (slot) => {
+        const g = this.game;
+        if (g) this.done(g.unequip(slot));
+        else this.free((m) => unequipSlot(this.run!.ctx(), slot, m));
+      },
+      drop: (item) => {
+        const g = this.game;
+        if (g) this.done(g.drop(item));
+        else this.free((m) => m.push({ kind: 'system', text: 'There is nowhere to drop that in a village.' }));
+      },
+      use: (item) => {
+        const g = this.game;
+        if (!g) {
+          if (item.kind === 'potion') this.free((m) => drinkPotion(this.run!.ctx(), item, m));
+          else this.free((m) => m.push({ kind: 'system', text: 'You cannot use that in a village.' }));
+          return;
+        }
+        // A wand, rod or staff whose spell needs a creature or a cell is aimed first.
+        const spell = item.kind === 'wand' || item.kind === 'rod' || item.kind === 'staff' ? g.spells.get(item.spell) : undefined;
+        if (spell && !resolvesAtOnce(spell)) {
+          this.overlays.length = 0;
+          this.beginAim(spell, item);
+          return;
+        }
+        this.done(g.use(item));
+      },
+    };
+  }
+
+  /** C: the spell list. Choosing a spell starts the cast. */
+  private openSpells(): void {
+    const game = this.game;
+    if (!game) {
+      this.log.add({ kind: 'system', text: 'There is nothing to cast at in a village.' }, this.turn);
+      return;
+    }
+    const { player } = game.state;
+    const known = player.spells.map((id) => game.spells.get(id)).filter((s): s is Spell => s !== undefined);
+    if (known.length === 0) {
+      this.log.add({ kind: 'system', text: 'You know no spells.' }, this.turn);
+      return;
+    }
+    this.overlays.push(spellMenu(known, player.magic, (spell) => this.beginCast(spell)));
+  }
+
+  /** A spell chosen from the list. */
+  private beginCast(spell: Spell): void {
+    this.beginAim(spell, null);
+  }
+
+  /**
+   * A self spell, or one around the caster, resolves on choosing; the rest ask for a creature or a cell (Spec 01,
+   * Targeting). `item` is the wand, rod or staff when the spell is cast from its charges.
+   */
+  private beginAim(spell: Spell, item: Item | null): void {
+    const game = this.game!;
+    const go = (aim?: Parameters<typeof game.cast>[1]) => (item ? game.use(item, aim) : game.cast(spell, aim));
+    if (needsCell(spell)) {
+      const cells = blinkCells(game, spell);
+      if (cells.length === 0) {
+        this.log.add({ kind: 'system', text: 'There is nowhere to blink to.' }, this.turn);
+        return;
+      }
+      this.casting = spell;
+      this.usingItem = item;
+      this.cursor = new CellCursor(game, (at) => canBlinkTo(game, spell, at), cells);
+      return;
+    }
+    if (resolvesAtOnce(spell)) return this.finishCast(go());
+    const targets = spellTargets(game, spell);
+    if (targets.length === 0) {
+      this.log.add({ kind: 'system', text: 'There is no valid target.' }, this.turn);
+      return;
+    }
+    this.casting = spell;
+    this.usingItem = item;
+    this.targeting = new Targeting(game, targetSpecOf(spell), targets);
+    this.showTarget();
+  }
+
+  private finishCast(result: ActResult): void {
+    this.applyResult(result);
+  }
+
+  /** Forget what was being aimed. */
+  private stopAiming(): void {
+    this.targeting = null;
+    this.cursor = null;
+    this.casting = null;
+    this.usingItem = null;
+  }
+
+  // Keys while choosing Blink's cell: W A S D move the cursor, Enter confirms, Esc cancels with no turn spent.
+  private chooseCell(command: Command): void {
+    const cursor = this.cursor!;
+    switch (command.type) {
+      case 'move':
+        cursor.move(command.dx, command.dy);
+        return;
+      case 'confirm': {
+        if (!cursor.ok) {
+          this.log.add({ kind: 'system', text: 'You cannot blink there.' }, this.turn);
+          return;
+        }
+        const spell = this.casting!;
+        const item = this.usingItem;
+        this.stopAiming();
+        this.finishCast(item ? this.game!.use(item, { ...cursor.at }) : this.game!.cast(spell, { ...cursor.at }));
+        return;
+      }
+      case 'cancel':
+        this.stopAiming();
+        return;
+      default:
+        return;
     }
   }
 
   private startTargeting(): void {
     const game = this.game!;
-    const weapon = game.state.player.ranged;
-    if (!weapon) {
+    const option = game.ranged();
+    if (!option) {
       this.log.add({ kind: 'system', text: 'You have no ranged weapon readied.' }, this.turn);
       return;
     }
-    const targeting = startTargeting(game, { range: weapon.range, shape: { kind: 'single' } });
+    if (option.problem) {
+      this.log.add({ kind: 'system', text: option.problem }, this.turn);
+      return;
+    }
+    const targeting = startTargeting(game, { range: option.range, shape: { kind: 'single' } });
     if (!targeting) {
       this.log.add({ kind: 'system', text: 'There is no valid target.' }, this.turn);
       return;
@@ -173,14 +480,15 @@ export class Shell {
         break;
       case 'confirm':
       {
-        const result = this.game!.fire(t.selected);
-        this.targeting = null;
-        for (const m of result.messages) this.log.add(m, this.game!.state.round);
-        this.afterAction();
+        const spell = this.casting;
+        const item = this.usingItem;
+        const result = item ? this.game!.use(item, t.selected) : spell ? this.game!.cast(spell, t.selected) : this.game!.fire(t.selected);
+        this.stopAiming();
+        this.applyResult(result);
         break;
       }
       case 'cancel':
-        this.targeting = null;
+        this.stopAiming();
         break;
       default:
         return;
@@ -191,7 +499,7 @@ export class Shell {
   /** Draw the whole screen: panes, character, log, then any overlay on top. */
   draw(grid: Grid): void {
     drawPanes(grid, this.title);
-    if (this.game) drawMap(grid, this.game.state, this.targeting);
+    if (this.game) drawMap(grid, this.game.state, this.targeting, this.cursor);
     else if (this.village) this.village.draw(grid);
     else grid.text(inner(MAIN_PANE).x + 2, inner(MAIN_PANE).y + 1, 'No level loaded.', UI.label, UI.background);
     drawCharacterPane(grid, this.character);

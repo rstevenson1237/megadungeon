@@ -76,14 +76,15 @@ describe('every key acts or logs "not yet available"', () => {
     const handled = press(shell, key, shift);
     expect(handled).toBe(true);
     const acted = shell.overlays.length > 0;
-    const logged = shell.log.lines(shell.turn).some((l) => l.text.endsWith('is not yet available.'));
+    // Casting (task 2.8) and the inventory (task 2.9) act: with no run to act in they say so instead.
+    const logged = shell.log.lines(shell.turn).some((l) => l.text.endsWith('is not yet available.') || l.text.startsWith('There is nothing to cast') || l.text.startsWith('There is nothing to carry'));
     expect(acted || logged).toBe(true);
   });
 
   it('names the missing feature in the message and spends no turn', () => {
     const shell = newShell();
-    press(shell, 'i');
-    expect(shell.log.lines(1).map((l) => l.text)).toEqual(['Inventory is not yet available.']);
+    press(shell, 'l');
+    expect(shell.log.lines(1).map((l) => l.text)).toEqual(['Looking is not yet available.']);
     expect(shell.turn).toBe(1);
   });
 
@@ -162,14 +163,17 @@ describe('overlays', () => {
     press(shell, 'ArrowDown');
     expect(menu.selected).toBe(2);
     press(shell, 's');
+    press(shell, 's');
+    expect(menu.selected).toBe(4);
+    press(shell, 's');
     expect(menu.selected).toBe(0); // wraps
     press(shell, 'w');
-    expect(menu.selected).toBe(2);
+    expect(menu.selected).toBe(4);
     press(shell, 'a'); // sideways does nothing
-    expect(menu.selected).toBe(2);
-    press(shell, 'Enter'); // Quit: not yet available, menu closes
+    expect(menu.selected).toBe(4);
+    press(shell, 'Enter'); // Quit, with no title screen to go to here: the menu closes and says so
     expect(shell.overlays).toHaveLength(0);
-    expect(shell.log.lines(1).at(-1)!.text).toBe('Quitting is not yet available.');
+    expect(shell.log.lines(1).at(-1)!.text).toBe('Quitting is not available.');
   });
 
   it('opens Help from the menu, replacing it, and Esc then returns to the map', () => {

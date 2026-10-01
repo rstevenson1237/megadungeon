@@ -161,10 +161,13 @@ describe('the village and the stairs in the shell (Spec 01, Overlays and screens
     expect(shell.game).toBeNull();
   });
 
-  it('a service says it is not yet available and stays in the village', () => {
+  it('a service opens its screen in the main view and Esc returns to the village menu', () => {
     const shell = newShell();
     press(shell, 'Enter'); // the first item, Bank
-    expect(shell.log.lines(shell.turn).some((l) => l.text === 'Bank is not yet available.')).toBe(true);
+    expect(shell.overlays).toHaveLength(1);
+    expect(screenText(shell).join('\n')).toContain('Deposit all carried treasure');
+    press(shell, 'Escape');
+    expect(shell.overlays).toHaveLength(0);
     expect(shell.run!.inVillage).toBe(true);
   });
 
@@ -198,7 +201,7 @@ describe('the village and the stairs in the shell (Spec 01, Overlays and screens
 
   it('keys with no village action log not yet available; Esc opens the game menu', () => {
     const shell = newShell();
-    press(shell, 'i');
+    press(shell, 'l');
     expect(shell.log.lines(shell.turn).some((l) => l.text.includes('not yet available'))).toBe(true);
     press(shell, 'Escape');
     expect(shell.overlays).toHaveLength(1);
@@ -211,7 +214,6 @@ describe('the village and the stairs in the shell (Spec 01, Overlays and screens
     expect(shell.game!.state.map.player).toEqual({ x: 1, y: 1 });
     press(shell, 'e'); // up stair of level 1: the village
     expect(shell.village).not.toBeNull();
-    press(shell, 'Enter'); // Bank (not yet)
     press(shell, 'w');
     press(shell, 'Enter'); // Go down
     expect(shell.game).not.toBeNull();

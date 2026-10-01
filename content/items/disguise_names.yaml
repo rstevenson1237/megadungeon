@@ -1,0 +1,29 @@
+# Stub entries (Spec 08): the unidentified look of a potion, ring, wand, rod or staff (Spec 05). "cloudy blue" is
+# shown as "a cloudy blue potion". Every kind needs at least as many names as it has magic items. The launch table
+# of 100 is written in Phase 3 (task 3.5).
+- { id: potion_look_cloudy_blue, name: cloudy blue, kind: potion, tags: [stub] }
+- { id: potion_look_fizzing_red, name: fizzing red, kind: potion, tags: [stub] }
+- { id: potion_look_murky_green, name: murky green, kind: potion, tags: [stub] }
+- { id: potion_look_thick_black, name: thick black, kind: potion, tags: [stub] }
+- { id: potion_look_pale_yellow, name: pale yellow, kind: potion, tags: [stub] }
+- { id: potion_look_bubbling_amber, name: bubbling amber, kind: potion, tags: [stub] }
+- { id: potion_look_milky_white, name: milky white, kind: potion, tags: [stub] }
+- { id: potion_look_silver_swirled, name: silver swirled, kind: potion, tags: [stub] }
+- { id: potion_look_dark_violet, name: dark violet, kind: potion, tags: [stub] }
+- { id: potion_look_oily_brown, name: oily brown, kind: potion, tags: [stub] }
+- { id: ring_look_copper, name: copper, kind: ring, tags: [stub] }
+- { id: ring_look_jade, name: jade, kind: ring, tags: [stub] }
+- { id: ring_look_bone, name: bone, kind: ring, tags: [stub] }
+- { id: ring_look_tin, name: tin, kind: ring, tags: [stub] }
+- { id: ring_look_onyx, name: onyx, kind: ring, tags: [stub] }
+- { id: ring_look_braided_wire, name: braided wire, kind: ring, tags: [stub] }
+- { id: wand_look_ash, name: ash, kind: wand, tags: [stub] }
+- { id: wand_look_yew, name: yew, kind: wand, tags: [stub] }
+- { id: wand_look_pale_birch, name: pale birch, kind: wand, tags: [stub] }
+- { id: wand_look_blackthorn, name: blackthorn, kind: wand, tags: [stub] }
+- { id: rod_look_iron, name: iron, kind: rod, tags: [stub] }
+- { id: rod_look_brass, name: brass, kind: rod, tags: [stub] }
+- { id: rod_look_dull_steel, name: dull steel, kind: rod, tags: [stub] }
+- { id: staff_look_oak, name: oak, kind: staff, tags: [stub] }
+- { id: staff_look_gnarled_elm, name: gnarled elm, kind: staff, tags: [stub] }
+- { id: staff_look_ebony, name: ebony, kind: staff, tags: [stub] }

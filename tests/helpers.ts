@@ -1,11 +1,26 @@
-import { Game, type PlayerState, createPlayer } from '../src/game/game.ts';
-import { Run } from '../src/game/run.ts';
+import { resolve } from 'node:path';
+import type { Rng } from '../src/core/rng.ts';
+import type { Spell } from '../src/core/schemas.ts';
+import { Game, type ArrivalOptions, type PlayerState, createPlayer } from '../src/game/game.ts';
+import { Run, type RunOptions } from '../src/game/run.ts';
 import { GENERATOR_VERSION, emptyPlacements, type Level, type Point } from '../src/rules/world/level.ts';
 import { creature, type Monster } from '../src/game/monsters.ts';
 import type { CharacterPaneData } from '../src/ui/character-pane.ts';
 import { CP437_TO_UNICODE } from '../src/ui/cp437.ts';
 import { COLS, Grid } from '../src/ui/grid.ts';
 import { Shell } from '../src/ui/shell.ts';
+import { buildContent } from '../tools/content-build.ts';
+import { gameContentOf } from '../src/game/content.ts';
+import { spellsFrom } from '../src/rules/magic/spells.ts';
+import { ammoCount } from '../src/rules/items/inventory.ts';
+import { startingKit } from '../src/rules/items/kit.ts';
+import { itemDataFrom, makeAmmo, makeLockpicks, makeMagicItem } from '../src/rules/items/magic.ts';
+import { makeGear } from '../src/rules/items/gear.ts';
+import type { GearItem, Item, Quality } from '../src/rules/items/types.ts';
+import { createRng } from '../src/core/rng.ts';
+import { createCharacter } from '../src/rules/character/character.ts';
+import { classById } from '../src/rules/character/classes.ts';
+import { runOptionsFor } from '../src/game/world.ts';
 
 /** Build a level from rows: '#' wall, '.' floor, '<' up stair (required), '>' down stair. */
 export function levelFrom(rows: string[]): Level {
@@ -31,12 +46,64 @@ export function room(w: number, h: number, px: number, py: number): Level {
   return levelFrom(rows);
 }
 
-/** A game on a hand-built level with no monsters, a Combat d6 pool of 2 and a sling. */
-export const testPlayer = (extra: Partial<PlayerState> = {}): PlayerState =>
-  ({ ...createPlayer({ combatStep: 6, combatDice: 2, combatMax: 2, ranged: { name: 'Sling', range: 6, ammo: 20 } }), ...extra });
+/** The real content, built once: the spells, the items and the classes are read from the tables, not rewritten in tests. */
+let built: ReturnType<typeof buildContent> | undefined;
+export const content = () => (built ??= buildContent(resolve(import.meta.dirname, '../content')));
+export const SPELLS: Spell[] = spellsFrom(content().bundle);
+export const spell = (id: string): Spell => SPELLS.find((s) => s.id === id)!;
+export const ITEMS = itemDataFrom(content().bundle);
+export const CONTENT = gameContentOf(content().bundle);
 
-export function gameOn(level: Level, player: Partial<PlayerState> = {}): Game {
-  return new Game(1, level, testPlayer(player));
+let nextUid = 1;
+/** A piece of gear from its base. Artifact quality by default, so a rigged roll is never eaten by a break roll. */
+export const gear = (id: string, quality: Quality = 'artifact', extra: Partial<GearItem> = {}): GearItem => ({ ...makeGear(ITEMS.bases.get(id)!, nextUid++, quality), ...extra });
+/** A stack of ammunition from its base. */
+export const ammo = (id: string, count: number): Item => makeAmmo(ITEMS.bases.get(id)!, nextUid++, count);
+/** A magic item from its row; `cursed` forces the curse either way, so a test never depends on a roll of 1 in 10. */
+export function magic(id: string, cursed?: boolean, seed = 1): Item {
+  const item = makeMagicItem(ITEMS.magic.get(id)!, nextUid++, createRng(seed), ITEMS);
+  if (cursed !== undefined && 'cursed' in item) item.cursed = cursed;
+  return item;
+}
+
+/** A sling in the ranged slot with `ammo` sling stones in the pack (Spec 05). */
+export const slingKit = (ammo = 20) => startingKit([{ id: 'sling' }, { id: 'sling_stones', count: ammo }], ITEMS);
+export const stonesLeft = (game: Game): number => ammoCount(game.state.player.pack, 'stone');
+
+/** A game on a hand-built level with no monsters, a Combat d6 pool of 2 and a sling with 20 stones. */
+export const testPlayer = (extra: Partial<PlayerState> = {}): PlayerState =>
+  ({ ...createPlayer({ combatStep: 6, combatDice: 2, combatMax: 2, ...slingKit() }), ...extra });
+
+export function gameOn(level: Level, player: Partial<PlayerState> = {}, arrival: ArrivalOptions = {}): Game {
+  return new Game(1, level, testPlayer(player), { spells: SPELLS, items: ITEMS, content: CONTENT, ...arrival });
+}
+
+/** A caster: three Magic d6 dice, and every spell known. */
+export const caster = (extra: Partial<PlayerState> = {}): Partial<PlayerState> => ({
+  magic: { step: 6, dice: 3, max: 3 },
+  spells: SPELLS.map((s) => s.id),
+  combatDice: 3,
+  combatMax: 3,
+  ...extra,
+});
+
+/** A game for casting: the spell table loaded, the player a caster. */
+export const castingGame = (level: Level, extra: Partial<PlayerState> = {}): Game => gameOn(level, caster(extra));
+
+/**
+ * Deal the given faces to the next `int` calls of the game's generator, then carry on with the real stream.
+ * Each call replaces what was still queued. A spell's own roll comes first, then any duration it rolls, then
+ * whatever the creatures roll after it, so rig a trailing face for any creature that will roll that round.
+ */
+export function rig(game: Game, ...faces: number[]): void {
+  const rng = game.rng as Rng & { queue?: number[] };
+  if (!rng.queue) {
+    rng.queue = [];
+    const real = rng.int.bind(rng);
+    rng.int = (min: number, max: number): number => (rng.queue!.length > 0 ? rng.queue!.shift()! : real(min, max));
+  }
+  rng.queue.length = 0;
+  rng.queue.push(...faces);
 }
 
 /** A monster with sensible defaults: one die, normal speed, a brute, unaware unless `alert` is set. */
@@ -59,9 +126,9 @@ export const testCharacter = (): CharacterPaneData => ({
 });
 
 /** A shell with a game loaded on the given level. */
-export function shellOn(level: Level, monsters: Monster[] = []): Shell {
+export function shellOn(level: Level, monsters: Monster[] = [], player: Partial<PlayerState> = {}): Shell {
   const shell = new Shell('Test', testCharacter());
-  shell.setRun(new Run(1, testPlayer(), { startDepth: 1, levelFor: () => level }));
+  shell.setRun(new Run(1, testPlayer(player), { startDepth: 1, levelFor: () => level, spells: SPELLS, items: ITEMS, content: CONTENT }));
   shell.game!.state.monsters.push(...monsters);
   return shell;
 }
@@ -130,4 +197,40 @@ export function checkLevel(level: Level): string | null {
     if (at(level.downStair.x, level.downStair.y) !== '>') return 'down stair position';
   }
   return null;
+}
+
+/** A room with features, traps, doors and the like added: the level the feature tests play on. */
+export function withThings(base: Level, things: Partial<Pick<Level, 'features' | 'traps' | 'doors' | 'lore' | 'specials' | 'piles' | 'npcs'>>): Level {
+  return { ...base, ...things };
+}
+
+/** The ids a test needs to find a hidden thing's cell. */
+export const cell = (level: Level, x: number, y: number): number => y * level.width + x;
+
+/** A plain key, or a stack of them. */
+export const keyItem = (count = 1): Item => ({ kind: 'key', uid: nextUid++, id: 'key', name: 'key', value: 0, count });
+/** A bundle of lockpicks. */
+export const picksItem = (count = 3): Item => makeLockpicks(ITEMS.bases.get('lockpicks')!, nextUid++, count);
+/** A vault key naming the vault it opens. */
+export const vaultKeyItem = (link: string): Item => ({ kind: 'vault_key', uid: nextUid++, id: 'vault_key', name: 'vault key', value: 0, link });
+
+/** A game with the player standing at (x, y) rather than on the stair, sight refreshed. */
+export function gameAt(level: Level, x: number, y: number, player: Partial<PlayerState> = {}, arrival: ArrivalOptions = {}): Game {
+  const game = gameOn(level, player, arrival);
+  game.state.map.player = { x, y };
+  game.refreshSight();
+  return game;
+}
+
+/**
+ * A run on the real content and the real run layout of a seed, standing in the village `at` (0 for the surface, else the
+ * nth subterranean village), played by a thief with the given player state. XP and levels are tracked.
+ */
+export function townRun(seed = 12345, extra: Partial<PlayerState> = {}, at = 0, more: Partial<RunOptions> = {}): Run {
+  const bundle = content().bundle;
+  const options = runOptionsFor(bundle, seed);
+  const thief = classById(bundle, 'thief');
+  const startDepth = at === 0 ? 0 : options.layout!.villages[at - 1]!.level;
+  const player = { ...createPlayer({ combatStep: 6, combatDice: 2, combatMax: 3, pack: [], equipment: {} }), ...extra };
+  return new Run(seed, player, { ...options, startDepth, character: createCharacter('Mara', thief), classDef: thief, ...more });
 }

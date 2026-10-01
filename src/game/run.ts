@@ -6,11 +6,20 @@
 // algorithm on to the generator. Saving comes with task 2.13.
 
 import type { LogMessage } from '../core/log.ts';
+import type { Spell } from '../core/schemas.ts';
+import { type ItemData, disguisesFor } from '../rules/items/magic.ts';
 import { generateLevel, PLAIN_STYLE, type LevelStyle } from '../rules/world/generate.ts';
-import { MAX_DEPTH, type Level, type SizeClass } from '../rules/world/level.ts';
+import { MAX_DEPTH, type Level, type Point, type SizeClass } from '../rules/world/level.ts';
 import type { LevelContents } from '../rules/world/placement/index.ts';
 import type { RunLayout } from '../rules/world/run-layout.ts';
 import { Game, type LevelDelta, type PlayerState } from './game.ts';
+import { endBound } from '../rules/magic/status.ts';
+import { type Character, type ClassDef } from '../rules/character/character.ts';
+import type { PoolName, Step } from '../rules/character/dice.ts';
+import { levelUp, levelsOwed, type LevelUp } from '../rules/character/progression.ts';
+import { type GameContent, noContent } from './content.ts';
+import type { ItemCtx } from './items.ts';
+import { Town } from './town.ts';
 
 /** The surface village sits above level 1. */
 export const SURFACE = 0;
@@ -31,8 +40,23 @@ export interface RunOptions {
   contentsFor?: (depth: number) => LevelContents | undefined;
   /** Depths that are villages instead of levels; the surface only, unless a layout is given. */
   villages?: number[];
+  /** The spell table, so the spells the player knows can be cast (Spec 04). */
+  spells?: readonly Spell[];
+  /** The item tables, so loot can be made into items (Spec 05). */
+  items?: ItemData;
+  /** The tables features roll from: traps, fountains, debris, gods, books, monsters (Spec 06). */
+  content?: GameContent;
+  /** The character's rules state and class, so deposits can level them up (Spec 03); without them XP is not tracked. */
+  character?: Character;
+  classDef?: ClassDef;
   /** Where the run starts: the surface village by default. */
   startDepth?: number;
+  /** A saved run's level deltas and round counter (Spec 09). */
+  deltas?: Record<number, LevelDelta>;
+  round?: number;
+  /** Who is playing and whether the seed is the seed of the day (a date), for the leaderboard (Spec 09). */
+  characterId?: string;
+  daily?: string;
   /** Supplies the level for a depth. Tests pass hand-built levels; the default generates from the seed. */
   levelFor?: (depth: number) => Level;
 }
@@ -40,26 +64,126 @@ export interface RunOptions {
 export class Run {
   readonly villages: readonly number[];
   readonly layout: RunLayout | undefined;
-  readonly deltas: Record<number, LevelDelta> = {};
+  readonly deltas: Record<number, LevelDelta>;
+  /** The id the leaderboard knows this character by, and the date if the seed is the seed of the day. */
+  readonly characterId: string;
+  readonly daily: string | undefined;
   depth: number;
   /** The level being played; null in a village, where there is no map (Spec 01). */
   game: Game | null = null;
   /** The run's round counter; a level's own counter takes over while it is being played. */
   round = 1;
   private readonly levelFor: (depth: number) => Level;
+  private readonly spells: readonly Spell[];
+  private readonly items: ItemData | undefined;
+  private readonly content: GameContent | undefined;
+  private readonly contentsFor: ((depth: number) => LevelContents | undefined) | undefined;
+  private readonly peeked = new Map<number, Level>();
+  /** What the villages did on arrival, until the shell has shown it. */
+  private arrivals: LogMessage[] = [];
+  /** The character's rules state: XP and level (Spec 03). */
+  readonly character: Character;
+  readonly classDef: ClassDef | undefined;
+  /** The village services, shops, quests and the lift (Spec 07). */
+  readonly town: Town;
+  /** Called after a village rest, the only time the game is saved (Spec 09). */
+  onRest: (() => void) | undefined;
+  /** This run's look for each unidentified magic item (Spec 05). Derived from the tables and the seed. */
+  readonly disguises: ReadonlyMap<string, string>;
 
   constructor(
     readonly runSeed: number,
     readonly player: PlayerState,
     options: RunOptions = {},
   ) {
+    this.deltas = options.deltas ?? {};
+    this.round = options.round ?? 1;
+    this.characterId = options.characterId ?? `${runSeed >>> 0}`;
+    this.daily = options.daily;
     this.layout = options.layout;
+    this.contentsFor = options.contentsFor;
+    this.spells = options.spells ?? [];
+    this.items = options.items;
+    this.content = options.content;
+    this.disguises = options.items ? disguisesFor(runSeed, options.items.magic.values(), options.items.disguiseNames) : new Map();
     this.villages = options.villages ?? [SURFACE, ...(options.layout?.villages.map((v) => v.level) ?? [])];
     const sizeFor = options.sizeFor ?? stubSize;
     const styleFor = options.styleFor ?? (() => PLAIN_STYLE);
     this.levelFor = options.levelFor ?? ((d) => generateLevel(runSeed, d, sizeFor(d), styleFor(d), options.contentsFor?.(d)));
     this.depth = options.startDepth ?? SURFACE;
+    this.character = options.character ?? {
+      name: '',
+      classId: options.classDef?.id ?? '',
+      level: 1,
+      xp: 0,
+      pools: { combat: { step: player.combatStep as Step, dice: player.combatDice, max: player.combatMax }, skill: { ...player.skill }, magic: { ...player.magic } },
+      minorAbilities: [],
+      waited: 0,
+    };
+    this.classDef = options.classDef;
+    this.town = new Town(this);
     this.arrive(this.depth, 'down');
+  }
+
+  get spellList(): readonly Spell[] {
+    return this.spells;
+  }
+
+  get itemData(): ItemData | undefined {
+    return this.items;
+  }
+
+  get gameContent(): GameContent {
+    return this.content ?? noContent();
+  }
+
+  /** What a level of the run holds, generated once for the questions the villages ask (quests, rumours); never the level being played. */
+  peek(depth: number): Level {
+    let level = this.peeked.get(depth);
+    if (!level) this.peeked.set(depth, (level = this.levelFor(depth)));
+    return level;
+  }
+
+  /** The plan the run layout made for a level: its quest goals and pieces (Spec 02). */
+  planOf(depth: number): LevelContents['plan'] | undefined {
+    return this.contentsFor?.(depth)?.plan;
+  }
+
+  /** What the villages said on arriving, taken once. */
+  takeArrivals(): LogMessage[] {
+    const out = this.arrivals;
+    this.arrivals = [];
+    return out;
+  }
+
+  /** Level ups owed after banking: one screen per level crossed (Spec 03). Zero when the run has no class. */
+  get levelsOwed(): number {
+    return this.classDef ? levelsOwed(this.character) : 0;
+  }
+
+  /** Apply the next level up with the new die going to `pool`, and bring the player's pools in line (Spec 03). */
+  levelUp(pool: PoolName): LevelUp | null {
+    if (!this.classDef) return null;
+    const before = { combat: this.character.pools.combat.max, skill: this.character.pools.skill.max, magic: this.character.pools.magic.max };
+    const result = levelUp(this.runSeed, this.character, this.classDef, pool);
+    if (!result) return null;
+    const { player } = this;
+    const mine = { combat: { step: player.combatStep, dice: player.combatDice, max: player.combatMax }, skill: player.skill, magic: player.magic };
+    for (const name of ['combat', 'skill', 'magic'] as const) {
+      const grown = this.character.pools[name].max - before[name];
+      mine[name].step = this.character.pools[name].step;
+      mine[name].max = this.character.pools[name].max;
+      mine[name].dice += grown;
+    }
+    player.combatStep = mine.combat.step;
+    player.combatMax = mine.combat.max;
+    player.combatDice = mine.combat.dice;
+    return result;
+  }
+
+  /** What the item actions need, from the run alone: usable in a village, where there is no level. */
+  ctx(): ItemCtx {
+    return { player: this.player, knowledge: { known: this.player.known, disguises: this.disguises }, spells: new Map(this.spells.map((sp) => [sp.id, sp])) };
   }
 
   get inVillage(): boolean {
@@ -79,33 +203,85 @@ export class Run {
     return direction === 'up' ? this.depth > SURFACE : this.depth < MAX_DEPTH;
   }
 
-  /**
-   * Take the stairs, or Go up and Go down in a village. Leaving a level keeps its delta; the
-   * neighbouring level or village is then built, arriving on the stair that joins them.
-   * Using stairs costs one round but the monsters do not act, and they stay where they were (Spec 04).
-   */
-  travel(direction: 'up' | 'down'): LogMessage[] {
-    if (!this.canTravel(direction)) return [{ kind: 'system', text: 'There is nowhere further that way.' }];
+  /** Leave the level being played: keep its delta, carry the round, and end what was bound to the level (Spec 06). */
+  private leave(): void {
     if (this.game) {
       this.deltas[this.depth] = this.game.captureDelta();
       this.round = this.game.state.round;
     }
+    endBound(this.player.statuses);
     this.round++;
+  }
+
+  /**
+   * Take the stairs, or Go up and Go down in a village. Leaving a level keeps its delta; the
+   * neighbouring level or village is then built, arriving on the stair that joins them.
+   * Using stairs costs one round but the monsters do not act, and they stay where they were (Spec 04).
+   * Once a level's lever is pulled its down stair leads to the landing of the collapsed passage (Spec 02).
+   */
+  travel(direction: 'up' | 'down'): LogMessage[] {
+    if (!this.canTravel(direction)) return [{ kind: 'system', text: 'There is nowhere further that way.' }];
+    const lever = direction === 'down' && this.game?.state.used.lever ? this.game.state.map.level.specials.find((s) => s.kind === 'lever') : undefined;
+    this.leave();
+    if (lever?.kind === 'lever') {
+      this.depth = lever.landingLevel;
+      this.arrive(this.depth, 'down', 'landing');
+      return [{ kind: 'discovery', text: `The stair drops you through the collapsed passage to level ${this.depth}.` }];
+    }
     this.depth += direction === 'down' ? 1 : -1;
     // Going down arrives on the new level's up stair; going up arrives on its down stair.
     this.arrive(this.depth, direction);
-    return [{ kind: 'discovery', text: this.inVillage ? `You arrive in ${this.title}.` : `You ${direction === 'down' ? 'descend to' : 'climb to'} level ${this.depth}.` }];
+    return [{ kind: 'discovery', text: this.inVillage ? `You arrive in ${this.title}.` : `You ${direction === 'down' ? 'descend to' : 'climb to'} level ${this.depth}.` }, ...this.takeArrivals()];
   }
 
-  private arrive(depth: number, direction: 'up' | 'down'): void {
+  /** The lift takes the player to another visited village (Spec 07); the town has taken the fare. */
+  lift(to: number): LogMessage[] {
+    this.leave();
+    this.depth = to;
+    this.arrive(this.depth, 'down');
+    return [{ kind: 'discovery', text: `The lift stops. You arrive in ${this.title}.` }];
+  }
+
+  /** A teleporter takes the player to the paired level's teleporter (Spec 02, task 2.10). */
+  teleport(to: number): LogMessage[] {
+    this.leave();
+    this.depth = to;
+    this.arrive(this.depth, 'down', 'teleporter');
+    return [{ kind: 'discovery', text: `You step out of a teleporter on level ${this.depth}.` }];
+  }
+
+  /** A deep pit drops the player to the level below, at a random walkable cell (Spec 06). */
+  fall(): LogMessage[] {
+    this.leave();
+    this.depth = Math.min(MAX_DEPTH, this.depth + 1);
+    this.arrive(this.depth, 'down');
+    this.game?.landAnywhere();
+    return [{ kind: 'warning', text: `You land hard on level ${this.depth}.` }];
+  }
+
+  private arrive(depth: number, direction: 'up' | 'down', at?: 'teleporter' | 'landing'): void {
     if (this.villages.includes(depth)) {
       this.game = null;
+      this.arrivals.push(...this.town.onArrive());
       return;
     }
-    this.game = new Game(this.runSeed, this.levelFor(depth), this.player, {
+    const level = this.levelFor(depth);
+    // The deepest level reached and arriving on level 100 are kept for the leaderboard (Spec 09).
+    const { stats } = this.player;
+    stats.deepest = Math.max(stats.deepest, depth);
+    if (depth === MAX_DEPTH) stats.won = true;
+    // A teleporter or a collapsed passage lands the player on its own cell of the level.
+    const special = at ? level.specials.find((sp) => sp.kind === at) : undefined;
+    const where: Point | undefined = special ? { x: special.x, y: special.y } : undefined;
+    this.game = new Game(this.runSeed, level, this.player, {
+      ...(where ? { at: where } : {}),
       stair: direction === 'down' ? 'up' : 'down',
       delta: this.deltas[depth],
       round: this.round,
+      spells: this.spells,
+      ...(this.items ? { items: this.items } : {}),
+      ...(this.content ? { content: this.content } : {}),
+      above: { villagesAbove: this.town.number(depth), facts: () => this.town.rumourFacts(Math.max(0, ...this.villages.filter((v) => v < depth))) },
     });
   }
 }

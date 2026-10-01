@@ -1,7 +1,7 @@
 // Content checks that run after every table has passed its schema (Spec 08, "Validation and
 // coverage"): references, roll cycles, theme ids, template text and single-line widths.
 
-import { BEHAVIOURS, EFFECTS } from '../src/core/catalog.ts';
+import { BEHAVIOURS, DISGUISED_KINDS, EFFECTS } from '../src/core/catalog.ts';
 import type { ContentBundle } from '../src/core/schemas.ts';
 import { templateErrors } from '../src/core/templates.ts';
 
@@ -17,8 +17,8 @@ export const REGISTRIES: Record<string, readonly string[]> = {
 export interface RefRule {
   /** Dotted path into the entry, e.g. `loot.roll`. */
   field: string;
-  /** `table`: the value names another table in the bundle. Otherwise a code registry name. */
-  target: 'table' | { registry: keyof typeof REGISTRIES };
+  /** `table`: the value names another table in the bundle. `ids`: the value is an id in the named table (or in any of the named tables). Otherwise a code registry name. */
+  target: 'table' | { ids: string | readonly string[] } | { registry: keyof typeof REGISTRIES };
 }
 
 /** Each table's reference fields. A task that adds a table with `effect:` or `roll:` adds its rule here. */
@@ -28,6 +28,15 @@ export const REFERENCE_RULES: Record<string, readonly RefRule[]> = {
     { field: 'loot.roll', target: 'table' },
   ],
   bosses: [{ field: 'behaviour', target: { registry: 'behaviours' } }],
+  spells: [{ field: 'effect', target: { registry: 'effects' } }],
+  traps: [{ field: 'effect', target: { registry: 'effects' } }],
+  fountain_effects: [{ field: 'effect', target: { registry: 'effects' } }],
+  debris_finds: [{ field: 'item', target: { ids: ['equipment_bases', 'magic_items'] } }],
+  magic_items: [
+    { field: 'effect', target: { registry: 'effects' } },
+    { field: 'spell', target: { ids: 'spells' } },
+    { field: 'base', target: { ids: 'equipment_bases' } },
+  ],
 };
 
 /** The table that defines theme ids; `themes:` keys are checked against it once it exists. */
@@ -67,6 +76,11 @@ export const SINGLE_LINE_FIELDS: Record<string, readonly string[]> = {
   quest_items: ['name'],
   classes: ['name'],
   minor_abilities: ['name'],
+  spells: ['name'],
+  equipment_bases: ['name'],
+  disguise_names: ['name'],
+  fountain_effects: ['name'],
+  debris_finds: ['name'],
 };
 
 function getPath(entry: Entry, path: string): unknown {
@@ -99,6 +113,10 @@ export function checkReferences(bundle: ContentBundle): string[] {
             if (!edges.has(table)) edges.set(table, new Set());
             edges.get(table)!.add(name);
           }
+        } else if ('ids' in rule.target) {
+          const tables = typeof rule.target.ids === 'string' ? [rule.target.ids] : rule.target.ids;
+          const known = new Set(tables.flatMap((t) => entriesOf(bundle, t).map((e) => String(e.id))));
+          if (!known.has(String(value))) errors.push(`${where} "${String(value)}" is not an id in ${tables.join(' or ')}`);
         } else {
           const registry = REGISTRIES[rule.target.registry]!;
           if (!registry.includes(String(value))) {
@@ -113,6 +131,8 @@ export function checkReferences(bundle: ContentBundle): string[] {
   errors.push(...checkThemeIds(bundle));
   errors.push(...checkThemeVariants(bundle));
   errors.push(...checkMinorAbilityClasses(bundle));
+  errors.push(...checkClassSpells(bundle));
+  errors.push(...checkItems(bundle));
   return errors;
 }
 
@@ -126,6 +146,52 @@ function checkMinorAbilityClasses(bundle: ContentBundle): string[] {
       if (!known.has(cls)) errors.push(`minor_abilities "${String(entry.id)}": classes "${cls}" is not a class`);
     }
     if (new Set(listed).size !== listed.length) errors.push(`minor_abilities "${String(entry.id)}": a class is listed twice`);
+  }
+  return errors;
+}
+
+/** A class's guaranteed spell must exist, and must fit inside the number of spells it starts with (Spec 04). */
+function checkClassSpells(bundle: ContentBundle): string[] {
+  const known = new Set(entriesOf(bundle, 'spells').map((e) => String(e.id)));
+  const errors: string[] = [];
+  for (const entry of entriesOf(bundle, 'classes')) {
+    const spells = entry.spells as { count: number; always?: string } | undefined;
+    if (spells?.always !== undefined && !known.has(spells.always)) {
+      errors.push(`classes "${String(entry.id)}": spells.always "${spells.always}" is not a spell`);
+    }
+    if (spells && spells.count > known.size) errors.push(`classes "${String(entry.id)}": starts with ${spells.count} spells but only ${known.size} exist`);
+  }
+  return errors;
+}
+
+/**
+ * Items hold together (Spec 05): a magic weapon sits on a melee base, magic armour on an armour base (or a
+ * shield for `off`), starting gear names real things, and every disguised kind has a name for each item.
+ */
+function checkItems(bundle: ContentBundle): string[] {
+  const errors: string[] = [];
+  const bases = new Map(entriesOf(bundle, 'equipment_bases').map((e) => [String(e.id), String(e.type)]));
+  const magic = entriesOf(bundle, 'magic_items');
+  for (const item of magic) {
+    const where = `magic_items "${String(item.id)}"`;
+    const base = item.base === undefined ? undefined : bases.get(String(item.base));
+    if (base === undefined) continue;
+    if (item.kind === 'weapon' && base !== 'melee') errors.push(`${where}: a magic weapon needs a melee base, not ${base}`);
+    if (item.kind === 'armour' && base !== (item.off ? 'shield' : 'armour')) errors.push(`${where}: magic armour needs ${item.off ? 'a shield' : 'an armour'} base, not ${base}`);
+    if (item.kind !== 'armour' && item.off) errors.push(`${where}: only magic armour can be \`off\``);
+  }
+  const known = new Set([...bases.keys(), ...magic.map((m) => String(m.id))]);
+  for (const cls of entriesOf(bundle, 'classes')) {
+    for (const g of (cls.gear ?? []) as { id: string }[]) {
+      if (!known.has(g.id)) errors.push(`classes "${String(cls.id)}": gear "${g.id}" is not an equipment base or magic item`);
+    }
+  }
+  if (bundle.tables.disguise_names) {
+    for (const kind of DISGUISED_KINDS) {
+      const items = magic.filter((m) => m.kind === kind).length;
+      const names = entriesOf(bundle, 'disguise_names').filter((d) => d.kind === kind).length;
+      if (names < items) errors.push(`disguise_names: ${names} ${kind} names for ${items} ${kind} magic items; each item needs its own`);
+    }
   }
   return errors;
 }

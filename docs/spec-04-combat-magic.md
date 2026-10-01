@@ -160,6 +160,38 @@ All figures are starting values for playtesting.
 - **Rivals** walk to the down stair along the shortest path. They take the contents of any container or floor pile within 8 steps of their way (never a cross-level cache or stash) and fight every monster next to them, as an ordinary melee exchange in which both sides roll d6 plus modifier. A rival that reaches the down stair waits beside it; no creature ever uses stairs. Once attacked, a rival is hostile and fights as a skirmisher. A dead rival drops everything it looted on its cell.
 - **Loot taken by rivals** is recorded in the level's delta so the player finds those containers empty (Spec 06 will read it).
 
+## Clarifications (task 2.8, proposed October 1, 2026, awaiting approval)
+
+All figures are starting values for playtesting. Where the spec above is silent these fill the gap so the build can proceed; any the owner changes goes back here first.
+
+**Spell table and casting**
+
+- **The 15 spells are rows of the `spells` table** (`content/magic/spells.yaml`). A row names an `effect` defined in code and carries its numbers (shape, reach, footprint, duration), so tuning and the target of 30 spells are content work (Spec 08).
+- **Casting costs one round.** Rolling the spell is one Magic die as a spell roll (Spec 03): 4 or more works; 2 to 3 works and the die is lost; 1 does nothing and the die is lost; an empty pool rolls with disadvantage and loses nothing more. An area spell rolls once. Blessed and Cursed do not touch spell rolls (they apply to checks).
+- **Choosing a spell is the confirmation for a self spell** and for a spell centred on the caster (Thunderclap, Turn Undead): it resolves at once, even with nothing near. Targeted and area-at-range spells enter targeting (Spec 01) with the spell's reach.
+- **Blink** picks a cell, not a creature: a cursor starts on the caster, W A S D move it, Enter confirms, Esc cancels with no turn spent. The cell must be visible, within 5 cells, open floor (shallow water counts, deep water and lava do not) and free of creatures.
+- **Targets** are creatures visible, in reach, with a clear line (Spec 01). Sleep skips creatures that are naturally asleep, as it needs an unaware or alert one.
+- **Offensive spells count as attacks.** Every spell that affects creatures other than Sleep alerts the creature it hits (a rival turns hostile) and makes noise like any combat (Awareness, above). Sleep is quiet. A spell whose roll fails does none of this.
+- **Adjacent** in Thunderclap means the 8 cells around the caster. Each creature is pushed 2 cells in a straight line directly away (diagonal for a diagonal neighbour) and stops early at a wall, closed door, liquid or other creature. Being pushed deals no damage.
+- **Fear** does not affect creatures that never flee (undead, constructs, bosses); **Turn Undead** does affect undead, and only them.
+- **Light** reveals (marks as explored) the room the caster stands in, with its walls and doors, or when not in a room every open cell connected to the caster within 8 cells, with the walls beside them. **Detect** reveals every floor trap, container trap and secret door within 8 cells in a straight line, through walls, and saves them as part of the level delta (Spec 06 reads them). A revealed secret door behaves as a normal door.
+- **Shield** is a ward held in the character's own state, not one of the eight status effects: it absorbs the next hit within 10 rounds and shows in the Status block. A new Shield resets it to 10.
+- **Arcane Bolt** for a Mage (major ability Arcane Bolt) loses no die on a 2 to 3.
+
+**Starting and learned spells**
+
+- **Starting spells** are drawn from the 15, seeded by the run seed, character name and class, with no repeats. A class's guaranteed spell (Mage Arcane Bolt, Priest Heal) is always in its draw and counts toward its number. The counts are in the class table (`spells`).
+- **Spellbooks** hold one spell. Reading one is a Magic check (Spec 03): 4 or more learns it; 2 to 3 fails and the book cannot be tried again until the character has taken a village rest since; 1 destroys the book and leaves the reader Cursed for 20 rounds (Spec 06, negative effects). A spell already known is not learned again and the book is kept. Reading in the dungeon costs one round.
+
+**Status effects**
+
+- **Duration counts the round the effect starts.** Effects tick down once a round after every creature has acted, so Hold for 3 rounds costs the creature 3 turns. Poisoned has no duration, and Cursed has none unless its source gives one (a destroyed spellbook: 20 rounds). A new application of an effect already present keeps the longer duration (no duration is the longest) and never adds a second copy.
+- **Speed:** Hasted acts twice a round, Slowed every other round, both together cancel to the creature's own speed. For the player, a hasted action takes half a round (the monsters act after every second action) and a slowed action takes two rounds.
+- **Asleep:** the creature cannot act and melee against it has advantage; a hit on it ends the effect. **Held:** cannot act. **Frightened:** a monster flees from the player (as in Fleeing, above); the player may not step to a cell nearer to the source but may still fight.
+- **Poisoned:** one Combat die is lost every 20 rounds, and waiting does not recover dice. A lost die with none left is fatal, as with any hit. Village rest ends it; Cure and the hermit arrive with items and villages.
+- **Blessed and Cursed** give advantage and disadvantage on checks (Spec 03); together they cancel.
+- **The Status block** lists each active effect with its remaining rounds, then Shield.
+
 ## Acceptance criteria
 
 - [ ] Nothing on the level moves until the player spends an action; free actions (inventory, look, targeting) cost no round.

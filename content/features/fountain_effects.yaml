@@ -1,0 +1,12 @@
+# Stub entries (Spec 08): what a drink from a fountain can do (Spec 06, "Fixtures"). Good: restore a Combat, Skill or
+# Magic die, cure poison, reveal the level map, coins in the basin; bad: poison, a water creature, nothing. The launch
+# table of 12 is written in Phase 3 (task 3.7).
+- { id: fountain_restore_combat, name: restore a Combat die, effect: restore_dice, pool: combat, dice: 1, weight: 10, tags: [stub] }
+- { id: fountain_restore_skill, name: restore a Skill die, effect: restore_dice, pool: skill, dice: 1, weight: 8, tags: [stub] }
+- { id: fountain_restore_magic, name: restore a Magic die, effect: restore_dice, pool: magic, dice: 1, weight: 8, tags: [stub] }
+- { id: fountain_cure, name: cure poison, effect: cure_poison, weight: 8, tags: [stub] }
+- { id: fountain_map, name: reveal the map, effect: reveal_map, weight: 5, tags: [stub] }
+- { id: fountain_coins, name: coins in the basin, effect: coins, amount: [2, 8], weight: 10, tags: [stub] }
+- { id: fountain_poison, name: foul water, effect: poison, weight: 8, tags: [stub] }
+- { id: fountain_creature, name: a water creature, effect: water_creature, weight: 6, tags: [stub] }
+- { id: fountain_nothing, name: still water, effect: nothing, weight: 12, tags: [stub] }

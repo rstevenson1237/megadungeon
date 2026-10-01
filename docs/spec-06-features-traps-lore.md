@@ -130,6 +130,59 @@ A 1 on a check always costs something, and the cost fits what the player was doi
 
 Skill uses, spells and ranged attacks already lose the die on a 1 (Spec 03) and do not also roll on this table.
 
+## Clarifications (task 2.10, proposed October 1, 2026, awaiting approval)
+
+All figures are starting values for playtesting. Where the spec above is silent these fill the gap so the build can proceed; any the owner changes goes back here first.
+
+**Hidden things, searching and noticing**
+
+- **Hidden** are floor traps, container traps, secret doors and debris not yet searched. What the player has found, noticed, searched, disarmed, forced or used is recorded by cell (or feature number) in the level delta.
+- **Search (X)** is one round. Each hidden thing in the 8 cells around the player gets one Skill check. Advantage from a ring or cloak and Blessed or Cursed combine, and an advantage and a disadvantage cancel. A 4 or more finds it; a 1 on any check triggers the Search negative effect once for the whole search. A found thing stays found.
+- **Passive notice** happens when a step ends next to a hidden floor trap, container trap or secret door that has not had its free check: one Skill check with disadvantage (Blessed or Cursed combine), once per thing. It never triggers a negative effect, because it is free.
+- **Debris** is hidden until searched; a success finds one thing from the `debris_finds` table (coins, scaled by depth, or a small item, which goes to the pack or else the floor) and the debris is then spent. A failed search leaves it to try again.
+
+**Doors and locks**
+
+- **E at a locked door** uses lockpicks if carried, else a key, else forces it. Walking into a locked door uses a key if one is carried and otherwise says the door is locked, with no round spent. A key is consumed when used.
+- **Picking** is a Skill check (gloves, Blessed and Cursed combine): 4 or more opens; 2 to 3 fails; 1 breaks one lockpick. **Forcing** is a Combat check with the Combat die (Blessed and Cursed combine): 4 or more breaks it open, otherwise it holds; on a 1 the strain costs a Combat die as a hit takes one. Every attempt alerts unaware creatures within 6 cells.
+- **A forced door** stays broken open and cannot be closed. **A sealed door** opens only to the vault key that names its vault, which is consumed; it cannot be picked or forced and E says so.
+- **Locked chests:** 1 in 4 plain chests is locked (not a vault, cache or stash chest), fixed by the run seed and the chest, and opens as a locked door does.
+- **Blocking:** chests, sacks, weapon racks, pottery, fountains, altars, sarcophagi and levers block movement but not sight or shots. Debris, floor runes, traps, teleporters and landings can be walked on. Smashed pottery can be walked over.
+- **E acts on** what is underfoot (stairs, a teleporter), then on the four cells around, the facing one first: a locked or open door, a container or fixture, a found trap (to disarm it), a lever, a wall mark (sign, graffiti, rune).
+
+**Containers**
+
+- **Opening** a chest, sack or rack costs one round and shows a pick-up list; taking from the list costs nothing and what does not fit stays in the container. A trapped container whose trap is not yet found triggers it on opening; one whose trap is found has E try to disarm it first (a Skill check: 4 or more removes the trap, 2 to 3 fails safely, 1 triggers it) and opens only once the trap is gone.
+- **Pottery** is smashed by E, spilling its contents on its cell, and alerts unaware creatures within 4 cells; 1 time in 8 it releases a rat or the weakest creature of the depth table beside it.
+- **Looted** (the player's or a rival's) means emptied and shown dimmed; a container never refills.
+
+**Fixtures**
+
+- **Fountain:** E drinks, rolling the `fountain_effects` table, and it dries after 1 to 3 drinks (rolled at the first drink from the level seed and the fountain). A water creature is an aquatic creature of the depth table, else any, beside the fountain. Coins in the basin are scaled by depth.
+- **Altar:** E offers the gold (10 gp times the level's depth) or one item from the pack, then a Magic check (Blessed and Cursed combine). 4 or more gives the god's blessing: Blessed until the player leaves the level, a curse lifted, or one item identified. 2 to 3 does nothing and the offering is spent. A 1 leaves the player Cursed until lifted. An altar takes one offering. A shrine altar's success counts for its set; the third success grants the god's lasting buff.
+- **Sarcophagus:** E lifts the lid: a Combat check. 4 or more opens it: treasure from the tiered gem table, jewelry three times in four, a magic item one time in five, and 1 time in 3 an undead of the depth table rises beside it (any creature if none is tagged undead). 2 to 3 the lid holds; 1 crushes it down: one Combat die as a hit. Once opened it stays open.
+- **Magical rune:** a floor rune is read by stepping on it, a wall rune with E; each is a Magic check. 4 or more: a floor rune gives a ward (Shield for 20 rounds), a wall rune of a rune word teaches its letter; 1 discharges, fire (one Combat die) or a teleport to a random cell by a coin flip; 2 to 3 does nothing. A rune is spent after one success or discharge.
+
+**Traps**
+
+- **A floor trap stays until it springs or is disarmed**, and a sprung trap is spent (a collapse leaves debris). Stepping onto a found trap is refused with no round spent; to cross it, disarm it. A hidden one gets the avoid check (Skill: 4 or more jumps clear, stays found and unsprung; 2 to 3 or 1 springs it).
+- **Effects** are named by the trap table: lose Combat dice (each as a hit), a status, an alarm, a teleport to a random cell, a collapse, a deep pit (the player falls to the level below at a random walkable cell, losing a die), or a summoned creature beside the container. Below level 50 (levels 51 and deeper) a trap marked heavy costs two dice.
+- **Monsters never step on traps** (they route around them).
+
+**Lore and the journal**
+
+- **Signs and graffiti** are read with E from the cell beside the wall they are on, in one round; **books** are read from the pack in one round and kept. The text shows in a window and a summary line goes to the log. The journal records each entry once, by level, and a lore chain's entries read in order are the chain.
+
+**Negative effects** are applied where the table says. A wandering monster comes from the depth table by the Spec 02 rating ceiling, arrives hunting, out of sight and never adjacent.
+
+**Connective elements** (Spec 02) have no task of their own in the plan, so their use is fixed here:
+
+- **Teleporter:** E on it, one round, takes the player to the paired level's teleporter.
+- **Collapsed passage:** E on the lever pulls it once; after that the down stair of the lever's level leads to the landing on the target level.
+- **Map fragment:** using it from the pack consumes it and maps the target level: on arrival the whole layout is explored and its secret doors and vault are found.
+- **Rune word:** each wall rune read teaches its letter. E on the marked altar speaks the word once every letter is known, giving Blessed until the player leaves the level.
+- **Vault:** the vault key found on one level opens the sealed door of the named vault.
+
 ## Acceptance criteria
 
 - [ ] A search rolls once per hidden thing in the 8 surrounding cells and applies at most one negative effect.

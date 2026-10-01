@@ -5,10 +5,13 @@
 import type { LogMessage } from '../core/log.ts';
 import { LOSE_TRACK_ROUNDS, NOTICE_RANGE, noticeRoll } from '../rules/combat/awareness.ts';
 import { creatureMelee, failsMorale, monsterRanged } from '../rules/combat/attacks.ts';
+import { derive } from '../rules/items/gear.ts';
+import { cannotAct, effectiveSpeed, hasStatus } from '../rules/magic/status.ts';
 import { distanceSq, lineCells } from '../rules/world/geometry.ts';
 import { distancesFrom } from '../rules/world/grid.ts';
 import { TILE, type Point } from '../rules/world/level.ts';
 import { Name, addLoot, alert, combatAt, damage, hitPlayer, monsterAttacks, provoke, seen } from './combat.ts';
+import { contentsOf, stateOf, trapAt } from './features/index.ts';
 import type { Game } from './game.ts';
 import { TERRAIN_BLOCKED, TERRAIN_OPEN, isClear, refreshSight } from './map-state.ts';
 import type { Monster } from './monsters.ts';
@@ -49,10 +52,21 @@ class Round {
     return this.game.state.map.level.width;
   }
 
+  /** The terrain with floor traps shut: creatures never step on a trap, so they route around it (Spec 06, task 2.10). */
+  private withoutTraps(terrain: Uint8Array): Uint8Array {
+    const { map, used } = this.game.state;
+    const t = terrain.slice();
+    for (const trap of map.level.traps) {
+      const i = trap.y * map.level.width + trap.x;
+      if (!used.disarmed.includes(i)) t[i] = TERRAIN_BLOCKED;
+    }
+    return t;
+  }
+
   /** Walking distance from the player to every cell; closed doors block (creatures other than rivals never open them). */
   fromPlayer(): Int32Array {
     const { map } = this.game.state;
-    return (this.playerDist ??= distancesFrom(map.terrain, map.level.width, map.level.height, map.player, (t) => t === TERRAIN_OPEN));
+    return (this.playerDist ??= distancesFrom(this.withoutTraps(map.terrain), map.level.width, map.level.height, map.player, (t) => t === TERRAIN_OPEN));
   }
 
   /** Terrain as a rival sees it: a closed normal door is passable, because a rival opens it. */
@@ -64,7 +78,7 @@ class Round {
       const i = d.y * map.level.width + d.x;
       if (d.kind === 'normal' && t[i] === TERRAIN_BLOCKED && map.level.tiles[d.y]![d.x] === TILE.door) t[i] = TERRAIN_OPEN;
     }
-    return (this.rivalTerrain = t);
+    return (this.rivalTerrain = this.withoutTraps(t));
   }
 
   fromStair(): Int32Array | null {
@@ -81,7 +95,7 @@ const sees = (game: Game, m: Monster): boolean => seen(game, m);
 const free = (game: Game, x: number, y: number): boolean => {
   const { map } = game.state;
   return x >= 0 && y >= 0 && x < map.level.width && y < map.level.height &&
-    map.terrain[y * map.level.width + x] === TERRAIN_OPEN && !game.monsterAt(x, y) && !(map.player.x === x && map.player.y === y);
+    map.terrain[y * map.level.width + x] === TERRAIN_OPEN && !game.monsterAt(x, y) && !(map.player.x === x && map.player.y === y) && !trapAt(game, x, y);
 };
 
 const orthAdjacent = (a: Point, b: Point): boolean => Math.abs(a.x - b.x) + Math.abs(a.y - b.y) === 1;
@@ -175,7 +189,7 @@ function checkRound(round: Round, m: Monster): void {
   if (m.awareness !== 'alert') {
     if (m.role === 'boss' && inSameRoom(game, m)) alert(game, m);
     else if (m.kind === 'bandit' && visible) alert(game, m);
-    else if (visible && distanceSq(m, map.player) <= NOTICE_RANGE * NOTICE_RANGE && noticeRoll(game.rng, m.awareness, player.stealth)) alert(game, m);
+    else if (visible && distanceSq(m, map.player) <= NOTICE_RANGE * NOTICE_RANGE && player.invisible <= 0 && noticeRoll(game.rng, m.awareness, derive(player.equipment, player.stealth).notice)) alert(game, m);
     return;
   }
   if (m.fleeing) return trackFleeing(m, visible);
@@ -303,7 +317,7 @@ function hunt(round: Round, m: Monster): void {
 /** The rival's melee with a monster next to it: one exchange in which both roll d6 plus modifier. */
 function rivalFights(round: Round, rival: Monster, target: Monster): void {
   const { game, messages } = round;
-  const exchange = creatureMelee(game.rng, rival, { modifier: target.modifier, unaware: target.awareness !== 'alert' });
+  const exchange = creatureMelee(game.rng, rival, { modifier: target.modifier, unaware: target.awareness !== 'alert', asleep: hasStatus(target.statuses, 'asleep') });
   provoke(game, target);
   combatAt(game, target, [target]);
   if (exchange.defenderHit) damage(game, target, messages, rival);
@@ -316,9 +330,12 @@ function loot(game: Game, rival: Monster): void {
   const { looted } = game.state;
   const near = (p: Point): boolean => Math.max(Math.abs(p.x - rival.x), Math.abs(p.y - rival.y)) <= 1;
   level.features.forEach((f, i) => {
-    if (f.type !== 'container' || f.link || looted.features.includes(i) || f.contents.length === 0 || !near(f)) return;
+    if (f.type !== 'container' || f.link || looted.features.includes(i) || !near(f)) return;
+    const contents = contentsOf(game, i);
+    if (contents.length === 0) return;
     looted.features.push(i);
-    addLoot(rival.carried, f.contents);
+    stateOf(game, i).left = [];
+    addLoot(rival.carried, contents);
   });
   level.piles.forEach((p, i) => {
     if (looted.piles.includes(i) || p.contents.length === 0 || !near(p)) return;
@@ -335,7 +352,7 @@ function lootDetour(round: Round, rival: Monster): Int32Array | null {
   const { level } = map;
   const targets: Point[] = [];
   level.features.forEach((f, i) => {
-    if (f.type === 'container' && !f.link && !looted.features.includes(i) && f.contents.length > 0) targets.push(f);
+    if (f.type === 'container' && !f.link && !looted.features.includes(i) && contentsOf(game, i).length > 0) targets.push(f);
   });
   level.piles.forEach((p, i) => {
     if (!looted.piles.includes(i) && p.contents.length > 0) targets.push(p);
@@ -424,12 +441,17 @@ export function creaturesAct(game: Game, messages: LogMessage[]): void {
     if (player.dead) return;
     if (!monsters.includes(m)) continue;
     checkRound(round, m);
-    for (let n = actionsInRound(m.speed, number); n > 0; n--) {
+    for (let n = actionsInRound(effectiveSpeed(m.speed, m.statuses), number); n > 0; n--) {
       if (player.dead || !monsters.includes(m)) break;
+      if (cannotAct(m.statuses)) break; // Asleep or Held (Spec 04, Status effects)
+      if (m.stunned) {
+        m.stunned = false; // a mace's stun costs its next action (Spec 05)
+        continue;
+      }
       if (m.kind === 'rival' && !m.hostile) rivalTurn(round, m);
       else if (m.awareness === 'asleep') break;
       else if (m.awareness === 'unaware') wander(game, m);
-      else if (m.fleeing) flee(round, m);
+      else if (m.fleeing || hasStatus(m.statuses, 'frightened')) flee(round, m);
       else hunt(round, m);
     }
   }

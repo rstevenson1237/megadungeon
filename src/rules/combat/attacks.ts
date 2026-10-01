@@ -29,32 +29,38 @@ export interface MeleeExchange extends MeleeOutcome {
  * Player melee: one Combat die against the monster's d6 plus modifier. An unaware or asleep
  * monster rolls with disadvantage (Spec 04). Higher hits; a tie hits both.
  */
-export function playerMelee(rng: Rng, combat: DieSource, monster: { modifier: number; unaware: boolean }): MeleeExchange {
-  const attacker = poolDie(rng, combat);
+export function playerMelee(rng: Rng, combat: DieSource, monster: { modifier: number; unaware: boolean; asleep?: boolean }, attackMod = 0): MeleeExchange {
+  // Melee against an Asleep creature has advantage (Spec 04, Status effects). The weapon's modifier adds to the die (Spec 05).
+  const attacker = poolDie(rng, combat, monster.asleep ? 'advantage' : 'normal') + attackMod;
   const defender = monsterDie(rng, monster.modifier, monster.unaware ? 'disadvantage' : 'normal');
   return { ...meleeOutcome(attacker, defender), attacker, defender };
 }
 
-/** Monster melee: d6 plus modifier against one Combat die. `ambush` is advantage on the first attack of an ambusher. */
-export function monsterMelee(rng: Rng, monster: { modifier: number; ambush: boolean }, combat: DieSource): MeleeExchange {
-  const attacker = monsterDie(rng, monster.modifier, monster.ambush ? 'advantage' : 'normal');
-  const defender = poolDie(rng, combat);
+/**
+ * Monster melee: d6 plus modifier against one Combat die. `ambush` is advantage on the first attack of an
+ * ambusher, and so is attacking a player who is Asleep.
+ */
+export function monsterMelee(rng: Rng, monster: { modifier: number; ambush: boolean }, combat: DieSource, playerAsleep = false, defenceMod = 0): MeleeExchange {
+  const attacker = monsterDie(rng, monster.modifier, monster.ambush || playerAsleep ? 'advantage' : 'normal');
+  // Armour and shield modifiers add to the player's die when defending against melee only (Spec 05).
+  const defender = poolDie(rng, combat) + defenceMod;
   return { ...meleeOutcome(attacker, defender), attacker, defender };
 }
 
 /** Two creatures fighting each other (a rival and a monster): both roll d6 plus modifier. */
-export function creatureMelee(rng: Rng, a: { modifier: number; unaware?: boolean }, b: { modifier: number; unaware?: boolean }): MeleeExchange {
-  const attacker = monsterDie(rng, a.modifier, a.unaware ? 'disadvantage' : 'normal');
+export function creatureMelee(rng: Rng, a: { modifier: number; unaware?: boolean }, b: { modifier: number; unaware?: boolean; asleep?: boolean }): MeleeExchange {
+  const attacker = monsterDie(rng, a.modifier, a.unaware ? 'disadvantage' : b.asleep ? 'advantage' : 'normal');
   const defender = monsterDie(rng, b.modifier, b.unaware ? 'disadvantage' : 'normal');
   return { ...meleeOutcome(attacker, defender), attacker, defender };
 }
 
 /**
  * Player ranged: one Skill die as a skill use. 4 or more hits, 2 to 3 hits but the die is lost,
- * 1 misses and the die is lost. An adjacent target gives the attacker disadvantage.
+ * 1 misses and the die is lost. An adjacent target gives the attacker disadvantage, and so does a tower shield
+ * (`disadvantage`); both together are still one disadvantage.
  */
-export function playerRanged(rng: Rng, skill: Pool, adjacent: boolean): RollResult {
-  return rollPool(rng, skill, 'ranged', adjacent ? 'disadvantage' : 'normal');
+export function playerRanged(rng: Rng, skill: Pool, adjacent: boolean, disadvantage = false): RollResult {
+  return rollPool(rng, skill, 'ranged', adjacent || disadvantage ? 'disadvantage' : 'normal');
 }
 
 /**

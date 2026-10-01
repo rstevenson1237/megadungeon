@@ -1,9 +1,12 @@
 # The 20 classes (Spec 03, "Classes"). Starting steps, the pool stepped at levels 4, 7 and 9, and the major ability.
-# Ability effects are code (tasks 2.7 to 2.9); the text is the spec's.
+# Ability effects are code (tasks 2.7 to 2.9); the text is the spec's. `spells` is how many spells the class starts
+# with and the one it always has (Spec 04, "Spells"); classes without it start with none. `gear` is the starting
+# equipment of the four core classes (Spec 05); the other 16 are written in task 3.4.
 - id: warrior
   name: Warrior
   start: { combat: 8, skill: 6, magic: 4 }
   steps: [combat, combat, skill]
+  gear: [{ id: long_sword }, { id: round_shield }, { id: leather }]
   ability:
     id: cleave
     name: Cleave
@@ -12,6 +15,8 @@
   name: Mage
   start: { combat: 4, skill: 6, magic: 8 }
   steps: [magic, magic, skill]
+  spells: { count: 3, always: arcane_bolt }
+  gear: [{ id: quarterstaff }, { id: potion_clarity }]
   ability:
     id: arcane_bolt
     name: Arcane Bolt
@@ -20,6 +25,7 @@
   name: Thief
   start: { combat: 6, skill: 8, magic: 4 }
   steps: [skill, skill, combat]
+  gear: [{ id: short_sword }, { id: dagger }, { id: sling }, { id: sling_stones, count: 20 }, { id: leather }]
   ability:
     id: backstab
     name: Backstab
@@ -28,6 +34,8 @@
   name: Priest
   start: { combat: 6, skill: 6, magic: 6 }
   steps: [magic, combat, magic]
+  spells: { count: 2, always: heal }
+  gear: [{ id: mace }, { id: round_shield }, { id: leather }, { id: potion_healing }]
   ability:
     id: heal
     name: Heal
@@ -52,6 +60,7 @@
   name: Paladin
   start: { combat: 6, skill: 6, magic: 6 }
   steps: [combat, magic, combat]
+  spells: { count: 1 }
   ability:
     id: smite
     name: Smite
@@ -76,6 +85,7 @@
   name: Bard
   start: { combat: 6, skill: 6, magic: 6 }
   steps: [skill, magic, skill]
+  spells: { count: 1 }
   ability:
     id: fascinate
     name: Fascinate
@@ -84,6 +94,7 @@
   name: Druid
   start: { combat: 6, skill: 6, magic: 6 }
   steps: [magic, skill, magic]
+  spells: { count: 2 }
   ability:
     id: wild_shape
     name: Wild Shape
@@ -92,6 +103,7 @@
   name: Necromancer
   start: { combat: 4, skill: 6, magic: 8 }
   steps: [magic, magic, skill]
+  spells: { count: 2 }
   ability:
     id: raise
     name: Raise
@@ -100,6 +112,7 @@
   name: Sorcerer
   start: { combat: 4, skill: 6, magic: 8 }
   steps: [magic, magic, combat]
+  spells: { count: 2 }
   ability:
     id: overchannel
     name: Overchannel
@@ -108,6 +121,7 @@
   name: Illusionist
   start: { combat: 4, skill: 8, magic: 6 }
   steps: [skill, magic, magic]
+  spells: { count: 2 }
   ability:
     id: decoy
     name: Decoy
@@ -116,6 +130,7 @@
   name: Warlock
   start: { combat: 6, skill: 4, magic: 8 }
   steps: [magic, magic, combat]
+  spells: { count: 2 }
   ability:
     id: pact
     name: Pact
@@ -140,6 +155,7 @@
   name: Shaman
   start: { combat: 6, skill: 4, magic: 8 }
   steps: [magic, skill, magic]
+  spells: { count: 2 }
   ability:
     id: spirit_totem
     name: Spirit Totem

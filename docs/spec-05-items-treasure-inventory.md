@@ -145,6 +145,51 @@ Shops buy at half value and sell at list price, and everything costs more the de
 
 Every character also starts with 20 gp in the bank. Starting gear is normal quality; the other 16 classes' gear lives in the content tables.
 
+## Clarifications (task 2.9, proposed October 1, 2026, awaiting approval)
+
+All figures are starting values for playtesting. Where the spec above is silent these fill the gap so the build can proceed; any the owner changes goes back here first.
+
+**Items as data**
+
+- **Item instances copy the numbers they need** from their table row when they are created (as placed monsters do), so a saved item never needs the table. Table rows: `equipment_bases` (the 16 weapon, armour and shield bases of this spec plus the three ammunition types), `magic_items` (each row carries its effect fields; `value` in gp) and `disguise_names`. A class's starting gear is a `gear` list of ids.
+- **The identity of a thing a level holds is rolled when it is picked up**, from a stream fixed by the run seed, the depth and where it lay, so a level generates exactly as before and the same pickup always gives the same item. A rack's weapon is a base drawn by depth with quality crude 25%, normal 60%, fine 15%.
+
+**Inventory**
+
+- **Slots:** coins fill slots by hundreds and gems fill slots by hundreds, separately; ammunition per type by twenties; keys (plain and vault keys together) by tens; potions per kind by fives; jewelry, books, spellbooks, quest items and map fragments one each; most gear one; two-handed weapons and plate two when carried unequipped.
+- **A full pack refuses a pickup** and the log says so. A stack takes as much as fits, and the rest stays where it lay.
+- **Actions:** pick up, equip, unequip, drop and use each cost one round; inspecting is free. A pickup costs one round however many things are taken.
+- **Equipping:** a two-handed weapon and a shield displace each other (the off hand is empty while a two-handed weapon is held); whatever is displaced goes to the pack if there is room, else the equip is refused. A ring goes in the first empty ring slot and is refused when both are full. Staves are one-handed.
+- **Pack size** is 12 plus 2 for each Pack Mule drawn.
+
+**Quality, weapons and armour**
+
+- **Breaking:** a roll of 1 to 100 at or under 15, 3 or 1 (crude, normal, fine). Ranged weapons roll when they hit, like other weapons; the body armour and the shield each roll when the wearer is hit. Broken gear gives no modifier, trait or enchantment, and a broken ranged weapon cannot fire.
+- **Modifiers** add to the Combat die the player rolls: the weapon's to melee attack, armour and shield to melee defence only.
+- **Mace, Stun:** a melee hit won by 3 or more costs the monster its next action.
+- **Spear, Reach:** moving toward a creature exactly 2 cells away in a straight line, with the cell between free, attacks it instead of moving. Only the target can be hit by that exchange.
+- **Dagger, thrown:** with no ranged weapon readied, F throws a spare dagger from the pack (else the wielded one) up to 4 cells, as a ranged attack with one Skill die. It lands on the target's cell or a free cell beside it and can be picked up.
+- **Crossbow:** after firing it cannot fire again the next round (no round is spent trying), and a hit removes 2 dice.
+- **Plate:** monsters notice with advantage whatever stealth buffs say, and the player's spell rolls have disadvantage. **Chain:** stealth buffs do not give monsters disadvantage. **Tower shield:** the player's ranged attacks have disadvantage (not twice over when the target is adjacent). **Quarterstaff:** +1 on defence rolls. **Light** only marks a weapon that allows Backstab (class abilities arrive later).
+
+**Treasure**
+
+- **Appraisal** is rolled once per piece from the run seed and the piece, at 60% to 120% of base, and kept on the piece.
+- **Banking** takes coins and appraised pieces only.
+- **Theft** takes 10% of the carried treasure value (coins at face value, pieces at appraised or base value), rounded up and at least 1: coins first, and when coins do not cover it the cheapest pieces until it is covered.
+
+**Magic items**
+
+- **Cursed items:** only a ring, clothing, weapon, armour or staff can be cursed (things that can be worn), 1 in 10 at creation. While equipped it gives the Cursed status with no duration, it cannot be removed or displaced, and its drawback is its own: a weapon or armour bonus becomes -1, a ring or clothing effect reverses (disadvantage on search, monsters notice with advantage, -1 melee, wait recovery every 15 rounds, disadvantage on lockpicking), a staff's advantage becomes disadvantage. Lifting the curse (Remove Curse potion, hermit, Purify) clears it and the status, and the item then works as its true self.
+- **Identification:** potions, wands, rods and staves are identified by use, per kind for the rest of the run; rings, clothing, weapons and armour only by the service, per item. An unidentified item shows a disguise from `disguise_names` (potions, rings, wands, rods and staves; shuffled per run seed) or its plain base name with "(unknown)". Identifying shows the true name and any curse.
+- **Charges** (wand 3 to 8, rod 2 to 5, staff 3 to 6) are rolled at creation. Using one casts the spell with no Magic die and no failure; a wand or rod that is spent crumbles, a staff stays. A staff also gives advantage on spell rolls of its shape while uncursed and unbroken.
+- **Potions:** Healing, Vigour, Focus and Clarity restore dice; Haste lasts 5 rounds; Invisibility stops notice rolls against the player for 10 rounds; Cure ends Poisoned; Remove Curse lifts every curse worn. **Boots of Speed** give Haste for 3 rounds once per level, by using them.
+- **Artifacts** never break and are never cursed. Their slot comes from the table (default ring), and a boss carries its artifact and drops it where it dies.
+
+**Prices**
+
+- **Buying** costs value times (1 + 0.2 for each village below the surface); **selling** pays 50% of value with no depth multiplier (Fence adds 20% of that); a crude item's value is already half a normal one's, so it sells for half. Artifacts are priceless and cannot be sold. **Identification** costs 100 gp and **repair** 30% of value, both times the same multiplier.
+
 ## Acceptance criteria
 
 - [ ] Equipped items use no pack slots; stacks follow the per-slot table; a full pack refuses pickups.
