@@ -12,6 +12,7 @@ import type { Loot } from '../rules/world/level.ts';
 import type { Game } from './game.ts';
 import { wearerHit, weaponHit } from './items.ts';
 import type { Monster } from './monsters.ts';
+import { failQuest } from './town-state.ts';
 
 /** How a creature is named in the log: "the goblin", but "Corvin the Bold" for a named one. */
 export const nameOf = (m: Monster): string => (m.kind === 'monster' ? `the ${m.name}` : m.name);
@@ -84,8 +85,10 @@ export function removeDie(game: Game, m: Monster, messages: LogMessage[], say: D
     return;
   }
   if (shown) messages.push({ kind: 'combat', text: say.kill });
-  const { monsters, drops } = game.state;
+  const { monsters, drops, player } = game.state;
   monsters.splice(monsters.indexOf(m), 1);
+  // An opponent's death meets its quest's goal, to be paid on the next arrival in a village (Spec 07, task 2.11).
+  if (m.quest && !player.town.goals.includes(m.quest)) player.town.goals.push(m.quest);
   if (m.carried.length > 0) {
     drops.push({ x: m.x, y: m.y, contents: m.carried });
     if (shown) messages.push({ kind: 'loot', text: `${Name(m)} drops ${describe(m.carried)}.` });
@@ -122,9 +125,28 @@ export function hurtPlayer(game: Game, messages: LogMessage[], say: DieText): bo
   return true;
 }
 
+/**
+ * With a freed captive following, one blow in three meant for the player falls on them instead (Spec 04 says only
+ * that a captive follows; Spec 07 that one who dies fails its quest: clarifications of task 2.11). Two blows kill.
+ */
+function escortTakesHit(game: Game, m: Monster, messages: LogMessage[]): boolean {
+  const { town, journal } = game.state.player;
+  if (town.escorts.length === 0 || !game.rng.oneIn(3)) return false;
+  const escort = town.escorts[0]!;
+  escort.dice--;
+  if (escort.dice > 0) {
+    messages.push({ kind: 'combat', text: `${Name(m)} strikes ${escort.name} instead of you.` });
+    return true;
+  }
+  town.escorts.splice(0, 1);
+  messages.push({ kind: 'warning', text: `${Name(m)} kills ${escort.name}.` });
+  if (escort.quest && failQuest(town, journal, escort.quest)) messages.push({ kind: 'warning', text: 'The quest has failed.' });
+  return true;
+}
+
 /** A creature's hit on the player removes one Combat die; a hit with none left is fatal (Spec 03). */
 export const hitPlayer = (game: Game, m: Monster, messages: LogMessage[], verb = 'hits'): boolean =>
-  hurtPlayer(game, messages, { hit: `${Name(m)} ${verb} you.`, kill: `${Name(m)} kills you.` });
+  escortTakesHit(game, m, messages) ? false : hurtPlayer(game, messages, { hit: `${Name(m)} ${verb} you.`, kill: `${Name(m)} kills you.` });
 
 /**
  * A bandit's hit also steals 10% of the carried treasure, coins first and then the cheapest pieces (Spec 04, Spec 05);

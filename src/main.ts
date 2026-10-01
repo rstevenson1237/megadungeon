@@ -4,6 +4,7 @@ import bundle from './generated/content-bundle.json';
 import type { ContentBundle } from './core/schemas.ts';
 import { runOptionsFor } from './game/world.ts';
 import { classById } from './rules/character/classes.ts';
+import { createCharacter } from './rules/character/character.ts';
 import { itemDataFrom } from './rules/items/magic.ts';
 import { startingKit } from './rules/items/kit.ts';
 import { spellsFrom } from './rules/magic/spells.ts';
@@ -13,18 +14,19 @@ import { mountScreen } from './ui/screen.ts';
 
 // The title screen, then a run from the surface village down through generated levels.
 // The character is test data until character creation exists.
+const thief = classById(bundle as ContentBundle, 'thief');
 const testCharacter: CharacterPaneData = {
   name: 'Mara',
   className: 'Thief',
-  level: 3,
-  xp: 5210,
-  xpNext: 8000,
-  bank: 1340,
-  carried: 620,
+  level: 1,
+  xp: 0,
+  xpNext: 2000,
+  bank: 20,
+  carried: 0,
   stats: [
-    { name: 'Combat', step: 6, current: 1, max: 2 },
-    { name: 'Skill', step: 8, current: 2, max: 2 },
-    { name: 'Magic', step: 6, current: 3, max: 3 },
+    { name: 'Combat', step: thief.start.combat, current: 1, max: 1 },
+    { name: 'Skill', step: thief.start.skill, current: 1, max: 1 },
+    { name: 'Magic', step: thief.start.magic, current: 1, max: 1 },
   ],
   equipment: [
     { name: 'Short sword', quality: 'Fine' },
@@ -43,6 +45,8 @@ const root = document.getElementById('app');
 if (root) {
   const app = new App({
     newCharacter: () => structuredClone(testCharacter),
+    // The thief's rules state, so deposits level it up (Spec 03).
+    rules: () => ({ character: createCharacter('Mara', thief), classDef: thief }),
     runOptions: (seed) => runOptionsFor(bundle as ContentBundle, seed),
     // Test data until character creation exists: the test character knows every spell, so each can be tried.
     startingSpells: () => spellsFrom(bundle as ContentBundle).map((s) => s.id),

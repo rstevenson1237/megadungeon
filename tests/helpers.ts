@@ -18,6 +18,9 @@ import { itemDataFrom, makeAmmo, makeLockpicks, makeMagicItem } from '../src/rul
 import { makeGear } from '../src/rules/items/gear.ts';
 import type { GearItem, Item, Quality } from '../src/rules/items/types.ts';
 import { createRng } from '../src/core/rng.ts';
+import { createCharacter } from '../src/rules/character/character.ts';
+import { classById } from '../src/rules/character/classes.ts';
+import { runOptionsFor } from '../src/game/world.ts';
 
 /** Build a level from rows: '#' wall, '.' floor, '<' up stair (required), '>' down stair. */
 export function levelFrom(rows: string[]): Level {
@@ -217,4 +220,17 @@ export function gameAt(level: Level, x: number, y: number, player: Partial<Playe
   game.state.map.player = { x, y };
   game.refreshSight();
   return game;
+}
+
+/**
+ * A run on the real content and the real run layout of a seed, standing in the village `at` (0 for the surface, else the
+ * nth subterranean village), played by a thief with the given player state. XP and levels are tracked.
+ */
+export function townRun(seed = 12345, extra: Partial<PlayerState> = {}, at = 0): Run {
+  const bundle = content().bundle;
+  const options = runOptionsFor(bundle, seed);
+  const thief = classById(bundle, 'thief');
+  const startDepth = at === 0 ? 0 : options.layout!.villages[at - 1]!.level;
+  const player = { ...createPlayer({ combatStep: 6, combatDice: 2, combatMax: 3, pack: [], equipment: {} }), ...extra };
+  return new Run(seed, player, { ...options, startDepth, character: createCharacter('Mara', thief), classDef: thief });
 }

@@ -62,6 +62,13 @@ export const MAP = {
   background: 0x000000,
 } as const;
 
+/** Traders, hermits and captives on the map (Spec 01 core glyph table, Spec 07): an @ coloured by role. */
+export const NPC_LOOK: Readonly<Record<string, { glyph: string; colour: number }>> = {
+  trader: { glyph: '@', colour: 0xf0c840 },
+  hermit: { glyph: '@', colour: 0x9ad06a },
+  captive: { glyph: '@', colour: 0xe8e8a0 },
+};
+
 /** Loose items on the floor (Spec 01 core glyph table): coins in gold, the rest plain. */
 export const ITEM_COLOURS = { coins: 0xf0c840, other: 0xe0e0e0 } as const;
 

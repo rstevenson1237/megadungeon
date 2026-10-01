@@ -10,7 +10,7 @@ import { TILE } from '../rules/world/level.ts';
 import { GLYPH, toCp437 } from './cp437.ts';
 import { cameraOrigin } from './camera.ts';
 import { COLS, type Grid } from './grid.ts';
-import { ITEM_COLOURS, MAP, TARGET } from './palette.ts';
+import { ITEM_COLOURS, MAP, NPC_LOOK, TARGET } from './palette.ts';
 import { MAIN_PANE, inner } from './panes.ts';
 
 const GLYPH_PLAYER = 64;
@@ -95,6 +95,13 @@ export function drawMap(grid: Grid, state: GameState, targeting: Targeting | nul
       if (pile) grid.set(view.x + vx, view.y + vy, pile.glyph, pile.colour, MAP.background);
     }
   }
+
+  // People who do not fight: traders, hermits and captives not yet freed (Spec 04, Spec 07).
+  level.npcs.forEach((npc, i) => {
+    const look = NPC_LOOK[npc.kind];
+    const at = screen(npc.x, npc.y);
+    if (look && at && visible[npc.y * level.width + npc.x] && !state.used.npcs[i]?.freed) grid.set(at[0], at[1], toCp437(look.glyph), look.colour, MAP.background);
+  });
 
   // Monsters show only on visible cells, never on remembered ones.
   for (const m of state.monsters) {

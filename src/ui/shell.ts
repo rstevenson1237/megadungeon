@@ -14,7 +14,9 @@ import { UI } from './palette.ts';
 import { drawMap } from './map-view.ts';
 import type { Game } from '../game/game.ts';
 import type { Run } from '../game/run.ts';
-import { VillageScreen } from './village.ts';
+import { VillageScreen, type TownHost } from './town.ts';
+import { LevelUpMenu, levelUpMenu, talkMenu, type PeopleHost } from './people.ts';
+import { LEVEL_XP, poolsWithRoom } from '../rules/character/progression.ts';
 import type { LogMessage } from '../core/log.ts';
 import { CellCursor, Targeting, startTargeting } from '../game/targeting.ts';
 import { ratingText } from '../game/monsters.ts';
@@ -77,10 +79,41 @@ export class Shell {
   private arrived(): void {
     const run = this.run!;
     this.title = run.title;
-    this.village = run.inVillage ? new VillageScreen(run.depth, (d) => this.travel(d)) : null;
+    this.village = run.inVillage ? new VillageScreen(run, this.townHost()) : null;
     this.turn = run.game ? run.game.state.round : run.round;
     this.syncCharacter();
     this.character.target = undefined;
+  }
+
+  /** What the village screens call: leave, log, refresh and run level ups, and arrive by lift. */
+  private townHost(): TownHost {
+    return {
+      go: (direction) => this.travel(direction),
+      log: (messages) => this.say(messages),
+      changed: () => this.refreshed(),
+      moved: (messages) => this.moved(messages),
+    };
+  }
+
+  private peopleHost(): PeopleHost {
+    return {
+      log: (messages) => this.say(messages),
+      changed: () => this.refreshed(),
+      free: (index) => this.applyResult(this.game!.free(index)),
+    };
+  }
+
+  private say(messages: readonly LogMessage[]): void {
+    for (const m of messages) this.log.add(m, this.game ? this.game.state.round : this.run?.round ?? this.turn);
+  }
+
+  /** The pane follows what the services did, and any level up owed is run, one screen per level (Spec 03). */
+  private refreshed(): void {
+    this.syncCharacter();
+    const run = this.run;
+    if (!run || run.levelsOwed <= 0 || poolsWithRoom(run.character).length === 0 || this.overlays.some((o) => o instanceof LevelUpMenu)) return;
+    const menu = levelUpMenu(run, { log: (m) => this.say(m), changed: () => this.syncCharacter() });
+    this.overlays.push(menu);
   }
 
   private travel(direction: 'up' | 'down'): void {
@@ -88,10 +121,11 @@ export class Shell {
   }
 
   /** The run changed level or village (stairs, a teleporter, a fall): say so, and bring everything in line. */
-  private moved(messages: LogMessage[]): void {
+  private moved(messages: readonly LogMessage[]): void {
     for (const m of messages) this.log.add(m, this.run!.round);
     this.stopAiming();
     this.arrived();
+    this.refreshed();
   }
 
   /**
@@ -110,6 +144,10 @@ export class Shell {
     if (result.opened !== undefined) this.overlays.push(new LootOverlay(game, result.opened, this.lootHost()));
     if (result.offer !== undefined) this.overlays.push(offerMenu(ctxOf(game), result.offer, offeringCost(game), this.offerHost()));
     if (result.read) this.overlays.push(new TextWindow(result.read.title, result.read.lines));
+    if (result.npc !== undefined) {
+      const talk = talkMenu(game, result.npc, this.peopleHost());
+      if (talk) this.overlays.push(talk);
+    }
   }
 
   private lootHost(): LootHost {
@@ -132,6 +170,7 @@ export class Shell {
 
   private apply(result: OverlayResult, from: Overlay): void {
     if (result.message) this.log.add(result.message, this.turn);
+    if (result.messages) this.say(result.messages);
     if (result.close) this.overlays.splice(this.overlays.indexOf(from), 1);
     if (result.open) this.overlays.push(result.open);
   }
@@ -173,7 +212,12 @@ export class Shell {
         this.openInventory();
         return;
       case 'journal':
-        this.overlays.push(new JournalOverlay(() => this.run?.player.journal ?? []));
+        this.overlays.push(
+          new JournalOverlay(
+            () => this.run?.player.journal ?? [],
+            this.run ? { quests: () => this.run!.town.active().map((o) => ({ id: o.quest.id, text: o.text })), abandon: (id) => this.say(this.run!.town.abandon(id).messages) } : undefined,
+          ),
+        );
         return;
       default: {
         const result = this.game?.act(command);
@@ -188,6 +232,8 @@ export class Shell {
 
   private applyVillage(result: OverlayResult): void {
     if (result.message) this.log.add(result.message, this.turn);
+    if (result.messages) this.say(result.messages);
+    if (result.open) this.overlays.push(result.open);
   }
 
   /** Bring the round counter and the character pane's Combat pool in line with the game. */
@@ -217,6 +263,12 @@ export class Shell {
       }));
     }
     this.character.inventory = { used: slotsUsed(player), total: player.packSlots };
+    // The bank, XP and level come from the run (Spec 01, Spec 03, Spec 07).
+    const run = this.run!;
+    this.character.bank = player.town.bank;
+    this.character.xp = run.character.xp;
+    this.character.level = run.character.level;
+    this.character.xpNext = LEVEL_XP[run.character.level] ?? null;
     this.character.carried = carriedEstimate(player.coins, player.pack);
   }
 

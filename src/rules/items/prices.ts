@@ -2,6 +2,7 @@
 // worth, what a village charges and pays, and what its services cost. Pure arithmetic over `Item` values.
 
 import { QUALITY_VALUE } from './gear.ts';
+import { type ItemData, isIdentified } from './magic.ts';
 import type { Item } from './types.ts';
 
 /** List prices rise 20% for each village below the surface (Spec 05). */
@@ -69,3 +70,38 @@ export const identifyPrice = (villagesBelowSurface: number): number => Math.ceil
 
 /** What the smith asks to repair a broken piece: 30% of its value, scaled by the village. */
 export const repairPrice = (item: Item, villagesBelowSurface: number): number => Math.ceil(itemValue(item) * REPAIR_RATE * villageMultiplier(villagesBelowSurface));
+
+/**
+ * What an item is worth to a shop when the player does not know what it is (Spec 07, "Selling unidentified items"):
+ * as a plain item of its kind. Enchanted gear is its base at its quality; a ring, clothing, wand, rod, staff or
+ * potion of a kind not yet known is the cheapest of its kind in the tables.
+ */
+export function plainValue(item: Item, data: ItemData, known: readonly string[]): number {
+  if (isIdentified(item, known)) return itemValue(item);
+  switch (item.kind) {
+    case 'weapon':
+    case 'armour':
+    case 'shield': {
+      const base = data.bases.get(data.magic.get(item.enchant?.id ?? '')?.base ?? '');
+      return base && item.quality !== 'artifact' ? Math.round(base.price * QUALITY_VALUE[item.quality]) : itemValue(item);
+    }
+    case 'potion':
+    case 'ring':
+    case 'clothing':
+    case 'wand':
+    case 'rod':
+    case 'staff': {
+      const same = [...data.magic.values()].filter((row) => row.kind === item.kind).map((row) => row.value);
+      const each = same.length > 0 ? Math.min(...same) : item.value;
+      return item.kind === 'potion' ? each * item.count : each;
+    }
+    default:
+      return itemValue(item);
+  }
+}
+
+/** What a shop pays for an item the player may or may not have identified: half the plain value, plus the Fence's 20%. */
+export function shopPays(item: Item, data: ItemData, known: readonly string[], fence = false): number {
+  const value = plainValue(item, data, known);
+  return value <= 0 ? 0 : Math.floor(value * SELL_RATE * (1 + (fence ? FENCE_BONUS : 0)));
+}

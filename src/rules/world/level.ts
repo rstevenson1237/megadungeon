@@ -69,6 +69,8 @@ export type Loot =
   | { kind: 'quest_item'; quest: string; id: string; name: string }
   /** A boss's artifact, dropped where it dies (Spec 05, task 2.9). */
   | { kind: 'artifact'; id: string; name: string }
+  /** The lift keeper's token, carried by one boss (Spec 02, task 2.11). */
+  | { kind: 'lift_token' }
   /** A made item: what a bandit stole, what a rival looted, what the player dropped or threw. */
   | { kind: 'item'; item: Item };
 

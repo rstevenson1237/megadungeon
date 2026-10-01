@@ -5,6 +5,7 @@
 import { formatSeed } from '../core/rng.ts';
 import { createPlayer } from '../game/game.ts';
 import type { Step } from '../rules/character/dice.ts';
+import type { Character, ClassDef } from '../rules/character/character.ts';
 import type { Kit } from '../rules/items/kit.ts';
 import { Run, type RunOptions } from '../game/run.ts';
 import type { CharacterPaneData } from './character-pane.ts';
@@ -23,6 +24,8 @@ export interface AppDeps extends TitleDeps {
   abilities?: readonly string[];
   /** What the new character carries and wields (test data until creation exists). */
   kit?: () => Kit;
+  /** The character's rules state and class, so banking treasure can level it up (Spec 03; test data until creation exists). */
+  rules?: () => { character: Character; classDef: ClassDef };
 }
 
 export class App {
@@ -60,7 +63,8 @@ export class App {
     });
     const shell = new Shell('', character);
     shell.onQuit = () => this.openTitle();
-    shell.setRun(new Run(choice.seed, player, this.deps.runOptions?.(choice.seed))); // starts in the surface village
+    const rules = this.deps.rules?.();
+    shell.setRun(new Run(choice.seed, player, { ...this.deps.runOptions?.(choice.seed), ...(rules ? { character: rules.character, classDef: rules.classDef } : {}) })); // starts in the surface village
     const which = choice.daily ? `seed of the day ${choice.daily}` : 'random seed';
     shell.log.add({ kind: 'system', text: `New run, ${which}: ${formatSeed(choice.seed)}.` }, 1);
     this.title = null;

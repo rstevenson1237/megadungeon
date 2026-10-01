@@ -21,7 +21,6 @@ import {
   describeStatus,
   effectiveSpeed,
   hasStatus,
-  removeStatus,
   statusOf,
   tickStatuses,
 } from '../rules/magic/status.ts';
@@ -32,11 +31,13 @@ import { nameOf, playerAttacks, removeDie } from './combat.ts';
 import type { Command } from './commands.ts';
 import { ctxOf, dropItem, equipItem, fireRanged, pickUp, rangedOption, throwableDagger, unequipSlot, useItem } from './items.ts';
 import { type MapState, TERRAIN_BLOCKED, TERRAIN_OPEN, createMapState, isOpen, refreshSight } from './map-state.ts';
-import { interact, lockedDoorAt, offer, readLoreBook, search, stepEnds, takeFromContainer, trapAt, walkIntoLocked } from './features/index.ts';
+import { freeCaptive, interact, lockedDoorAt, npcIndexAt, useNpc, offer, readLoreBook, search, stepEnds, takeFromContainer, trapAt, walkIntoLocked } from './features/index.ts';
 import { mapLevel } from './features/fixtures.ts';
 import { teleportPlayer } from './features/spawn.ts';
 import { type Aim, castSpell, spellAimError } from './magic.ts';
 import { type Monster, spawnAll } from './monsters.ts';
+import type { Fact } from '../core/templates.ts';
+import { type TownState, freshTown } from './town-state.ts';
 
 export { MAX_SIMULATED, actionsInRound };
 
@@ -104,6 +105,8 @@ export interface PlayerState {
   abilities: string[];
   /** Village rests taken, which a failed spellbook waits for (Spec 04). */
   rests: number;
+  /** The bank, quests, specialists and shop stock of the run (Spec 07, task 2.11). */
+  town: TownState;
   /** The first of a hasted pair of actions is done, so the monsters have not yet acted for this round. */
   halfRound: boolean;
 }
@@ -138,13 +141,14 @@ export function createPlayer(setup: PlayerSetup): PlayerState {
     statuses: [],
     shield: 0,
     rests: 0,
+    town: freshTown(),
     halfRound: false,
   };
 }
 
 /**
- * A village rest (Spec 03): every die in every pool comes back, Poisoned ends, and the rest count a failed
- * spellbook waits for goes up. The cost and the save belong to the village (task 2.11).
+ * A village rest (Spec 03, Spec 07): every die in every pool comes back, every timed effect ends but a curse, and the
+ * rest count a failed spellbook waits for goes up. The cost, the time passed and the save belong to the village.
  */
 export function takeRest(player: PlayerState): void {
   player.combatDice = player.combatMax;
@@ -152,7 +156,11 @@ export function takeRest(player: PlayerState): void {
   player.magic.dice = player.magic.max;
   player.waited = 0;
   player.halfRound = false;
-  removeStatus(player.statuses, 'poisoned');
+  // Timed effects end, curses do not (Spec 07, "Lodging").
+  for (let i = player.statuses.length - 1; i >= 0; i--) if (player.statuses[i]!.id !== 'cursed') player.statuses.splice(i, 1);
+  player.shield = 0;
+  player.invisible = 0;
+  player.reload = 0;
   player.rests++;
 }
 
@@ -188,9 +196,11 @@ export interface UsedState {
   marks: number[];
   /** The level's lever has been pulled. */
   lever: boolean;
+  /** What was done with the people here, by their number in `level.npcs`: a captive freed, a trader's stock bought (Spec 07). */
+  npcs: Record<number, { freed?: boolean; bought?: number[] }>;
 }
 
-export const freshUsed = (): UsedState => ({ noticed: [], searched: [], disarmed: [], collapsed: [], broken: [], features: {}, marks: [], lever: false });
+export const freshUsed = (): UsedState => ({ noticed: [], searched: [], disarmed: [], collapsed: [], broken: [], features: {}, marks: [], lever: false, npcs: {} });
 
 export interface GameState {
   map: MapState;
@@ -217,6 +227,8 @@ export interface PendingEffects {
   opened?: number;
   /** An altar waits for an offering. */
   offer?: number;
+  /** A trader or hermit to deal with: their number in `level.npcs`. */
+  npc?: number;
   /** Text to show in a window: a sign, a book, a rune. */
   read?: { title: string; lines: string[] };
 }
@@ -266,6 +278,8 @@ export interface ArrivalOptions {
   items?: ItemData;
   /** The tables features roll from: traps, fountains, debris, gods, books, monsters (Spec 06). */
   content?: GameContent;
+  /** The villages above this level: prices of traders and hermits, and what a hermit's rumour may say (Spec 07). */
+  above?: { villagesAbove: number; facts: () => Fact[] };
 }
 
 export class Game {
@@ -279,6 +293,8 @@ export class Game {
   readonly disguises: ReadonlyMap<string, string>;
   /** The tables features roll from. Derived from the content, so never saved. */
   readonly content: GameContent;
+  /** The village multiplier index and rumour facts for dungeon people (Spec 07). */
+  readonly above: { villagesAbove: number; facts: () => Fact[] };
   /** What the last action asked the run to do next: change level by a fall or a teleport, or show something. Not saved. */
   pending: PendingEffects = {};
 
@@ -297,6 +313,7 @@ export class Game {
     this.spells = new Map((arrival.spells ?? []).map((sp) => [sp.id, sp]));
     this.items = arrival.items ?? itemDataFrom({ tables: {} });
     this.content = arrival.content ?? noContent();
+    this.above = arrival.above ?? { villagesAbove: 0, facts: () => [] };
     this.disguises = disguisesFor(runSeed, this.items.magic.values(), this.items.disguiseNames);
     const at = arrival.at ?? (arrival.stair === 'down' ? level.downStair ?? level.upStair : level.upStair);
     this.state = {
@@ -409,6 +426,14 @@ export class Game {
     if (helpless) return helpless;
     fireRanged(this, target, messages);
     return this.endRound(messages);
+  }
+
+  /** Free a captive, who then follows (Spec 04): one round. */
+  free(index: number): ActResult {
+    const messages: LogMessage[] = [];
+    if (this.state.player.dead) return { messages: [{ kind: 'system', text: 'You are dead.' }], spent: false };
+    freeCaptive(this, index, messages);
+    return this.finish(this.endRound(messages));
   }
 
   /** Take from an opened container's list: free (Spec 06). `which` is a line of the list, or everything that fits. */
@@ -556,6 +581,11 @@ export class Game {
     if (monster) {
       playerAttacks(this, monster, messages);
       return this.endRound(messages);
+    }
+    // Walking into a trader, a hermit or a captive is the same as E: it opens their menu (Spec 01).
+    if (npcIndexAt(this, x, y) >= 0) {
+      useNpc(this, messages);
+      return { messages, spent: false };
     }
     // A spear reaches 2 cells: moving toward a creature that far off, with the cell between free, attacks it (Spec 05, task 2.9).
     if (isOpen(map, x, y) && derive(player.equipment, player.stealth).weaponTraits.includes('reach')) {

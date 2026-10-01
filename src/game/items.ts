@@ -211,6 +211,7 @@ function itemFromLoot(game: Game, loot: Loot, uid: number, rng: Rng): Item | und
     case 'item':
       return loot.item;
     case 'coins':
+    case 'lift_token':
       return undefined;
   }
 }
@@ -224,6 +225,7 @@ function itemAt(game: Game, loot: Loot, index: number, at: Point): Item | undefi
 /** What the pick-up list shows for a piece of loot: coins as gold, anything else as it would be named in the pack. */
 export function lootLine(game: Game, loot: Loot, index: number, at: Point): string {
   if (loot.kind === 'coins') return `${loot.amount} gp`;
+  if (loot.kind === 'lift_token') return "lift keeper's token";
   const item = itemAt(game, loot, index, at);
   return item ? describeItem(item, knowledge(game)) : loot.kind;
 }
@@ -235,6 +237,11 @@ export function lootLine(game: Game, loot: Loot, index: number, at: Point): stri
 export function takeLoot(game: Game, loot: Loot, index: number, at: Point, messages: LogMessage[]): { left?: Loot; full: boolean } {
   const { player } = game.state;
   const capacity = player.packSlots;
+  if (loot.kind === 'lift_token') {
+    player.town.liftToken = true;
+    messages.push({ kind: 'loot', text: "You take the lift keeper's token. Lift fares are halved from now on." });
+    return { full: false };
+  }
   if (loot.kind === 'coins') {
     const got = addCoins(player, capacity, loot.amount);
     if (got > 0) messages.push({ kind: 'loot', text: `You pick up ${got} gp.` });

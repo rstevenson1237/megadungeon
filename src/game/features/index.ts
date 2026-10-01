@@ -10,12 +10,14 @@ import { drink, liftLid, pullLever, stepOnRune, useAltar, useTeleporter } from '
 import { disarm, onStep } from './hidden.ts';
 import { interactLockedDoor, lockedDoorAt } from './locks.ts';
 import { markAt, readMark } from './lore.ts';
+import { useNpc } from './npcs.ts';
 
 export * from './common.ts';
 export { contentsOf, isOpened, listLines, takeFromContainer } from './containers.ts';
 export { drink, liftLid, offer, offeringCost, revealMap, useAltar } from './fixtures.ts';
 export { hiddenNear, negative, onStep, passiveNotice, search, triggerTrap, trapDice, type CheckKind } from './hidden.ts';
 export { chestLocked, doorAt, interactLockedDoor, lockedDoorAt, walkIntoLocked } from './locks.ts';
+export { buyFromTrader, freeCaptive, hermitOffers, npcIndexAt, traderItems, traderOffer, traderPriceOf, unknownItems, useHermit, useNpc, type HermitOffer } from './npcs.ts';
 export { addJournal, journalByLevel, markAt, readLoreBook } from './lore.ts';
 export { noiseAt, placeCreature, pickRow, summon, teleportPlayer, wanderer } from './spawn.ts';
 
@@ -50,6 +52,8 @@ export function interact(game: Game, messages: LogMessage[]): boolean | undefine
     useTeleporter(game, under.to, messages);
     return true;
   }
+  const person = useNpc(game, messages);
+  if (person !== undefined) return person;
   for (const p of facingFirst(game)) {
     const door = lockedDoorAt(game, p.x, p.y);
     if (door) return interactLockedDoor(game, door, messages);

@@ -9,7 +9,7 @@ import { describeItem } from '../rules/items/magic.ts';
 import type { Item } from '../rules/items/types.ts';
 import type { ItemCtx } from '../game/items.ts';
 import type { Grid } from './grid.ts';
-import { FULL_WINDOW, Menu, type MenuItem, type Overlay, type OverlayResult, centred, drawWindow } from './overlay.ts';
+import { FULL_WINDOW, ListMenu, Menu, type MenuItem, type Overlay, type OverlayResult, centred, drawWindow } from './overlay.ts';
 import { OVERLAY, UI } from './palette.ts';
 import { inner } from './panes.ts';
 
@@ -100,11 +100,20 @@ export function journalLines(journal: readonly JournalEntry[], width = 64): { te
   return out;
 }
 
-/** The journal overlay (J): everything read, grouped by level, scrolled with W and S. */
+/** What the journal asks of the shell: the quests taken, and giving one up (Spec 07: abandoned from the journal). */
+export interface JournalHost {
+  quests(): { id: string; text: string }[];
+  abandon(id: string): void;
+}
+
+/** The journal overlay (J): everything read, grouped by level, scrolled with W and S; Enter offers to abandon a quest. */
 export class JournalOverlay implements Overlay {
   scroll = 0;
 
-  constructor(private readonly journal: () => readonly JournalEntry[]) {}
+  constructor(
+    private readonly journal: () => readonly JournalEntry[],
+    private readonly host?: JournalHost,
+  ) {}
 
   private get rows(): number {
     return inner(FULL_WINDOW).h - 1;
@@ -119,7 +128,7 @@ export class JournalOverlay implements Overlay {
     lines.slice(first, first + this.rows).forEach((line, i) => {
       grid.text(area.x + 1 + (line.header ? 0 : 2), area.y + i, line.text, line.header ? UI.gold : UI.value, UI.background);
     });
-    grid.text(area.x + 1, area.y + area.h - 1, 'W/S scroll  Esc close', OVERLAY.hint, UI.background);
+    grid.text(area.x + 1, area.y + area.h - 1, this.host ? 'W/S scroll  Enter abandon a quest  Esc close' : 'W/S scroll  Esc close', OVERLAY.hint, UI.background);
   }
 
   handle(command: Command): OverlayResult {
@@ -127,6 +136,17 @@ export class JournalOverlay implements Overlay {
       const total = journalLines(this.journal()).length;
       this.scroll = Math.max(0, Math.min(Math.max(0, total - this.rows), this.scroll + command.dy));
       return {};
+    }
+    if (command.type === 'confirm' && this.host) {
+      const host = this.host;
+      return {
+        open: new ListMenu(
+          'Abandon a quest',
+          () => host.quests().map((q) => ({ label: q.text, detail: 'abandon', choose: () => (host.abandon(q.id), {}) })),
+          () => 'Choose a quest to give up. It leaves the board for good.',
+          'You have taken no quests.',
+        ),
+      };
     }
     return command.type === 'cancel' || command.type === 'journal' ? { close: true } : {};
   }

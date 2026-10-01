@@ -59,6 +59,8 @@ export interface Monster {
   group: number;
   /** Where it was placed: unaware creatures wander within 3 cells of here. */
   home: { x: number; y: number };
+  /** The quest whose opponent it is: its death meets that quest's goal (Spec 07, task 2.11). */
+  quest?: string;
 }
 
 /** Colour names used by the monster tables (Spec 08), as 24-bit colours; any other name draws light grey. */
@@ -127,7 +129,8 @@ export const spawn = (p: PlacedMonster, id: number, rng?: Rng): Monster => {
     ambush: ambusher,
     group: p.group,
     // A boss carries its artifact and drops it where it dies (Spec 05, task 2.9).
-    carried: p.artifact ? [{ kind: 'artifact', id: p.artifact.id, name: p.artifact.name }] : [],
+    carried: [...(p.artifact ? [{ kind: 'artifact' as const, id: p.artifact.id, name: p.artifact.name }] : []), ...(p.liftToken ? [{ kind: 'lift_token' as const }] : [])],
+    ...(p.quest ? { quest: p.quest } : {}),
   });
 };
 
