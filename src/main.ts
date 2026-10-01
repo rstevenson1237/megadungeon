@@ -1,5 +1,8 @@
 import './ui/fonts/font.css';
 import type { CharacterPaneData } from './ui/character-pane.ts';
+import bundle from './generated/content-bundle.json';
+import type { ContentBundle } from './core/schemas.ts';
+import { runOptionsFor } from './game/world.ts';
 import { App } from './ui/app.ts';
 import { Grid } from './ui/grid.ts';
 import { mountScreen } from './ui/screen.ts';
@@ -34,7 +37,10 @@ const testCharacter: CharacterPaneData = {
 
 const root = document.getElementById('app');
 if (root) {
-  const app = new App({ newCharacter: () => structuredClone(testCharacter) });
+  const app = new App({
+    newCharacter: () => structuredClone(testCharacter),
+    runOptions: (seed) => runOptionsFor(bundle as ContentBundle, seed),
+  });
   const grid = new Grid();
   void mountScreen(root, 'Px437 IBM VGA 9x16').then((renderer) => {
     const redraw = (): void => {

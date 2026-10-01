@@ -25,6 +25,12 @@ jobs:
       - run: npm ci
       - name: Content check
         run: npm run content:check
+      - name: Coverage report
+        run: npm run content:report
+      - uses: actions/upload-artifact@v4
+        with:
+          name: content-coverage
+          path: coverage/content-coverage.html
       - name: Typecheck
         run: npm run typecheck
       - name: Tests

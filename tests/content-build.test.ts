@@ -24,7 +24,14 @@ describe('content build', () => {
   it('compiles the real content folder with no errors', () => {
     const { bundle, errors } = buildContent(resolve(import.meta.dirname, '..', 'content'));
     expect(errors).toEqual([]);
-    expect(Object.keys(bundle.tables).sort()).toEqual(['monsters', 'village_names']);
+    expect(Object.keys(bundle.tables).sort()).toEqual([
+      'artifacts',
+      'level_themes',
+      'monsters',
+      'quest_templates',
+      'rumours',
+      'village_names',
+    ]);
   });
 
   it('compiles a valid table into the bundle', () => {

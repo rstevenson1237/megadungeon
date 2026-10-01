@@ -38,6 +38,31 @@ When a run starts, one pass over the seed fixes where the villages, teleporters,
 | Quests | Each village's quest board is pre-rolled, and each quest names a target level below that village | A fixed quest list per village |
 | Cross-level links | Each link has a source piece on one level and a target on the same or a deeper level (see Connective elements) | Count set per element type |
 
+**Clarifications (approved October 1, 2026, task 2.2).** All figures are starting values for playtesting.
+
+- **Independent streams:** each element above (villages, teleporters, bosses, artifacts, themes, quests, each link type) draws from its own stream of the run seed, so changing one never moves another.
+- **Villages:** each subterranean village takes a name from the village name table, without repeats unless the table runs out.
+- **Teleporters:** each non-village level 1 to 99 rolls 10%. The chosen levels are shuffled and paired; if the count is odd, the leftover level gets no teleporter. A level has at most one.
+- **Artifacts:** a boss draws from the artifact table by its level's depth, never an artifact already drawn. If no unused artifact fits the depth, any unused one is drawn; if none is left, the boss holds no artifact.
+- **Themes:** a theme's unlock level is the first level of its `depth` range. For a level, every unlocked theme is a candidate; each theme in the newest unlock group weighs 3, each in the previous group 2, each in all older groups 1 (times its own `weight`). Village levels have no theme. Level 100 is the one theme whose range covers it.
+- **Quests:** each village, the surface included, gets a list of 6. The goal level is any level strictly between the village and the next deeper village, or down to level 100 for the deepest; a village with no level between has no quests. The quest type is drawn evenly from the four types. The gold reward is half the nominal treasure budget (50 + 10 x depth squared) at the goal level, rounded; any item reward is left to the villages task.
+- **Cross-level links** sit on non-village levels 1 to 99. Counts per run, and distances, are:
+
+| Link | Per run | Pieces and distances |
+| --- | --- | --- |
+| Sealed vault | 3 | Key level, then the vault 2 to 5 levels deeper |
+| Map fragment | 4 | Fragment level, then the mapped level 1 to 10 deeper |
+| Lore chain | 3 | 4 to 6 entries, each 1 to 10 levels below the last; the end points to a cache or to a boss's weakness (a coin flip, boss only if one lies deeper), 1 to 10 levels below the last entry, or on that boss's level |
+| Rune word | 1 | 4 to 6 letters, one per level, each 1 to 10 levels below the last; the altar 1 to 10 levels below the last letter |
+| Rescued specialist | 3 | One each of smith, appraiser, trader, on any level |
+| Named rival | 1 | 4 to 6 appearances, each 1 to 10 levels below the last; the stash 1 to 10 levels below the last appearance |
+| Shrine set | 2 | Three altar levels, each 1 to 10 levels below the last |
+| Lift token | 1 | Carried by one boss on levels 1 to 99; none if the run has no such boss |
+| Collapsed passage | 2 | Lever level, then the landing level 4 to 6 deeper (the stair skips 3 to 5 levels) |
+| Artifact seals | none | Follow the boss artifacts |
+
+The god of a shrine set, the rival's name and the pieces' exact placement are chosen when levels are built (task 2.4).
+
 **Village levels:** a village replaces its dungeon level. Stairs from the level above or below arrive at the village menu, which offers Go up and Go down to the neighbouring dungeon levels.
 
 ## Level sizes and layouts

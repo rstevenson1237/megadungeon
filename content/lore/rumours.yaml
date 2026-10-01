@@ -1,0 +1,28 @@
+# Stub entries for task 2.1 (Spec 08, "Stub content in Phases 1 and 2"): one template per
+# rumour kind so every kind has text. The launch table of 60 is written in Phase 3 (task 3.9).
+- id: stub_rumour_vault
+  needs: vault
+  text:
+    - "They say a sealed vault waits on level {level}, and only its own key will open it."
+    - "A drunk miner swore he saw a vault door on level {level}."
+- id: stub_rumour_boss
+  needs: boss
+  text:
+    - "{Boss} holds level {level}."
+    - "Something on level {level} guards {artifact}."
+- id: stub_rumour_teleporter
+  needs: teleporter
+  text:
+    - "There is a teleporter on level {level}."
+- id: stub_rumour_rival_stash
+  needs: rival_stash
+  text:
+    - "{Rival} hid a stash on level {level}."
+- id: stub_rumour_trap_level
+  needs: trap_level
+  text:
+    - "Level {level} is thick with traps."
+- id: stub_rumour_fountain
+  needs: fountain
+  text:
+    - "There is a fountain on level {level}."

@@ -52,6 +52,14 @@ Every table shares the same five filter fields, so one roller serves all of them
   loot: { roll: pocket_change }
 ```
 
+**Clarifications (approved October 1, 2026, task 2.1):**
+
+- **Themes favour, they do not restrict.** A theme listed in `themes` multiplies the entry's weight; every unlisted theme keeps x1, so the entry can still roll there. An entry with no `themes` field is x1 everywhere.
+- **Tags filter by "all of".** An entry matches when it carries every tag the caller asks for.
+- **`roll:` names a table.** The value is the name of another table in the bundle (its file name without extension). A nested roll uses the caller's depth and theme; the caller's tags apply only to the first table. An entry whose nested table has no eligible entry is itself not eligible. Tables may not roll each other in a cycle.
+- **Each table's own fields come from its owning task.** The build has a strict schema only for tables whose fields the specs define. A YAML file with no schema fails the build; the task that implements a system adds the schema for the tables it reads. The coverage report still lists every catalog table against its launch minimum.
+- **Single-line width.** Spec 01 sets no per-field widths, so a single-line name field may be at most as wide as the text area of the narrowest pane that shows names, the character pane (25 cells).
+
 ## Table catalog
 
 These are the tables the game needs, with proposed launch minimums sized so a player rarely sees repeats in one run.

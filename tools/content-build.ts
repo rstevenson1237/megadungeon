@@ -4,6 +4,8 @@ import { fileURLToPath } from 'node:url';
 import { parse } from 'yaml';
 import type { ZodType } from 'zod';
 import { tableSchemas, type ContentBundle } from '../src/core/schemas.ts';
+import { checkContent } from './content-checks.ts';
+import { buildCoverage, renderCoverageHtml } from './coverage.ts';
 
 export interface BuildResult {
   bundle: ContentBundle;
@@ -23,8 +25,9 @@ function yamlFiles(dir: string): string[] {
 /**
  * Reads every YAML table under `contentDir`, checks it, and returns the bundle
  * with a list of errors. One file per table; the file name is the table name.
- * Checks: schema (missing, mistyped and unknown fields) and id uniqueness
- * across the whole bundle (Spec 08, "Validation and coverage").
+ * Checks: schema (missing, mistyped and unknown fields), id uniqueness across the
+ * whole bundle, references, theme ids and template text (Spec 08, "Validation and
+ * coverage"). Coverage is reported separately (tools/coverage.ts).
  */
 export function buildContent(contentDir: string): BuildResult {
   const errors: string[] = [];
@@ -78,25 +81,42 @@ export function buildContent(contentDir: string): BuildResult {
     tables[table] = entries;
   }
 
-  return { bundle: { tables }, errors };
+  const bundle: ContentBundle = { tables };
+  errors.push(...checkContent(bundle));
+  return { bundle, errors };
 }
 
 function main(): void {
   const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
   const checkOnly = process.argv.includes('--check');
+  // --strict is the launch bar (Spec 08): short tables and coverage gaps fail the build too.
+  const strict = process.argv.includes('--strict');
+  const reportPath = process.argv.includes('--report')
+    ? join(root, 'coverage', 'content-coverage.html')
+    : undefined;
   const { bundle, errors } = buildContent(join(root, 'content'));
+  const coverage = buildCoverage(bundle);
 
+  if (strict && coverage.problems > 0) {
+    errors.push(`coverage: ${coverage.problems} problem(s); run "npm run content:report" for the list`);
+  }
   if (errors.length > 0) {
     console.error(`Content check failed with ${errors.length} error(s):`);
     for (const e of errors) console.error(`  - ${e}`);
     process.exit(1);
   }
 
+  if (reportPath) {
+    mkdirSync(dirname(reportPath), { recursive: true });
+    writeFileSync(reportPath, renderCoverageHtml(coverage));
+    console.log(`Coverage report written to ${relative(root, reportPath)} (${coverage.problems} problem(s) before launch).`);
+  }
+
   const summary = Object.entries(bundle.tables)
     .map(([name, rows]) => `${name}: ${rows.length}`)
     .join(', ');
-  if (checkOnly) {
-    console.log(`Content check passed (${summary}).`);
+  if (checkOnly || reportPath) {
+    if (checkOnly) console.log(`Content check passed (${summary}).`);
     return;
   }
   const out = join(root, 'src', 'generated', 'content-bundle.json');
