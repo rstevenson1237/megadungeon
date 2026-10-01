@@ -27,6 +27,7 @@ export const REFERENCE_RULES: Record<string, readonly RefRule[]> = {
     { field: 'behaviour', target: { registry: 'behaviours' } },
     { field: 'loot.roll', target: 'table' },
   ],
+  bosses: [{ field: 'behaviour', target: { registry: 'behaviours' } }],
 };
 
 /** The table that defines theme ids; `themes:` keys are checked against it once it exists. */
@@ -54,6 +55,16 @@ export const SINGLE_LINE_FIELDS: Record<string, readonly string[]> = {
   village_names: ['name'],
   level_themes: ['name'],
   artifacts: ['name'],
+  bosses: ['name'],
+  traps: ['name'],
+  altar_gods: ['name'],
+  runes: ['name'],
+  rivals: ['name'],
+  npc_names: ['name'],
+  vault_names: ['name'],
+  gems_jewelry: ['name'],
+  magic_items: ['name'],
+  quest_items: ['name'],
 };
 
 function getPath(entry: Entry, path: string): unknown {

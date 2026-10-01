@@ -1,7 +1,7 @@
 // Working grid for level generation: one byte per cell, row by row. Core of the
 // four-direction rules: every step here is orthogonal, never diagonal (Spec 01, 02).
 
-import { TILE, type Level, type Point, type Rect } from './level.ts';
+import { TILE, type Door, type DoorKind, type Level, type Point, type Rect } from './level.ts';
 
 export const WALL = 0;
 export const FLOOR = 1;
@@ -12,7 +12,30 @@ export const SHALLOW = 5;
 export const DEEP = 6;
 export const LAVA = 7;
 
-const TILE_CHARS = [TILE.wall, TILE.floor, TILE.stairsUp, TILE.stairsDown, TILE.door, TILE.shallowWater, TILE.deepWater, TILE.lava];
+/**
+ * Doors that are not plain: a secret door is drawn as wall, a locked or sealed one as a door (Spec 02, task 2.4).
+ * All three can be walked once opened or found, so they count as walkable for four-direction connectivity,
+ * but not for the critical path (`isOpenWalkable`).
+ */
+export const SECRET_DOOR = 8;
+export const LOCKED_DOOR = 9;
+export const SEALED_DOOR = 10;
+
+const TILE_CHARS = [
+  TILE.wall,
+  TILE.floor,
+  TILE.stairsUp,
+  TILE.stairsDown,
+  TILE.door,
+  TILE.shallowWater,
+  TILE.deepWater,
+  TILE.lava,
+  TILE.wall, // secret door
+  TILE.door, // locked door
+  TILE.door, // sealed door
+];
+
+const DOOR_CELL: Record<DoorKind, number> = { normal: DOOR, locked: LOCKED_DOOR, secret: SECRET_DOOR, sealed: SEALED_DOOR };
 
 export const ORTHOGONAL: readonly (readonly [number, number])[] = [
   [0, -1],
@@ -24,6 +47,12 @@ export const ORTHOGONAL: readonly (readonly [number, number])[] = [
 /** Everything but a wall, deep water and lava is walkable; those three count as walls for reachability (Spec 02, "Liquids"). */
 export const isWalkable = (cell: number): boolean => cell !== WALL && cell !== DEEP && cell !== LAVA;
 
+/** Walkable with no secret, locked or sealed door on the way: the rule for the critical path (Spec 02, "Reachability"). */
+export const isOpenWalkable = (cell: number): boolean => isWalkable(cell) && cell !== SECRET_DOOR && cell !== LOCKED_DOOR && cell !== SEALED_DOOR;
+
+/** The cell code a door of this kind has in the working grid. */
+export const doorCell = (kind: DoorKind): number => DOOR_CELL[kind];
+
 export function toRows(cells: Uint8Array, width: number, height: number): string[] {
   const rows: string[] = [];
   for (let y = 0; y < height; y++) {
@@ -34,8 +63,11 @@ export function toRows(cells: Uint8Array, width: number, height: number): string
   return rows;
 }
 
-/** Parse a level's rows back to cells; null when a row has the wrong length or an unknown character. */
-export function toCells(level: Pick<Level, 'tiles' | 'width' | 'height'>): Uint8Array | null {
+/**
+ * Parse a level's rows back to cells; null when a row has the wrong length or an unknown character.
+ * Given the level's doors, secret, locked and sealed doors come back as such instead of wall and door.
+ */
+export function toCells(level: Pick<Level, 'tiles' | 'width' | 'height'> & { doors?: readonly Door[] }): Uint8Array | null {
   const { tiles, width, height } = level;
   if (tiles.length !== height) return null;
   const cells = new Uint8Array(width * height);
@@ -47,6 +79,9 @@ export function toCells(level: Pick<Level, 'tiles' | 'width' | 'height'>): Uint8
       if (cell < 0) return null;
       cells[y * width + x] = cell;
     }
+  }
+  for (const d of level.doors ?? []) {
+    if (d.x >= 0 && d.y >= 0 && d.x < width && d.y < height) cells[d.y * width + d.x] = DOOR_CELL[d.kind];
   }
   return cells;
 }

@@ -8,6 +8,7 @@
 import type { LogMessage } from '../core/log.ts';
 import { generateLevel, PLAIN_STYLE, type LevelStyle } from '../rules/world/generate.ts';
 import { MAX_DEPTH, type Level, type SizeClass } from '../rules/world/level.ts';
+import type { LevelContents } from '../rules/world/placement/index.ts';
 import type { RunLayout } from '../rules/world/run-layout.ts';
 import { Game, type LevelDelta, type PlayerState } from './game.ts';
 
@@ -26,6 +27,8 @@ export interface RunOptions {
   sizeFor?: (depth: number) => SizeClass;
   /** Layout algorithm and variants of a dungeon level, from its theme; plain rooms and corridors when omitted. */
   styleFor?: (depth: number) => LevelStyle;
+  /** What a dungeon level holds (Spec 02, steps 4 to 11); without it a level is bare walls, floor and stairs. */
+  contentsFor?: (depth: number) => LevelContents | undefined;
   /** Depths that are villages instead of levels; the surface only, unless a layout is given. */
   villages?: number[];
   /** Where the run starts: the surface village by default. */
@@ -54,7 +57,7 @@ export class Run {
     this.villages = options.villages ?? [SURFACE, ...(options.layout?.villages.map((v) => v.level) ?? [])];
     const sizeFor = options.sizeFor ?? stubSize;
     const styleFor = options.styleFor ?? (() => PLAIN_STYLE);
-    this.levelFor = options.levelFor ?? ((d) => generateLevel(runSeed, d, sizeFor(d), styleFor(d)));
+    this.levelFor = options.levelFor ?? ((d) => generateLevel(runSeed, d, sizeFor(d), styleFor(d), options.contentsFor?.(d)));
     this.depth = options.startDepth ?? SURFACE;
     this.arrive(this.depth, 'down');
   }

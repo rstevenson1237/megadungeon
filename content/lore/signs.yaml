@@ -1,0 +1,7 @@
+# Stub entries for task 2.4 (Spec 02, step 10). The launch table of 120 is written in Phase 3 (task 3.8).
+- id: sign_stub_01
+  text: "Stairs down. Mind the dark."
+- id: sign_stub_02
+  text: "Authorised delvers only."
+- id: sign_stub_03
+  text: "Deep hall, this way."

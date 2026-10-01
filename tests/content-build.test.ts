@@ -25,11 +25,25 @@ describe('content build', () => {
     const { bundle, errors } = buildContent(resolve(import.meta.dirname, '..', 'content'));
     expect(errors).toEqual([]);
     expect(Object.keys(bundle.tables).sort()).toEqual([
+      'altar_gods',
       'artifacts',
+      'books',
+      'bosses',
+      'gems_jewelry',
+      'graffiti',
       'level_themes',
+      'lore_chains',
+      'magic_items',
       'monsters',
+      'npc_names',
+      'quest_items',
       'quest_templates',
+      'rivals',
       'rumours',
+      'runes',
+      'signs',
+      'traps',
+      'vault_names',
       'village_names',
     ]);
   });

@@ -1,6 +1,6 @@
 import { Game, type PlayerState, createPlayer } from '../src/game/game.ts';
 import { Run } from '../src/game/run.ts';
-import { GENERATOR_VERSION, type Level, type Point } from '../src/rules/world/level.ts';
+import { GENERATOR_VERSION, emptyPlacements, type Level, type Point } from '../src/rules/world/level.ts';
 import type { Monster } from '../src/game/monsters.ts';
 import type { CharacterPaneData } from '../src/ui/character-pane.ts';
 import { CP437_TO_UNICODE } from '../src/ui/cp437.ts';
@@ -20,6 +20,7 @@ export function levelFrom(rows: string[]): Level {
     generatorVersion: GENERATOR_VERSION, runSeed: 0, depth: 1, size: 'small', layout: 'rooms_and_corridors',
     width: rows[0]!.length, height: rows.length, tiles: rows, rooms: [],
     upStair: find('<')!, downStair: find('>'), attempts: 1, fallback: false,
+    ...emptyPlacements(),
   };
 }
 export const blank = (w: number, h: number): string[] => Array.from({ length: h }, () => '#'.repeat(w));
@@ -87,7 +88,9 @@ export const isBlocking = (c: string): boolean => c === '#' || c === '=' || c ==
 export function checkLevel(level: Level): string | null {
   const { width, height, tiles } = level;
   if (tiles.length !== height || tiles.some((r) => r.length !== width)) return 'bad dimensions';
-  const at = (x: number, y: number): string => tiles[y]?.[x] ?? '#';
+  // A secret door is drawn as wall but is a doorway; it counts as walkable for connectivity (Spec 02).
+  const secret = new Set(level.doors.filter((d) => d.kind === 'secret').map((d) => d.y * width + d.x));
+  const at = (x: number, y: number): string => (secret.has(y * width + x) ? '+' : tiles[y]?.[x] ?? '#');
   for (let x = 0; x < width; x++) if (at(x, 0) !== '#' || at(x, height - 1) !== '#') return 'open edge';
   for (let y = 0; y < height; y++) if (at(0, y) !== '#' || at(width - 1, y) !== '#') return 'open edge';
 

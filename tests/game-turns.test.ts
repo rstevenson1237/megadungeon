@@ -1,11 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { MAX_SIMULATED, actionsInRound } from '../src/game/game.ts';
-import { MONSTER_COUNTS, STUB_KINDS, placeStubMonsters, ratingCeiling } from '../src/game/monsters.ts';
+import { DEFAULT_MONSTER_COLOUR, MONSTER_COLOURS, spawnAll } from '../src/game/monsters.ts';
 import { createRng } from '../src/core/rng.ts';
 import { meleeOutcome, rollDie } from '../src/rules/combat/melee.ts';
 import { distanceSq } from '../src/rules/world/geometry.ts';
-import { generateLevel } from '../src/rules/world/generate.ts';
-import type { SizeClass } from '../src/rules/world/level.ts';
 import { gameOn, levelFrom, monsterAt, press, room, shellOn, walk } from './helpers.ts';
 
 describe('turn loop (Spec 04, Turns and timing)', () => {
@@ -236,48 +234,37 @@ describe('stub melee (Spec 03, Melee; Spec 04, Attacks)', () => {
   });
 });
 
-describe('stub monster placement (Spec 02, Depth scaling and step 8)', () => {
-  const sizes: SizeClass[] = ['small', 'medium', 'large'];
+describe('spawning placed monsters (Spec 02, step 8)', () => {
+  const placed = {
+    x: 4, y: 2, id: 'stub_monster_mid', name: 'stub goblin', glyph: 'g', colour: 'moss',
+    dice: 3, modifier: 1, speed: 'normal' as const, behaviour: 'stub', group: 0, role: 'normal' as const,
+  };
 
-  it('places the counts for each size, on floor cells, none within 8 cells of the up stair', () => {
-    for (let seed = 0; seed < 60; seed++) {
-      const size = sizes[seed % 3]!;
-      const level = generateLevel(seed, 1 + seed, size);
-      const monsters = placeStubMonsters(level, createRng(seed));
-      const [lo, hi] = MONSTER_COUNTS[size];
-      expect(monsters.length).toBeGreaterThanOrEqual(lo);
-      expect(monsters.length).toBeLessThanOrEqual(hi);
-      const cells = new Set<string>();
-      for (const m of monsters) {
-        expect(level.tiles[m.y]![m.x]).toBe('.');
-        expect(distanceSq(m, level.upStair)).toBeGreaterThan(64);
-        cells.add(`${m.x},${m.y}`);
-      }
-      expect(cells.size).toBe(monsters.length);
-    }
+  it('brings a placed monster to life at full health, not yet alert, with its table colour', () => {
+    const level = { ...room(8, 3, 1, 2), monsters: [placed, { ...placed, x: 5, colour: 'unheard-of', speed: 'fast' as const }] };
+    const monsters = spawnAll(level);
+    expect(monsters.map((m) => m.id)).toEqual([0, 1]);
+    expect(monsters[0]).toMatchObject({ name: 'stub goblin', glyph: 'g', x: 4, y: 2, dice: 3, maxDice: 3, modifier: 1, alert: false });
+    expect(monsters[0]!.colour).toBe(MONSTER_COLOURS.moss);
+    expect(monsters[1]).toMatchObject({ speed: 'fast', colour: DEFAULT_MONSTER_COLOUR });
   });
 
-  it('rolls ratings between half the ceiling and the ceiling, with the Spec 02 modifier', () => {
-    expect(ratingCeiling(1)).toBe(1);
-    expect(ratingCeiling(10)).toBe(3);
-    expect(ratingCeiling(99)).toBe(20);
-    expect(ratingCeiling(100)).toBe(20);
-    for (const depth of [1, 20, 55, 99]) {
-      const level = generateLevel(7, depth, 'large');
-      const ceiling = ratingCeiling(depth);
-      for (const m of placeStubMonsters(level, createRng(depth))) {
-        expect(m.maxDice).toBeGreaterThanOrEqual(Math.ceil(ceiling / 2));
-        expect(m.maxDice).toBeLessThanOrEqual(ceiling);
-        const base = Math.min(6, Math.floor(depth / 15));
-        expect(m.modifier).toBeGreaterThanOrEqual(Math.max(-2, base - 2));
-        expect(m.modifier).toBeLessThanOrEqual(Math.min(6, base + 2));
-        expect(STUB_KINDS.some((k) => k.name === m.name)).toBe(true);
-      }
-    }
+  it('starts a game with the level\'s monsters and none for a level without any', () => {
+    const level = { ...room(8, 3, 1, 2), monsters: [placed] };
+    expect(gameOn(level).state.monsters).toHaveLength(1);
+    expect(gameOn(room(8, 3, 1, 2)).state.monsters).toEqual([]);
   });
 
-  it('is deterministic per seed and level', () => {
-    const level = generateLevel(5, 12, 'medium');
-    expect(placeStubMonsters(level, createRng(1))).toEqual(placeStubMonsters(level, createRng(1)));
+  it('keeps a locked door shut and free to try, and opens a normal one (Spec 06, until task 2.10)', () => {
+    const base = levelFrom(['#####', '#<+.#', '#####']);
+    const locked = { ...base, doors: [{ x: 2, y: 1, kind: 'locked' as const }] };
+    const game = gameOn(locked);
+    const result = game.act({ type: 'move', dx: 1, dy: 0 })!;
+    expect(result.spent).toBe(false);
+    expect(result.messages[0]!.text).toBe('The door is locked.');
+    expect(game.state.map.player).toEqual({ x: 1, y: 1 });
+    const normal = gameOn({ ...base, doors: [{ x: 2, y: 1, kind: 'normal' as const }] });
+    expect(normal.act({ type: 'move', dx: 1, dy: 0 })!.spent).toBe(true);
+    expect(normal.state.map.openDoors).toEqual([1 * 5 + 2]);
   });
 });

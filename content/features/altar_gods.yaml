@@ -1,0 +1,8 @@
+# Stub entries for task 2.4 (Spec 02, "Shrine sets"). Blessings and shrine buffs arrive with task 2.10;
+# the launch table of 8 is written in Phase 3 (task 3.7).
+- id: god_stub_01
+  name: the Pale Lantern
+- id: god_stub_02
+  name: the Iron Mother
+- id: god_stub_03
+  name: the Quiet Tide

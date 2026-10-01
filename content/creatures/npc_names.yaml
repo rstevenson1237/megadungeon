@@ -1,0 +1,17 @@
+# Stub entries for task 2.4 (Spec 02, step 10). The launch table of 300 is written in Phase 3 (task 3.9).
+- id: npc_name_stub_01
+  name: Brannoch
+- id: npc_name_stub_02
+  name: Ilse Varrow
+- id: npc_name_stub_03
+  name: Old Tam
+- id: npc_name_stub_04
+  name: Sorrel
+- id: npc_name_stub_05
+  name: Garrick Dunn
+- id: npc_name_stub_06
+  name: Maud
+- id: npc_name_stub_07
+  name: Wick
+- id: npc_name_stub_08
+  name: Tilda Ashe

@@ -1,0 +1,37 @@
+# Stub entries for task 2.4 (Spec 05, "Treasure and appraisal"): gems and jewelry tiered by depth, with base
+# values in gp. The launch table of 50 is written in Phase 3 (task 3.5).
+- id: gem_stub_quartz
+  name: quartz
+  kind: gem
+  value: 25
+  depth: [1, 40]
+- id: gem_stub_garnet
+  name: garnet
+  kind: gem
+  value: 100
+  depth: [10, 70]
+- id: gem_stub_ruby
+  name: ruby
+  kind: gem
+  value: 500
+  depth: [40, 100]
+- id: gem_stub_diamond
+  name: diamond
+  kind: gem
+  value: 1500
+  depth: [70, 100]
+- id: jewelry_stub_brooch
+  name: silver brooch
+  kind: jewelry
+  value: 150
+  depth: [1, 45]
+- id: jewelry_stub_circlet
+  name: gold circlet
+  kind: jewelry
+  value: 600
+  depth: [20, 100]
+- id: jewelry_stub_chalice
+  name: jewelled chalice
+  kind: jewelry
+  value: 2000
+  depth: [50, 100]

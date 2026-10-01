@@ -1,0 +1,49 @@
+# The floor and container traps of Spec 06, as stub entries for task 2.4. Their effects arrive with task 2.10.
+# `themes` follows the intake's feature bias: collapse traps in the Old Mine, spore (poison gas) traps in the
+# Fungal Caverns, fire in the Lava Forges, summoning in the Wizard's Sanctum, magic traps in the Void Halls.
+- id: trap_dart
+  name: dart trap
+  kind: floor
+- id: trap_pit
+  name: pit
+  kind: floor
+- id: trap_poison_gas
+  name: poison gas
+  kind: floor
+  themes: { fungal_caverns: 3 }
+- id: trap_sleep_gas
+  name: sleep gas
+  kind: floor
+- id: trap_net
+  name: net trap
+  kind: floor
+- id: trap_alarm
+  name: alarm
+  kind: floor
+- id: trap_teleport
+  name: teleport trap
+  kind: floor
+  themes: { void_halls: 3 }
+- id: trap_collapse
+  name: collapse
+  kind: floor
+  themes: { old_mine: 3 }
+- id: trap_deep_pit
+  name: deep pit
+  kind: floor
+  weight: 5
+  tags: [deep_pit]
+- id: trap_poison_needle
+  name: poison needle
+  kind: container
+- id: trap_fire_burst
+  name: fire burst
+  kind: container
+  themes: { lava_forges: 3 }
+- id: trap_container_alarm
+  name: alarm
+  kind: container
+- id: trap_summoning
+  name: summoning
+  kind: container
+  themes: { wizards_sanctum: 2 }
