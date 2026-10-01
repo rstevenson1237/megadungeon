@@ -81,8 +81,11 @@ export class HelpOverlay implements Overlay {
   }
 }
 
-/** The game menu Esc opens when there is nothing to cancel. */
-export function gameMenu(): Menu {
+/**
+ * The game menu Esc opens when there is nothing to cancel. `onQuit` abandons the run and returns
+ * to the title screen; there is no save to fall back to until task 2.13, so for now everything is lost.
+ */
+export function gameMenu(onQuit?: () => void): Menu {
   const unavailable = (what: string): OverlayResult => ({
     close: true,
     message: { kind: 'system', text: `${what} is not yet available.` },
@@ -90,6 +93,9 @@ export function gameMenu(): Menu {
   return new Menu('Game Menu', [
     { label: 'Help', choose: () => ({ close: true, open: new HelpOverlay() }) },
     { label: 'Leaderboard', choose: () => unavailable('The leaderboard') },
-    { label: 'Quit without saving', choose: () => unavailable('Quitting') },
+    {
+      label: 'Quit without saving',
+      choose: () => (onQuit ? (onQuit(), { close: true }) : unavailable('Quitting')),
+    },
   ]);
 }

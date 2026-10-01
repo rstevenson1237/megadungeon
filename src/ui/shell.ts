@@ -23,6 +23,8 @@ export class Shell {
   readonly overlays: Overlay[] = [];
   /** The round, from the game once a level is loaded; messages from this round draw bright. */
   turn = 1;
+  /** Called when the player quits from the game menu (returns to the title screen). */
+  onQuit: (() => void) | null = null;
   /** The run in progress; null until one starts (the title screen, task 1.10). */
   run: Run | null = null;
   /** The village menu, while the run is in a village (Spec 01: no village map). */
@@ -92,7 +94,7 @@ export class Shell {
     }
     switch (command.type) {
       case 'cancel':
-        this.overlays.push(gameMenu());
+        this.overlays.push(gameMenu(this.onQuit ?? undefined));
         return;
       case 'history':
         this.overlays.push(new HistoryOverlay(this.log, this.turn));

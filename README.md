@@ -25,4 +25,4 @@ CI (`.github/workflows/ci.yml`) runs the content check, typecheck, tests and bui
 
 ## Font
 
-The renderer bakes a 9x16 CP437 font into a glyph atlas (`src/ui/atlas.ts`). The font is IBM VGA 9x16 from The Ultimate Oldschool PC Font Pack by VileR, bundled unmodified in `src/ui/fonts/` under CC BY-SA 4.0 (attribution in `src/ui/fonts/NOTICE.md`, licence text alongside). Credits in the game itself arrive with the title screen (task 1.10).
+The renderer bakes a 9x16 CP437 font into a glyph atlas (`src/ui/atlas.ts`). The font is IBM VGA 9x16 from The Ultimate Oldschool PC Font Pack by VileR, bundled unmodified in `src/ui/fonts/` under CC BY-SA 4.0 (attribution in `src/ui/fonts/NOTICE.md`, licence text alongside). The title screen carries the credit line.
