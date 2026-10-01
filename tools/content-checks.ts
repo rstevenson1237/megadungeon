@@ -52,6 +52,8 @@ export const NAME_MAX_WIDTH = 25;
 export const SINGLE_LINE_FIELDS: Record<string, readonly string[]> = {
   monsters: ['name'],
   village_names: ['name'],
+  level_themes: ['name'],
+  artifacts: ['name'],
 };
 
 function getPath(entry: Entry, path: string): unknown {

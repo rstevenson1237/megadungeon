@@ -9,6 +9,7 @@
   needs: boss
   text:
     - "{Boss} holds level {level}."
+    - "Something on level {level} guards {artifact}."
 - id: stub_rumour_teleporter
   needs: teleporter
   text:

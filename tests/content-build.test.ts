@@ -25,6 +25,8 @@ describe('content build', () => {
     const { bundle, errors } = buildContent(resolve(import.meta.dirname, '..', 'content'));
     expect(errors).toEqual([]);
     expect(Object.keys(bundle.tables).sort()).toEqual([
+      'artifacts',
+      'level_themes',
       'monsters',
       'quest_templates',
       'rumours',

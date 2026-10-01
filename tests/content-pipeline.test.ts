@@ -168,8 +168,14 @@ describe('coverage report', () => {
     expect(r.tables.find((t) => t.table === 'magic_items')!.depthGaps).toEqual([{ from: 41, to: 100 }]);
   });
 
-  it('warns that theme ids are unchecked while there is no theme table', () => {
-    expect(report.warnings.join(' ')).toMatch(/level_themes/);
+  it('warns that theme ids are unchecked only while there is no theme table', () => {
+    expect(report.warnings).toEqual([]); // the real content has the 13 themes
+    const bare = buildCoverage({ tables: { village_names: [] } });
+    expect(bare.warnings.join(' ')).toMatch(/level_themes/);
+  });
+
+  it('shows the 13 themes covering every level, so the theme table has no gap', () => {
+    expect(byTable('level_themes')).toMatchObject({ count: 13, minimum: 13, depthGaps: [], ok: true });
   });
 
   it('flags a text table with more than 20% in other styles', () => {

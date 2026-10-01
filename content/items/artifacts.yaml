@@ -1,0 +1,62 @@
+# Stub entries for task 2.2 (Spec 08, "Stub content in Phases 1 and 2"): enough that a run never
+# runs out of artifacts. The launch table of 40 is written in Phase 3 (task 3.5).
+- id: stub_artifact_01
+  name: Stub Relic 01
+  tags: [stub]
+- id: stub_artifact_02
+  name: Stub Relic 02
+  tags: [stub]
+- id: stub_artifact_03
+  name: Stub Relic 03
+  tags: [stub]
+- id: stub_artifact_04
+  name: Stub Relic 04
+  tags: [stub]
+- id: stub_artifact_05
+  name: Stub Relic 05
+  tags: [stub]
+- id: stub_artifact_06
+  name: Stub Relic 06
+  tags: [stub]
+- id: stub_artifact_07
+  name: Stub Relic 07
+  tags: [stub]
+- id: stub_artifact_08
+  name: Stub Relic 08
+  tags: [stub]
+- id: stub_artifact_09
+  name: Stub Relic 09
+  tags: [stub]
+- id: stub_artifact_10
+  name: Stub Relic 10
+  tags: [stub]
+- id: stub_artifact_11
+  name: Stub Relic 11
+  tags: [stub]
+- id: stub_artifact_12
+  name: Stub Relic 12
+  tags: [stub]
+- id: stub_artifact_13
+  name: Stub Relic 13
+  tags: [stub]
+- id: stub_artifact_14
+  name: Stub Relic 14
+  tags: [stub]
+- id: stub_artifact_15
+  name: Stub Relic 15
+  tags: [stub]
+- id: stub_artifact_16
+  name: Stub Relic 16
+  tags: [stub]
+- id: stub_artifact_17
+  name: Stub Relic 17
+  tags: [stub]
+- id: stub_artifact_18
+  name: Stub Relic 18
+  tags: [stub]
+- id: stub_artifact_19
+  name: Stub Relic 19
+  tags: [stub]
+- id: stub_artifact_20
+  name: Stub Relic 20
+  tags: [stub]

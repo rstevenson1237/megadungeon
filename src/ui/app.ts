@@ -4,7 +4,7 @@
 
 import { formatSeed } from '../core/rng.ts';
 import { createPlayer } from '../game/game.ts';
-import { Run } from '../game/run.ts';
+import { Run, type RunOptions } from '../game/run.ts';
 import type { CharacterPaneData } from './character-pane.ts';
 import type { Grid } from './grid.ts';
 import { type KeyInput, keyToCommand } from './input.ts';
@@ -14,6 +14,8 @@ import { type RunChoice, TitleScreen, type TitleDeps } from './title.ts';
 export interface AppDeps extends TitleDeps {
   /** A fresh character for a new run (test data until creation exists). */
   newCharacter: () => CharacterPaneData;
+  /** Run options for a seed: the run layout and level sizes from the content (task 2.2). */
+  runOptions?: (seed: number) => RunOptions;
 }
 
 export class App {
@@ -42,7 +44,7 @@ export class App {
     });
     const shell = new Shell('', character);
     shell.onQuit = () => this.openTitle();
-    shell.setRun(new Run(choice.seed, player)); // starts in the surface village
+    shell.setRun(new Run(choice.seed, player, this.deps.runOptions?.(choice.seed))); // starts in the surface village
     const which = choice.daily ? `seed of the day ${choice.daily}` : 'random seed';
     shell.log.add({ kind: 'system', text: `New run, ${which}: ${formatSeed(choice.seed)}.` }, 1);
     this.title = null;

@@ -1,12 +1,13 @@
 // The run (Spec 02, "Seeds, determinism and persistence"; Spec 09): one run seed, where the
 // player is in the 100 levels, and the deltas of every level visited. A level regenerates from
 // the seed on each visit and its delta is replayed on top, so only the player's changes are kept.
-// Task 1.9 builds the surface village stub and in-memory deltas; subterranean villages come with
-// the run layout (task 2.2) and saving with task 2.13.
+// Task 1.9 built the surface village stub and in-memory deltas; task 2.2 adds the run layout, which
+// places the subterranean villages and picks each level's theme and size. Saving comes with task 2.13.
 
 import type { LogMessage } from '../core/log.ts';
 import { generateLevel } from '../rules/world/generate.ts';
 import { MAX_DEPTH, type Level, type SizeClass } from '../rules/world/level.ts';
+import type { RunLayout } from '../rules/world/run-layout.ts';
 import { Game, type LevelDelta, type PlayerState } from './game.ts';
 
 /** The surface village sits above level 1. */
@@ -18,7 +19,11 @@ export function stubSize(depth: number): SizeClass {
 }
 
 export interface RunOptions {
-  /** Depths that are villages instead of levels: only the surface until the run layout (task 2.2). */
+  /** The run layout (Spec 02): its subterranean villages join the surface as the village depths. */
+  layout?: RunLayout;
+  /** Size class of a dungeon level, from its theme; without it sizes cycle with depth (stub). */
+  sizeFor?: (depth: number) => SizeClass;
+  /** Depths that are villages instead of levels; the surface only, unless a layout is given. */
   villages?: number[];
   /** Where the run starts: the surface village by default. */
   startDepth?: number;
@@ -28,6 +33,7 @@ export interface RunOptions {
 
 export class Run {
   readonly villages: readonly number[];
+  readonly layout: RunLayout | undefined;
   readonly deltas: Record<number, LevelDelta> = {};
   depth: number;
   /** The level being played; null in a village, where there is no map (Spec 01). */
@@ -41,8 +47,10 @@ export class Run {
     readonly player: PlayerState,
     options: RunOptions = {},
   ) {
-    this.villages = options.villages ?? [SURFACE];
-    this.levelFor = options.levelFor ?? ((d) => generateLevel(runSeed, d, stubSize(d)));
+    this.layout = options.layout;
+    this.villages = options.villages ?? [SURFACE, ...(options.layout?.villages.map((v) => v.level) ?? [])];
+    const sizeFor = options.sizeFor ?? stubSize;
+    this.levelFor = options.levelFor ?? ((d) => generateLevel(runSeed, d, sizeFor(d)));
     this.depth = options.startDepth ?? SURFACE;
     this.arrive(this.depth, 'down');
   }
@@ -53,7 +61,10 @@ export class Run {
 
   /** The main view's header (Spec 01): the village or the level and its depth. */
   get title(): string {
-    return this.depth === SURFACE ? 'Surface Village' : this.inVillage ? `Village, Level ${this.depth}` : `Level ${this.depth}`;
+    if (this.depth === SURFACE) return 'Surface Village';
+    if (!this.inVillage) return `Level ${this.depth}`;
+    const name = this.layout?.villages.find((v) => v.level === this.depth)?.name;
+    return name ? `${name}, Level ${this.depth}` : `Village, Level ${this.depth}`;
   }
 
   /** Whether the stairs or the village menu lead further in that direction. */

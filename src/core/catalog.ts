@@ -22,7 +22,7 @@ export interface CatalogEntry {
 }
 
 export const CATALOG: readonly CatalogEntry[] = [
-  { table: 'level_themes', area: 'world', label: 'Level themes', minimum: 13, unit: 'entries', readBy: 'Spec 02' },
+  { table: 'level_themes', area: 'world', label: 'Level themes', minimum: 13, unit: 'entries', readBy: 'Spec 02', depthCoverage: [1, 100] },
   { table: 'village_names', area: 'world', label: 'Village names', minimum: 40, unit: 'entries', readBy: 'Spec 07', text: true },
   { table: 'monsters', area: 'creatures', label: 'Monsters', minimum: 150, unit: 'entries', readBy: 'Specs 02, 04', depthCoverage: [1, 100] },
   { table: 'bosses', area: 'creatures', label: 'Bosses', minimum: 40, unit: 'entries', readBy: 'Specs 02, 04', depthCoverage: [1, 99] },
@@ -51,6 +51,22 @@ export const CATALOG: readonly CatalogEntry[] = [
   { table: 'quest_items', area: 'lore', label: 'Named quest items', minimum: 60, unit: 'entries', readBy: 'Specs 02, 07', text: true },
   { table: 'vault_names', area: 'lore', label: 'Vault and shrine names', minimum: 30, unit: 'entries', readBy: 'Spec 02', text: true },
 ];
+
+/** The eight layout algorithms and the level 100 set piece (Spec 02, "Level sizes and layouts"). */
+export const LAYOUT_ALGORITHMS = [
+  'rooms_and_corridors',
+  'mirrored_halls',
+  'warren_tunnels',
+  'channel_grid',
+  'cellular_caves',
+  'maze_with_crypts',
+  'freeform_chambers',
+  'disjoint_rooms',
+  'set_piece',
+] as const;
+export type LayoutAlgorithm = (typeof LAYOUT_ALGORITHMS)[number];
+
+export const SIZE_CLASSES = ['small', 'medium', 'large'] as const;
 
 /** Rumour kinds (Spec 07, Tavern): what a rumour can say. A rumour template `needs` one. */
 export const RUMOUR_KINDS = ['vault', 'boss', 'teleporter', 'rival_stash', 'trap_level', 'fountain'] as const;
