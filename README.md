@@ -22,3 +22,7 @@ npm run ci           # everything CI runs
 ```
 
 CI (`.github/workflows/ci.yml`) runs the content check, typecheck, tests and build on every push and pull request. Every merge to `main` also deploys the build to GitHub Pages at <https://rstevenson1237.github.io/megadungeon/>. Pages must be enabled once in the repository settings (Settings, Pages, Source: GitHub Actions).
+
+## Font
+
+The renderer bakes a 9x16 CP437 font into a glyph atlas (`src/ui/atlas.ts`). The font is IBM VGA 9x16 from The Ultimate Oldschool PC Font Pack by VileR, bundled unmodified in `src/ui/fonts/` under CC BY-SA 4.0 (attribution in `src/ui/fonts/NOTICE.md`, licence text alongside). Credits in the game itself arrive with the title screen (task 1.10).
