@@ -2,57 +2,11 @@ import { describe, expect, it } from 'vitest';
 import { createRng, hash32, levelSeed } from '../src/core/rng.ts';
 import { connectRegions, fallbackLevel, generateLevel, placeStairs } from '../src/rules/world/generate.ts';
 import { FLOOR, STAIRS_UP, WALL, labelRegions } from '../src/rules/world/grid.ts';
-import { LEVEL_SIZES, MAX_DEPTH, TILE, type Level, type SizeClass } from '../src/rules/world/level.ts';
+import { LEVEL_SIZES, MAX_DEPTH, type SizeClass } from '../src/rules/world/level.ts';
 import { findProblems } from '../src/rules/world/validate.ts';
+import { checkLevel } from './helpers.ts';
 
 const SIZES: SizeClass[] = ['small', 'medium', 'large'];
-const DIRS = [[0, -1], [1, 0], [0, 1], [-1, 0]] as const;
-
-// An independent checker, written separately from the generator's own: breadth-first
-// search over orthogonal steps only.
-function checkLevel(level: Level): string | null {
-  const { width, height, tiles } = level;
-  if (tiles.length !== height || tiles.some((r) => r.length !== width)) return 'bad dimensions';
-  const at = (x: number, y: number): string => (tiles[y]?.[x] ?? TILE.wall);
-  for (let x = 0; x < width; x++) if (at(x, 0) !== '#' || at(x, height - 1) !== '#') return 'open edge';
-  for (let y = 0; y < height; y++) if (at(0, y) !== '#' || at(width - 1, y) !== '#') return 'open edge';
-
-  let ups = 0;
-  let downs = 0;
-  let walkable = 0;
-  for (let y = 0; y < height; y++) {
-    for (let x = 0; x < width; x++) {
-      const c = at(x, y);
-      if (c === '<') ups++;
-      if (c === '>') downs++;
-      if (c !== '#') walkable++;
-    }
-  }
-  if (ups !== 1 || at(level.upStair.x, level.upStair.y) !== '<') return 'up stair';
-  if (level.depth === MAX_DEPTH ? downs !== 0 || level.downStair !== null : downs !== 1) return 'down stair count';
-
-  const dist = new Map<number, number>([[level.upStair.y * width + level.upStair.x, 0]]);
-  const queue = [level.upStair.y * width + level.upStair.x];
-  for (let head = 0; head < queue.length; head++) {
-    const i = queue[head]!;
-    const x = i % width;
-    const y = (i - x) / width;
-    for (const [dx, dy] of DIRS) {
-      const n = (y + dy) * width + (x + dx);
-      if (at(x + dx, y + dy) === '#' || dist.has(n)) continue;
-      dist.set(n, dist.get(i)! + 1);
-      queue.push(n);
-    }
-  }
-  if (dist.size !== walkable) return `unreachable cells: ${walkable - dist.size}`;
-  if (level.downStair) {
-    const longest = Math.max(...dist.values());
-    const d = dist.get(level.downStair.y * width + level.downStair.x)!;
-    if (d < 0.6 * longest) return `down stair at ${d} of ${longest}`;
-    if (at(level.downStair.x, level.downStair.y) !== '>') return 'down stair position';
-  }
-  return null;
-}
 
 describe('rooms-and-corridors generator (Spec 02)', () => {
   it('produces each size class at its size', () => {

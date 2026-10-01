@@ -2,7 +2,8 @@
 // needs and gives a run its layout and level sizes.
 
 import type { ContentBundle, Artifact, LevelTheme, VillageName } from '../core/schemas.ts';
-import { generateRunLayout, type LayoutContent } from '../rules/world/run-layout.ts';
+import { PLAIN_STYLE } from '../rules/world/generate.ts';
+import { generateRunLayout, type LayoutContent, type ThemeRow } from '../rules/world/run-layout.ts';
 import type { RunOptions } from './run.ts';
 
 export function layoutContentOf(bundle: ContentBundle): LayoutContent {
@@ -14,13 +15,15 @@ export function layoutContentOf(bundle: ContentBundle): LayoutContent {
   };
 }
 
-/** The layout for a seed, and the level size each theme calls for. */
+/** The layout for a seed, and the level size and layout algorithm each theme calls for. */
 export function runOptionsFor(bundle: ContentBundle, seed: number): RunOptions {
   const content = layoutContentOf(bundle);
   const layout = generateRunLayout(seed, content);
-  const sizes = new Map(content.themes.map((t) => [t.id, t.size]));
+  const themes = new Map(content.themes.map((t) => [t.id, t]));
+  const themeAt = (depth: number): ThemeRow | undefined => themes.get(layout.themes[depth] ?? '');
   return {
     layout,
-    sizeFor: (depth) => sizes.get(layout.themes[depth] ?? '') ?? 'medium',
+    sizeFor: (depth) => themeAt(depth)?.size ?? 'medium',
+    styleFor: (depth) => themeAt(depth) ?? PLAIN_STYLE,
   };
 }

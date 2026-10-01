@@ -2,10 +2,11 @@
 // player is in the 100 levels, and the deltas of every level visited. A level regenerates from
 // the seed on each visit and its delta is replayed on top, so only the player's changes are kept.
 // Task 1.9 built the surface village stub and in-memory deltas; task 2.2 adds the run layout, which
-// places the subterranean villages and picks each level's theme and size. Saving comes with task 2.13.
+// places the subterranean villages and picks each level's theme and size; task 2.3 passes the theme's layout
+// algorithm on to the generator. Saving comes with task 2.13.
 
 import type { LogMessage } from '../core/log.ts';
-import { generateLevel } from '../rules/world/generate.ts';
+import { generateLevel, PLAIN_STYLE, type LevelStyle } from '../rules/world/generate.ts';
 import { MAX_DEPTH, type Level, type SizeClass } from '../rules/world/level.ts';
 import type { RunLayout } from '../rules/world/run-layout.ts';
 import { Game, type LevelDelta, type PlayerState } from './game.ts';
@@ -23,6 +24,8 @@ export interface RunOptions {
   layout?: RunLayout;
   /** Size class of a dungeon level, from its theme; without it sizes cycle with depth (stub). */
   sizeFor?: (depth: number) => SizeClass;
+  /** Layout algorithm and variants of a dungeon level, from its theme; plain rooms and corridors when omitted. */
+  styleFor?: (depth: number) => LevelStyle;
   /** Depths that are villages instead of levels; the surface only, unless a layout is given. */
   villages?: number[];
   /** Where the run starts: the surface village by default. */
@@ -50,7 +53,8 @@ export class Run {
     this.layout = options.layout;
     this.villages = options.villages ?? [SURFACE, ...(options.layout?.villages.map((v) => v.level) ?? [])];
     const sizeFor = options.sizeFor ?? stubSize;
-    this.levelFor = options.levelFor ?? ((d) => generateLevel(runSeed, d, sizeFor(d)));
+    const styleFor = options.styleFor ?? (() => PLAIN_STYLE);
+    this.levelFor = options.levelFor ?? ((d) => generateLevel(runSeed, d, sizeFor(d), styleFor(d)));
     this.depth = options.startDepth ?? SURFACE;
     this.arrive(this.depth, 'down');
   }

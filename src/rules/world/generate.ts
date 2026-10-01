@@ -1,7 +1,8 @@
-// Level generation pipeline (Spec 02, "Generation pipeline"). Task 1.6 builds steps 1 to 3
-// (carve, connect, stairs) and the validation they need (step 12) for the rooms-and-corridors
-// layout. Doors, keys, features and the rest arrive with tasks 2.3 and 2.4.
+// Level generation pipeline (Spec 02, "Generation pipeline"). Tasks 1.6 and 2.3 build steps 1 to 3
+// (carve, connect, stairs) and the validation they need (step 12) for all eight layout algorithms,
+// with the retries and the plain-rooms fallback. Doors, keys, features and the rest arrive with task 2.4.
 
+import type { LayoutAlgorithm } from '../../core/catalog.ts';
 import { levelSeed, levelStreams, subSeed, type Rng } from '../../core/rng.ts';
 import {
   FLOOR,
@@ -9,66 +10,127 @@ import {
   STAIRS_UP,
   carveCorridor,
   distancesFrom,
+  fillRect,
+  findClearings,
+  interiorOf,
   labelRegions,
   toRows,
 } from './grid.ts';
+import { carveLayout, DEFAULT_STYLE, type LayoutStyle } from './layouts/index.ts';
 import { GENERATOR_VERSION, LEVEL_SIZES, MAX_DEPTH, type Level, type Point, type Rect, type SizeClass } from './level.ts';
-import { carveRoomsAndCorridors } from './rooms-and-corridors.ts';
 import { farEnough, findProblems } from './validate.ts';
+
+/**
+ * Which layout algorithm builds a level, and its variants (Spec 02, clarifications of task 2.3).
+ * A theme row has exactly these fields, so a theme can be passed as it is.
+ */
+export interface LevelStyle extends Partial<LayoutStyle> {
+  layout: LayoutAlgorithm;
+}
+
+/** The style a level gets when none is given. */
+export const PLAIN_STYLE: LevelStyle = { layout: 'rooms_and_corridors' };
 
 /** Tries with successive sub-seeds before the plain-rooms fallback (Spec 02, step 12). */
 export const MAX_ATTEMPTS = 20;
 
+const ORTHOGONAL_STEPS = [
+  [0, -1],
+  [1, 0],
+  [0, 1],
+  [-1, 0],
+] as const;
+
 /**
  * Step 2, "Connect": flood-fill in four directions and join every separate region to the
- * main one (the one holding `anchor`) with a corridor. Two regions that touch only at a
- * corner are at distance 2, so their joining corridor is the cell that widens the touch
- * into a real passage.
+ * main one (the one holding `anchor`, or the largest when there is no anchor) with an L-shaped
+ * corridor between the nearest pair of cells. Two regions that touch only at a corner are
+ * at distance 2, so their joining corridor is the cell that widens the touch into a real passage.
+ * Deep water on the way becomes a ford and lava a causeway (see `carveCorridor`).
  */
-export function connectRegions(cells: Uint8Array, width: number, height: number, anchor: Point, rng: Rng): void {
+export function connectRegions(cells: Uint8Array, width: number, height: number, anchor: Point | null, rng: Rng): void {
+  const size = width * height;
+  const dist = new Int32Array(size);
+  const source = new Int32Array(size);
+  const queue = new Int32Array(size);
   for (;;) {
     const { labels, count } = labelRegions(cells, width, height);
     if (count <= 1) return;
-    const main = labels[anchor.y * width + anchor.x]!;
-    const mainCells: Point[] = [];
-    const otherCells: Point[] = [];
-    for (let i = 0; i < labels.length; i++) {
-      const label = labels[i]!;
-      if (label === 0) continue;
-      (label === main ? mainCells : otherCells).push({ x: i % width, y: Math.floor(i / width) });
+    let main: number;
+    if (anchor) {
+      main = labels[anchor.y * width + anchor.x]!;
+    } else {
+      const sizes = new Int32Array(count + 1);
+      for (const label of labels) sizes[label]!++;
+      main = 1;
+      for (let l = 2; l <= count; l++) if (sizes[l]! > sizes[main]!) main = l;
     }
-    // Join the nearest other-region cell to the nearest main-region cell; the next pass
-    // finds any region still left over.
-    let best: [Point, Point] = [mainCells[0]!, otherCells[0]!];
-    let bestDist = Infinity;
-    for (const o of otherCells) {
-      for (const m of mainCells) {
-        const d = Math.abs(o.x - m.x) + Math.abs(o.y - m.y);
-        if (d < bestDist) {
-          bestDist = d;
-          best = [m, o];
-        }
+    // Breadth-first from every cell of the main region over everything, walls included: the first
+    // cell of another region reached is the nearest by Manhattan distance, and `source` is its partner.
+    dist.fill(-1);
+    let head = 0;
+    let tail = 0;
+    for (let i = 0; i < size; i++) {
+      if (labels[i] === main) {
+        dist[i] = 0;
+        source[i] = i;
+        queue[tail++] = i;
       }
     }
-    carveCorridor(cells, width, best[0], best[1], rng.oneIn(2));
+    let found = -1;
+    while (head < tail) {
+      const i = queue[head++]!;
+      if (labels[i] !== 0 && labels[i] !== main) {
+        found = i;
+        break;
+      }
+      const x = i % width;
+      const y = (i - x) / width;
+      for (const [dx, dy] of ORTHOGONAL_STEPS) {
+        const nx = x + dx;
+        const ny = y + dy;
+        if (nx < 0 || ny < 0 || nx >= width || ny >= height) continue;
+        const n = ny * width + nx;
+        if (dist[n] !== -1) continue;
+        dist[n] = dist[i]! + 1;
+        source[n] = source[i]!;
+        queue[tail++] = n;
+      }
+    }
+    const from = source[found]!;
+    carveCorridor(
+      cells,
+      width,
+      { x: from % width, y: Math.floor(from / width) },
+      { x: found % width, y: Math.floor(found / width) },
+      rng.oneIn(2),
+    );
   }
 }
 
-/** Cells with floor on all four sides inside a room: never a doorway, never in a corridor mouth. */
-function roomInteriorCells(rooms: Rect[]): Point[] {
+/** Plain floor cells inside rooms, never on a room's edge: not a doorway, not in a corridor mouth. */
+function roomInteriorCells(cells: Uint8Array, width: number, rooms: Rect[]): Point[] {
   const out: Point[] = [];
   for (const r of rooms) {
-    for (let y = r.y + 1; y < r.y + r.h - 1; y++) {
-      for (let x = r.x + 1; x < r.x + r.w - 1; x++) out.push({ x, y });
+    const inner = interiorOf(r);
+    for (let y = inner.y; y < inner.y + inner.h; y++) {
+      for (let x = inner.x; x < inner.x + inner.w; x++) if (cells[y * width + x] === FLOOR) out.push({ x, y });
     }
   }
+  return out;
+}
+
+function plainFloorCells(cells: Uint8Array, width: number): Point[] {
+  const out: Point[] = [];
+  for (let i = 0; i < cells.length; i++) if (cells[i] === FLOOR) out.push({ x: i % width, y: Math.floor(i / width) });
   return out;
 }
 
 /**
  * Step 3, "Stairs": the up stair in a random room, then the down stair at least 60% of the
  * longest walkable distance away (none on level 100). Returns null when no cell qualifies,
- * which makes the attempt fail validation.
+ * which makes the attempt fail validation. With `loose`, a stair that finds no room cell
+ * (or no room cell far enough) goes on any plain floor cell instead.
  */
 export function placeStairs(
   cells: Uint8Array,
@@ -77,8 +139,10 @@ export function placeStairs(
   rooms: Rect[],
   depth: number,
   rng: Rng,
+  loose = false,
 ): { up: Point; down: Point | null } | null {
-  const spots = roomInteriorCells(rooms);
+  let spots = roomInteriorCells(cells, width, rooms);
+  if (spots.length === 0 && loose) spots = plainFloorCells(cells, width);
   if (spots.length === 0) return null;
   const up = rng.pick(spots);
   cells[up.y * width + up.x] = STAIRS_UP;
@@ -87,9 +151,11 @@ export function placeStairs(
   const dist = distancesFrom(cells, width, height, up);
   let longest = 0;
   for (const d of dist) if (d > longest) longest = d;
-  const far = spots.filter((p) => farEnough(dist[p.y * width + p.x]!, longest) && (p.x !== up.x || p.y !== up.y));
-  if (far.length === 0) return null;
-  const down = rng.pick(far);
+  const far = (p: Point): boolean => farEnough(dist[p.y * width + p.x]!, longest) && (p.x !== up.x || p.y !== up.y);
+  let candidates = spots.filter(far);
+  if (candidates.length === 0 && loose) candidates = plainFloorCells(cells, width).filter(far);
+  if (candidates.length === 0) return null;
+  const down = rng.pick(candidates);
   cells[down.y * width + down.x] = STAIRS_DOWN;
   return { up, down };
 }
@@ -98,6 +164,7 @@ function build(
   runSeed: number,
   depth: number,
   size: SizeClass,
+  layout: LayoutAlgorithm,
   attempts: number,
   fallback: boolean,
   cells: Uint8Array,
@@ -110,6 +177,7 @@ function build(
     runSeed: runSeed >>> 0,
     depth,
     size,
+    layout,
     width,
     height,
     tiles: toRows(cells, width, height),
@@ -121,24 +189,49 @@ function build(
   };
 }
 
-/** One try with one sub-seed: carve, connect, stairs. Null when stairs cannot be placed. */
-function attempt(runSeed: number, depth: number, size: SizeClass, seed: number, attempts: number): Level | null {
+/** The algorithm that really builds a level: the set piece is rooms and corridors until task 3.10. */
+const algorithmFor = (layout: LayoutAlgorithm): LayoutAlgorithm => (layout === 'set_piece' ? 'rooms_and_corridors' : layout);
+
+/**
+ * One try with one sub-seed: carve, connect, stairs. Null when the layout comes out unusable or
+ * the stairs cannot be placed.
+ */
+function attempt(
+  runSeed: number,
+  depth: number,
+  size: SizeClass,
+  style: LevelStyle,
+  seed: number,
+  attempts: number,
+  fallback: boolean,
+): Level | null {
   const { width, height } = LEVEL_SIZES[size];
   const { layout } = levelStreams(seed);
   const cells = new Uint8Array(width * height);
-  const rooms = carveRoomsAndCorridors(cells, width, height, layout);
-  const first = rooms[0]!;
-  connectRegions(cells, width, height, { x: first.x, y: first.y }, layout);
-  const stairs = placeStairs(cells, width, height, rooms, depth, layout);
+  const variants: LayoutStyle = {
+    stamp: style.stamp ?? DEFAULT_STYLE.stamp,
+    liquid: style.liquid ?? DEFAULT_STYLE.liquid,
+    pillared: style.pillared ?? DEFAULT_STYLE.pillared,
+  };
+  const carved = carveLayout(style.layout, cells, width, height, layout, variants);
+  if (!carved) return null;
+  connectRegions(cells, width, height, null, layout);
+  const rooms = carved.rooms ?? findClearings(cells, width, height);
+  if (rooms.length === 0) return null;
+  const stairs = placeStairs(cells, width, height, rooms, depth, layout, carved.looseStairs);
   if (!stairs) return null;
-  return build(runSeed, depth, size, attempts, false, cells, rooms, stairs);
+  return build(runSeed, depth, size, algorithmFor(style.layout), attempts, fallback, cells, rooms, stairs);
 }
 
 /**
- * The plain-rooms fallback: two fixed rooms in opposite corners joined by one corridor,
- * with seeded stairs. Used only after 20 failed tries.
+ * The plain-rooms fallback (Spec 02, step 12): rooms and corridors with 20 more sub-seeds, and
+ * only if all of those fail, two fixed rooms in opposite corners joined by one corridor.
  */
 export function fallbackLevel(runSeed: number, depth: number, size: SizeClass, seed: number): Level {
+  for (let n = 0; n < MAX_ATTEMPTS; n++) {
+    const level = attempt(runSeed, depth, size, PLAIN_STYLE, subSeed(seed, n), MAX_ATTEMPTS, true);
+    if (level && findProblems(level).length === 0) return level;
+  }
   const { width, height } = LEVEL_SIZES[size];
   const { layout } = levelStreams(seed);
   const cells = new Uint8Array(width * height);
@@ -146,25 +239,23 @@ export function fallbackLevel(runSeed: number, depth: number, size: SizeClass, s
     { x: 3, y: 3, w: 12, h: 6 },
     { x: width - 16, y: height - 10, w: 12, h: 6 },
   ];
-  for (const r of rooms) {
-    for (let y = r.y; y < r.y + r.h; y++) for (let x = r.x; x < r.x + r.w; x++) cells[y * width + x] = FLOOR;
-  }
+  for (const r of rooms) fillRect(cells, width, r, FLOOR);
   carveCorridor(cells, width, { x: 9, y: 5 }, { x: width - 10, y: height - 7 }, true);
   const stairs = placeStairs(cells, width, height, rooms, depth, layout);
   if (!stairs) throw new Error('fallback level could not place stairs');
-  return build(runSeed, depth, size, MAX_ATTEMPTS, true, cells, rooms, stairs);
+  return build(runSeed, depth, size, 'rooms_and_corridors', MAX_ATTEMPTS, true, cells, rooms, stairs);
 }
 
 /**
- * Generate level `depth` of the run `runSeed`. Deterministic: the same seed, depth, size
+ * Generate level `depth` of the run `runSeed`. Deterministic: the same seed, depth, size, style
  * and generator version always give the same level, and no other level is needed first.
  * If validation fails, the next sub-seed is tried (up to 20 times), then the fallback.
  */
-export function generateLevel(runSeed: number, depth: number, size: SizeClass): Level {
+export function generateLevel(runSeed: number, depth: number, size: SizeClass, style: LevelStyle = PLAIN_STYLE): Level {
   if (!Number.isInteger(depth) || depth < 1 || depth > MAX_DEPTH) throw new RangeError(`bad level number: ${depth}`);
   const seed = levelSeed(runSeed, depth);
   for (let n = 0; n < MAX_ATTEMPTS; n++) {
-    const level = attempt(runSeed, depth, size, subSeed(seed, n), n + 1);
+    const level = attempt(runSeed, depth, size, style, subSeed(seed, n), n + 1, false);
     if (level && findProblems(level).length === 0) return level;
   }
   const level = fallbackLevel(runSeed, depth, size, subSeed(seed, MAX_ATTEMPTS));

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { LAYOUT_ALGORITHMS, QUEST_TYPES, RUMOUR_KINDS, SIZE_CLASSES } from './catalog.ts';
+import { CAVE_STAMPS, LAYOUT_ALGORITHMS, LIQUIDS, QUEST_TYPES, RUMOUR_KINDS, SIZE_CLASSES } from './catalog.ts';
 
 // Shared filter fields every table has (Spec 08, "Table format and rolling").
 // Unknown fields fail the build, so every table schema is strict.
@@ -40,6 +40,10 @@ export const levelThemeSchema = z.strictObject({
   name: z.string().min(1),
   layout: z.enum(LAYOUT_ALGORITHMS),
   size: z.enum(SIZE_CLASSES),
+  // Layout variants (Spec 02, clarifications of task 2.3): what caves stamp in, what the liquid is, pillared halls.
+  stamp: z.enum(CAVE_STAMPS).optional(),
+  liquid: z.enum(LIQUIDS).optional(),
+  pillared: z.boolean().optional(),
 });
 
 // Artifacts (Spec 02, "Run layout"): just a name until task 2.9 gives them powers.

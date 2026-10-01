@@ -89,6 +89,23 @@ Each theme picks a size class and one of eight layout algorithms; the theme's pa
 
 **Liquids:** shallow water is walkable; deep water and lava are not, and count as walls for reachability.
 
+**Clarifications (approved October 1, 2026, task 2.3).** All figures are starting values for playtesting.
+
+- **Theme fields:** the theme table gains three optional fields. `stamp` (shafts, river or lake) says what a cellular-caves level stamps in; `liquid` (water or lava) says what its rivers, lakes and channels hold; `pillared` (true or false) adds pillars to a rooms-and-corridors level: in each room of 7 x 5 or more, a wall pillar on every second cell, at least two cells in from the room's edge, so pillars never touch each other or the edge and every floor cell stays four-way connected. Old Mine stamps shafts, Fungal Caverns a river, Underdark Lake a lake, Lava Forges a river with `liquid: lava`; Dwarven Hold is `pillared`. A theme without them gets shafts, water and no pillars.
+- **Rooms:** `Level.rooms` lists the chambers a level is built around (monster groups, doors and the boss room use them in task 2.4). Layouts with literal rooms list them: a warren's blob room is listed as the rectangle that fits inside it. Cellular caves have none, so they list clearings: floor-only rectangles from 5 x 3 up to 11 x 7, found by scanning the finished level and kept 2 cells apart. A room's rectangle holds only plain floor, except in pillared halls, where pillars stand inside it.
+- **Layouts:**
+  - **Mirrored halls:** the left half is a rooms-and-corridors level; the right half is its mirror image; one to three straight corridors cross the centre, each joining a room nearest the centre to its mirror image.
+  - **Warren tunnels:** several random walkers carve one-cell tunnels until about 22% of the level is floor; a walker that branches may leave an elliptical blob room (3 to 5 cells across, 2 to 3 tall) at the junction.
+  - **Channel grid:** chambers 7 x 5 on a lattice 17 cells across and 11 down; most neighbours are joined by a three-cell channel, a walkway on each side of one row of deep water, or shallow water on one in four. Chambers hold a few puddles of shallow water.
+  - **Cellular caves:** 45% random wall, five smoothing passes of the 4-5 rule (a wall stays wall with four or more wall neighbours among its eight; a floor cell turns wall with five or more), only the largest cave kept. Shafts are two to four straight one-cell passages through rock. A river is a meandering one- or two-cell band of deep water with shallow banks and two to four fords. A lake is an ellipse of deep water near the middle of the level, with radii of about an eighth of its width and a sixth of its height, and a two-cell shallow shore. For lava the banks and fords are plain floor.
+  - **Maze with crypts:** a one-cell recursive-backtracker maze on odd cells; crypts of 5 or 7 by 3 or 5 cells are cut into it, aligned to the maze.
+  - **Freeform chambers:** one chamber per 330 map cells, each an ellipse with one or two smaller ellipses attached, placed apart; the chambers are joined as a spanning tree of L-shaped corridors, plus a few extra links.
+  - **Disjoint rooms:** one room in about 70% of the cells of a sparse grid (22 x 10 cells each), joined as a spanning tree plus extra links, all by long corridors. Doors, and so the secret ones, come with the placement pipeline (task 2.4), which may only make a door secret where another route keeps the critical path open.
+  - **Set piece:** until the level 100 template (task 3.10) it uses rooms and corridors.
+- **Joining regions:** a separate region is joined to the main one by an L-shaped corridor between the nearest pair of cells; where the corridor crosses deep water it is a ford of shallow water, and across lava, plain floor.
+- **Stairs:** both stairs go in the interior of a room (a cell not on the rectangle's edge, and plain floor). In mazes, warrens and caves, where the far end of the level is often a dead end or a tunnel, a stair that finds no room cell far enough goes on any plain floor cell far enough instead.
+- **Fallback:** after 20 failed tries a level tries rooms and corridors with 20 more sub-seeds, and only then two fixed rooms joined by one corridor.
+
 ## Generation pipeline
 
 Each level is built in twelve fixed steps; if validation fails, the level retries with the next sub-seed, so the result is still deterministic.

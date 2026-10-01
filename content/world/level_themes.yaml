@@ -1,5 +1,6 @@
 # The 13 level themes of Spec 02 and the intake. `depth` starts at the unlock level.
-# Palettes, tile sets and feature weights are added with tasks 2.3, 2.4 and 3.2.
+# `stamp`, `liquid` and `pillared` are layout variants (Spec 02, task 2.3). Palettes, tile sets and
+# feature weights are added with tasks 2.4 and 3.2.
 - id: cellars_and_crypts
   name: Cellars and Crypts
   depth: [1, 99]
@@ -20,6 +21,7 @@
   depth: [1, 99]
   layout: cellular_caves
   size: medium
+  stamp: shafts
 - id: ruined_temple
   name: Ruined Temple
   depth: [20, 99]
@@ -30,11 +32,13 @@
   depth: [20, 99]
   layout: cellular_caves
   size: large
+  stamp: river
 - id: dwarven_hold
   name: Dwarven Hold
   depth: [40, 99]
   layout: rooms_and_corridors
   size: large
+  pillared: true
 - id: catacomb_labyrinth
   name: Catacomb Labyrinth
   depth: [40, 99]
@@ -50,11 +54,14 @@
   depth: [60, 99]
   layout: cellular_caves
   size: large
+  stamp: lake
 - id: lava_forges
   name: Lava Forges
   depth: [80, 99]
   layout: cellular_caves
   size: large
+  stamp: river
+  liquid: lava
 - id: void_halls
   name: Void Halls
   depth: [80, 99]

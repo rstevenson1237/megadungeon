@@ -4,7 +4,7 @@
 import { bearingFromNorth, distanceCells, distanceSq, lineCells, squareFootprint } from '../rules/world/geometry.ts';
 import type { Point } from '../rules/world/level.ts';
 import type { Game } from './game.ts';
-import { isOpen } from './map-state.ts';
+import { isClear } from './map-state.ts';
 import type { Monster } from './monsters.ts';
 
 /** What a targeted action reaches: one creature, or a square footprint around the chosen cell. */
@@ -18,7 +18,7 @@ export interface TargetSpec {
 
 /**
  * Valid targets (Spec 01 and 04): visible, within range, with a clear line of fire (no wall,
- * closed door or other creature on the way). Sorted by distance, ties broken clockwise from north.
+ * closed door or other creature on the way; water and lava do not block it). Sorted by distance, ties broken clockwise from north.
  */
 export function validTargets(game: Game, range: number): Monster[] {
   const { map } = game.state;
@@ -27,7 +27,7 @@ export function validTargets(game: Game, range: number): Monster[] {
   const clear = (m: Monster): boolean =>
     lineCells(from, m)
       .slice(0, -1)
-      .every((c) => isOpen(map, c.x, c.y) && !game.monsterAt(c.x, c.y));
+      .every((c) => isClear(map, c.x, c.y) && !game.monsterAt(c.x, c.y));
   return game.state.monsters
     .filter((m) => map.visible[m.y * width + m.x] === 1 && distanceSq(from, m) <= range * range && clear(m))
     .sort((a, b) => distanceSq(from, a) - distanceSq(from, b) || bearingFromNorth(from, a) - bearingFromNorth(from, b));

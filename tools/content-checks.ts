@@ -98,6 +98,22 @@ export function checkReferences(bundle: ContentBundle): string[] {
 
   errors.push(...checkRollCycles(edges));
   errors.push(...checkThemeIds(bundle));
+  errors.push(...checkThemeVariants(bundle));
+  return errors;
+}
+
+/** Layout variants of a theme (Spec 02, task 2.3) only mean something on the layout that reads them. */
+function checkThemeVariants(bundle: ContentBundle): string[] {
+  const errors: string[] = [];
+  for (const entry of entriesOf(bundle, THEME_TABLE)) {
+    const where = `${THEME_TABLE} "${String(entry.id)}"`;
+    const layout = String(entry.layout);
+    if (entry.stamp !== undefined && layout !== 'cellular_caves') errors.push(`${where}: stamp needs the cellular_caves layout, not ${layout}`);
+    if (entry.pillared !== undefined && layout !== 'rooms_and_corridors') errors.push(`${where}: pillared needs the rooms_and_corridors layout, not ${layout}`);
+    const holdsLiquid = layout === 'cellular_caves' || layout === 'channel_grid';
+    if (entry.liquid !== undefined && !holdsLiquid) errors.push(`${where}: liquid needs the cellular_caves or channel_grid layout, not ${layout}`);
+    if (entry.liquid !== undefined && layout === 'cellular_caves' && entry.stamp === 'shafts') errors.push(`${where}: shafts hold no liquid`);
+  }
   return errors;
 }
 
