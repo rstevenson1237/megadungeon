@@ -1,0 +1,17 @@
+# Stub entries for task 1.1. Real monsters are written in Phase 3 (task 3.3).
+- id: stub_monster_weak
+  name: stub rat
+  glyph: r
+  colour: moss
+  rating: 1d4+0
+  behaviour: stub
+  depth: [1, 5]
+  tags: [stub]
+- id: stub_monster_strong
+  name: stub ogre
+  glyph: O
+  colour: moss
+  rating: 1d8+2
+  behaviour: stub
+  depth: [3, 10]
+  tags: [stub]
