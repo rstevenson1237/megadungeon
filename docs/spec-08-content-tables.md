@@ -135,7 +135,7 @@ Content is written in Phase 3 in reviewed batches, starting from a short style g
 5. **Coverage-led:** the coverage report sets which gaps to fill next.
 6. **Tuning:** balance changes during playtests are made through weights, depths and numbers in the tables, not code.
 
-## Addendum A (proposed October 1, 2026, awaiting approval)
+## Addendum A (approved October 2, 2026)
 
 From Intake Addendum A (findings A1, A3, A9, A10).
 

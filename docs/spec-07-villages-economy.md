@@ -129,7 +129,7 @@ Gold flow (diagram as text):
 
 Traders and hermits sit outside this loop: they take carried coins in the dungeon, which trades XP the player could have banked for help right now.
 
-## Clarifications (task 2.11, proposed October 1, 2026, awaiting approval)
+## Clarifications (task 2.11, proposed October 1, 2026, approved October 2, 2026)
 
 All figures are starting values for playtesting. Where the spec above is silent these fill the gap so the build can proceed; any the owner changes goes back here first.
 

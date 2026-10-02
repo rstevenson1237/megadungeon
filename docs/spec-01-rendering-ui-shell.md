@@ -180,7 +180,7 @@ Menus draw as boxed overlays over the main view, so the character pane and log s
 | Death | Full grid | Cause and depth, then: return to last save, new character on the same seed keeping 10% of bank and one item, or new seed |
 | Leaderboard | Full grid | From local storage: seed, name, class, level, deepest level, monsters killed |
 
-## Addendum A (proposed October 1, 2026, awaiting approval)
+## Addendum A (approved October 2, 2026)
 
 From Intake Addendum A (findings A1, A4, A5, B5). All figures are starting values for playtesting.
 

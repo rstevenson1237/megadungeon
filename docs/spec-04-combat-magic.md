@@ -160,7 +160,7 @@ All figures are starting values for playtesting.
 - **Rivals** walk to the down stair along the shortest path. They take the contents of any container or floor pile within 8 steps of their way (never a cross-level cache or stash) and fight every monster next to them, as an ordinary melee exchange in which both sides roll d6 plus modifier. A rival that reaches the down stair waits beside it; no creature ever uses stairs. Once attacked, a rival is hostile and fights as a skirmisher. A dead rival drops everything it looted on its cell.
 - **Loot taken by rivals** is recorded in the level's delta so the player finds those containers empty (Spec 06 will read it).
 
-## Clarifications (task 2.8, proposed October 1, 2026, awaiting approval)
+## Clarifications (task 2.8, proposed October 1, 2026, approved October 2, 2026)
 
 All figures are starting values for playtesting. Where the spec above is silent these fill the gap so the build can proceed; any the owner changes goes back here first.
 
@@ -192,7 +192,7 @@ All figures are starting values for playtesting. Where the spec above is silent 
 - **Blessed and Cursed** give advantage and disadvantage on checks (Spec 03); together they cancel.
 - **The Status block** lists each active effect with its remaining rounds, then Shield.
 
-## Addendum A (proposed October 1, 2026, awaiting approval)
+## Addendum A (approved October 2, 2026)
 
 From Intake Addendum A (finding A2: Raise, Decoy and Companion need creatures on the player's side). All figures are starting values for playtesting.
 

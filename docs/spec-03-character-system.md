@@ -145,7 +145,7 @@ Creation takes three choices and starts the character in the surface village.
 
 The character starts at level 1 with one full die per pool at the class's steps, the class's starting equipment (items spec), 12 inventory slots, and 20 gp in the bank (Spec 05). A new character started on the same seed after a death also carries 10% of the previous bank and the one recovered item.
 
-## Addendum A (proposed October 1, 2026, awaiting approval)
+## Addendum A (approved October 2, 2026)
 
 From Intake Addendum A (findings A2, A3, B3, B4). All figures are starting values for playtesting.
 

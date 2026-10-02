@@ -145,7 +145,7 @@ Shops buy at half value and sell at list price, and everything costs more the de
 
 Every character also starts with 20 gp in the bank. Starting gear is normal quality; the other 16 classes' gear lives in the content tables.
 
-## Clarifications (task 2.9, proposed October 1, 2026, awaiting approval)
+## Clarifications (task 2.9, proposed October 1, 2026, approved October 2, 2026)
 
 All figures are starting values for playtesting. Where the spec above is silent these fill the gap so the build can proceed; any the owner changes goes back here first.
 
@@ -190,7 +190,7 @@ All figures are starting values for playtesting. Where the spec above is silent 
 
 - **Buying** costs value times (1 + 0.2 for each village below the surface); **selling** pays 50% of value with no depth multiplier (Fence adds 20% of that); a crude item's value is already half a normal one's, so it sells for half. Artifacts are priceless and cannot be sold. **Identification** costs 100 gp and **repair** 30% of value, both times the same multiplier.
 
-## Addendum A (proposed October 1, 2026, awaiting approval)
+## Addendum A (approved October 2, 2026)
 
 From Intake Addendum A (findings A1, B1): every class needs starting gear before Phase 4 so it can be created and played. These lists use the 16 bases above, are normal quality, and may be revised in task 4.4.
 

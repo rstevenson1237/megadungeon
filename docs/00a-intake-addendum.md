@@ -2,7 +2,7 @@
 
 Oct 1, 2026 · @Robert Stevenson
 
-This addendum records what a review of Phases 1 and 2 found missing or unfinished against the intake and the nine specs, and adds a new Phase 3 (Systems closeout) to finish it before any content is written in bulk. Content creation moves to Phase 4. Proposed October 1, 2026, awaiting approval.
+This addendum records what a review of Phases 1 and 2 found missing or unfinished against the intake and the nine specs, and adds a new Phase 3 (Systems closeout) to finish it before any content is written in bulk. Content creation moves to Phase 4. Proposed October 1, 2026; approved in full October 2, 2026.
 
 ## Why
 
@@ -54,7 +54,7 @@ Each finding traces to the intake or spec it comes from, and to where this adden
 
 ## New and changed requirements
 
-Each line below is written into the named spec as an "Addendum A" section, proposed and awaiting approval.
+Each line below is written into the named spec as an "Addendum A" section, approved October 2, 2026.
 
 - **Spec 01:** the character creation screen; Z waits until a die returns or something interrupts; L moves a look cursor over visible and remembered cells; the header names the theme.
 - **Spec 02:** each placement step rolls from its own stream; the named rival arc, the lore chain's weakness, artifact seals and a stub final boss on level 100; the sweep criterion.
@@ -67,14 +67,14 @@ Each line below is written into the named spec as an "Addendum A" section, propo
 
 ## Decisions for you
 
-The addendum proposes a default for each; mark the box to approve it, or note the change.
+Each default below was approved as written on October 2, 2026, together with every rule of the six pending clarification sections and every Addendum A section in the specs.
 
-- [ ] **Approve the six pending clarification sections** (C1) as written, or list changes. Of note: the captive taking 1 blow in 3 (Spec 07), the lift token halving fares instead of making them free (Spec 07), 1 in 4 plain chests locked (Spec 06), Cleave-style numbers being starting values.
-- [ ] **Saves across content changes (C2):** before release, refuse a save from different content with a plain message (recommended: simple, honest, and only playtest saves are affected). Before the Content complete gate, choose the release policy: either store each visited level's generated contents in the save (robust; adds roughly 3 to 8 KB per visited level), or freeze rolled tables at release so later updates only append retired-safe rows.
-- [ ] **Abilities as skill uses:** active abilities (Q) roll a Skill die as a skill use; passive and triggered ones (Cleave, Backstab, Shield Wall, Flurry, Overchannel, Hex Breaker, Brew, Companion) need no roll, and neither do the two trades, Pact and Smite. The intake says "class abilities count as skill uses"; this reads it as covering the ones the player chooses to use.
-- [ ] **Two minor abilities need a ruling:** Scholar ("identify scrolls and books on sight") when the game has no scrolls, and the minor ability Blessed ("advantage on checks against undead"), which shares a name with the Blessed status. Proposed: Scholar shows a spellbook's spell and a book's lore-chain place before reading, and learns a spellbook on 2 to 3 as well as 4 or more; Blessed is renamed Hallowed, giving advantage on Combat checks and melee defence against creatures tagged `undead`.
-- [ ] **Allies:** a third kind of creature that fights for the player (Raise, Decoy, Companion), as set out in the Spec 04 addendum.
-- [ ] **Stub starting gear** for the 16 additional classes, as listed in the Spec 05 addendum, final unless Phase 4 changes it.
+- [x] **Approve the six pending clarification sections** (C1) as written, or list changes. Of note: the captive taking 1 blow in 3 (Spec 07), the lift token halving fares instead of making them free (Spec 07), 1 in 4 plain chests locked (Spec 06), Cleave-style numbers being starting values.
+- [x] **Saves across content changes (C2):** before release, refuse a save from different content with a plain message (recommended: simple, honest, and only playtest saves are affected). Before the Content complete gate, choose the release policy: either store each visited level's generated contents in the save (robust; adds roughly 3 to 8 KB per visited level), or freeze rolled tables at release so later updates only append retired-safe rows.
+- [x] **Abilities as skill uses:** active abilities (Q) roll a Skill die as a skill use; passive and triggered ones (Cleave, Backstab, Shield Wall, Flurry, Overchannel, Hex Breaker, Brew, Companion) need no roll, and neither do the two trades, Pact and Smite. The intake says "class abilities count as skill uses"; this reads it as covering the ones the player chooses to use.
+- [x] **Two minor abilities need a ruling:** Scholar ("identify scrolls and books on sight") when the game has no scrolls, and the minor ability Blessed ("advantage on checks against undead"), which shares a name with the Blessed status. Proposed: Scholar shows a spellbook's spell and a book's lore-chain place before reading, and learns a spellbook on 2 to 3 as well as 4 or more; Blessed is renamed Hallowed, giving advantage on Combat checks and melee defence against creatures tagged `undead`.
+- [x] **Allies:** a third kind of creature that fights for the player (Raise, Decoy, Companion), as set out in the Spec 04 addendum.
+- [x] **Stub starting gear** for the 16 additional classes, as listed in the Spec 05 addendum, final unless Phase 4 changes it.
 
 ## Changes to the build phases
 
@@ -90,4 +90,4 @@ The plan gains a Phase 3 of eleven tasks; the twelve content tasks move to Phase
 
 ## Open questions
 
-- [ ] **Addendum approved:** the findings, the new Phase 3 and the spec addenda.
+- [x] **Addendum approved:** the findings, the new Phase 3 and the spec addenda (October 2, 2026).

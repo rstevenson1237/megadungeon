@@ -2,7 +2,7 @@
 
 Sep 30, 2026 · @Robert Stevenson
 
-This plan turns the nine approved specs into tasks across the build phases, each ending at a gate you approve. Approved September 30, 2026. Revised October 1, 2026 by Intake Addendum A (`docs/00a-intake-addendum.md`): a new Phase 3, Systems closeout, finishes what Phase 2 left open, and content moves to Phase 4. The revision is proposed and awaiting approval.
+This plan turns the nine approved specs into tasks across the build phases, each ending at a gate you approve. Approved September 30, 2026. Revised October 1, 2026 by Intake Addendum A (`docs/00a-intake-addendum.md`): a new Phase 3, Systems closeout, finishes what Phase 2 left open, and content moves to Phase 4. The revision was approved October 2, 2026.
 
 ## Approach
 
@@ -168,4 +168,4 @@ The content build's schema, reference and coverage checks (Spec 08) run alongsid
 - [x] **Hosting:** GitHub Pages, deployed from every merged task.
 - [x] **Review between gates:** a playable build after every task.
 - [x] **Task order:** approved as written.
-- [ ] **Revision of October 1, 2026:** the Phase 3 Systems closeout and the move of content to Phase 4 (Intake Addendum A).
+- [x] **Revision of October 1, 2026 (approved October 2):** the Phase 3 Systems closeout and the move of content to Phase 4 (Intake Addendum A).

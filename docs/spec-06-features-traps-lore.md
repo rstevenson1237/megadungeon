@@ -130,7 +130,7 @@ A 1 on a check always costs something, and the cost fits what the player was doi
 
 Skill uses, spells and ranged attacks already lose the die on a 1 (Spec 03) and do not also roll on this table.
 
-## Clarifications (task 2.10, proposed October 1, 2026, awaiting approval)
+## Clarifications (task 2.10, proposed October 1, 2026, approved October 2, 2026)
 
 All figures are starting values for playtesting. Where the spec above is silent these fill the gap so the build can proceed; any the owner changes goes back here first.
 
@@ -183,7 +183,7 @@ All figures are starting values for playtesting. Where the spec above is silent 
 - **Rune word:** each wall rune read teaches its letter. E on the marked altar speaks the word once every letter is known, giving Blessed until the player leaves the level.
 - **Vault:** the vault key found on one level opens the sealed door of the named vault.
 
-## Addendum A (proposed October 1, 2026, awaiting approval)
+## Addendum A (approved October 2, 2026)
 
 From Intake Addendum A (findings A2, A3, A7). Class abilities change some rolls in this spec; the rules live in Spec 03, Addendum A, and are listed here so this spec stays complete.
 

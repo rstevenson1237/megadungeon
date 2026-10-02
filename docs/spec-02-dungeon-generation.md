@@ -190,7 +190,7 @@ Cleared levels refill over time, and wandering monsters keep any level from feel
 - **Treasure does not restock**: only monsters return, so each level's treasure budget is finite.
 - **Wandering monsters:** a 1 in 200 chance each turn on a dungeon level, plus the wandering monster result on a rolled 1 for a check. They enter from out of sight, never adjacent to the player.
 - **Villages** never restock or spawn wandering monsters.
-- **Clarifications (task 2.12, proposed October 1, 2026, awaiting approval):** the original monster budget is the number of ordinary monsters the level was generated with (bosses, quest guards and opponents are not counted). Time away is counted in whole 500-turn blocks from the round the player left (a village rest adds 200 turns), each block returning 10% of the budget, rounded to a whole monster, up to 50%. Ordinary monsters alive never exceed the original budget, so a level the player left full gains nothing. Restocked monsters start asleep or unaware like any placed monster, on open cells out of sight of where the player arrives, and are drawn like a wanderer from the depth table. The 1 in 200 wandering chance is checked once per round (a hasted player's half rounds do not count) from a stream of its own, so it never changes the dice of a fight.
+- **Clarifications (task 2.12, proposed October 1, 2026, approved October 2, 2026):** the original monster budget is the number of ordinary monsters the level was generated with (bosses, quest guards and opponents are not counted). Time away is counted in whole 500-turn blocks from the round the player left (a village rest adds 200 turns), each block returning 10% of the budget, rounded to a whole monster, up to 50%. Ordinary monsters alive never exceed the original budget, so a level the player left full gains nothing. Restocked monsters start asleep or unaware like any placed monster, on open cells out of sight of where the player arrives, and are drawn like a wanderer from the depth table. The 1 in 200 wandering chance is checked once per round (a hasted player's half rounds do not count) from a stream of its own, so it never changes the dice of a fight.
 
 ## Quest goals
 
@@ -222,7 +222,7 @@ These cross-level links make finds on one level matter on another. Each has a so
 | Artifact seals | Artifacts from bosses | Each artifact carried weakens the final boss on level 100 |
 | Collapsed passages | A lever or charge on one level | Opens a shortcut stair that skips several levels down |
 
-## Addendum A (proposed October 1, 2026, awaiting approval)
+## Addendum A (approved October 2, 2026)
 
 From Intake Addendum A (findings A6 to A8, C2, C3). All figures are starting values for playtesting.
 

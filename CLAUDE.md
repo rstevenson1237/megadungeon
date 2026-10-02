@@ -63,4 +63,4 @@ Everything is already designed and approved. The documents in `docs/` are the sp
 
 ## Where things stand
 
-Phases 1 and 2 are built. Intake Addendum A (`docs/00a-intake-addendum.md`) adds Phase 3, Systems closeout, and moves content to Phase 4. Start with task 3.1: the owner approves the pending clarification sections and every "Addendum A" section before any Phase 3 code.
+Phases 1 and 2 are built. Intake Addendum A (`docs/00a-intake-addendum.md`) adds Phase 3, Systems closeout, and moves content to Phase 4. Task 3.1 is done: on October 2, 2026 the owner approved every pending clarification section and every "Addendum A" section as written, so no built rule changed. Next is task 3.2.

@@ -100,20 +100,20 @@ Updating the game must never break a run in progress.
 - **Content:** ids are never removed or reused (Spec 08). A retired entry stays in the bundle marked retired, so saves that hold it still load, but it is never rolled again.
 - **Unknown future versions:** a save from a newer game than the one running is refused with a clear message instead of being loaded and damaged.
 
-## Clarifications (task 2.13, proposed October 1, 2026, awaiting approval)
+## Clarifications (task 2.13, proposed October 1, 2026, approved October 2, 2026)
 
 All figures are starting values for playtesting. Where the spec above is silent these fill the gap so the build can proceed; any the owner changes goes back here first.
 
 **What a save is**
 
 - **Format:** one JSON text, save format 1. It holds the three versions, the seed, the seed-of-the-day date, a character id, when it was saved, the village of the last rest, the run's round counter, the character, the player (carried and worn items, bank, quests, journal, identified kinds, spells, shop stock and the counts the leaderboard needs) and one delta per visited level. To stay far under 1 MB, a level's explored cells are stored as alternating run lengths and a living monster as only what differs from a fresh one. A full 100-level run with every level explored and every monster alive comes to about 0.3 MB.
-- **Versions:** the game version is the save format number. The generator version is the one the levels were built with; a build that no longer has it refuses the save. The content version is a fingerprint of the content tables made by the content build; it is recorded but never blocks a load, because ids are never removed (Spec 08).
+- **Versions:** the game version is the save format number. The generator version is the one the levels were built with; a build that no longer has it refuses the save. The content version is a fingerprint of the content tables made by the content build; it is recorded but never blocks a load, because ids are never removed (Spec 08). Until release, Addendum A below replaces this: a save from other content is refused.
 - **Refusals:** a file that is not a save, one with parts missing, one from a newer format and one from a retired generator are each refused with a plain message, and nothing is changed.
 
 **Writing and storing**
 
 - **Safe writes:** the save is written to a numbered record, the pointer `current` is then moved to it, and only then is the old record deleted. A crash at any step leaves a loadable save: the old one before the pointer moves, the new one after.
-- **When:** a new run is saved the moment it starts (creation does not exist yet, so the run start stands in for finishing creation), and every village rest saves. Nothing else does.
+- **When:** a new run is saved the moment it starts (until creation exists the run start stands in for finishing creation; Addendum A moves the first save to the end of creation), and every village rest saves. Nothing else does.
 - **Import** replaces the browser's save with the file's, after reading it; the player then quits to the title screen and chooses Continue. **Export** downloads the current save; with no save yet it says so.
 - **The title screen warning** about clearing browser data shows until the first game is started or continued in this browser.
 
@@ -126,7 +126,7 @@ All figures are starting values for playtesting. Where the spec above is silent 
 - **Reaching level 100** is recorded on arrival. **The final boss** is the monster with the boss role on level 100; a stub final boss arrives with task 3.10 (Addendum A), and the real one with the level 100 set piece (task 4.10).
 - **The leaderboard** shows all runs, or only the runs of the seed of the day of a date (today's when opened); Enter switches the view.
 
-## Addendum A (proposed October 1, 2026, awaiting approval)
+## Addendum A (approved October 2, 2026)
 
 From Intake Addendum A (findings A1, C2).
 
