@@ -68,7 +68,7 @@ describe('key map (Spec 01)', () => {
   });
 });
 
-describe('every key acts or logs "not yet available"', () => {
+describe('every key acts (Spec 01; task 3.9): nothing logs "not yet available"', () => {
   const keys = KEY_BINDINGS.flatMap((b) => b.entries.map((e) => ({ key: e.key === 'tab' ? 'Tab' : e.key, shift: e.shift ?? false })));
 
   it.each(keys)('key "$key" (shift $shift)', ({ key, shift }) => {
@@ -76,17 +76,16 @@ describe('every key acts or logs "not yet available"', () => {
     const handled = press(shell, key, shift);
     expect(handled).toBe(true);
     const acted = shell.overlays.length > 0;
-    // Casting (task 2.8), the inventory (task 2.9) and Q (task 3.6) act: with no run to act in they say so instead.
-    const logged = shell.log.lines(shell.turn).some(
-      (l) => l.text.endsWith('is not yet available.') || l.text.startsWith('There is nothing to cast') || l.text.startsWith('There is nothing to carry') || l.text === 'You have no ability to use.',
-    );
-    expect(acted || logged).toBe(true);
+    // With no run to act in, each key says why it does nothing.
+    const lines = shell.log.lines(shell.turn).map((l) => l.text);
+    expect(acted || lines.length > 0).toBe(true);
+    expect(lines.some((t) => t.includes('not yet available'))).toBe(false);
   });
 
-  it('names the missing feature in the message and spends no turn', () => {
+  it('with no game in progress a key says so and spends no turn', () => {
     const shell = newShell();
     press(shell, 'l');
-    expect(shell.log.lines(1).map((l) => l.text)).toEqual(['Looking is not yet available.']);
+    expect(shell.log.lines(1).map((l) => l.text)).toEqual(['There is no game in progress.']);
     expect(shell.turn).toBe(1);
   });
 
@@ -208,10 +207,10 @@ describe('overlays', () => {
     expect(shell.overlays).toHaveLength(1);
   });
 
-  it('collapses repeated "not yet available" messages into a count', () => {
+  it('collapses repeated messages into a count', () => {
     const shell = newShell();
     for (let i = 0; i < 3; i++) press(shell, 'x');
-    expect(shell.log.lines(1).map((l) => l.text)).toEqual(['Searching is not yet available. (x3)']);
+    expect(shell.log.lines(1).map((l) => l.text)).toEqual(['There is no game in progress. (x3)']);
   });
 
   it('keeps menus inside the main pane', () => {

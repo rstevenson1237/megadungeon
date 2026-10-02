@@ -1,7 +1,9 @@
 // The UI shell: owns the log, the overlay stack and the screen. Turns key
 // presses into commands, gives them to the top overlay, or else to the game.
 
-import { COMMAND_NAMES, type Command } from '../game/commands.ts';
+import type { Command, CommandType } from '../game/commands.ts';
+import { describeCell, lookCreatures } from '../game/look.ts';
+import { cameraOrigin } from './camera.ts';
 import { MessageLog } from '../game/log.ts';
 import { drawCharacterPane, type CharacterPaneData } from './character-pane.ts';
 import type { Grid } from './grid.ts';
@@ -64,6 +66,9 @@ export class Shell {
   usingItem: Item | null = null;
   /** Set while the player is choosing the cell Blink goes to. */
   cursor: CellCursor | null = null;
+  /** Set while looking (L): the cursor, and which visible creature Tab last jumped to. */
+  looking: CellCursor | null = null;
+  private lookIndex = -1;
   /** The active major ability being aimed (Fascinate, Mark, Volley), with Volley's first target once chosen. */
   aimingAbility: { id: string; first?: Monster } | null = null;
 
@@ -200,6 +205,10 @@ export class Shell {
       this.chooseCell(command);
       return;
     }
+    if (this.looking) {
+      this.look(command);
+      return;
+    }
     if (this.village && ['move', 'confirm', 'interact'].includes(command.type)) {
       this.applyVillage(this.village.handle(command));
       return;
@@ -217,6 +226,18 @@ export class Shell {
       case 'ranged':
         if (this.game) {
           this.startTargeting();
+          return;
+        }
+        break;
+      case 'waitLong':
+        if (this.game) {
+          this.applyResult(this.game.waitUntilRecovered());
+          return;
+        }
+        break;
+      case 'look':
+        if (this.game) {
+          this.startLooking();
           return;
         }
         break;
@@ -245,7 +266,61 @@ export class Shell {
         }
       }
     }
-    this.log.add({ kind: 'system', text: `${COMMAND_NAMES[command.type]} is not yet available.` }, this.turn);
+    this.log.add({ kind: 'system', text: nothingToDo(command.type, this.run ? (this.game ? 'dungeon' : 'village') : 'none') }, this.turn);
+  }
+
+  // --- L: look (Spec 01, Addendum A), a free action ---
+
+  /** Start looking: a cursor on the player, kept within the main view. */
+  private startLooking(): void {
+    const game = this.game!;
+    this.looking = new CellCursor(game, () => true, []);
+    this.lookIndex = -1;
+  }
+
+  /** Keys while looking: W A S D move the cursor within the main view, Tab and Shift+Tab jump between visible creatures, Esc, Enter or L end it. */
+  private look(command: Command): void {
+    const cursor = this.looking!;
+    const game = this.game!;
+    switch (command.type) {
+      case 'move': {
+        const { x0, y0, x1, y1 } = this.viewBounds();
+        cursor.at = { x: Math.min(x1, Math.max(x0, cursor.at.x + command.dx)), y: Math.min(y1, Math.max(y0, cursor.at.y + command.dy)) };
+        return;
+      }
+      case 'nextTarget':
+      case 'prevTarget': {
+        const creatures = lookCreatures(game);
+        if (creatures.length === 0) return;
+        const next = command.type === 'nextTarget';
+        // The first Tab goes to the nearest creature and the first Shift+Tab to the farthest; after that they cycle.
+        if (this.lookIndex < 0) this.lookIndex = next ? 0 : creatures.length - 1;
+        else this.lookIndex = (this.lookIndex + (next ? 1 : -1) + creatures.length) % creatures.length;
+        const m = creatures[this.lookIndex]!;
+        cursor.at = { x: m.x, y: m.y };
+        return;
+      }
+      case 'confirm':
+      case 'cancel':
+      case 'look':
+        this.looking = null;
+        return;
+      default:
+        return;
+    }
+  }
+
+  /** The level cells the main view shows now, as the camera places it. */
+  private viewBounds(): { x0: number; y0: number; x1: number; y1: number } {
+    const { level, player } = this.game!.state.map;
+    const view = inner(MAIN_PANE);
+    const origin = cameraOrigin(level.width, level.height, player, view.w, view.h);
+    return { x0: Math.max(0, origin.x), y0: Math.max(0, origin.y), x1: Math.min(level.width, origin.x + view.w) - 1, y1: Math.min(level.height, origin.y + view.h) - 1 };
+  }
+
+  /** What look says of the cell under its cursor, for the bottom row of the main view. */
+  lookText(): string | null {
+    return this.looking && this.game ? describeCell(this.game, this.looking.at) : null;
   }
 
   private applyVillage(result: OverlayResult): void {
@@ -547,6 +622,7 @@ export class Shell {
 
   /** Forget what was being aimed. */
   private stopAiming(): void {
+    this.looking = null;
     this.aimingAbility = null;
     this.targeting = null;
     this.cursor = null;
@@ -651,7 +727,14 @@ export class Shell {
   /** Draw the whole screen: panes, character, log, then any overlay on top. */
   draw(grid: Grid): void {
     drawPanes(grid, this.title);
-    if (this.game) drawMap(grid, this.game.state, this.targeting, this.cursor, mapLook(this.run?.theme));
+    if (this.game) {
+      drawMap(grid, this.game.state, this.targeting, this.cursor ?? this.looking, mapLook(this.run?.theme));
+      const text = this.lookText();
+      if (text !== null) {
+        const view = inner(MAIN_PANE);
+        grid.text(view.x, view.y + view.h - 1, text.slice(0, view.w).padEnd(view.w), UI.value, UI.background);
+      }
+    }
     else if (this.village) this.village.draw(grid);
     else grid.text(inner(MAIN_PANE).x + 2, inner(MAIN_PANE).y + 1, 'No level loaded.', UI.label, UI.background);
     drawCharacterPane(grid, this.character);
@@ -670,4 +753,37 @@ export function abilityLines(minors: readonly string[], classDef: ClassDef | und
   for (const id of minors) counts.set(id, (counts.get(id) ?? 0) + 1);
   const lines = [...counts].map(([id, n]) => (n > 1 ? `${nameOf(id)} x${n}` : nameOf(id)));
   return classDef ? [classDef.majorAbility.name, ...lines] : lines;
+}
+
+/**
+ * What a key with nothing to act on says (Spec 01: every key acts), with no round spent: in a village, which has no map
+ * and no rounds, and in the dungeon when there is nothing to target or confirm.
+ */
+export function nothingToDo(type: CommandType, where: 'dungeon' | 'village' | 'none'): string {
+  if (where === 'none') return 'There is no game in progress.';
+  switch (type) {
+    case 'nextTarget':
+    case 'prevTarget':
+      return 'There is nothing to target.';
+    case 'confirm':
+      return 'There is nothing to confirm.';
+    default:
+      break;
+  }
+  if (where === 'dungeon') return 'There is nothing to do that with here.';
+  switch (type) {
+    case 'wait':
+    case 'waitLong':
+      return 'There is no waiting in a village; rest at the lodging to recover.';
+    case 'search':
+      return 'There is nothing to search in a village.';
+    case 'pickup':
+      return 'There is nothing to pick up in a village.';
+    case 'ranged':
+      return 'There is nothing to shoot at in a village.';
+    case 'look':
+      return 'There is no map to look at in a village.';
+    default:
+      return 'There is nothing to do that with in a village.';
+  }
 }

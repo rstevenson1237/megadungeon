@@ -59,6 +59,9 @@ import { type TownState, freshTown } from './town-state.ts';
 
 export { MAX_SIMULATED, actionsInRound };
 
+/** Z never waits more than this many times in one go: far beyond any wait cycle, so it only guards the loop. */
+const WAIT_LIMIT = 100;
+
 const NESW: readonly (readonly [number, number])[] = [
   [0, -1],
   [1, 0],
@@ -671,7 +674,7 @@ export class Game {
     const say = (text: string): ActResult => ({ messages: [{ kind: 'system', text }], spent: false });
     if (!id) return say('You have no class ability.');
     const name = this.content.majorNames.get(id) ?? id;
-    if (!BUILT_MAJORS.includes(id)) return say(`${name} is not yet available.`);
+    if (!BUILT_MAJORS.includes(id)) return say(`You cannot use ${name}.`); // every class ability is built; only an unknown id comes here
     switch (MAJOR_KINDS[id]) {
       case 'passive':
         return say(passiveNote(player, id, name));
@@ -699,6 +702,40 @@ export class Game {
     if (helpless) return helpless;
     makePact(player, messages);
     return this.endRound(messages);
+  }
+
+  /**
+   * Z, wait until recovered (Spec 01, Addendum A): the Space wait again and again, one round at a time, until a Combat
+   * die returns. It stops early when a creature not in view at the start comes into view, when the player is hit or
+   * gains a status, or when a combat or warning message is logged. With nothing to wait for (a full Combat pool, or
+   * Poisoned, which stops recovery) it says so and spends no round.
+   */
+  waitUntilRecovered(): ActResult {
+    const { player, map } = this.state;
+    if (player.dead) return { messages: [{ kind: 'system', text: 'You are dead.' }], spent: false };
+    if (player.pools.combat.dice >= player.pools.combat.max) return { messages: [{ kind: 'system', text: 'You are already at full strength.' }], spent: false };
+    if (hasStatus(player.statuses, 'poisoned')) return { messages: [{ kind: 'system', text: 'The poison stops you recovering by waiting.' }], spent: false };
+    const inView = (): Monster[] => this.state.monsters.filter((m) => !isAlly(m) && map.visible[m.y * map.level.width + m.x] === 1);
+    const seenAtStart = new Set(inView());
+    const messages: LogMessage[] = [];
+    let spent = false;
+    // A die returns within a wait cycle; the bound only guards against a loop that never ends.
+    for (let n = 0; n < WAIT_LIMIT && !player.dead; n++) {
+      const dice = player.pools.combat.dice;
+      const statuses = new Set(player.statuses.map((e) => e.id));
+      const result = this.act({ type: 'wait' })!;
+      spent ||= result.spent;
+      messages.push(...result.messages);
+      if (player.pools.combat.dice > dice) break;
+      if (player.pools.combat.dice < dice || player.statuses.some((e) => !statuses.has(e.id))) break;
+      if (result.messages.some((m) => m.kind === 'combat' || m.kind === 'warning')) break;
+      const newcomer = inView().find((m) => !seenAtStart.has(m));
+      if (newcomer) {
+        messages.push({ kind: 'warning', text: `You stop waiting: ${nameOf(newcomer)} comes into view.` });
+        break;
+      }
+    }
+    return { messages, spent };
   }
 
   /** An Asleep or Held player cannot act: the action is lost and the round goes by (Spec 04, Status effects). */

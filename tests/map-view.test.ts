@@ -206,7 +206,7 @@ describe('main view drawing (Spec 01): three cell states', () => {
       abilities: [], status: [], wait: { rounds: 0, needed: 10 }, inventory: { used: 0, total: 12 },
     });
     shell.handleKey({ key: 'd', shiftKey: false });
-    expect(shell.log.lines(shell.turn).some((l) => l.text.includes('not yet available'))).toBe(true);
+    expect(shell.log.lines(shell.turn).at(-1)!.text).toBe('There is no game in progress.');
     shell.setRun(new Run(1, testPlayer(), { startDepth: 1, levelFor: () => levelFrom(['#####', '#<..#', '#####']) }));
     shell.handleKey({ key: 'd', shiftKey: false });
     expect(shell.game!.state.map.player).toEqual({ x: 2, y: 1 });

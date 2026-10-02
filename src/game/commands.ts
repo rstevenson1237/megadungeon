@@ -23,7 +23,7 @@ export type Command =
 
 export type CommandType = Command['type'];
 
-/** Short names, used in "not yet available" log messages. */
+/** Short names of the commands. */
 export const COMMAND_NAMES: Record<CommandType, string> = {
   move: 'Moving',
   wait: 'Waiting',
