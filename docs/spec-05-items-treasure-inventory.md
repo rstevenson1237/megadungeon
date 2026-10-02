@@ -213,7 +213,7 @@ From Intake Addendum A (findings A1, B1): every class needs starting gear before
 | Witch Hunter | Short sword, crossbow with 20 bolts, leather |
 | Beastmaster | Spear, shortbow with 20 arrows, leather |
 
-- **Clarification (task 3.4, proposed October 2, 2026, awaiting approval):** a new character knows the potions it starts with, by their true names, as the creation screen names them. Every other potion is disguised until identified (Spec 05).
+- **Clarification (task 3.4, proposed and approved October 2, 2026):** a new character knows the potions it starts with, by their true names, as the creation screen names them. Every other potion is disguised until identified (Spec 05).
 
 **Acceptance criteria added**
 
