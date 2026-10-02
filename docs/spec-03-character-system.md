@@ -196,6 +196,15 @@ From Intake Addendum A (findings A2, A3, B3, B4). All figures are starting value
   - **Not yet built:** until tasks 3.7 and 3.8, Q on Rage, Volley, Fascinate, Wild Shape, Mark, Spirit Totem, Raise, Decoy and Companion says the ability is not yet available.
   - **The pane:** the Status block shows "Smite ready" while Smite is readied and "Shield Wall ready" while Shield Wall has not turned a blow in this fight.
 
+- **Clarification (task 3.7, proposed October 2, 2026, awaiting approval):** where the rows for the six active major abilities leave a detail open, the build reads it as follows.
+  - **The skill use:** Rage, Fascinate, Wild Shape, Mark and Spirit Totem each roll one Skill die as a skill use. A failed use spends the round and does nothing. Volley's skill use is its one ranged roll; there is no second roll.
+  - **Rage and Wild Shape:** their rounds count the round they are used in, as Sanctuary's do; using one again while it runs starts its rounds again, and two never add. Rage covers every melee exchange between the player and a creature, whoever began it. Wild Shape steps up the Combat die rolled in melee, attacking and defending, and in Combat checks; the pool itself and the die the pane shows do not change. At d12 it can still be used and gives nothing.
+  - **Fascinate** is aimed in targeting over every creature in sight, nearest first. On a success the d6 is rolled and the creature is Held (Spec 04: a creature already Held keeps the longer duration). It is not an exchange: no fight begins, and the creature stays as aware as it was (a rival stays peaceful).
+  - **Mark** is aimed the same way over the asleep and unaware creatures in sight. Marking is quiet, like Fascinate. "Each of the player's hits" means melee and ranged hits (Backstab, Cleave, a hit back, a thrown dagger and each Volley shot included); a spell that removes a die is not a hit. A new mark replaces the old.
+  - **Spirit Totem** has no cursor: it goes on the cell the player faces if that is free, else the first free cell clockwise from north. A free cell is open floor, not a stair, with no creature on it. Using it again takes down the old totem. Nothing can attack it. With no free cell Q says so and no round is spent. It draws as CP437 232 (Φ) in the fixture colour, which the core glyph table (Spec 01) does not list. The pane's wait counter counts toward 5 while the player stands beside it.
+  - **Volley:** the second target is chosen from the same targets less the first; Esc cancels at any point with no round spent. The roll has disadvantage when either target is adjacent. Each target hit is hit as an ordinary shot (a crossbow bolt removes 2 dice, and Hex Breaker, Mark and the weapon's break roll apply to each), and a crossbow reloads once. With one shot left the volley is a single shot at the first target. Both targets are provoked, and each is heard as combat.
+  - **Not yet built:** until task 3.8, Q on Raise, Decoy and Companion says the ability is not yet available.
+
 **The example minor abilities** (Minor abilities table), as effects from the Spec 08 vocabulary
 
 | Ability | Rule |

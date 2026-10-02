@@ -51,6 +51,7 @@ import { mapLevel } from './features/fixtures.ts';
 import { restock, teleportPlayer, wanderer } from './features/spawn.ts';
 import { WANDER_ONE_IN } from '../rules/world/restock.ts';
 import { type Aim, castSpell, spellAimError } from './magic.ts';
+import { type MajorAim, activeProblem, useActiveMajor, waitRoundsNow } from './actives.ts';
 import { type Monster, spawnAll } from './monsters.ts';
 import type { Fact } from '../core/templates.ts';
 import { type TownState, freshTown } from './town-state.ts';
@@ -279,6 +280,8 @@ export interface GameState {
   used: UsedState;
   /** Once-per-level-visit effects already spent on this visit, by effect (Second Wind's `rally`; Spec 03, Addendum A). Not saved: a visit ends on leaving. */
   spent: string[];
+  /** The creature an Assassin has marked, by its id, until it dies or the player leaves the level (Spec 03, Addendum A). Not saved. */
+  mark: number | null;
 }
 
 /** What an action leaves for the shell and the run to carry out (Spec 06): a level change, or something to show. */
@@ -394,6 +397,7 @@ export class Game {
       revealed: delta ? delta.revealed.slice() : [],
       used: delta ? structuredClone(delta.used) : freshUsed(),
       spent: [],
+      mark: null,
     };
     // A level a map fragment has mapped shows its layout the first time it is entered (Spec 02, task 2.10).
     if (!delta && player.mapped.includes(level.depth)) mapLevel(this);
@@ -640,9 +644,11 @@ export class Game {
   /**
    * Q on the major ability (Spec 03, Addendum A). A passive one works by itself, and Q says so with no round spent;
    * Smite is readied or cancelled with no round; Pact is one round with no roll. A spell (Arcane Bolt, Heal) is cast
-   * as C would cast it, which the shell starts, so it never comes here.
+   * as C would cast it, which the shell starts, so it never comes here. An active one is a skill use of one round,
+   * aimed (`aim`) at the creature Fascinate or Mark takes, or the one or two Volley shoots; one that cannot be used
+   * now costs nothing.
    */
-  useMajor(): ActResult {
+  useMajor(aim?: MajorAim): ActResult {
     const { player } = this.state;
     if (player.dead) return { messages: [{ kind: 'system', text: 'You are dead.' }], spent: false };
     const id = majorOf(player);
@@ -659,6 +665,14 @@ export class Game {
         break;
     }
     const messages: LogMessage[] = [];
+    if (MAJOR_KINDS[id] === 'active') {
+      const problem = activeProblem(this, id, aim);
+      if (problem) return say(problem);
+      const helpless = this.helpless(messages);
+      if (helpless) return helpless;
+      useActiveMajor(this, id, name, aim, messages);
+      return this.endRound(messages);
+    }
     if (id === 'smite') {
       toggleSmite(player, messages);
       return { messages, spent: false };
@@ -784,7 +798,7 @@ export class Game {
       if (hasStatus(player.statuses, 'poisoned')) player.waited = 0;
       else if (waiting && !player.dead) {
         const pool = { dice: player.pools.combat.dice, max: player.pools.combat.max };
-        const wait = waitRound(player.waited, pool, derived(this).waitRounds);
+        const wait = waitRound(player.waited, pool, waitRoundsNow(this));
         player.waited = wait.waited;
         player.pools.combat.dice = pool.dice;
         if (wait.restored) messages.push({ kind: 'system', text: 'You feel your strength return.' });

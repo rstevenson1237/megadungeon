@@ -21,6 +21,8 @@ export interface MapState {
   terrain: Uint8Array;
   /** Derived from the player's position, so never saved: 1 where a cell is visible now. */
   visible: Uint8Array;
+  /** A Shaman's Spirit Totem, which blocks movement but not sight until the player leaves the level (Spec 03, Addendum A). Never saved. */
+  totem?: Point | null;
 }
 
 /**
@@ -82,6 +84,7 @@ export function createMapState(level: Level, options: MapOptions = {}): MapState
 /** Rebuild the terrain after pottery is smashed. */
 export function refreshTerrain(state: MapState): void {
   state.terrain = buildTerrain(state.level, state.openDoors, state.cleared);
+  if (state.totem) state.terrain[state.totem.y * state.level.width + state.totem.x] = TERRAIN_LIQUID;
 }
 
 /** Recompute what is visible after the player moves or a door opens or closes. */

@@ -36,6 +36,8 @@ import { BUILT_MAJORS, MAJOR_KINDS, activeAbilities, majorOf, packSizeOf, passiv
 import { isIdentified, displayName } from '../rules/items/magic.ts';
 import { type Item } from '../rules/items/types.ts';
 import { resolvesAtOnce, needsCell } from '../rules/magic/spells.ts';
+import { fascinateTargets, markTargets, volleyProblem, volleyTargets, waitRoundsNow } from '../game/actives.ts';
+import type { Monster } from '../game/monsters.ts';
 
 export class Shell {
   readonly log = new MessageLog();
@@ -61,6 +63,8 @@ export class Shell {
   usingItem: Item | null = null;
   /** Set while the player is choosing the cell Blink goes to. */
   cursor: CellCursor | null = null;
+  /** The active major ability being aimed (Fascinate, Mark, Volley), with Volley's first target once chosen. */
+  aimingAbility: { id: string; first?: Monster } | null = null;
 
   constructor(
     public title: string,
@@ -79,6 +83,7 @@ export class Shell {
     this.announced = { death: false, win: run.player.stats.won, final_boss: run.player.stats.finalBoss };
     this.targeting = null;
     this.cursor = null;
+    this.aimingAbility = null;
     this.casting = null;
     this.usingItem = null;
     this.arrived();
@@ -270,7 +275,7 @@ export class Shell {
     this.character.abilities = abilityLines(player.minorAbilities, classDef);
     // The wait recovery counter: rounds waited so far, and how many bring a Combat die back (Spec 01, Status).
     const minors = this.run!.gameContent.minors;
-    this.character.wait = { rounds: player.waited, needed: derivedFor(player, minors).waitRounds };
+    this.character.wait = { rounds: player.waited, needed: this.game ? waitRoundsNow(this.game) : derivedFor(player, minors).waitRounds };
     // Active effects with their rounds left, then a Shield, then timed abilities such as Sanctuary (Spec 01, Status; Spec 04; Spec 03, Addendum A).
     this.character.status = [
       ...player.statuses.map(describeStatus),
@@ -437,7 +442,44 @@ export class Shell {
       else this.log.add({ kind: 'system', text: `You do not know ${name}.` }, this.turn);
       return;
     }
+    if (id === 'volley' || id === 'fascinate' || id === 'mark') return this.aimAbility(id);
     this.applyResult(game.useMajor());
+  }
+
+  /**
+   * Aim an active major ability (Spec 03, Addendum A): Fascinate at any creature in sight and Mark at an asleep or
+   * unaware one, with no range limit or line of fire; Volley at a first and then a second, different target of the
+   * readied weapon's shot. Choosing is free; Enter confirms and Esc cancels, as in targeting (Spec 01).
+   */
+  private aimAbility(id: 'volley' | 'fascinate' | 'mark'): void {
+    const game = this.game!;
+    const problem = id === 'volley' ? volleyProblem(game) : undefined;
+    if (problem) {
+      this.log.add({ kind: 'system', text: problem }, this.turn);
+      return;
+    }
+    const targets = id === 'volley' ? volleyTargets(game) : id === 'fascinate' ? fascinateTargets(game) : markTargets(game);
+    if (targets.length === 0) {
+      this.log.add({ kind: 'system', text: id === 'mark' ? 'There is no unaware creature in sight.' : id === 'fascinate' ? 'There is no creature in sight.' : 'There is no valid target.' }, this.turn);
+      return;
+    }
+    const range = id === 'volley' ? game.ranged()!.range : Math.max(game.state.map.level.width, game.state.map.level.height);
+    this.aimingAbility = { id };
+    this.targeting = new Targeting(game, { range, shape: { kind: 'single' } }, targets);
+    this.showTarget();
+  }
+
+  /** Enter while aiming an ability: Volley's first choice asks for a second when there is one; anything else is used. */
+  private confirmAbility(t: Targeting): ActResult | undefined {
+    const { id, first } = this.aimingAbility!;
+    if (id !== 'volley') return this.game!.useMajor(t.selected);
+    if (first) return this.game!.useMajor([first, t.selected]);
+    const rest = t.targets.filter((m) => m !== t.selected);
+    if (rest.length === 0) return this.game!.useMajor([t.selected]);
+    this.aimingAbility = { id, first: t.selected };
+    this.targeting = new Targeting(this.game!, t.spec, rest);
+    this.log.add({ kind: 'system', text: 'Choose a second target.' }, this.turn);
+    return undefined;
   }
 
   /** Use an active minor ability (a skill use); only in the dungeon. */
@@ -491,6 +533,7 @@ export class Shell {
 
   /** Forget what was being aimed. */
   private stopAiming(): void {
+    this.aimingAbility = null;
     this.targeting = null;
     this.cursor = null;
     this.casting = null;
@@ -560,6 +603,14 @@ export class Shell {
         break;
       case 'confirm':
       {
+        if (this.aimingAbility) {
+          const result = this.confirmAbility(t);
+          if (result) {
+            this.stopAiming();
+            this.applyResult(result);
+          }
+          break;
+        }
         const spell = this.casting;
         const item = this.usingItem;
         const result = item ? this.game!.use(item, t.selected) : spell ? this.game!.cast(spell, t.selected) : this.game!.fire(t.selected);

@@ -6,7 +6,7 @@ import type { EffectSpec } from '../core/catalog.ts';
 import type { LogMessage } from '../core/log.ts';
 import type { Rng } from '../core/rng.ts';
 import type { Character } from '../rules/character/character.ts';
-import { type RollResult, rollPool } from '../rules/character/dice.ts';
+import { type RollResult, type Step, rollPool, stepUp } from '../rules/character/dice.ts';
 import { type Derived, derive } from '../rules/items/gear.ts';
 import { packCapacity } from '../rules/items/inventory.ts';
 import { liftCurse } from '../rules/items/magic.ts';
@@ -22,8 +22,8 @@ export interface TimedAbility {
   /** The ability's id and name, for the Status block. */
   id: string;
   name: string;
-  /** What it does while it runs, with its numbers: copied from the row when it is used. */
-  effect: EffectSpec;
+  /** What a minor ability does while it runs, with its numbers: copied from the row when it is used. A major one (Rage, Wild Shape) has none; its rule is in code. */
+  effect?: EffectSpec;
   rounds: number;
 }
 
@@ -94,7 +94,7 @@ export const timedLeft = (player: PlayerState, id: string): number => player.tim
 
 /** What monsters' melee rolls against the player lose while a Sanctuary runs (Spec 03, Addendum A); several do not add. */
 export const monsterMeleePenalty = (player: PlayerState): number =>
-  Math.max(0, ...(player.timed ?? []).filter((t) => t.effect.effect === 'sanctuary').map((t) => t.effect.amount ?? 0));
+  Math.max(0, ...(player.timed ?? []).filter((t) => t.effect?.effect === 'sanctuary').map((t) => t.effect!.amount ?? 0));
 
 /** A round has ended: every timed ability loses one, and those that end are named. */
 export function tickTimed(player: PlayerState): string[] {
@@ -178,14 +178,49 @@ export const MAJOR_KINDS: Readonly<Record<string, MajorKind>> = {
   companion: 'passive',
 };
 
-/** The major abilities with a rule in code so far (task 3.6); the actives and the companion come with tasks 3.7 and 3.8. */
-export const BUILT_MAJORS: readonly string[] = ['cleave', 'arcane_bolt', 'backstab', 'heal', 'shield_wall', 'smite', 'flurry', 'overchannel', 'pact', 'brew', 'hex_breaker'];
+/** The major abilities with a rule in code so far (tasks 3.6 and 3.7); Raise, Decoy and Companion come with task 3.8. */
+export const BUILT_MAJORS: readonly string[] = [
+  'cleave',
+  'arcane_bolt',
+  'backstab',
+  'heal',
+  'shield_wall',
+  'smite',
+  'flurry',
+  'overchannel',
+  'pact',
+  'brew',
+  'hex_breaker',
+  'rage',
+  'volley',
+  'fascinate',
+  'wild_shape',
+  'mark',
+  'spirit_totem',
+];
 
 /** Whether the player has a major ability, by id. */
 export const hasMajor = (player: Pick<PlayerState, 'abilities'>, id: string): boolean => player.abilities.includes(id);
 
 /** The player's major ability: the first in `abilities` (one per class). */
 export const majorOf = (player: Pick<PlayerState, 'abilities'>): string | undefined => player.abilities[0];
+
+// --- Timed major abilities (Spec 03, Addendum A: Rage and Wild Shape) ---
+
+/** Rounds a Rage runs, and a Wild Shape (Spec 03, Addendum A). */
+export const RAGE_ROUNDS = 10;
+export const WILD_SHAPE_ROUNDS = 20;
+
+/** Start a timed ability, or start it again: its rounds count the one it is used in, and two never add. */
+export function startTimed(player: PlayerState, id: string, name: string, rounds: number): void {
+  player.timed = [...(player.timed ?? []).filter((t) => t.id !== id), { id, name, rounds }];
+}
+
+/** Rage is running: a melee tie between the player and a creature hits only the creature (Spec 03, Addendum A). */
+export const raging = (player: PlayerState): boolean => timedLeft(player, 'rage') > 0;
+
+/** The step the player's Combat die rolls at: one step up while Wild Shape runs, never past d12 (Spec 03, Addendum A). */
+export const combatStep = (player: PlayerState): Step => (timedLeft(player, 'wild_shape') > 0 ? stepUp(player.pools.combat.step) : player.pools.combat.step);
 
 // --- Fights (Spec 03, Addendum A, "A fight") ---
 

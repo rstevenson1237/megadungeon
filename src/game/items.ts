@@ -22,7 +22,7 @@ import {
 import type { EquipSlot, GearItem, Item } from '../rules/items/types.ts';
 import { applyStatus, removeStatus } from '../rules/magic/status.ts';
 import type { Loot, Point } from '../rules/world/level.ts';
-import { combatAt, damage, extraDice, nameOf, provoke, removeDie } from './combat.ts';
+import { combatAt, damage, extraDice, markExtra, nameOf, provoke, removeDie } from './combat.ts';
 import type { Game, PlayerState } from './game.ts';
 import { type MinorEffects, bindWielded, derivedFor, hasMajor, joinFight, knownIds, packSizeOf } from './abilities.ts';
 import { mapLevel } from './features/fixtures.ts';
@@ -108,14 +108,10 @@ export function rangedOption(game: Game): RangedOption | undefined {
 
 /** The player fires the readied ranged weapon, or throws a dagger, at a creature (Spec 04, Spec 05). Costs ammunition, not a round. */
 export function fireRanged(game: Game, target: Monster, messages: LogMessage[]): void {
-  const { player, map } = game.state;
+  const { player } = game.state;
   const option = rangedOption(game)!;
-  const d = derived(game);
-  const adjacent = Math.max(Math.abs(target.x - map.player.x), Math.abs(target.y - map.player.y)) <= 1;
-  const result = playerRanged(game.rng, player.pools.skill, adjacent, d.rangedMode === 'disadvantage');
-  joinFight(player, game.state.round); // an exchange involving the player (Spec 03, Addendum A)
-  provoke(game, target);
-  combatAt(game, target, [target]);
+  const result = playerRanged(game.rng, player.pools.skill, adjacentToPlayer(game, target), derived(game).rangedMode === 'disadvantage');
+  shotTaken(game, [target]);
   const weapon = readied(game);
   if (option.thrown) {
     const dagger = throwableDagger(game)!;
@@ -123,21 +119,57 @@ export function fireRanged(game: Game, target: Monster, messages: LogMessage[]):
     else delete player.equipment.main;
     if (result.success) {
       damage(game, target, messages, 'player');
-      extraDice(game, target, messages, hexBreaker(game, target));
+      extraDice(game, target, messages, [...hexBreaker(game, target), ...markExtra(game, target)]);
     } else messages.push({ kind: 'combat', text: `Your throw misses ${nameOf(target)}.` });
     land(game, dagger.item, target, messages);
   } else {
     spendAmmo(player.pack, weapon!.ammo!);
     if (weapon!.traits.includes('reload')) player.reload = 2; // loaded again after the next round
-    if (result.success) {
-      damage(game, target, messages, 'player');
-      // A crossbow bolt removes 2 dice (Spec 05).
-      if (weapon!.traits.includes('heavy') && game.state.monsters.includes(target)) removeDie(game, target, messages, { hit: `The bolt tears into ${nameOf(target)}.`, kill: `The bolt kills ${nameOf(target)}.` }, true);
-      extraDice(game, target, messages, hexBreaker(game, target));
-      weaponHit(game, weapon!, messages);
-    } else messages.push({ kind: 'combat', text: `Your shot misses ${nameOf(target)}.` });
+    if (result.success) shotHits(game, weapon!, target, messages);
+    else messages.push({ kind: 'combat', text: `Your shot misses ${nameOf(target)}.` });
   }
   if (result.dieLost) messages.push({ kind: 'combat', text: 'You lose a Skill die.' });
+}
+
+/**
+ * Volley (Spec 03, Addendum A): one Skill roll as a ranged attack resolves a shot at each target, one shot of
+ * ammunition each. The roll has disadvantage when either target is adjacent. A hit on each is a hit as `fireRanged`
+ * makes it. Needs a readied ranged weapon that can fire (not a thrown dagger), which the caller has checked.
+ */
+export function fireVolley(game: Game, targets: readonly Monster[], messages: LogMessage[]): void {
+  const { player } = game.state;
+  const weapon = readied(game)!;
+  const adjacent = targets.some((t) => adjacentToPlayer(game, t));
+  const result = playerRanged(game.rng, player.pools.skill, adjacent, derived(game).rangedMode === 'disadvantage');
+  shotTaken(game, targets);
+  for (const _ of targets) spendAmmo(player.pack, weapon.ammo!);
+  if (weapon.traits.includes('reload')) player.reload = 2;
+  messages.push({ kind: 'combat', text: `You loose a volley at ${targets.map(nameOf).join(' and ')}.` });
+  for (const target of targets) {
+    if (!result.success) messages.push({ kind: 'combat', text: `Your shot misses ${nameOf(target)}.` });
+    else if (game.state.monsters.includes(target)) shotHits(game, weapon, target, messages);
+  }
+  if (result.dieLost) messages.push({ kind: 'combat', text: 'You lose a Skill die.' });
+}
+
+const adjacentToPlayer = (game: Game, target: Monster): boolean => {
+  const at = game.state.map.player;
+  return Math.max(Math.abs(target.x - at.x), Math.abs(target.y - at.y)) <= 1;
+};
+
+/** A shot is an exchange involving the player (Spec 03, Addendum A): each target is provoked, and the fight is heard. */
+function shotTaken(game: Game, targets: readonly Monster[]): void {
+  joinFight(game.state.player, game.state.round);
+  for (const t of targets) provoke(game, t);
+  for (const t of targets) combatAt(game, t, targets);
+}
+
+/** A shot from the readied weapon hits: a die, a second for a crossbow bolt (Spec 05), the extras that add, and the weapon's break roll. */
+function shotHits(game: Game, weapon: GearItem, target: Monster, messages: LogMessage[]): void {
+  damage(game, target, messages, 'player');
+  if (weapon.traits.includes('heavy') && game.state.monsters.includes(target)) removeDie(game, target, messages, { hit: `The bolt tears into ${nameOf(target)}.`, kill: `The bolt kills ${nameOf(target)}.` }, true);
+  extraDice(game, target, messages, [...hexBreaker(game, target), ...markExtra(game, target)]);
+  weaponHit(game, weapon, messages);
 }
 
 /** Hex Breaker (Spec 03, Addendum A): a ranged hit on a creature with the caster behaviour removes one more die. */
