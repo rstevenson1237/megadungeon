@@ -5,7 +5,8 @@ import { Run } from '../src/game/run.ts';
 import { runOptionsFor } from '../src/game/world.ts';
 import { createCharacter, type ClassDef } from '../src/rules/character/character.ts';
 import { classById } from '../src/rules/character/classes.ts';
-import { packSize } from '../src/rules/items/inventory.ts';
+import { packSizeOf } from '../src/game/abilities.ts';
+import type { PlayerState } from '../src/game/game.ts';
 import { Grid } from '../src/ui/grid.ts';
 import { drawMap } from '../src/ui/map-view.ts';
 import { DEFAULT_LOOK, MAP, dimmed, mapLook } from '../src/ui/palette.ts';
@@ -15,6 +16,7 @@ import { CONTENT, ITEMS, SPELLS, content, gear, room, testCharacter, testPlayer 
 
 const thief = (): ClassDef => classById(content().bundle, 'thief');
 /** A class whose every minor draw is Pack Mule, so a level up is sure to draw it. */
+const packSize = (p: PlayerState): number => packSizeOf(p, CONTENT.minors);
 const muleClass = (): ClassDef => ({ ...thief(), minorAbilities: [{ id: 'pack_mule', name: 'Pack Mule', stackable: true }] });
 
 describe('Spec 03, Addendum A: one record of the character', () => {
@@ -36,7 +38,7 @@ describe('Spec 03, Addendum A: one record of the character', () => {
   });
 
   it('a Pack Mule drawn at level up grows the pack at once, and the pack really holds more', () => {
-    const run = new Run(3, createPlayer({ character: createCharacter('Ilse', muleClass()), pack: [], equipment: {} }), { classDef: muleClass(), items: ITEMS });
+    const run = new Run(3, createPlayer({ character: createCharacter('Ilse', muleClass()), pack: [], equipment: {} }), { classDef: muleClass(), items: ITEMS, content: CONTENT });
     expect(packSize(run.player)).toBe(12);
     run.player.xp = 4000;
     run.levelUp('skill');
@@ -53,7 +55,7 @@ describe('Spec 03, Addendum A: one record of the character', () => {
   });
 
   it("a shrine set's lasting buff now reaches the rules that read it: a wait buff of 8 brings a die back in 8 rounds", () => {
-    const game = new Game(1, room(6, 4, 2, 2), testPlayer({ combatDice: 1, combatMax: 2, buffs: [{ passive: 'wait', amount: 8 }] }), { spells: SPELLS, items: ITEMS, content: CONTENT });
+    const game = new Game(1, room(6, 4, 2, 2), testPlayer({ combatDice: 1, combatMax: 2, buffs: [{ effect: 'wait_rounds', amount: 8 }] }), { spells: SPELLS, items: ITEMS, content: CONTENT });
     for (let i = 0; i < 7; i++) game.act({ type: 'wait' });
     expect(game.state.player.pools.combat.dice).toBe(1);
     game.act({ type: 'wait' });
@@ -73,7 +75,7 @@ describe('Spec 01: the character pane shows only real state', () => {
     const player = createPlayer({ character: createCharacter('Ilse', muleClass()) });
     player.minorAbilities.push('pack_mule', 'pack_mule');
     player.waited = 4;
-    const shell = shellFor(new Run(5, player, { classDef: muleClass(), levelFor: () => room(8, 6, 2, 2), startDepth: 1, villages: [0] }));
+    const shell = shellFor(new Run(5, player, { classDef: muleClass(), content: CONTENT, levelFor: () => room(8, 6, 2, 2), startDepth: 1, villages: [0] }));
     expect(shell.character.name).toBe('Ilse');
     expect(shell.character.className).toBe('Thief');
     expect(shell.character.abilities).toEqual(['Backstab', 'Pack Mule x2']);

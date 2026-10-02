@@ -41,6 +41,7 @@
   kind: floor
   effect: teleport
   themes: { void_halls: 3 }
+  tags: [magic] # a magic trap (Spec 08, Addendum A): Hex Breaker makes it do nothing
 - id: trap_collapse
   name: collapse
   kind: floor

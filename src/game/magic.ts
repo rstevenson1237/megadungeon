@@ -5,12 +5,13 @@
 import type { LogMessage } from '../core/log.ts';
 import type { Spell } from '../core/schemas.ts';
 import { spellMode } from '../rules/items/gear.ts';
-import { derivedFor } from './items.ts';
+import { derived } from './items.ts';
 import { castRoll, reachOf, resolvesAtOnce } from '../rules/magic/spells.ts';
 import { type StatusId, STATUS_NAMES, applyStatus } from '../rules/magic/status.ts';
 import { distanceSq, squareFootprint } from '../rules/world/geometry.ts';
 import type { Point } from '../rules/world/level.ts';
-import { Name, combatAt, hurtPlayer, nameOf, provoke, removeDie, seen } from './combat.ts';
+import { Name, combatAt, hurtPlayer, isHostile, nameOf, provoke, removeDie, seen } from './combat.ts';
+import { fightReady, hasMajor, joinFight, useOncePerFight } from './abilities.ts';
 import type { Game } from './game.ts';
 import { TERRAIN_BLOCKED, isOpen } from './map-state.ts';
 import type { Monster } from './monsters.ts';
@@ -21,11 +22,31 @@ export type Aim = Monster | Point;
 
 const isMonster = (aim: Aim | undefined): aim is Monster => aim !== undefined && 'dice' in aim;
 
-/** The targeting a spell needs: its reach, and the footprint of an area aimed at a creature (Spec 01). */
+/**
+ * An area spell as the caster casts it: Widen grows a footprint by `widen` cells each way and a caster-centred
+ * spell's reach by `widen` cells (Spec 03, Addendum A). Any other spell is unchanged.
+ */
+export function widened(spell: Spell, widen: number): Spell {
+  if (spell.shape !== 'area' || widen <= 0) return spell;
+  if (spell.centred) return { ...spell, reach: reachOf(spell) + widen };
+  // The table allows 3 or 5; widened, a footprint may be 7 (Blizzard), which the geometry takes as any odd size.
+  return spell.size ? { ...spell, size: (spell.size + 2 * widen) as Spell['size'] } : spell;
+}
+
+/** The spell as this player casts it: an area widened by Widen. */
+export const asCast = (game: Game, spell: Spell): Spell => widened(spell, derived(game).spellWiden);
+
+/** The targeting a spell needs: its reach, and the footprint of an area aimed at a creature (Spec 01). Pass the spell as cast. */
 export const targetSpecOf = (spell: Spell): TargetSpec => ({
   range: reachOf(spell),
   shape: spell.shape === 'area' && spell.size ? { kind: 'area', size: spell.size } : { kind: 'single' },
 });
+
+/** True when a hostile creature stands in one of the eight cells around the player (Focus; Spec 03, Addendum A). */
+export function engaged(game: Game): boolean {
+  const { map, monsters } = game.state;
+  return monsters.some((m) => isHostile(m) && Math.max(Math.abs(m.x - map.player.x), Math.abs(m.y - map.player.y)) === 1);
+}
 
 /** A creature Sleep cannot touch: one that is naturally asleep, as the spell needs an unaware or alert one. */
 const asleepAlready = (spell: Spell, m: Monster): boolean => spell.status === 'asleep' && m.awareness === 'asleep';
@@ -76,18 +97,29 @@ export interface CastOptions {
  * cast (from a charge) skips the roll. Plate armour gives spell rolls disadvantage and a staff of the spell's
  * shape advantage (Spec 05).
  */
-export function castSpell(game: Game, spell: Spell, aim: Aim | undefined, messages: LogMessage[], options: CastOptions = {}): void {
+export function castSpell(game: Game, plain: Spell, aim: Aim | undefined, messages: LogMessage[], options: CastOptions = {}): void {
   const { player } = game.state;
+  // Widen grows an area spell however it is cast (Spec 03, Addendum A).
+  const spell = asCast(game, plain);
   const at = isMonster(aim) ? ` at ${nameOf(aim)}` : '';
+  // A spell aimed at a creature is an exchange involving the player: it begins or continues a fight (Spec 03, Addendum A).
+  if (isMonster(aim)) joinFight(player, game.state.round);
   if (options.free) {
     messages.push({ kind: 'combat', text: `You use ${options.source ?? 'it'}${at}: ${spell.name}.` });
     apply(game, spell, aim, messages);
     return;
   }
   // The Mage's major ability: Arcane Bolt loses no die on a 2 to 3 (Spec 03).
-  const lossFree = spell.id === 'arcane_bolt' && player.abilities.includes('arcane_bolt');
-  const roll = castRoll(game.rng, player.pools.magic, lossFree, spellMode(derivedFor(player), spell.shape));
+  const bolt = spell.id === 'arcane_bolt' && hasMajor(player, 'arcane_bolt');
+  // Overchannel: the first spell roll of 2 to 3 in each fight loses no die (Spec 03, Addendum A).
+  const overchannel = !bolt && hasMajor(player, 'overchannel') && fightReady(player, 'overchannel');
+  // Focus: advantage while no hostile creature is adjacent (Spec 03, Addendum A).
+  const roll = castRoll(game.rng, player.pools.magic, bolt || overchannel, spellMode(derived(game), spell.shape, engaged(game)));
   messages.push({ kind: 'combat', text: `You cast ${spell.name}${at}.` });
+  if (overchannel && roll.success && roll.face <= 3 && !roll.fromEmpty) {
+    useOncePerFight(player, 'overchannel');
+    messages.push({ kind: 'system', text: 'You overchannel the spell and keep your Magic die.' });
+  }
   if (roll.success) apply(game, spell, aim, messages);
   else messages.push({ kind: 'warning', text: 'The spell fizzles.' });
   if (roll.dieLost) messages.push({ kind: 'warning', text: 'You lose a Magic die.' });

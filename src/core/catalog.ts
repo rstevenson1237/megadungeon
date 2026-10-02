@@ -127,7 +127,7 @@ export const GEAR_TRAITS = [
 ] as const;
 export type GearTrait = (typeof GEAR_TRAITS)[number];
 
-/** Passive effects of rings, clothing and artifacts that are always on (Spec 05, "Magic items"). */
+/** Always-on effects of rings and clothing (Spec 05, "Magic items"). Each is a word for an effect of the vocabulary (`PASSIVE_EFFECTS`). */
 export const PASSIVES = ['search', 'stealth', 'melee', 'wait', 'lockpick'] as const;
 export type Passive = (typeof PASSIVES)[number];
 
@@ -190,6 +190,143 @@ export type Blessing = (typeof BLESSINGS)[number];
 
 /** Effects defined in code. Tables name these (`effect: restore_dice`). */
 export const EFFECTS: readonly string[] = [...new Set([...SPELL_EFFECTS, ...ITEM_EFFECTS, ...TRAP_EFFECTS, ...FOUNTAIN_EFFECTS])];
+
+// --- The effect vocabulary (Spec 08, Addendum A; task 3.5) ---
+//
+// One list of effects in code, which minor abilities, artifacts and shrine buffs name (`effect: wait_rounds`), each
+// with the fields that effect needs. A ring's or a piece of clothing's `passive` is a word for one of them
+// (`PASSIVE_EFFECTS`), so every worn power, ability and buff is worked out by the same code (rules/items/gear.ts,
+// `derive`). A new effect is code first: it is added here by a task, with its code and its test, and only then may
+// content name it.
+
+/** The roll types an `advantage` effect can name (Spec 08, Addendum A, "Kinds of effect"). */
+export const ADVANTAGE_ROLLS = ['search', 'notice', 'lockpick', 'disarm', 'avoid_trap', 'spell'] as const;
+export type AdvantageRoll = (typeof ADVANTAGE_ROLLS)[number];
+
+/** Creature tags the game keeps on a creature in play, which an effect's `tag` may name. A new one is code first. */
+export const CREATURE_TAGS = ['undead'] as const;
+export type CreatureTag = (typeof CREATURE_TAGS)[number];
+
+/** The kinds of effect (Spec 08, Addendum A). */
+export type EffectKind = 'advantage' | 'modifier' | 'rate' | 'trigger' | 'active';
+
+/** The fields an effect can carry (Spec 08, Addendum A, "Fields"). */
+// `rolls`, not `roll`: on any row `roll:` names a table to nest a roll in (Spec 08, "Table format and rolling"), and
+// an artifact row is rolled by the shared roller (clarification of task 3.5).
+export const EFFECT_FIELDS = ['amount', 'rolls', 'tag', 'shape', 'rounds'] as const;
+export type EffectField = (typeof EFFECT_FIELDS)[number];
+
+/** Tables whose rows name an effect: a shrine buff is an altar god's `buff`. */
+export type EffectTable = 'minor_abilities' | 'artifacts' | 'altar_gods';
+
+export interface EffectDef {
+  kind: EffectKind;
+  /** The fields a row must give (`required`) or may give (`optional`); any other field fails the build. */
+  fields: Partial<Record<EffectField, 'required' | 'optional'>>;
+  /** The smallest and largest `amount` allowed; 1 and no limit unless given. */
+  amount?: readonly [number, number];
+  /** Tables that may name it; every table unless given. Actives and bound effects belong to minor abilities. */
+  only?: readonly EffectTable[];
+  /** What it does, for the content author. */
+  text: string;
+}
+
+/** The vocabulary. Ids never change once released; `text` says what the code does. */
+export const ABILITY_EFFECTS = {
+  advantage: {
+    kind: 'advantage',
+    fields: { rolls: 'required', shape: 'optional' },
+    text: 'Advantage on the rolls named in `rolls`: search checks, passive notice, lockpicking, disarming, the avoid check of a hidden floor trap, or spell rolls (of `shape` only, when given)',
+  },
+  spell_focus: { kind: 'advantage', fields: {}, text: 'Advantage on spell rolls while no hostile creature is adjacent' },
+  against_tag: { kind: 'advantage', fields: { tag: 'required' }, text: 'Advantage on the Combat die in melee against a creature with `tag`, attacking and defending' },
+  melee: { kind: 'modifier', fields: { amount: 'required' }, text: '+`amount` on melee rolls' },
+  weapon_melee: {
+    kind: 'modifier',
+    fields: { amount: 'required' },
+    only: ['minor_abilities'],
+    text: '+`amount` on melee rolls with the weapon base wielded when it was drawn; drawn bare-handed, it binds to the next weapon wielded',
+  },
+  defence: { kind: 'modifier', fields: { amount: 'required' }, text: '+`amount` on the Combat die when defending against melee' },
+  stealth: { kind: 'modifier', fields: {}, text: "Monsters' notice rolls against the player have disadvantage" },
+  spell_widen: {
+    kind: 'modifier',
+    fields: { amount: 'required' },
+    text: "An area spell's footprint grows by `amount` cells each way, and a spell centred on the caster reaches `amount` cells further",
+  },
+  wait_rounds: { kind: 'rate', fields: { amount: 'required' }, text: 'Waiting restores a Combat die every `amount` rounds; with several, the shortest wins' },
+  pack_slots: { kind: 'rate', fields: { amount: 'required' }, text: '+`amount` pack slots; several add up' },
+  sell_bonus: { kind: 'rate', fields: { amount: 'required' }, text: 'Selling pays `amount` percent more; several add up' },
+  rest_cost: { kind: 'rate', fields: { amount: 'required' }, amount: [0, 100], text: 'A village rest costs `amount` percent of its price (0 is free); with several, the lowest wins' },
+  potion_magic: { kind: 'rate', fields: { amount: 'required' }, text: 'A potion that restores Magic dice restores `amount` more' },
+  book_lore: {
+    kind: 'trigger',
+    fields: {},
+    text: "On reading: a spellbook shows its spell and a book its lore-chain place before reading, and a spellbook is learned on 2 to 3 as well as on 4 or more",
+  },
+  sure_footing: { kind: 'trigger', fields: {}, text: "On the avoid check of a hidden floor trap: 2 to 3 jumps clear like 4 or more, and a 1 springs it one time in two" },
+  careful_opening: {
+    kind: 'trigger',
+    fields: {},
+    text: 'On opening a container whose trap is not found: a Skill check, where only a 1 springs it; otherwise the trap is found, not sprung',
+  },
+  rally: { kind: 'trigger', fields: {}, text: 'Once per level visit: when a hit leaves the player with one Combat die, regain one' },
+  sanctuary: {
+    kind: 'active',
+    fields: { amount: 'required', rounds: 'required' },
+    only: ['minor_abilities'],
+    text: "Used with Q as a skill use: for `rounds` rounds, monsters take -`amount` on melee rolls against the player",
+  },
+  purify: {
+    kind: 'active',
+    fields: {},
+    only: ['minor_abilities'],
+    text: 'Used with Q as a skill use: lifts the curse of one worn cursed item (and the Cursed status if no curse is left), or else ends Poisoned',
+  },
+} as const satisfies Record<string, EffectDef>;
+
+export type AbilityEffect = keyof typeof ABILITY_EFFECTS;
+export const ABILITY_EFFECT_IDS = Object.keys(ABILITY_EFFECTS) as AbilityEffect[];
+
+/** What a row says about its effect: the effect's id and the fields it needs (Spec 08, Addendum A). */
+export interface EffectSpec {
+  effect: AbilityEffect;
+  amount?: number | undefined;
+  rolls?: AdvantageRoll | AdvantageRoll[] | undefined;
+  tag?: CreatureTag | undefined;
+  shape?: SpellShape | undefined;
+  rounds?: number | undefined;
+}
+
+/** The effect each ring and clothing `passive` stands for (Spec 05, "Magic items"); `amount` comes from the row. */
+export const PASSIVE_EFFECTS: Readonly<Record<Passive, Omit<EffectSpec, 'amount'>>> = {
+  search: { effect: 'advantage', rolls: 'search' },
+  lockpick: { effect: 'advantage', rolls: 'lockpick' },
+  stealth: { effect: 'stealth' },
+  melee: { effect: 'melee' },
+  wait: { effect: 'wait_rounds' },
+};
+
+/**
+ * Why a row's effect is not valid for `table`: an effect not on the list, a field it needs missing, a field it does
+ * not take, or an amount out of range. Empty when it is valid.
+ */
+export function effectErrors(spec: Partial<Record<'effect' | EffectField, unknown>>, table: EffectTable): string[] {
+  const id = spec.effect;
+  if (typeof id !== 'string' || !(id in ABILITY_EFFECTS)) return [`"${String(id)}" is not an effect on the list (${ABILITY_EFFECT_IDS.join(', ')})`];
+  const def: EffectDef = ABILITY_EFFECTS[id as AbilityEffect];
+  const errors: string[] = [];
+  if (def.only && !def.only.includes(table)) errors.push(`${id} is only for ${def.only.join(', ')}`);
+  for (const field of EFFECT_FIELDS) {
+    const need = def.fields[field];
+    if (need === 'required' && spec[field] === undefined) errors.push(`${id} needs \`${field}\``);
+    if (!need && spec[field] !== undefined) errors.push(`${id} takes no \`${field}\``);
+  }
+  const [lo, hi] = def.amount ?? [1, Infinity];
+  if (typeof spec.amount === 'number' && (spec.amount < lo || spec.amount > hi)) errors.push(`${id} needs an \`amount\` from ${lo}${hi === Infinity ? ' up' : ` to ${hi}`}`);
+  if (spec.shape !== undefined && id === 'advantage' && ![spec.rolls].flat().includes('spell')) errors.push('`shape` goes with the roll type `spell`');
+  return errors;
+}
 
 /** Launch floors for tables that are checked by group (Spec 08, "Validation and coverage"). */
 export const MONSTERS_PER_RATING = 5;

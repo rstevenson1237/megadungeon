@@ -2,7 +2,7 @@
 // clarifications of task 2.9): making an item from its table row, the disguises, what the player is told, and
 // lifting a curse. Rolls come from a seeded generator the caller supplies.
 
-import { DISGUISED_KINDS } from '../../core/catalog.ts';
+import { DISGUISED_KINDS, type EffectSpec } from '../../core/catalog.ts';
 import { createRng, hash32, type Rng } from '../../core/rng.ts';
 import type { Artifact, ContentBundle, DisguiseName, EquipmentBase, MagicItem } from '../../core/schemas.ts';
 import { makeGear, rollQuality } from './gear.ts';
@@ -106,6 +106,19 @@ export function makeMagicItem(row: MagicItem, uid: number, rng: Rng, data: ItemD
   }
 }
 
+/** The effect a row names and its fields, as an item or a buff keeps it (Spec 08, Addendum A). */
+export function effectOf(row: EffectSpec): EffectSpec {
+  const { effect, amount, rolls, tag, shape, rounds } = row;
+  return {
+    effect,
+    ...(amount !== undefined ? { amount } : {}),
+    ...(rolls !== undefined ? { rolls: structuredClone(rolls) } : {}),
+    ...(tag !== undefined ? { tag } : {}),
+    ...(shape !== undefined ? { shape } : {}),
+    ...(rounds !== undefined ? { rounds } : {}),
+  };
+}
+
 /** An artifact: never breaks, never cursed, always known for what it is (Spec 05). */
 export function makeArtifact(row: Artifact, uid: number): WornItem {
   return {
@@ -115,8 +128,7 @@ export function makeArtifact(row: Artifact, uid: number): WornItem {
     name: row.name,
     value: 0,
     slot: row.slot ?? 'ring',
-    ...(row.passive ? { passive: row.passive } : {}),
-    ...(row.amount ? { amount: row.amount } : {}),
+    effect: effectOf(row),
     cursed: false,
     identified: true,
   };

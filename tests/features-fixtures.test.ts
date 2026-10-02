@@ -203,7 +203,7 @@ describe('Spec 06: altars', () => {
     expect(wins[0]).not.toContain('lasting gift');
     expect(wins[1]).not.toContain('lasting gift');
     expect(wins[2]).toContain('lasting gift');
-    expect(player.buffs).toEqual([{ passive: 'melee', amount: 1 }]);
+    expect(player.buffs).toEqual([{ effect: 'melee', amount: 1 }]);
     expect(derive({}, false, player.buffs).melee).toBe(0); // bare hands -1, and the buff +1
   });
 

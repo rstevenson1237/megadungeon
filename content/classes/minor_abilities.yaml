@@ -1,67 +1,95 @@
-# Minor abilities (Spec 03, "Minor abilities"). These are the examples the spec gives for the four core
-# classes; the full pools of 12 for all 20 classes are written in task 4.4. Effects are code (tasks 2.7 to 2.10).
+# Minor abilities (Spec 03, "Minor abilities", and its Addendum A). These are the examples the spec gives for the
+# four core classes; the full pools of 12 for all 20 classes are written in task 4.4. Each names its effect from the
+# vocabulary in code (Spec 08, Addendum A; src/core/catalog.ts, ABILITY_EFFECTS) with the fields that effect needs.
 - id: hardy
   name: Hardy
   text: Waiting restores a Combat die in 8 rounds
   classes: [warrior]
+  effect: wait_rounds
+  amount: 8
 - id: weapon_master
   name: Weapon Master
-  text: +1 on melee with one weapon type
+  text: +1 on melee with the weapon wielded when drawn
   classes: [warrior]
+  effect: weapon_melee
+  amount: 1
 - id: pack_mule
   name: Pack Mule
   text: +2 inventory slots
   classes: [warrior]
   stackable: true
+  effect: pack_slots
+  amount: 2
 - id: second_wind
   name: Second Wind
   text: Once per level, regain a Combat die when down to one
   classes: [warrior]
+  effect: rally
 - id: focus
   name: Focus
-  text: Advantage on spell rolls while not adjacent to a monster
+  text: Advantage on spell rolls while no foe is adjacent
   classes: [mage]
+  effect: spell_focus
 - id: scholar
   name: Scholar
-  text: Identify scrolls and books on sight
+  text: Know books before reading; learn spells more easily
   classes: [mage]
+  effect: book_lore
 - id: widen
   name: Widen
   text: Area spells reach one cell further
   classes: [mage]
+  effect: spell_widen
+  amount: 1
 - id: mana_well
   name: Mana Well
   text: Potions that restore Magic dice restore one extra
   classes: [mage]
+  effect: potion_magic
+  amount: 1
 - id: keen_eye
   name: Keen Eye
-  text: Advantage on search checks
+  text: Advantage on search checks and passive notice
   classes: [thief]
+  effect: advantage
+  rolls: [search, notice]
 - id: light_step
   name: Light Step
-  text: Floor traps trigger on a 1 only half the time
+  text: Hidden floor traps are easier to jump clear of
   classes: [thief]
+  effect: sure_footing
 - id: fence
   name: Fence
   text: +20% when selling
   classes: [thief]
+  effect: sell_bonus
+  amount: 20
 - id: quick_hands
   name: Quick Hands
   text: Container traps trigger only on a 1
   classes: [thief]
-- id: blessed
-  name: Blessed
-  text: Advantage on checks against undead
+  effect: careful_opening
+- id: hallowed
+  name: Hallowed
+  text: Advantage in melee against the undead
   classes: [priest]
+  effect: against_tag
+  tag: undead
 - id: sanctuary
   name: Sanctuary
   text: Monsters take -2 on melee rolls against you for 3 rounds
   classes: [priest]
+  effect: sanctuary
+  amount: 2
+  rounds: 3
 - id: tithe
   name: Tithe
   text: Village rest is free
   classes: [priest]
+  effect: rest_cost
+  amount: 0
 - id: purify
   name: Purify
-  text: Remove one curse or poison as a skill use
+  text: Lift one worn curse, or else end poison, as a skill use
   classes: [priest]
+  effect: purify

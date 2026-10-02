@@ -12,7 +12,7 @@ import { type Monster, creature } from './monsters.ts';
 import { Run, type RunOptions } from './run.ts';
 
 /** The save format. Bump it with every change to what is stored, and add a migration from the format before. */
-export const SAVE_FORMAT = 2;
+export const SAVE_FORMAT = 4;
 /** The generator versions this build can still build levels with; a save keeps the one it started with (Spec 02, Spec 09). */
 export { SUPPORTED_GENERATORS };
 
@@ -153,7 +153,55 @@ export function migrate1to2(data: Record<string, unknown>): Record<string, unkno
 }
 
 /** `migrations[n]` upgrades a format-n save to format n + 1. */
-export const MIGRATIONS: Readonly<Record<number, Migration>> = { 1: migrate1to2 };
+/** The effect a format 2 `passive` word stood for (Spec 05), as format 3 keeps it (Spec 08, Addendum A). */
+function passiveToEffect(passive: unknown, amount: unknown): Record<string, unknown> {
+  const amounted = typeof amount === 'number' ? { amount } : {};
+  switch (passive) {
+    case 'search':
+    case 'lockpick':
+      return { effect: 'advantage', rolls: passive };
+    case 'wait':
+      return { effect: 'wait_rounds', ...amounted };
+    case 'melee':
+      return { effect: 'melee', ...amounted };
+    default:
+      return { effect: 'stealth' };
+  }
+}
+
+/** Every artifact anywhere in the save (worn, in the pack, the bank, a pile, a monster's hands): its passive becomes its effect. */
+function artifactsToEffects(value: unknown): void {
+  if (Array.isArray(value)) return value.forEach(artifactsToEffects);
+  if (typeof value !== 'object' || value === null) return;
+  const node = value as Record<string, unknown>;
+  if (node.kind === 'artifact' && node.effect === undefined) {
+    if (node.passive !== undefined) node.effect = passiveToEffect(node.passive, node.amount);
+    delete node.passive;
+    delete node.amount;
+  }
+  for (const child of Object.values(node)) artifactsToEffects(child);
+}
+
+/**
+ * Format 2 kept a shrine buff and an artifact's power as a `passive` word; format 3 keeps each as an effect from the
+ * vocabulary (Spec 08, Addendum A; task 3.5), and the player gains the timed abilities running (none on a save).
+ */
+export function migrate2to3(data: Record<string, unknown>): Record<string, unknown> {
+  const out = structuredClone(data);
+  const player = (out.player ?? {}) as Record<string, unknown> & { buffs?: { passive?: unknown; amount?: unknown }[] };
+  player.buffs = (player.buffs ?? []).map((b) => passiveToEffect(b.passive, b.amount)) as never;
+  player.timed ??= [];
+  artifactsToEffects(out);
+  return out;
+}
+
+/** Format 4 keeps the fight in progress and whether Smite is readied (Spec 03, Addendum A; task 3.6): a format 3 save has neither. */
+export function migrate3to4(data: Record<string, unknown>): Record<string, unknown> {
+  const player = (data.player ?? {}) as Record<string, unknown>;
+  return { ...data, player: { ...player, fight: player.fight ?? null, smite: player.smite ?? false } };
+}
+
+export const MIGRATIONS: Readonly<Record<number, Migration>> = { 1: migrate1to2, 2: migrate2to3, 3: migrate3to4 };
 
 /**
  * Read a save from its text: upgrade an older format step by step, and refuse, with a clear message and nothing

@@ -9,6 +9,21 @@ import { type Item, type Equipment, type EquipSlot } from '../rules/items/types.
 import { type Buff } from '../rules/items/gear.ts';
 import { type ItemData, disguisesFor, itemDataFrom, type Knowledge } from '../rules/items/magic.ts';
 import { type GameContent, noContent } from './content.ts';
+import {
+  BUILT_MAJORS,
+  type Fight,
+  MAJOR_KINDS,
+  type TimedAbility,
+  cannotUse,
+  fightRoundEnds,
+  majorOf,
+  makePact,
+  pactProblem,
+  passiveNote,
+  tickTimed,
+  toggleSmite,
+  useActive,
+} from './abilities.ts';
 import type { Pool, Step } from '../rules/character/dice.ts';
 import type { Character } from '../rules/character/character.ts';
 import { restAll, waitRound } from '../rules/character/health.ts';
@@ -29,7 +44,7 @@ import { TILE, type Level, type Loot, type Pile, type Point } from '../rules/wor
 import { MAX_SIMULATED, actionsInRound, creaturesAct } from './ai.ts';
 import { nameOf, playerAttacks, removeDie } from './combat.ts';
 import type { Command } from './commands.ts';
-import { ctxOf, derivedFor, dropItem, equipItem, fireRanged, pickUp, rangedOption, throwableDagger, unequipSlot, useItem } from './items.ts';
+import { ctxOf, derived, dropItem, equipItem, fireRanged, pickUp, rangedOption, throwableDagger, unequipSlot, useItem } from './items.ts';
 import { type MapState, TERRAIN_BLOCKED, TERRAIN_OPEN, createMapState, isOpen, refreshSight } from './map-state.ts';
 import { freeCaptive, interact, lockedDoorAt, npcIndexAt, useNpc, offer, readLoreBook, search, stepEnds, takeFromContainer, trapAt, walkIntoLocked } from './features/index.ts';
 import { mapLevel } from './features/fixtures.ts';
@@ -121,6 +136,12 @@ export interface PlayerState extends Character {
   deathCause?: string;
   /** The first of a hasted pair of actions is done, so the monsters have not yet acted for this round. */
   halfRound: boolean;
+  /** Timed abilities running, such as Sanctuary, with their rounds left (Spec 03, Addendum A). */
+  timed: TimedAbility[];
+  /** The fight in progress, if any (Spec 03, Addendum A, "A fight"). */
+  fight: Fight | null;
+  /** Smite is readied for the next melee hit (Spec 03, Addendum A). */
+  smite: boolean;
 }
 
 /** The pools of a player made without a character: the Combat pool, and Skill and Magic (one d6 each by default). */
@@ -182,6 +203,9 @@ export function createPlayer(setup: PlayerSetup): PlayerState {
     town: freshTown(),
     stats: { deepest: 0, kills: 0, won: false, finalBoss: false },
     halfRound: false,
+    timed: [],
+    fight: null,
+    smite: false,
   };
 }
 
@@ -197,6 +221,8 @@ export function takeRest(player: PlayerState): void {
   player.shield = 0;
   player.invisible = 0;
   player.reload = 0;
+  player.timed = [];
+  player.fight = null;
   player.rests++;
 }
 
@@ -251,6 +277,8 @@ export interface GameState {
   /** Cells (y * width + x) of hidden things the player has found: floor traps, container traps and secret doors (Spec 04, Detect; Spec 06). */
   revealed: number[];
   used: UsedState;
+  /** Once-per-level-visit effects already spent on this visit, by effect (Second Wind's `rally`; Spec 03, Addendum A). Not saved: a visit ends on leaving. */
+  spent: string[];
 }
 
 /** What an action leaves for the shell and the run to carry out (Spec 06): a level change, or something to show. */
@@ -365,6 +393,7 @@ export class Game {
       looted: delta ? structuredClone(delta.looted) : { features: [], piles: [] },
       revealed: delta ? delta.revealed.slice() : [],
       used: delta ? structuredClone(delta.used) : freshUsed(),
+      spent: [],
     };
     // A level a map fragment has mapped shows its layout the first time it is entered (Spec 02, task 2.10).
     if (!delta && player.mapped.includes(level.depth)) mapLevel(this);
@@ -568,7 +597,7 @@ export class Game {
     const messages: LogMessage[] = [];
     const name = this.spells.get(book.spell)?.name ?? book.spell;
     if (player.dead) return { messages: [{ kind: 'system', text: 'You are dead.' }], spent: false, used: false };
-    const reader = { magic: player.pools.magic, spells: player.spells, rests: player.rests, mode: checkMode(player.statuses) };
+    const reader = { magic: player.pools.magic, spells: player.spells, rests: player.rests, mode: checkMode(player.statuses), scholar: derived(this).bookLore };
     // A known spell or a book waiting for a rest costs nothing.
     const ready = readiness(book, reader);
     if (ready !== 'ready') {
@@ -590,6 +619,56 @@ export class Game {
       messages.push({ kind: 'warning', text: 'The book crumbles to dust, and a curse settles on you.' });
     }
     return { ...this.endRound(messages), used };
+  }
+
+  /**
+   * Use an active minor ability (Spec 03, Addendum A): a skill use of one Skill die and one round. One that cannot
+   * be used now (not drawn, not an active, nothing for it to do) costs nothing. Q and its list call this (task 3.6).
+   */
+  useAbility(id: string): ActResult {
+    const { player } = this.state;
+    if (player.dead) return { messages: [{ kind: 'system', text: 'You are dead.' }], spent: false };
+    const problem = cannotUse(player, id, this.content.minors);
+    if (problem) return { messages: [{ kind: 'system', text: problem }], spent: false };
+    const messages: LogMessage[] = [];
+    const helpless = this.helpless(messages);
+    if (helpless) return helpless;
+    useActive(player, id, this.content.minorNames.get(id) ?? id, this.content.minors, this.rng, messages);
+    return this.endRound(messages);
+  }
+
+  /**
+   * Q on the major ability (Spec 03, Addendum A). A passive one works by itself, and Q says so with no round spent;
+   * Smite is readied or cancelled with no round; Pact is one round with no roll. A spell (Arcane Bolt, Heal) is cast
+   * as C would cast it, which the shell starts, so it never comes here.
+   */
+  useMajor(): ActResult {
+    const { player } = this.state;
+    if (player.dead) return { messages: [{ kind: 'system', text: 'You are dead.' }], spent: false };
+    const id = majorOf(player);
+    const say = (text: string): ActResult => ({ messages: [{ kind: 'system', text }], spent: false });
+    if (!id) return say('You have no class ability.');
+    const name = this.content.majorNames.get(id) ?? id;
+    if (!BUILT_MAJORS.includes(id)) return say(`${name} is not yet available.`);
+    switch (MAJOR_KINDS[id]) {
+      case 'passive':
+        return say(passiveNote(player, id, name));
+      case 'spell':
+        return say(`Cast ${name} with C.`);
+      default:
+        break;
+    }
+    const messages: LogMessage[] = [];
+    if (id === 'smite') {
+      toggleSmite(player, messages);
+      return { messages, spent: false };
+    }
+    const problem = pactProblem(player);
+    if (problem) return say(problem);
+    const helpless = this.helpless(messages);
+    if (helpless) return helpless;
+    makePact(player, messages);
+    return this.endRound(messages);
   }
 
   /** An Asleep or Held player cannot act: the action is lost and the round goes by (Spec 04, Status effects). */
@@ -629,7 +708,7 @@ export class Game {
       return { messages, spent: false };
     }
     // A spear reaches 2 cells: moving toward a creature that far off, with the cell between free, attacks it (Spec 05, task 2.9).
-    if (isOpen(map, x, y) && derivedFor(player).weaponTraits.includes('reach')) {
+    if (isOpen(map, x, y) && derived(this).weaponTraits.includes('reach')) {
       const far = this.monsterAt(x + dx, y + dy);
       if (far) {
         playerAttacks(this, far, messages, true);
@@ -705,12 +784,14 @@ export class Game {
       if (hasStatus(player.statuses, 'poisoned')) player.waited = 0;
       else if (waiting && !player.dead) {
         const pool = { dice: player.pools.combat.dice, max: player.pools.combat.max };
-        const wait = waitRound(player.waited, pool, derivedFor(player).waitRounds);
+        const wait = waitRound(player.waited, pool, derived(this).waitRounds);
         player.waited = wait.waited;
         player.pools.combat.dice = pool.dice;
         if (wait.restored) messages.push({ kind: 'system', text: 'You feel your strength return.' });
       }
     }
+    // A fight ends after 10 rounds in a row with no exchange involving the player (Spec 03, Addendum A).
+    fightRoundEnds(player, this.state.round);
     this.state.round++;
   }
 
@@ -722,6 +803,7 @@ export class Game {
     const mine = tickStatuses(player.statuses);
     for (const id of mine.ended) messages.push({ kind: 'system', text: `You are no longer ${describeStatus({ id, rounds: null, clock: 0 }).toLowerCase()}.` });
     if (player.shield > 0 && --player.shield === 0) messages.push({ kind: 'system', text: 'Your shield fades.' });
+    for (const name of tickTimed(player)) messages.push({ kind: 'system', text: `${name} ends.` });
     if (mine.poisonDue) {
       if (player.pools.combat.dice <= 0) {
         player.dead = true;

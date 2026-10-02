@@ -32,6 +32,8 @@ export interface Reader {
   /** Village rests taken so far. */
   rests: number;
   mode: RollMode;
+  /** Scholar: a 2 to 3 learns the spell as well as a 4 or more (Spec 03, Addendum A). */
+  scholar?: boolean;
 }
 
 /** Whether a book can be read now: the spell is known already, the book is waiting for a rest, or it is ready. */
@@ -43,13 +45,13 @@ export function readiness(book: Spellbook, reader: Pick<Reader, 'spells' | 'rest
 
 /**
  * Read a spellbook: a Magic check (a check costs no die). A learned spell joins `reader.spells`; a failure
- * records the rest count on the book; a 1 destroys it.
+ * records the rest count on the book; a 1 destroys it. A Scholar learns on 2 to 3 as well.
  */
 export function readSpellbook(rng: Rng, book: Spellbook, reader: Reader): ReadOutcome {
   const ready = readiness(book, reader);
   if (ready !== 'ready') return { kind: ready };
   const roll = rollPool(rng, reader.magic, 'check', reader.mode);
-  if (roll.success) {
+  if (roll.success || (reader.scholar === true && !roll.negative)) {
     reader.spells.push(book.spell);
     return { kind: 'learned' };
   }

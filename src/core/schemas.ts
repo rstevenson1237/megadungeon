@@ -1,6 +1,9 @@
 import { z } from 'zod';
 import {
+  ABILITY_EFFECT_IDS,
+  ADVANTAGE_ROLLS,
   AMMO_TYPES,
+  CREATURE_TAGS,
   BASE_TYPES,
   BLESSINGS,
   CAVE_STAMPS,
@@ -24,6 +27,8 @@ import {
   TRAP_EFFECTS,
   TRAP_KINDS,
   WORN_SLOTS,
+  type EffectTable,
+  effectErrors,
 } from './catalog.ts';
 
 // Shared filter fields every table has (Spec 08, "Table format and rolling").
@@ -107,15 +112,37 @@ export const levelThemeSchema = z.strictObject({
     .optional(),
 });
 
-// Artifacts (Spec 02, "Run layout"): just a name until task 2.9 gives them powers.
-export const artifactSchema = z.strictObject({
-  ...baseFields,
-  name: z.string().min(1),
-  // Where it is worn (default ring) and an always-on effect (Spec 05, "Magic items"); Phase 3 gives the real ones.
-  slot: z.enum(WORN_SLOTS).optional(),
-  passive: z.enum(PASSIVES).optional(),
-  amount: z.number().int().positive().optional(),
-});
+// The effect a row names, from the one vocabulary in code, and the fields it needs (Spec 08, Addendum A). The
+// fields are flat on the row (`effect: wait_rounds`, `amount: 8`); `effectErrors` checks each effect's own fields.
+const effectFields = {
+  effect: z.enum(ABILITY_EFFECT_IDS),
+  amount: z.number().int().min(0).optional(),
+  rolls: z.union([z.enum(ADVANTAGE_ROLLS), z.array(z.enum(ADVANTAGE_ROLLS)).min(1)]).optional(),
+  tag: z.enum(CREATURE_TAGS).optional(),
+  shape: z.enum(SPELL_SHAPES).optional(),
+  rounds: z.number().int().positive().optional(),
+};
+
+/** A refinement that fails a row whose effect is missing a field it needs, has one it does not take, or is not for `table`. */
+const checkEffect =
+  (table: EffectTable) =>
+  (row: Partial<Record<keyof typeof effectFields, unknown>>, ctx: z.RefinementCtx): void => {
+    for (const message of effectErrors(row, table)) ctx.addIssue({ code: 'custom', message });
+  };
+
+/** A shrine buff, or any effect given on its own: the effect and its fields (Spec 08, Addendum A). */
+export const effectSpecSchema = z.strictObject(effectFields);
+
+// Artifacts (Spec 02, "Run layout"; Spec 05, "Magic items"): where it is worn (default ring) and its effect, from the
+// vocabulary; from task 3.5 every artifact names one (Spec 08, Addendum A).
+export const artifactSchema = z
+  .strictObject({
+    ...baseFields,
+    name: z.string().min(1),
+    slot: z.enum(WORN_SLOTS).optional(),
+    ...effectFields,
+  })
+  .superRefine(checkEffect('artifacts'));
 
 // Tables placement rolls from (Spec 02, steps 6 to 11). Only the fields placement reads are defined here;
 // the tasks that give the things behaviour (2.8 to 2.11) add their own fields.
@@ -170,11 +197,12 @@ export const debrisFindSchema = z
     if (d.find === 'item' && !d.item) bad('an item find needs an `item` id');
   });
 
-// Altar gods (Spec 06, "Fixtures"): what a good offering gives, and the lasting buff of a completed shrine set.
+// Altar gods (Spec 06, "Fixtures"): what a good offering gives, and the lasting buff of a completed shrine set, an
+// effect from the vocabulary (Spec 08, Addendum A).
 export const altarGodSchema = z.strictObject({
   ...named,
   blessing: z.enum(BLESSINGS),
-  buff: z.strictObject({ passive: z.enum(PASSIVES), amount: z.number().int().positive().optional() }),
+  buff: effectSpecSchema.superRefine(checkEffect('altar_gods')),
 });
 // A rune-word letter is one capital letter; a rune without one is an effect rune (Spec 06).
 export const runeSchema = z.strictObject({ ...named, letter: z.string().regex(/^[A-Z]$/).optional() });
@@ -308,15 +336,19 @@ export const classSchema = z.strictObject({
   ability: z.strictObject({ id, name: z.string().min(1), text: z.string().min(1) }),
 });
 
-// Minor abilities (Spec 03, "Minor abilities"): one entry may sit in several classes' pools (shared entries).
-export const minorAbilitySchema = z.strictObject({
-  ...baseFields,
-  name: z.string().min(1),
-  text: z.string().min(1),
-  classes: z.array(id).min(1),
-  // May be drawn more than once (such as Pack Mule).
-  stackable: z.boolean().optional(),
-});
+// Minor abilities (Spec 03, "Minor abilities"): one entry may sit in several classes' pools (shared entries). From
+// task 3.5 each names its effect from the vocabulary (Spec 08, Addendum A).
+export const minorAbilitySchema = z
+  .strictObject({
+    ...baseFields,
+    name: z.string().min(1),
+    text: z.string().min(1),
+    classes: z.array(id).min(1),
+    // May be drawn more than once (such as Pack Mule).
+    stackable: z.boolean().optional(),
+    ...effectFields,
+  })
+  .superRefine(checkEffect('minor_abilities'));
 
 // Spells (Spec 04, "Spells" and "Starting spell list"): the shape, the reach in cells and the effect, which
 // is code. `status` and `rounds` belong to the `status` effect; `size` is the footprint of an area spell

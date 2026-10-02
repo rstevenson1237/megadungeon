@@ -6,7 +6,8 @@ import type { LogMessage } from '../../core/log.ts';
 import { createRng, hash32 } from '../../core/rng.ts';
 import { chooseTemplate, type Fact } from '../../core/templates.ts';
 import { type Knowledge, describeItem, identify, isIdentified, liftAllCurses } from '../../rules/items/magic.ts';
-import { addToPack, packSize } from '../../rules/items/inventory.ts';
+import { addToPack } from '../../rules/items/inventory.ts';
+import { knownIds, packSizeOf } from '../abilities.ts';
 import { traderPrice } from '../../rules/items/prices.ts';
 import { type Item, EQUIP_SLOTS } from '../../rules/items/types.ts';
 import { type HermitService, hermitPrice } from '../../rules/villages/economy.ts';
@@ -82,11 +83,12 @@ export function buyFromTrader(game: Game, index: number, which: number): LogMess
   if (player.coins < price) return [say(`${price} gp is more than the ${player.coins} gp you carry.`)];
   const trial = { coins: player.coins - price, pack: structuredClone(player.pack) };
   const want = 'count' in item ? item.count : 1;
-  if (addToPack(trial, packSize(player), structuredClone(item)) < want) return [say('Your pack is full.')];
+  const size = packSizeOf(player, game.content.minors);
+  if (addToPack(trial, size, structuredClone(item)) < want) return [say('Your pack is full.')];
   player.coins -= price;
-  addToPack(player, packSize(player), item);
+  addToPack(player, size, item);
   (npcState(game, index).bought ??= []).push(which);
-  const k: Knowledge = { known: player.known, disguises: game.disguises };
+  const k: Knowledge = { known: knownIds(player, game.items.magic.values()), disguises: game.disguises };
   return [say(`You buy ${describeItem(item, k)} for ${price} gp.`, 'loot')];
 }
 
@@ -129,7 +131,8 @@ export function hermitOffers(game: Game, index: number): HermitOffer[] {
 /** Everything the player carries or wears that is not yet known for what it is. */
 export function unknownItems(game: Game): Item[] {
   const { player } = game.state;
-  return [...player.pack, ...EQUIP_SLOTS.map((s) => player.equipment[s])].filter((i): i is Item => i !== undefined && !isIdentified(i, player.known));
+  const known = knownIds(player, game.items.magic.values());
+  return [...player.pack, ...EQUIP_SLOTS.map((s) => player.equipment[s])].filter((i): i is Item => i !== undefined && !isIdentified(i, known));
 }
 
 /** Use one of a hermit's services, paid from carried coins. `item` is what to identify. */
@@ -139,7 +142,7 @@ export function useHermit(game: Game, index: number, service: HermitService, ite
   if (offer.spent) return [say('The hermit has done that for you once already.')];
   if (player.coins < offer.price) return [say(`${offer.price} gp is more than the ${player.coins} gp you carry.`)];
   const messages: LogMessage[] = [];
-  const k: Knowledge = { known: player.known, disguises: game.disguises };
+  const k: Knowledge = { known: knownIds(player, game.items.magic.values()), disguises: game.disguises };
   switch (service) {
     case 'identify':
       if (!item || !unknownItems(game).includes(item)) return [say('There is nothing to identify.')];

@@ -2,7 +2,7 @@
 // needs from its table row when it is made (Spec 05, clarifications of task 2.9), so a saved item never needs
 // the table.
 
-import type { AmmoType, GearTrait, ItemEffect, Passive, SpellShape, WornSlot } from '../../core/catalog.ts';
+import type { AmmoType, EffectSpec, GearTrait, ItemEffect, Passive, SpellShape, WornSlot } from '../../core/catalog.ts';
 import type { StatusId } from '../magic/status.ts';
 
 /** Weapons and armour come in four qualities (Spec 05, "Quality, durability and repair"). */
@@ -75,8 +75,11 @@ export interface PotionItem extends Base {
 export interface WornItem extends Base {
   kind: 'ring' | 'clothing' | 'artifact';
   slot: WornSlot;
+  /** A ring's or clothing's always-on effect, a word for an effect of the vocabulary (Spec 05), with its number. */
   passive?: Passive;
   amount?: number;
+  /** An artifact's effect, copied from its row (Spec 08, Addendum A). */
+  effect?: EffectSpec;
   /** A worn power used from the pack screen, such as Boots of Speed. */
   power?: { status: StatusId; rounds: number; oncePerLevel: boolean };
   /** The level a once-a-level power was last used on. */

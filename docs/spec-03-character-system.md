@@ -184,6 +184,18 @@ From Intake Addendum A (findings A2, A3, B3, B4). All figures are starting value
 | Witch Hunter | Hex Breaker | Passive | A magical rune never discharges on the player (a 1 simply fails); traps tagged `magic` do nothing when sprung; ranged hits on a creature with the caster behaviour remove one extra die |
 | Beastmaster | Companion | Passive | An animal ally (Spec 04) with 1 die (d6+0), gaining a die at character levels 4, 7 and 10. It follows the player between levels and villages; if killed it returns at the next village rest |
 
+- **Clarification (task 3.6, proposed October 2, 2026, awaiting approval):** where the rules above leave a detail open, the build reads it as follows.
+  - **Once per fight** applies only while a fight is on. A hit taken with no fight on (a trap sprung while exploring) is not turned by Shield Wall, and a spell rolled with no fight on (a self spell before any exchange) gets no help from Overchannel. A creature's attack is an exchange, so it begins the fight before its hit lands.
+  - **Backstab** is a melee attack, so it begins or continues a fight although the creature does not roll.
+  - **Shield Wall and a Shield spell:** the spell's Shield absorbs a hit first; Shield Wall turns the first hit that reaches the player.
+  - **A hit back:** when the player wins an exchange a creature began, that hit is a player melee hit too: Flurry, a readied Smite and Cleave apply to it (weapon breakage, a mace's stun and a flame blade still apply only to the player's own attacks, as built).
+  - **Smite:** a miss does not spend it. If the Magic die is gone by the time the hit lands, Smite fades and the log says so.
+  - **Brew:** "every potion shows its true kind once seen" is built as every potion kind being known to an Alchemist, since any potion the screen shows has been seen. The surface village brews from the level 1 rows.
+  - **Hex Breaker:** the stub teleport trap is tagged `magic`; the launch traps are tagged in task 4.7.
+  - **Q in a village:** a passive ability says so; anything else says it can be used only in the dungeon. Q with a spell ability casts it only if it is known, which creation always makes it.
+  - **Not yet built:** until tasks 3.7 and 3.8, Q on Rage, Volley, Fascinate, Wild Shape, Mark, Spirit Totem, Raise, Decoy and Companion says the ability is not yet available.
+  - **The pane:** the Status block shows "Smite ready" while Smite is readied and "Shield Wall ready" while Shield Wall has not turned a blow in this fight.
+
 **The example minor abilities** (Minor abilities table), as effects from the Spec 08 vocabulary
 
 | Ability | Rule |
@@ -204,6 +216,20 @@ From Intake Addendum A (findings A2, A3, B3, B4). All figures are starting value
 | Sanctuary | Active: for 3 rounds, monsters take -2 on melee rolls against the player |
 | Tithe | Village rest is free |
 | Purify | Active: lifts the curse of one worn cursed item (and the Cursed status if no curse is left), or else ends Poisoned |
+
+- **Clarification (task 3.5, proposed and approved October 2, 2026):** where a row above leaves a detail open, the build reads it as follows.
+  - **Hallowed:** no check is made against a creature (the Combat checks are forcing a lock and lifting a lid), so "Combat checks and melee defence against creatures tagged `undead`" is read as the player's Combat die in every melee exchange with such a creature, attacking and defending.
+  - **Scholar:** in this build every spellbook comes from a shop already named by its spell, and no book holds a lore-chain place (a chain's entries are graffiti), so the showing half of Scholar has nothing to act on yet; it is built as soon as a book carries a chain place. The learning half (2 to 3 learns) is built.
+  - **Light Step:** a 1 that does not spring the trap (the other time in two) jumps clear like a 4 or more, so the trap is found.
+  - **Quick Hands:** finding the trap spends the round and does not open the container; the next E disarms it, as for any found trap.
+  - **Weapon Master:** "the weapon base" is the base's id, so any weapon on that base counts, magic or not. A ranged weapon is not wielded for melee and never binds it.
+  - **Focus:** a hostile creature is a monster, a bandit, or a rival once it has turned hostile.
+  - **Widen:** it widens an area spell however the player casts it, from a Magic die or from a wand, rod or staff. Blizzard's 5 x 5 becomes 7 x 7.
+  - **Mana Well:** potions only, not fountains.
+  - **Sanctuary:** its 3 rounds count the round it is used in, as Shield's do; using it again while it runs starts the 3 rounds again, and two never add.
+  - **Purify:** with several worn curses it lifts the first in slot order (main hand to second ring). With no worn curse and no poison it cannot be used, and Q says so with no round spent.
+  - **Second Wind:** "a hit" is anything that takes a Combat die as a hit does (a blow, a trap, a crushing lid), not poison.
+  - **Actives before task 3.6:** Sanctuary and Purify are built as skill uses in the game; the Q key and its list that call them come with task 3.6, as the plan sets out.
 
 **One owner for the dice**
 

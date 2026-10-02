@@ -7,11 +7,11 @@ import { EQUIP_SLOTS, isCursed, type Equipment, type EquipSlot, type Item } from
 /** Units per inventory slot (Spec 05). */
 export const PER_SLOT = { coins: 100, gems: 100, ammo: 20, keys: 10, lockpicks: 10, potions: 5 } as const;
 
-/** The pack starts at 12 slots, and each Pack Mule drawn adds 2 (Spec 03, Spec 05). */
+/** The pack starts at 12 slots (Spec 03, Spec 05); a `pack_slots` effect such as Pack Mule's adds to it (Spec 08, Addendum A). */
 export const PACK_BASE = 12;
-export const PACK_MULE_SLOTS = 2;
 
-export const packCapacity = (minorAbilities: readonly string[]): number => PACK_BASE + PACK_MULE_SLOTS * minorAbilities.filter((id) => id === 'pack_mule').length;
+/** The pack's size with `extraSlots` from effects: computed when needed, never stored (Spec 03, Addendum A). */
+export const packCapacity = (extraSlots = 0): number => PACK_BASE + extraSlots;
 
 /** What the pack holds: coins as a count, everything else as items. Equipment is separate and uses no slots. */
 export interface Carried {
@@ -206,6 +206,3 @@ export function spendAmmo(pack: Item[], type: AmmoType): boolean {
   if (--stack.count <= 0) pack.splice(pack.indexOf(stack), 1);
   return true;
 }
-
-/** The pack's size for a character: computed from the minor abilities drawn, never stored (Spec 03, Addendum A). */
-export const packSize = (character: { minorAbilities: readonly string[] }): number => packCapacity(character.minorAbilities);

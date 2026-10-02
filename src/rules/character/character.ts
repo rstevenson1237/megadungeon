@@ -44,6 +44,11 @@ export interface Character {
   minorAbilities: string[];
   /** Consecutive rounds of waiting so far (Spec 03, Waiting). */
   waited: number;
+  /**
+   * The weapon base each bound ability is tied to, by the ability's id (Weapon Master, Spec 03, Addendum A); null
+   * while one drawn bare-handed waits for the next weapon wielded.
+   */
+  bindings?: Record<string, string | null>;
 }
 
 /** A level 1 character: one full die per pool at the class's starting steps (Spec 03, Character creation). */

@@ -6,7 +6,7 @@ import { takeFromPack } from '../../rules/items/inventory.ts';
 import type { Item, KeyItem, LockpickItem, VaultKeyItem } from '../../rules/items/types.ts';
 import type { Door, Point } from '../../rules/world/level.ts';
 import type { Game } from '../game.ts';
-import { derivedFor } from '../items.ts';
+import { derived } from '../items.ts';
 import { TERRAIN_OPEN, refreshSight } from '../map-state.ts';
 import { cellOf, check, seeded, stateOf } from './common.ts';
 import { negative } from './hidden.ts';
@@ -58,7 +58,7 @@ function openDoor(game: Game, door: Point, forced: boolean): void {
 
 /** Pick the lock: a Skill check; 4 or more opens, 2 to 3 fails, 1 breaks a pick (Spec 06). */
 function pick(game: Game, messages: LogMessage[]): boolean {
-  const roll = check(game, 'skill', derivedFor(game.state.player).lockpick);
+  const roll = check(game, 'skill', derived(game).lockpick);
   if (roll.success) {
     messages.push({ kind: 'discovery', text: 'The lock clicks open.' });
     return true;
