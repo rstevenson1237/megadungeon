@@ -1,6 +1,7 @@
 // What happens in the game when attacks land (Spec 04): dice lost, deaths and drops, theft, and who
 // a fight wakes. The rolls themselves are rules (rules/combat); this layer applies their results.
 
+import type { CreatureTag } from '../core/catalog.ts';
 import type { LogMessage } from '../core/log.ts';
 import { alertedByCombat } from '../rules/combat/awareness.ts';
 import { theftTake } from '../rules/items/treasure.ts';
@@ -9,7 +10,8 @@ import { THEFTS_BEFORE_FLEEING, monsterMelee, playerMelee } from '../rules/comba
 import { distanceSq } from '../rules/world/geometry.ts';
 import { MAX_DEPTH, type Loot } from '../rules/world/level.ts';
 import type { Game } from './game.ts';
-import { derivedFor, wearerHit, weaponHit } from './items.ts';
+import { derived, wearerHit, weaponHit } from './items.ts';
+import { monsterMeleePenalty } from './abilities.ts';
 import type { Monster } from './monsters.ts';
 import { failQuest } from './town-state.ts';
 
@@ -125,8 +127,24 @@ export function hurtPlayer(game: Game, messages: LogMessage[], say: DieText): bo
   player.pools.combat.dice--;
   messages.push({ kind: 'combat', text: say.hit });
   wearerHit(game, messages); // armour and shield roll to break when the wearer is hit (Spec 05)
+  rally(game, messages);
   return true;
 }
+
+/** Second Wind (Spec 03, Addendum A): once per level visit, a hit that leaves one Combat die gives one back. */
+function rally(game: Game, messages: LogMessage[]): void {
+  const { player, spent } = game.state;
+  if (player.pools.combat.dice !== 1 || spent.includes('rally') || !derived(game).rally) return;
+  spent.push('rally');
+  player.pools.combat.dice++;
+  messages.push({ kind: 'system', text: 'A second wind fills you: one Combat die returns.' });
+}
+
+/** Whether a creature in play has a tag an effect can name (Spec 08, Addendum A): the game keeps these on the creature. */
+const HAS_TAG: Readonly<Record<CreatureTag, (m: Monster) => boolean>> = { undead: (m) => m.undead };
+
+/** Advantage on the player's Combat die against a creature with a tag the player fights well (Hallowed; Spec 03, Addendum A). */
+const tagMode = (game: Game, m: Monster): 'advantage' | 'normal' => (derived(game).against.some((tag) => HAS_TAG[tag](m)) ? 'advantage' : 'normal');
 
 /**
  * With a freed captive following, one blow in three meant for the player falls on them instead (Spec 04 says only
@@ -182,8 +200,8 @@ function steal(game: Game, bandit: Monster, messages: LogMessage[]): void {
 /** The player's melee attack on a creature: one exchange (Spec 04, Attacks), with the weapon's modifier (Spec 05). */
 export function playerAttacks(game: Game, m: Monster, messages: LogMessage[], reach = false): void {
   const { player } = game.state;
-  const d = derivedFor(player);
-  const exchange = playerMelee(game.rng, { step: player.pools.combat.step, dice: player.pools.combat.dice }, { modifier: m.modifier, unaware: m.awareness !== 'alert', asleep: hasStatus(m.statuses, 'asleep') }, d.melee);
+  const d = derived(game);
+  const exchange = playerMelee(game.rng, { step: player.pools.combat.step, dice: player.pools.combat.dice }, { modifier: m.modifier, unaware: m.awareness !== 'alert', asleep: hasStatus(m.statuses, 'asleep') }, d.melee, tagMode(game, m));
   provoke(game, m);
   combatAt(game, m, [m]);
   if (exchange.defenderHit) {
@@ -208,8 +226,8 @@ export function playerAttacks(game: Game, m: Monster, messages: LogMessage[], re
 /** A creature's melee attack on the player: one exchange. An ambusher's first has advantage. The player's armour adds to the defence die. */
 export function monsterAttacks(game: Game, m: Monster, messages: LogMessage[]): void {
   const { player } = game.state;
-  const defence = derivedFor(player).defence;
-  const exchange = monsterMelee(game.rng, m, { step: player.pools.combat.step, dice: player.pools.combat.dice }, hasStatus(player.statuses, 'asleep'), defence);
+  const defence = derived(game).defence;
+  const exchange = monsterMelee(game.rng, m, { step: player.pools.combat.step, dice: player.pools.combat.dice }, hasStatus(player.statuses, 'asleep'), defence, tagMode(game, m), monsterMeleePenalty(player));
   m.ambush = false;
   combatAt(game, game.state.map.player, [m]);
   if (exchange.defenderHit && hitPlayer(game, m, messages) && m.kind === 'bandit') steal(game, m, messages);

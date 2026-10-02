@@ -193,7 +193,7 @@ describe('Spec 09: versions and migration', () => {
       player: { ...rest, combatStep: 8, combatDice: 1, combatMax: 3, skill: pools.skill, magic: pools.magic, waited, packSlots: 16 },
     };
     const loaded = parseSave(JSON.stringify(v1));
-    expect(loaded.format).toBe(2);
+    expect(loaded.format).toBe(SAVE_FORMAT);
     expect(loaded).not.toHaveProperty('character');
     expect(loaded.player).not.toHaveProperty('packSlots');
     expect(loaded.player).not.toHaveProperty('combatDice');
@@ -227,7 +227,26 @@ describe('Spec 09: versions and migration', () => {
     steps.length = 0;
     expect(parseSave(JSON.stringify(v2), migrations, 3).characterId).toBe('migrated');
     expect(steps).toEqual(['2->3']);
-    expect(Object.keys(MIGRATIONS)).toEqual(['1']); // format 1 to 2: the character folded into the player
+    expect(Object.keys(MIGRATIONS)).toEqual(['1', '2']); // 1 to 2: the character folded into the player; 2 to 3: effects
+  });
+
+  it('a format 2 save: shrine buffs and artifacts keep a passive word, which becomes its effect (task 3.5)', () => {
+    const run = townRun(77, { pack: [] });
+    const now = toSave({ run, contentVersion: 'v' });
+    const oldArtifact = { kind: 'artifact', uid: 9, id: 'stub_artifact_01', name: 'Stub Relic 01', value: 0, slot: 'ring', passive: 'search', cursed: false, identified: true };
+    const { timed: _timed, ...player } = now.player;
+    const v2 = {
+      ...now,
+      format: 2,
+      player: { ...player, buffs: [{ passive: 'wait', amount: 8 }, { passive: 'stealth' }], equipment: { ring1: { ...oldArtifact, passive: 'melee', amount: 2 } }, pack: [oldArtifact] },
+    };
+    const loaded = parseSave(JSON.stringify(v2));
+    expect(loaded.format).toBe(3);
+    expect(loaded.player.buffs).toEqual([{ effect: 'wait_rounds', amount: 8 }, { effect: 'stealth' }]);
+    expect(loaded.player.equipment.ring1).toMatchObject({ kind: 'artifact', effect: { effect: 'melee', amount: 2 } });
+    expect(loaded.player.equipment.ring1).not.toHaveProperty('passive');
+    expect(loaded.player.pack[0]).toMatchObject({ effect: { effect: 'advantage', rolls: 'search' } });
+    expect(loaded.player.timed).toEqual([]);
   });
 
   it('a format with a missing migration is refused rather than guessed at', () => {

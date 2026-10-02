@@ -1,9 +1,9 @@
-import { packSize } from '../src/rules/items/inventory.ts';
+import { packCapacity } from '../src/rules/items/inventory.ts';
 import { describe, expect, it } from 'vitest';
 import { Game } from '../src/game/game.ts';
 import { carriedEstimate, appraise, bankable, depositValue, theftTake, APPRAISAL_HIGH, APPRAISAL_LOW } from '../src/rules/items/treasure.ts';
 import {
-  FENCE_BONUS, SELL_RATE, TRADER_RATE, buyPrice, identifyPrice, itemValue, repairPrice, sellPrice, traderPrice, villageMultiplier,
+  SELL_RATE, TRADER_RATE, buyPrice, identifyPrice, itemValue, repairPrice, sellPrice, traderPrice, villageMultiplier,
 } from '../src/rules/items/prices.ts';
 import type { TreasureItem, WornItem } from '../src/rules/items/types.ts';
 import { ITEMS, ammo, gameOn, gear, magic, monsterAt, room, testPlayer } from './helpers.ts';
@@ -33,10 +33,9 @@ describe('Spec 05: prices follow the depth multiplier and the sell rate', () => 
 
   it('shops pay half the value, with no depth multiplier, and the Fence adds 20% of that', () => {
     expect(SELL_RATE).toBe(0.5);
-    expect(FENCE_BONUS).toBe(0.2);
     const sword = gear('long_sword', 'normal');
     expect(sellPrice(sword)).toBe(20);
-    expect(sellPrice(sword, true)).toBe(24);
+    expect(sellPrice(sword, 20)).toBe(24);
     expect(sellPrice(gear('long_sword', 'crude'))).toBe(10); // half of what a normal one fetches
     expect(sellPrice(gear('long_sword', 'fine'))).toBe(60);
     // Buying in a deep village and selling elsewhere is never a profit.
@@ -186,6 +185,6 @@ describe('Spec 05 and 04: bandits steal 10% of the carried treasure', () => {
 describe('Spec 05: a new run carries 12 slots', () => {
   it('a new player has an empty pack of 12 slots and no known items', () => {
     const p = new Game(1, room(5, 5, 2, 2), testPlayer({ pack: [], equipment: {} }), { items: ITEMS }).state.player;
-    expect([packSize(p), p.known, p.invisible, p.reload]).toEqual([12, [], 0, 0]);
+    expect([packCapacity(), p.minorAbilities, p.known, p.invisible, p.reload]).toEqual([12, [], [], 0, 0]);
   });
 });

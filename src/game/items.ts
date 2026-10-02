@@ -7,8 +7,8 @@ import { createRng, hash32, type Rng } from '../core/rng.ts';
 import { pickWeighted } from '../core/roller.ts';
 import type { Spell } from '../core/schemas.ts';
 import { playerRanged } from '../rules/combat/attacks.ts';
-import { breaks, derive, makeGear, rollQuality, type Derived } from '../rules/items/gear.ts';
-import { addCoins, addToPack, ammoCount, equip as equipRule, equipped, spendAmmo, takeFromPack, unequip as unequipRule, packSize } from '../rules/items/inventory.ts';
+import { breaks, makeGear, rollQuality, type Derived } from '../rules/items/gear.ts';
+import { addCoins, addToPack, ammoCount, equip as equipRule, equipped, spendAmmo, takeFromPack, unequip as unequipRule } from '../rules/items/inventory.ts';
 import {
   type Knowledge,
   describeItem,
@@ -24,16 +24,16 @@ import { applyStatus, removeStatus } from '../rules/magic/status.ts';
 import type { Loot, Point } from '../rules/world/level.ts';
 import { combatAt, damage, nameOf, provoke, removeDie } from './combat.ts';
 import type { Game, PlayerState } from './game.ts';
+import { type MinorEffects, bindWielded, derivedFor, packSizeOf } from './abilities.ts';
 import { mapLevel } from './features/fixtures.ts';
 import { type Aim, castSpell, spellAimError } from './magic.ts';
 import { TERRAIN_OPEN } from './map-state.ts';
 import type { Monster } from './monsters.ts';
 
-/** What a player's equipment and lasting buffs give, with any stealth buff the character has from elsewhere. */
-export const derivedFor = (player: PlayerState): Derived => derive(player.equipment, player.stealth, player.buffs);
+export { derivedFor };
 
-/** What the player's equipment currently gives. */
-export const derived = (game: Game): Derived => derivedFor(game.state.player);
+/** What the player's equipment, abilities and lasting buffs give now (Spec 05; Spec 08, Addendum A). */
+export const derived = (game: Game): Derived => derivedFor(game.state.player, game.content.minors);
 
 /** What the player knows of their items: kinds found out by use, and this run's disguises. */
 export function knowledge(game: Game): Knowledge {
@@ -48,9 +48,11 @@ export interface ItemCtx {
   player: PlayerState;
   knowledge: Knowledge;
   spells: ReadonlyMap<string, Spell>;
+  /** Each minor ability's effect, for the pack's size, Mana Well and Weapon Master (Spec 08, Addendum A). */
+  minors: MinorEffects;
 }
 
-export const ctxOf = (game: Game): ItemCtx => ({ player: game.state.player, knowledge: knowledge(game), spells: game.spells });
+export const ctxOf = (game: Game): ItemCtx => ({ player: game.state.player, knowledge: knowledge(game), spells: game.spells, minors: game.content.minors });
 
 export const itemName = (ctx: ItemCtx, item: Item): string => displayName(item, ctx.knowledge);
 
@@ -236,7 +238,7 @@ export function lootLine(game: Game, loot: Loot, index: number, at: Point): stri
  */
 export function takeLoot(game: Game, loot: Loot, index: number, at: Point, messages: LogMessage[]): { left?: Loot; full: boolean } {
   const { player } = game.state;
-  const capacity = packSize(player);
+  const capacity = packSizeOf(player, game.content.minors);
   if (loot.kind === 'lift_token') {
     player.town.liftToken = true;
     messages.push({ kind: 'loot', text: "You take the lift keeper's token. Lift fares are halved from now on." });
@@ -296,12 +298,13 @@ const VERB: Partial<Record<Item['kind'], string>> = { weapon: 'wield', staff: 'w
 /** Wield or wear an item from the pack. A cursed item sticks and curses the wearer at once (Spec 05). */
 export function equipItem(ctx: ItemCtx, item: Item, messages: LogMessage[]): boolean {
   const { player } = ctx;
-  const result = equipRule(player, packSize(player), item);
+  const result = equipRule(player, packSizeOf(player, ctx.minors), item);
   if (!result.ok) {
     messages.push({ kind: 'system', text: result.reason });
     return false;
   }
   messages.push({ kind: 'system', text: `You ${VERB[item.kind] ?? 'put on'} ${itemName(ctx, item)}.` });
+  bindWielded(player, item); // a Weapon Master drawn bare-handed takes the first weapon wielded (Spec 03, Addendum A)
   for (const d of result.displaced) messages.push({ kind: 'system', text: `You put away ${itemName(ctx, d)}.` });
   if ('cursed' in item && item.cursed) {
     applyStatus(player.statuses, 'cursed', null);
@@ -314,7 +317,7 @@ export function equipItem(ctx: ItemCtx, item: Item, messages: LogMessage[]): boo
 export function unequipSlot(ctx: ItemCtx, slot: EquipSlot, messages: LogMessage[]): boolean {
   const { player } = ctx;
   const item = player.equipment[slot];
-  const result = unequipRule(player, packSize(player), slot);
+  const result = unequipRule(player, packSizeOf(player, ctx.minors), slot);
   if (!result.ok) {
     messages.push({ kind: 'system', text: result.reason });
     return false;
@@ -358,7 +361,8 @@ export function drinkPotion(ctx: ItemCtx, item: Extract<Item, { kind: 'potion' }
   takeFromPack(player.pack, item, 1);
   switch (item.effect) {
     case 'restore_dice':
-      say(restore(player, item.pool!, item.dice!) > 0 ? `You drink the ${before}. You feel better.` : `You drink the ${before}. Nothing seems to happen.`);
+      // Mana Well: a potion that restores Magic dice restores more (Spec 03, Addendum A).
+      say(restore(player, item.pool!, item.dice! + (item.pool === 'magic' ? derivedFor(player, ctx.minors).potionMagic : 0)) > 0 ? `You drink the ${before}. You feel better.` : `You drink the ${before}. Nothing seems to happen.`);
       break;
     case 'grant_status':
       applyStatus(player.statuses, item.status!, item.rounds!);

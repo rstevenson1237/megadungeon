@@ -2,7 +2,7 @@
 // Pure rules over a seeded generator; the game applies the hits.
 
 import type { Rng } from '../../core/rng.ts';
-import { rollFace, rollPool, type Pool, type RollMode, type RollResult } from '../character/dice.ts';
+import { combineModes, rollFace, rollPool, type Pool, type RollMode, type RollResult } from '../character/dice.ts';
 import { meleeOutcome, type MeleeOutcome } from './melee.ts';
 
 /** The step and dice left of a pool, which is all a defence or Combat roll reads. */
@@ -27,23 +27,33 @@ export interface MeleeExchange extends MeleeOutcome {
 
 /**
  * Player melee: one Combat die against the monster's d6 plus modifier. An unaware or asleep
- * monster rolls with disadvantage (Spec 04). Higher hits; a tie hits both.
+ * monster rolls with disadvantage (Spec 04). Higher hits; a tie hits both. `mode` is any other advantage on the
+ * player's die, such as Hallowed against the undead (Spec 03, Addendum A).
  */
-export function playerMelee(rng: Rng, combat: DieSource, monster: { modifier: number; unaware: boolean; asleep?: boolean }, attackMod = 0): MeleeExchange {
+export function playerMelee(rng: Rng, combat: DieSource, monster: { modifier: number; unaware: boolean; asleep?: boolean }, attackMod = 0, mode: RollMode = 'normal'): MeleeExchange {
   // Melee against an Asleep creature has advantage (Spec 04, Status effects). The weapon's modifier adds to the die (Spec 05).
-  const attacker = poolDie(rng, combat, monster.asleep ? 'advantage' : 'normal') + attackMod;
+  const attacker = poolDie(rng, combat, combineModes(monster.asleep ? 'advantage' : 'normal', mode)) + attackMod;
   const defender = monsterDie(rng, monster.modifier, monster.unaware ? 'disadvantage' : 'normal');
   return { ...meleeOutcome(attacker, defender), attacker, defender };
 }
 
 /**
  * Monster melee: d6 plus modifier against one Combat die. `ambush` is advantage on the first attack of an
- * ambusher, and so is attacking a player who is Asleep.
+ * ambusher, and so is attacking a player who is Asleep. `defenceMode` is advantage on the player's die (Hallowed),
+ * and `penalty` what the monster's roll loses (Sanctuary; Spec 03, Addendum A).
  */
-export function monsterMelee(rng: Rng, monster: { modifier: number; ambush: boolean }, combat: DieSource, playerAsleep = false, defenceMod = 0): MeleeExchange {
-  const attacker = monsterDie(rng, monster.modifier, monster.ambush || playerAsleep ? 'advantage' : 'normal');
+export function monsterMelee(
+  rng: Rng,
+  monster: { modifier: number; ambush: boolean },
+  combat: DieSource,
+  playerAsleep = false,
+  defenceMod = 0,
+  defenceMode: RollMode = 'normal',
+  penalty = 0,
+): MeleeExchange {
+  const attacker = monsterDie(rng, monster.modifier, monster.ambush || playerAsleep ? 'advantage' : 'normal') - penalty;
   // Armour and shield modifiers add to the player's die when defending against melee only (Spec 05).
-  const defender = poolDie(rng, combat) + defenceMod;
+  const defender = poolDie(rng, combat, defenceMode) + defenceMod;
   return { ...meleeOutcome(attacker, defender), attacker, defender };
 }
 

@@ -4,8 +4,9 @@
 
 import type { LogMessage } from '../../core/log.ts';
 import { eligibleEntries, pickWeighted } from '../../core/roller.ts';
-import { addCoins, takeFromPack, packSize } from '../../rules/items/inventory.ts';
-import { identify, isIdentified, liftAllCurses } from '../../rules/items/magic.ts';
+import { addCoins, takeFromPack } from '../../rules/items/inventory.ts';
+import { effectOf, identify, isIdentified, liftAllCurses } from '../../rules/items/magic.ts';
+import { packSizeOf } from '../abilities.ts';
 import type { Item } from '../../rules/items/types.ts';
 import { applyBound, applyStatus, removeStatus } from '../../rules/magic/status.ts';
 import { treasureBudget } from '../../rules/world/depth.ts';
@@ -66,7 +67,7 @@ export function drink(game: Game, index: number, messages: LogMessage[]): boolea
     case 'coins': {
       const [lo, hi] = row.amount!;
       const amount = game.rng.int(lo, hi) * Math.max(1, depthOf(game));
-      const got = addCoins(player, packSize(player), amount);
+      const got = addCoins(player, packSizeOf(player, game.content.minors), amount);
       say(`Coins glint in the basin: ${amount} gp.`, 'loot');
       if (got < amount) addToDrops(game, map.player, [{ kind: 'coins', amount: amount - got }]);
       break;
@@ -171,7 +172,7 @@ function shrineWon(game: Game, link: string, god: { id: string; name: string } |
   if (player.shrines[link] !== 3) return;
   const buff = god ? game.content.gods.get(god.id)?.buff : undefined;
   if (!buff) return;
-  player.buffs.push({ passive: buff.passive, amount: buff.amount });
+  player.buffs.push(effectOf(buff)); // an effect from the vocabulary (Spec 08, Addendum A)
   messages.push({ kind: 'discovery', text: `The third altar answers, and ${god!.name} grants you a lasting gift.` });
 }
 

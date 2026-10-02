@@ -13,8 +13,6 @@ export const villageMultiplier = (villagesBelowSurface: number): number => 1 + D
 
 /** Shops pay half an item's value (Spec 05). */
 export const SELL_RATE = 0.5;
-/** The Fence minor ability adds 20% to what shops pay (Spec 03). */
-export const FENCE_BONUS = 0.2;
 /** Traders in the dungeon sell at 150% of value (Spec 05). */
 export const TRADER_RATE = 1.5;
 /** Identification costs about 100 gp at the surface, and repair about 30% of value (Spec 05). */
@@ -57,12 +55,12 @@ export const traderPrice = (item: Item): number => Math.ceil(itemValue(item) * T
 
 /**
  * What a shop pays: half the value, with no depth multiplier so that buying in one village and selling in
- * another is never a profit; the Fence adds 20% of that. An artifact cannot be sold.
+ * another is never a profit; a `sell_bonus` effect adds its percent of that (Fence: 20). An artifact cannot be sold.
  */
-export function sellPrice(item: Item, fence = false): number {
+export function sellPrice(item: Item, bonusPercent = 0): number {
   const value = itemValue(item);
   if (value <= 0) return 0;
-  return Math.floor(value * SELL_RATE * (1 + (fence ? FENCE_BONUS : 0)));
+  return Math.floor(value * SELL_RATE * (1 + bonusPercent / 100));
 }
 
 /** What the identify service costs in a village (Spec 05). */
@@ -100,8 +98,8 @@ export function plainValue(item: Item, data: ItemData, known: readonly string[])
   }
 }
 
-/** What a shop pays for an item the player may or may not have identified: half the plain value, plus the Fence's 20%. */
-export function shopPays(item: Item, data: ItemData, known: readonly string[], fence = false): number {
+/** What a shop pays for an item the player may or may not have identified: half the plain value, plus any sell bonus percent (Fence). */
+export function shopPays(item: Item, data: ItemData, known: readonly string[], bonusPercent = 0): number {
   const value = plainValue(item, data, known);
-  return value <= 0 ? 0 : Math.floor(value * SELL_RATE * (1 + (fence ? FENCE_BONUS : 0)));
+  return value <= 0 ? 0 : Math.floor(value * SELL_RATE * (1 + bonusPercent / 100));
 }

@@ -6,7 +6,8 @@ import type { Loot } from '../../rules/world/level.ts';
 import type { Game } from '../game.ts';
 import { lootLine, addToDrops, takeLoot } from '../items.ts';
 import { refreshTerrain } from '../map-state.ts';
-import { cellOf, hasContainerTrap, isContainer, stateOf } from './common.ts';
+import { cellOf, check, hasContainerTrap, isContainer, stateOf } from './common.ts';
+import { derived } from '../items.ts';
 import { disarm, triggerTrap } from './hidden.ts';
 import { chestLocked, interactLockedChest } from './locks.ts';
 import { noiseAt, summon } from './spawn.ts';
@@ -62,6 +63,12 @@ export function interactContainer(game: Game, index: number, messages: LogMessag
   if (hasContainerTrap(game, index)) {
     if (game.state.revealed.includes(cellOf(game, f))) {
       disarm(game, { kind: 'container', index }, messages);
+      return true;
+    }
+    // Quick Hands: a Skill check, where only a 1 springs it; otherwise the trap is found, not sprung (Spec 03, Addendum A).
+    if (derived(game).carefulOpening && !check(game, 'skill').negative) {
+      game.state.revealed.push(cellOf(game, f));
+      messages.push({ kind: 'discovery', text: `Your quick hands find a trap on the ${f.kind} before it springs.` });
       return true;
     }
     const row = game.content.traps.get(f.trap!);

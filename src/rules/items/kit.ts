@@ -19,7 +19,7 @@ export interface Kit {
 }
 
 /** What a new character carries: the gear made at normal quality, then equipped in the order ranged, armour, weapon, shield. */
-export function startingKit(gear: readonly GearEntry[], data: ItemData, runSeed = 0, minorAbilities: readonly string[] = []): Kit {
+export function startingKit(gear: readonly GearEntry[], data: ItemData, runSeed = 0, extraSlots = 0): Kit {
   const pack: Item[] = [];
   gear.forEach((entry, i) => {
     const uid = hash32('kit', runSeed >>> 0, entry.id, i);
@@ -35,7 +35,7 @@ export function startingKit(gear: readonly GearEntry[], data: ItemData, runSeed 
     pack.push(item);
   });
   const kit: Kit = { pack, equipment: {} };
-  const capacity = packCapacity(minorAbilities);
+  const capacity = packCapacity(extraSlots);
   const first = (pred: (i: Item) => boolean): Item | undefined => kit.pack.find(pred);
   for (const pick of [
     first((i) => i.kind === 'ranged'),

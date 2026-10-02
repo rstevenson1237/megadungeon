@@ -95,7 +95,7 @@ describe('Spec 03: the 20 classes in the content tables', () => {
       expect(
         build({
           'classes.yaml': cls('{ combat: 8, skill: 6, magic: 4 }'),
-          'minor_abilities.yaml': '- id: m\n  name: M\n  text: t\n  classes: [x, ghost]\n',
+          'minor_abilities.yaml': '- id: m\n  name: M\n  text: t\n  classes: [x, ghost]\n  effect: stealth\n',
         }),
       ).toMatch(/"ghost" is not a class/);
     } finally {
@@ -165,7 +165,7 @@ describe('Spec 03: minor abilities from the content tables', () => {
     expect(pool('warrior')).toEqual(['hardy', 'weapon_master', 'pack_mule', 'second_wind']);
     expect(pool('mage')).toEqual(['focus', 'scholar', 'widen', 'mana_well']);
     expect(pool('thief')).toEqual(['keen_eye', 'light_step', 'fence', 'quick_hands']);
-    expect(pool('priest')).toEqual(['blessed', 'sanctuary', 'tithe', 'purify']);
+    expect(pool('priest')).toEqual(['hallowed', 'sanctuary', 'tithe', 'purify']); // Blessed renamed (Spec 03, Addendum A)
     expect(classById(built.bundle, 'warrior').minorAbilities.find((a) => a.id === 'pack_mule')?.stackable).toBe(true);
   });
 

@@ -5,7 +5,8 @@
 import type { LogMessage } from '../../core/log.ts';
 import { eligibleEntries, pickWeighted } from '../../core/roller.ts';
 import type { Trap } from '../../core/schemas.ts';
-import { addCoins, addToPack, packSize } from '../../rules/items/inventory.ts';
+import { addCoins, addToPack } from '../../rules/items/inventory.ts';
+import { packSizeOf } from '../abilities.ts';
 import { makeAmmo, makeLockpicks, makeMagicItem } from '../../rules/items/magic.ts';
 import { makeGear } from '../../rules/items/gear.ts';
 import type { Item } from '../../rules/items/types.ts';
@@ -14,7 +15,7 @@ import type { Point } from '../../rules/world/level.ts';
 import { createRng } from '../../core/rng.ts';
 import { alert } from '../combat.ts';
 import type { Game } from '../game.ts';
-import { addToDrops, derivedFor } from '../items.ts';
+import { addToDrops, derived } from '../items.ts';
 import { around, cellOf, check, depthOf, featureIndexAt, hasContainerTrap, seeded, stateOf, trapAt } from './common.ts';
 import { hurt, summon, teleportPlayer, wanderer } from './spawn.ts';
 
@@ -65,11 +66,11 @@ export function reveal(game: Game, h: Hidden, messages: LogMessage[]): void {
 
 /**
  * Search (X): one Skill check for each hidden thing in the 8 cells around, 4 or more finds it (Spec 06). Rings
- * and cloaks of searching give advantage, Blessed and Cursed apply, and a 1 on any check is one Search negative
- * effect for the whole search.
+ * and cloaks of searching and Keen Eye give advantage, Blessed and Cursed apply, and a 1 on any check is one Search
+ * negative effect for the whole search.
  */
 export function search(game: Game, messages: LogMessage[]): void {
-  const mode = derivedFor(game.state.player).search;
+  const mode = derived(game).search;
   const things = hiddenNear(game, game.state.map.player);
   if (things.length === 0) {
     messages.push({ kind: 'system', text: 'You search and find nothing.' });
@@ -90,14 +91,16 @@ export function search(game: Game, messages: LogMessage[]): void {
 
 /**
  * The free check when a step ends beside a hidden floor trap, container trap or secret door that has not had one:
- * a Skill check with disadvantage, once per thing, and never a negative effect (Spec 06, task 2.10).
+ * a Skill check with disadvantage, once per thing, and never a negative effect (Spec 06, task 2.10). Keen Eye's
+ * advantage cancels the disadvantage, so its notice roll is made normally (Spec 06, Addendum A).
  */
 export function passiveNotice(game: Game, messages: LogMessage[]): void {
   const { used } = game.state;
+  const mode = derived(game).passiveNotice;
   for (const h of hiddenNear(game, game.state.map.player, false)) {
     if (used.noticed.includes(h.cell)) continue;
     used.noticed.push(h.cell);
-    if (check(game, 'skill', 'disadvantage').success) reveal(game, h, messages);
+    if (check(game, 'skill', 'disadvantage', mode).success) reveal(game, h, messages);
   }
 }
 
@@ -121,7 +124,7 @@ export function makeFindItem(game: Game, id: string, count: number | undefined, 
 export function giveItem(game: Game, item: Item, messages: LogMessage[], name: string): void {
   const { player, map } = game.state;
   const want = 'count' in item ? item.count : 1;
-  const got = addToPack(player, packSize(player), item);
+  const got = addToPack(player, packSizeOf(player, game.content.minors), item);
   if (got > 0) messages.push({ kind: 'loot', text: `You take ${name}.` });
   if (got < want) {
     addToDrops(game, map.player, [{ kind: 'item', item: got > 0 && 'count' in item ? ({ ...item, count: want - got } as Item) : item }]);
@@ -140,7 +143,7 @@ function debrisFind(game: Game, cell: number, messages: LogMessage[]): void {
     const [lo, hi] = row.amount!;
     const amount = game.rng.int(lo, hi) * Math.max(1, depthOf(game));
     const { player, map } = game.state;
-    const got = addCoins(player, packSize(player), amount);
+    const got = addCoins(player, packSizeOf(player, game.content.minors), amount);
     messages.push({ kind: 'loot', text: `In the debris you find ${row.name}: ${amount} gp.` });
     if (got < amount) addToDrops(game, map.player, [{ kind: 'coins', amount: amount - got }]);
     return;
@@ -203,12 +206,17 @@ export function triggerTrap(game: Game, trap: Trap, at: Point, messages: LogMess
 const rowOf = (game: Game, id: string): Trap =>
   game.content.traps.get(id) ?? { id, name: 'trap', kind: 'floor', effect: 'lose_dice', dice: 1 };
 
-/** The player steps onto a floor trap that is not yet found: a Skill check to avoid it (Spec 06). */
+/**
+ * The player steps onto a floor trap that is not yet found: a Skill check to avoid it (Spec 06). With Light Step a
+ * 2 to 3 jumps clear like a 4 or more, and a 1 springs it one time in two (Spec 03, Addendum A).
+ */
 export function stepOnTrap(game: Game, at: Point, messages: LogMessage[]): void {
   const trap = trapAt(game, at.x, at.y);
   if (!trap) return;
-  const roll = check(game, 'skill');
-  if (roll.success) {
+  const d = derived(game);
+  const roll = check(game, 'skill', d.avoidTrap);
+  const clear = roll.success || (d.sureFooting && (!roll.negative || !game.rng.oneIn(2)));
+  if (clear) {
     game.state.revealed.push(cellOf(game, at));
     messages.push({ kind: 'discovery', text: 'You spot a trap at the last moment and jump clear!' });
     return;
@@ -220,7 +228,7 @@ export function stepOnTrap(game: Game, at: Point, messages: LogMessage[]): void 
 /** Disarm a found trap (E): a Skill check. 4 or more removes it, 2 to 3 fails safely, 1 springs it (Spec 06). */
 export function disarm(game: Game, target: { kind: 'floor'; at: Point } | { kind: 'container'; index: number }, messages: LogMessage[]): void {
   const { map } = game.state;
-  const roll = check(game, 'skill');
+  const roll = check(game, 'skill', derived(game).disarm);
   const trapId = target.kind === 'floor' ? trapAt(game, target.at.x, target.at.y)!.id : (map.level.features[target.index] as { trap: string }).trap;
   const row = rowOf(game, trapId);
   const at = target.kind === 'floor' ? target.at : (map.level.features[target.index] as Point);

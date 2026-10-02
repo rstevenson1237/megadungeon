@@ -7,7 +7,8 @@ import {
 } from '../src/rules/items/inventory.ts';
 import { startingKit } from '../src/rules/items/kit.ts';
 import type { Equipment, Item } from '../src/rules/items/types.ts';
-import { ITEMS, ammo, content, gear, gameOn, magic, room } from './helpers.ts';
+import { packSizeOf } from '../src/game/abilities.ts';
+import { CONTENT, ITEMS, ammo, content, gear, gameOn, magic, room, testPlayer } from './helpers.ts';
 
 const base = (id: string) => ITEMS.bases.get(id)!;
 const key = (n = 1): Item => ({ kind: 'key', uid: 1, id: 'key', name: 'key', value: 0, count: n });
@@ -83,8 +84,8 @@ describe('Spec 05: slots', () => {
 
   it('the pack has 12 slots, and each Pack Mule draw adds 2', () => {
     expect(PACK_BASE).toBe(12);
-    expect(packCapacity([])).toBe(12);
-    expect(packCapacity(['pack_mule', 'hardy', 'pack_mule'])).toBe(16);
+    expect(packCapacity()).toBe(12);
+    expect(packSizeOf(testPlayer({ minorAbilities: ['pack_mule', 'hardy', 'pack_mule'] }), CONTENT.minors)).toBe(16);
   });
 
   it('a full pack refuses a new item; a stack takes what fits', () => {

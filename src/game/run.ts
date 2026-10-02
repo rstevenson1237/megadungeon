@@ -20,6 +20,7 @@ import { levelUp, levelsOwed, type LevelUp } from '../rules/character/progressio
 import { type GameContent, noContent } from './content.ts';
 import type { ItemCtx } from './items.ts';
 import { Town } from './town.ts';
+import { bindDrawn } from './abilities.ts';
 
 /** The surface village sits above level 1. */
 export const SURFACE = 0;
@@ -172,12 +173,21 @@ export class Run {
 
   /** Apply the next level up with the new die going to `pool` (Spec 03). A Pack Mule drawn grows the pack at once, as its size is computed. */
   levelUp(pool: PoolName): LevelUp | null {
-    return this.classDef ? levelUp(this.runSeed, this.player, this.classDef, pool) : null;
+    if (!this.classDef) return null;
+    const result = levelUp(this.runSeed, this.player, this.classDef, pool);
+    // A Weapon Master drawn takes the weapon wielded now, or the next one wielded (Spec 03, Addendum A).
+    if (result?.minor) bindDrawn(this.player, result.minor, this.gameContent.minors);
+    return result;
   }
 
   /** What the item actions need, from the run alone: usable in a village, where there is no level. */
   ctx(): ItemCtx {
-    return { player: this.player, knowledge: { known: this.player.known, disguises: this.disguises }, spells: new Map(this.spells.map((sp) => [sp.id, sp])) };
+    return {
+      player: this.player,
+      knowledge: { known: this.player.known, disguises: this.disguises },
+      spells: new Map(this.spells.map((sp) => [sp.id, sp])),
+      minors: this.gameContent.minors,
+    };
   }
 
   get inVillage(): boolean {

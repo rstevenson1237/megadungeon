@@ -20,7 +20,7 @@ import { LEVEL_XP, poolsWithRoom } from '../rules/character/progression.ts';
 import type { LogMessage } from '../core/log.ts';
 import { CellCursor, Targeting, startTargeting } from '../game/targeting.ts';
 import { ratingText } from '../game/monsters.ts';
-import { blinkCells, canBlinkTo, spellTargets, targetSpecOf } from '../game/magic.ts';
+import { asCast, blinkCells, canBlinkTo, spellTargets, targetSpecOf } from '../game/magic.ts';
 import type { Spell } from '../core/schemas.ts';
 import { describeStatus } from '../rules/magic/status.ts';
 import { InventoryOverlay, TextWindow, type InventoryHost } from './inventory.ts';
@@ -31,7 +31,8 @@ import { type ItemCtx, ctxOf, derivedFor, drinkPotion, equipItem, itemName, uneq
 import type { ClassDef } from '../rules/character/character.ts';
 import type { ActResult } from '../game/game.ts';
 import { carriedEstimate } from '../rules/items/treasure.ts';
-import { equipped, slotsUsed, packSize } from '../rules/items/inventory.ts';
+import { equipped, slotsUsed } from '../rules/items/inventory.ts';
+import { packSizeOf } from '../game/abilities.ts';
 import { isIdentified, displayName } from '../rules/items/magic.ts';
 import { type Item } from '../rules/items/types.ts';
 import { resolvesAtOnce, needsCell } from '../rules/magic/spells.ts';
@@ -265,9 +266,14 @@ export class Shell {
     if (classDef) this.character.className = classDef.name;
     this.character.abilities = abilityLines(player.minorAbilities, classDef);
     // The wait recovery counter: rounds waited so far, and how many bring a Combat die back (Spec 01, Status).
-    this.character.wait = { rounds: player.waited, needed: derivedFor(player).waitRounds };
-    // Active effects with their rounds left, then a Shield (Spec 01, Status; Spec 04).
-    this.character.status = [...player.statuses.map(describeStatus), ...(player.shield > 0 ? [`Shield ${player.shield}`] : [])];
+    const minors = this.run!.gameContent.minors;
+    this.character.wait = { rounds: player.waited, needed: derivedFor(player, minors).waitRounds };
+    // Active effects with their rounds left, then a Shield, then timed abilities such as Sanctuary (Spec 01, Status; Spec 04; Spec 03, Addendum A).
+    this.character.status = [
+      ...player.statuses.map(describeStatus),
+      ...(player.shield > 0 ? [`Shield ${player.shield}`] : []),
+      ...(player.timed ?? []).map((t) => `${t.name} ${t.rounds}`),
+    ];
     // What is worn and wielded with its quality, the slots in use and the carried estimate (Spec 01, Spec 05).
     const ctx = this.itemCtx();
     if (ctx) {
@@ -278,7 +284,7 @@ export class Shell {
           : isIdentified(item, player.known) ? '' : 'Unknown',
       }));
     }
-    this.character.inventory = { used: slotsUsed(player), total: packSize(player) };
+    this.character.inventory = { used: slotsUsed(player), total: packSizeOf(player, minors) };
     // The bank, XP and level come from the run (Spec 01, Spec 03, Spec 07).
     const run = this.run!;
     this.character.bank = player.town.bank;
@@ -410,7 +416,7 @@ export class Shell {
     }
     this.casting = spell;
     this.usingItem = item;
-    this.targeting = new Targeting(game, targetSpecOf(spell), targets);
+    this.targeting = new Targeting(game, targetSpecOf(asCast(game, spell)), targets);
     this.showTarget();
   }
 

@@ -145,6 +145,11 @@ From Intake Addendum A (findings A1, A3, A9, A10).
 - **Kinds of effect:** advantage on a roll type (search, notice, lockpick, disarm, avoid a trap, spell rolls, spell rolls of a shape, checks against a tag); a modifier (+n to melee, +n to defence, -n to monsters' melee against the player); a rate (wait rounds, pack slots, sell bonus, rest cost); a trigger (on a kill, on a hit that leaves one die, once per level visit, once per fight); and an active (a named code effect used as a skill use from Q).
 - **Fields:** an entry names `effect` and the fields that effect needs (`amount`, `roll`, `tag`, `shape`, `rounds`). The schema checks each effect's fields.
 - **Required:** from task 3.5 the `minor_abilities` and `artifacts` tables require `effect`. A stub row may name an effect already on the list.
+- **Clarification (task 3.5, proposed October 2, 2026, awaiting approval):**
+  - **`rolls`, not `roll`:** the field naming the roll types of an advantage is written `rolls` (one, or a list: `rolls: [search, notice]`), because on any row `roll:` already names a table to nest a roll in (Table format and rolling), and an artifact row is rolled by the shared roller. The other fields keep their names.
+  - **The list** is `ABILITY_EFFECTS` in `src/core/catalog.ts`, each effect with its kind, the fields it requires or allows, and a line saying what it does. A field an effect does not take also fails the build. Actives (Sanctuary, Purify) and the bound `weapon_melee` (Weapon Master) are for minor abilities only.
+  - **Worn powers:** a ring's or a piece of clothing's `passive` word (search, stealth, melee, wait, lockpick) stands for an effect on the list, so every worn power, ability and buff is worked out by the same code. The `magic_items` table keeps its fields until task 4.5 writes the launch table.
+  - **Tags:** an effect's `tag` names a creature tag the game keeps on a creature in play; today that is `undead`. A new tag is code first, as a new effect is.
 
 **New and changed tables**
 

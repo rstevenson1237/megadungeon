@@ -5,7 +5,7 @@
 import type { LogMessage } from '../core/log.ts';
 import { LOSE_TRACK_ROUNDS, NOTICE_RANGE, noticeRoll } from '../rules/combat/awareness.ts';
 import { creatureMelee, failsMorale, monsterRanged } from '../rules/combat/attacks.ts';
-import { derivedFor } from './items.ts';
+import { derived } from './items.ts';
 import { cannotAct, effectiveSpeed, hasStatus } from '../rules/magic/status.ts';
 import { distanceSq, lineCells } from '../rules/world/geometry.ts';
 import { distancesFrom } from '../rules/world/grid.ts';
@@ -189,7 +189,7 @@ function checkRound(round: Round, m: Monster): void {
   if (m.awareness !== 'alert') {
     if (m.role === 'boss' && inSameRoom(game, m)) alert(game, m);
     else if (m.kind === 'bandit' && visible) alert(game, m);
-    else if (visible && distanceSq(m, map.player) <= NOTICE_RANGE * NOTICE_RANGE && player.invisible <= 0 && noticeRoll(game.rng, m.awareness, derivedFor(player).notice)) alert(game, m);
+    else if (visible && distanceSq(m, map.player) <= NOTICE_RANGE * NOTICE_RANGE && player.invisible <= 0 && noticeRoll(game.rng, m.awareness, derived(game).notice)) alert(game, m);
     return;
   }
   if (m.fleeing) return trackFleeing(m, visible);
