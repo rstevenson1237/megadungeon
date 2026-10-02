@@ -1,3 +1,4 @@
+import { SAVE_FORMAT } from '../src/game/save.ts';
 import { describe, expect, it } from 'vitest';
 import { removeDie } from '../src/game/combat.ts';
 import { Leaderboard, MemoryStorage } from '../src/game/leaderboard.ts';
@@ -13,7 +14,8 @@ import type { RunOptions } from '../src/game/run.ts';
 import { App } from '../src/ui/app.ts';
 import { COLS, Grid } from '../src/ui/grid.ts';
 import { CP437_TO_UNICODE } from '../src/ui/cp437.ts';
-import { content, gameOn, levelFrom, testCharacter } from './helpers.ts';
+import { content, createAs, gameOn, levelFrom, testCharacter } from './helpers.ts';
+import { creationContentOf } from '../src/game/lifecycle.ts';
 
 const flush = (): Promise<void> => new Promise((resolve) => setTimeout(resolve, 0));
 const thief = classById(content().bundle, 'thief');
@@ -40,13 +42,10 @@ function rig(runOptions?: (seed: number) => RunOptions, withSaves = true): Rig {
   let n = 0;
   const seeds = [0x1234abcd, 0x0badf00d];
   const app = new App({
-    newCharacter: testCharacter,
+    creation: creationContentOf(content().bundle),
     randomSeed: () => seeds[n++ % seeds.length]!,
     now: () => new Date('2026-10-01T12:00:00Z'),
     runOptions: runOptions ?? ((seed) => runOptionsFor(content().bundle, seed)),
-    rules: () => ({ character: createCharacter('Mara', thief), classDef: thief }),
-    classOf: () => thief,
-    kit: () => startingKit(thief.gear ?? [], itemDataFrom(content().bundle)),
     ...(withSaves ? { saves: new SaveSlot(store) } : {}),
     board,
     flags,
@@ -64,6 +63,7 @@ const text = (app: App): string => {
 /** Start a new random-seed run. */
 async function begin(r: Rig): Promise<void> {
   press(r.app, 'Enter');
+  createAs(r.app, 'Thief', 'Mara');
   await flush();
 }
 /** Choose a row of the open list by its text. */
@@ -143,7 +143,7 @@ describe('Spec 09: continue', () => {
     run.player.coins = 999;
     run.player.town.bank = 12345;
     dungeon(r);
-    run.player.combatDice = 0;
+    run.player.pools.combat.dice = 0;
     press(r.app, 'Escape', 'w', 'Enter'); // Quit without saving
     expect(r.app.shell).toBeNull();
     await flush();
@@ -157,7 +157,7 @@ describe('Spec 09: continue', () => {
     expect(back.player.coins).toBe(7);
     expect(back.player.town.bank).toBeLessThan(100);
     expect(back.player.rests).toBe(1);
-    expect(back.player.combatDice).toBe(back.player.combatMax);
+    expect(back.player.pools.combat.dice).toBe(back.player.pools.combat.max);
     expect(r.app.shell!.character.bank).toBe(back.player.town.bank);
   });
 
@@ -253,9 +253,18 @@ describe('Spec 09: death', () => {
     press(r.app, 's'); // the second item
     const kept = recoverableItems(dead.player)[1]!;
     press(r.app, 'Enter');
+    // Creation opens with the seed fixed, and says what the new character keeps (Spec 09, Addendum A).
+    expect(r.app.creation).not.toBeNull();
+    expect(text(r.app)).toContain(`From your last character you keep ${20 + Math.floor(bank * 0.1)} gp in the bank and`);
+    press(r.app, 'Escape'); // back to the death screen ...
+    expect(r.app.death).not.toBeNull();
+    press(r.app, 'Enter'); // ... which still has the same item chosen
+    createAs(r.app, 'Priest', 'Odo');
     await flush();
     const run = r.app.shell!.run!;
     expect(run).not.toBe(dead);
+    expect(run.player.name).toBe('Odo');
+    expect(run.classDef!.name).toBe('Priest');
     expect(run.runSeed).toBe(dead.runSeed);
     expect(run.player.town.bank).toBe(20 + Math.floor(bank * 0.1));
     expect(run.player.pack).toContain(kept);
@@ -291,6 +300,7 @@ describe('Spec 09: reaching level 100 and defeating the final boss', () => {
   it('arriving on level 100 records a win and play continues; the final boss is a further achievement; dying later updates the entry', async () => {
     const r = rig(nearTheBottom, false);
     press(r.app, 'Enter');
+    createAs(r.app, 'Thief', 'Mara');
     for (let i = 0; i < 6; i++) press(r.app, 'd');
     expect(r.board.all()).toHaveLength(0);
     press(r.app, 'e'); // down to level 100
@@ -376,18 +386,20 @@ describe('Spec 09: export and import from the game menu', () => {
     let next: string | undefined;
     const app = new App({ ...r.app['deps'], download: (name, body) => downloads.push([name, body]), upload: async () => next });
     press(app, 'Enter');
+    createAs(app, 'Thief', 'Mara');
     await flush();
     press(app, 'Escape', 's', 's', 'Enter'); // Export
     await flush();
     expect(downloads).toHaveLength(1);
     expect(downloads[0]![0]).toMatch(/^megadungeon-[0-9A-F]{8}\.save\.json$/);
     const text1 = downloads[0]![1];
-    expect(JSON.parse(text1).format).toBe(1);
+    expect(JSON.parse(text1).format).toBe(SAVE_FORMAT);
 
     const other = new MemoryStore();
     const fresh = new App({ ...r.app['deps'], saves: new SaveSlot(other), download: () => undefined, upload: async () => next });
     await flush();
     press(fresh, 'Enter');
+    createAs(fresh, 'Thief', 'Mara');
     await flush();
     next = text1;
     press(fresh, 'Escape', 's', 's', 's', 'Enter'); // Import

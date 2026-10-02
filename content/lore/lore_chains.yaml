@@ -1,6 +1,6 @@
 # Stub entries for task 2.4 (Spec 02, "Lore chains"): each row holds the six entries of one chain, found in
 # order, one per level. A chain of four or five entries uses the first of them. The launch table of 25 is
-# written in Phase 3 (task 3.8).
+# written in Phase 3 (task 4.8).
 - id: lore_chain_stub_01
   entries:
     - "The old crew dug here first."

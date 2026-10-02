@@ -29,6 +29,7 @@ describe('content build', () => {
       'artifacts',
       'books',
       'bosses',
+      'character_names',
       'classes',
       'debris_finds',
       'disguise_names',

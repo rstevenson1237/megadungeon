@@ -1,7 +1,8 @@
 import { resolve } from 'node:path';
 import type { Rng } from '../src/core/rng.ts';
 import type { Spell } from '../src/core/schemas.ts';
-import { Game, type ArrivalOptions, type PlayerState, createPlayer } from '../src/game/game.ts';
+import type { App } from '../src/ui/app.ts';
+import { Game, type ArrivalOptions, type PlayerState, type PoolSetup, createPlayer } from '../src/game/game.ts';
 import { Run, type RunOptions } from '../src/game/run.ts';
 import { GENERATOR_VERSION, emptyPlacements, type Level, type Point } from '../src/rules/world/level.ts';
 import { creature, type Monster } from '../src/game/monsters.ts';
@@ -71,15 +72,31 @@ export const slingKit = (ammo = 20) => startingKit([{ id: 'sling' }, { id: 'slin
 export const stonesLeft = (game: Game): number => ammoCount(game.state.player.pack, 'stone');
 
 /** A game on a hand-built level with no monsters, a Combat d6 pool of 2 and a sling with 20 stones. */
-export const testPlayer = (extra: Partial<PlayerState> = {}): PlayerState =>
-  ({ ...createPlayer({ combatStep: 6, combatDice: 2, combatMax: 2, ...slingKit() }), ...extra });
+/** Player state for a test: any of the player's fields, and the pool shorthands of `createPlayer` (combatDice and so on). */
+export type TestSetup = Partial<PlayerState> & Partial<PoolSetup>;
 
-export function gameOn(level: Level, player: Partial<PlayerState> = {}, arrival: ArrivalOptions = {}): Game {
+/** Lay a test's setup over a player: the pool shorthands set the character's pools, everything else replaces the field. */
+export function withSetup(base: PlayerState, extra: TestSetup): PlayerState {
+  const { combatStep, combatDice, combatMax, skill, magic, ...rest } = extra;
+  const player: PlayerState = { ...base, ...rest };
+  const combat = player.pools.combat;
+  if (combatStep !== undefined) combat.step = combatStep as typeof combat.step;
+  if (combatDice !== undefined) combat.dice = combatDice;
+  if (combatMax !== undefined) combat.max = combatMax;
+  if (skill) player.pools.skill = { ...skill };
+  if (magic) player.pools.magic = { ...magic };
+  return player;
+}
+
+export const testPlayer = (extra: TestSetup = {}): PlayerState =>
+  withSetup(createPlayer({ combatStep: 6, combatDice: 2, combatMax: 2, ...slingKit() }), extra);
+
+export function gameOn(level: Level, player: TestSetup = {}, arrival: ArrivalOptions = {}): Game {
   return new Game(1, level, testPlayer(player), { spells: SPELLS, items: ITEMS, content: CONTENT, ...arrival });
 }
 
 /** A caster: three Magic d6 dice, and every spell known. */
-export const caster = (extra: Partial<PlayerState> = {}): Partial<PlayerState> => ({
+export const caster = (extra: TestSetup = {}): TestSetup => ({
   magic: { step: 6, dice: 3, max: 3 },
   spells: SPELLS.map((s) => s.id),
   combatDice: 3,
@@ -88,7 +105,7 @@ export const caster = (extra: Partial<PlayerState> = {}): Partial<PlayerState> =
 });
 
 /** A game for casting: the spell table loaded, the player a caster. */
-export const castingGame = (level: Level, extra: Partial<PlayerState> = {}): Game => gameOn(level, caster(extra));
+export const castingGame = (level: Level, extra: TestSetup = {}): Game => gameOn(level, caster(extra));
 
 /**
  * Deal the given faces to the next `int` calls of the game's generator, then carry on with the real stream.
@@ -126,7 +143,7 @@ export const testCharacter = (): CharacterPaneData => ({
 });
 
 /** A shell with a game loaded on the given level. */
-export function shellOn(level: Level, monsters: Monster[] = [], player: Partial<PlayerState> = {}): Shell {
+export function shellOn(level: Level, monsters: Monster[] = [], player: TestSetup = {}): Shell {
   const shell = new Shell('Test', testCharacter());
   shell.setRun(new Run(1, testPlayer(player), { startDepth: 1, levelFor: () => level, spells: SPELLS, items: ITEMS, content: CONTENT }));
   shell.game!.state.monsters.push(...monsters);
@@ -215,7 +232,7 @@ export const picksItem = (count = 3): Item => makeLockpicks(ITEMS.bases.get('loc
 export const vaultKeyItem = (link: string): Item => ({ kind: 'vault_key', uid: nextUid++, id: 'vault_key', name: 'vault key', value: 0, link });
 
 /** A game with the player standing at (x, y) rather than on the stair, sight refreshed. */
-export function gameAt(level: Level, x: number, y: number, player: Partial<PlayerState> = {}, arrival: ArrivalOptions = {}): Game {
+export function gameAt(level: Level, x: number, y: number, player: TestSetup = {}, arrival: ArrivalOptions = {}): Game {
   const game = gameOn(level, player, arrival);
   game.state.map.player = { x, y };
   game.refreshSight();
@@ -226,11 +243,22 @@ export function gameAt(level: Level, x: number, y: number, player: Partial<Playe
  * A run on the real content and the real run layout of a seed, standing in the village `at` (0 for the surface, else the
  * nth subterranean village), played by a thief with the given player state. XP and levels are tracked.
  */
-export function townRun(seed = 12345, extra: Partial<PlayerState> = {}, at = 0, more: Partial<RunOptions> = {}): Run {
+export function townRun(seed = 12345, extra: TestSetup = {}, at = 0, more: Partial<RunOptions> = {}): Run {
   const bundle = content().bundle;
   const options = runOptionsFor(bundle, seed);
   const thief = classById(bundle, 'thief');
   const startDepth = at === 0 ? 0 : options.layout!.villages[at - 1]!.level;
-  const player = { ...createPlayer({ combatStep: 6, combatDice: 2, combatMax: 3, pack: [], equipment: {} }), ...extra };
-  return new Run(seed, player, { ...options, startDepth, character: createCharacter('Mara', thief), classDef: thief, ...more });
+  const player = withSetup(createPlayer({ character: createCharacter('Mara', thief), pack: [], equipment: {} }), { combatStep: 6, combatDice: 2, combatMax: 3, skill: { step: 6, dice: 1, max: 1 }, magic: { step: 6, dice: 1, max: 1 }, ...extra });
+  return new Run(seed, player, { ...options, startDepth, classDef: thief, ...more });
+}
+
+/** On the creation screen: pick the class by name and type the name, as a player would (Spec 01, Addendum A). */
+export function createAs(app: App, className: string, name: string): void {
+  const creation = app.creation;
+  if (!creation) throw new Error('not on the creation screen');
+  for (let i = 0; i < 20 && creation.card.cls.name !== className; i++) app.handleKey({ key: 's' });
+  if (creation.card.cls.name !== className) throw new Error(`no class "${className}"`);
+  app.handleKey({ key: 'Enter' });
+  for (const ch of name) app.handleKey({ key: ch });
+  app.handleKey({ key: 'Enter' });
 }

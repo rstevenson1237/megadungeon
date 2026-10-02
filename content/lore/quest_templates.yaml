@@ -1,5 +1,5 @@
 # Stub entries for task 2.1: one template per quest type. The launch table (10 per quest type)
-# is written in Phase 3 (task 3.9).
+# is written in Phase 3 (task 4.9).
 - id: stub_quest_captive
   needs: captive
   text:

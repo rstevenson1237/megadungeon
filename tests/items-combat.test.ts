@@ -70,11 +70,11 @@ describe('Spec 05: armour and shields add to the defence die against melee only'
       // The monster rolls 5; the player's die plus the modifier ties it at exactly 5, which hits the monster too.
       const tie = defend({ ...equipment, pack: [] }, 5 - mod, 5);
       expect(tie.m.dice, `defence ${mod}: tie`).toBeLessThan(30);
-      expect(tie.game.state.player.combatDice, `defence ${mod}: tie`).toBe(4);
+      expect(tie.game.state.player.pools.combat.dice, `defence ${mod}: tie`).toBe(4);
       const win = defend({ ...equipment, pack: [] }, 6 - mod, 5);
-      expect(win.game.state.player.combatDice, `defence ${mod}: win`).toBe(5); // the monster missed
+      expect(win.game.state.player.pools.combat.dice, `defence ${mod}: win`).toBe(5); // the monster missed
       const lose = defend({ ...equipment, pack: [] }, 4 - mod, 5);
-      expect(lose.game.state.player.combatDice, `defence ${mod}: lose`).toBe(4);
+      expect(lose.game.state.player.pools.combat.dice, `defence ${mod}: lose`).toBe(4);
     }
   });
 
@@ -84,15 +84,15 @@ describe('Spec 05: armour and shields add to the defence die against melee only'
     game.state.monsters.push(archer);
     rig(game, 4, 3); // the archer rolls 4 against a Skill die of 3: only without a bonus does that hit
     game.act({ type: 'wait' });
-    expect(game.state.player.combatDice).toBe(4);
+    expect(game.state.player.pools.combat.dice).toBe(4);
   });
 
   it('a quarterstaff gives +1 on defence rolls', () => {
     const staff = defend({ equipment: { main: gear('quarterstaff') }, pack: [] }, 4, 5); // 4 + 1 ties 5
-    expect(staff.game.state.player.combatDice).toBe(4);
+    expect(staff.game.state.player.pools.combat.dice).toBe(4);
     expect(staff.m.dice).toBeLessThan(30);
     const bare = defend({ equipment: { main: gear('dagger') }, pack: [] }, 4, 5);
-    expect(bare.game.state.player.combatDice).toBe(4);
+    expect(bare.game.state.player.pools.combat.dice).toBe(4);
     expect(bare.m.dice).toBe(30); // no tie: only the player was hit
   });
 });
@@ -146,7 +146,7 @@ describe('Spec 05: weapon traits', () => {
     step(game, 1);
     expect(game.state.map.player).toEqual({ x: 1, y: 2 }); // it did not move
     expect(m.dice).toBeLessThan(30);
-    expect(game.state.player.combatDice).toBe(6); // and the tie did not reach back along the spear
+    expect(game.state.player.pools.combat.dice).toBe(6); // and the tie did not reach back along the spear
   });
 
   it('a spear does nothing special with a wall, or a closed door, in between; and a sword never reaches', () => {
@@ -401,7 +401,7 @@ describe('Spec 05: breaking in play', () => {
     game.state.monsters.push(monsterAt(2, 2, { alert: true, ...dummy, modifier: 30 }));
     rig(game, 6, 1, 1, 1); // the monster's roll, the player's die, then two break rolls
     game.act({ type: 'wait' });
-    expect(game.state.player.combatDice).toBe(4);
+    expect(game.state.player.pools.combat.dice).toBe(4);
     expect(body.broken).toBe(true);
     expect(off.broken).toBe(true);
   });
@@ -412,7 +412,7 @@ describe('Spec 05: breaking in play', () => {
     game.state.monsters.push(monsterAt(2, 2, { alert: true, ...dummy, modifier: 30 }));
     rig(game, 6, 1, 1);
     game.act({ type: 'wait' });
-    expect(game.state.player.combatDice).toBe(5);
+    expect(game.state.player.pools.combat.dice).toBe(5);
     expect(body.broken).toBe(false);
   });
 

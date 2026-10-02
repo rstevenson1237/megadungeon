@@ -135,6 +135,30 @@ Content is written in Phase 3 in reviewed batches, starting from a short style g
 5. **Coverage-led:** the coverage report sets which gaps to fill next.
 6. **Tuning:** balance changes during playtests are made through weights, depths and numbers in the tables, not code.
 
+## Addendum A (approved October 2, 2026)
+
+From Intake Addendum A (findings A1, A3, A9, A10).
+
+**One effect vocabulary**
+
+- **One list in code:** minor abilities, artifacts, shrine buffs and the worn powers of magic items all name their effect from one list of effects defined in code. Content may only name effects on that list; a new effect is code first, added by a task and listed in the build's catalog, then content may use it.
+- **Kinds of effect:** advantage on a roll type (search, notice, lockpick, disarm, avoid a trap, spell rolls, spell rolls of a shape, checks against a tag); a modifier (+n to melee, +n to defence, -n to monsters' melee against the player); a rate (wait rounds, pack slots, sell bonus, rest cost); a trigger (on a kill, on a hit that leaves one die, once per level visit, once per fight); and an active (a named code effect used as a skill use from Q).
+- **Fields:** an entry names `effect` and the fields that effect needs (`amount`, `roll`, `tag`, `shape`, `rounds`). The schema checks each effect's fields.
+- **Required:** from task 3.5 the `minor_abilities` and `artifacts` tables require `effect`. A stub row may name an effect already on the list.
+
+**New and changed tables**
+
+- **`character_names`** (People, launch minimum 150): `id`, `name` (1 to 16 characters: letters, space, apostrophe, hyphen), and the shared filter fields. Stub entries are written in task 3.4.
+- **`level_themes`** gains `palette` (24-bit colours for the tokens wall, floor, door, stairs, shallow water, deep water, lava and accent) and `tiles` (the wall glyph: 35, 219 or 178; and the floor glyph). Both are optional until task 4.2; a theme without them uses the default set.
+- **Clarification (task 3.3, proposed and approved October 2, 2026):** colours are written `#rrggbb`, and a palette, when given, names all eight tokens. A remembered cell draws its token's colour at half brightness, as the default set's remembered colours roughly are. The `accent` token colours the specials (teleporters and levers). Features, items and creatures keep their own colours.
+- **`bosses`:** rows tagged `final` are the pool for level 100's final boss (Spec 02, Addendum A).
+- **`traps`:** the tag `magic` marks a magic trap (Hex Breaker; Void Halls' bias).
+- **`minor_abilities`:** the example Blessed is renamed Hallowed, with id `hallowed` (Spec 03, Addendum A). It has not been released, so Stable ids is not broken.
+
+**Acceptance criteria added**
+
+- [ ] A minor ability, artifact or shrine buff naming an effect not on the list, or missing that effect's fields, fails the build.
+
 ## Acceptance criteria
 
 - [ ] The build compiles every YAML table into one JSON bundle and fails on any schema, reference, uniqueness or placeholder error.

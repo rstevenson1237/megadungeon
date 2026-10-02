@@ -6,12 +6,12 @@ import type { LogMessage } from '../core/log.ts';
 import { createRng, hash32, levelSeed, type Rng } from '../core/rng.ts';
 import type { Spell } from '../core/schemas.ts';
 import { type Item, type Equipment, type EquipSlot } from '../rules/items/types.ts';
-import { type Buff, derive } from '../rules/items/gear.ts';
+import { type Buff } from '../rules/items/gear.ts';
 import { type ItemData, disguisesFor, itemDataFrom, type Knowledge } from '../rules/items/magic.ts';
-import { PACK_BASE } from '../rules/items/inventory.ts';
 import { type GameContent, noContent } from './content.ts';
-import type { Pool } from '../rules/character/dice.ts';
-import { waitRound } from '../rules/character/health.ts';
+import type { Pool, Step } from '../rules/character/dice.ts';
+import type { Character } from '../rules/character/character.ts';
+import { restAll, waitRound } from '../rules/character/health.ts';
 import { BOOK_CURSE_ROUNDS, readSpellbook, readiness, type Spellbook } from '../rules/magic/learning.ts';
 import {
   type StatusEffect,
@@ -29,7 +29,7 @@ import { TILE, type Level, type Loot, type Pile, type Point } from '../rules/wor
 import { MAX_SIMULATED, actionsInRound, creaturesAct } from './ai.ts';
 import { nameOf, playerAttacks, removeDie } from './combat.ts';
 import type { Command } from './commands.ts';
-import { ctxOf, dropItem, equipItem, fireRanged, pickUp, rangedOption, throwableDagger, unequipSlot, useItem } from './items.ts';
+import { ctxOf, derivedFor, dropItem, equipItem, fireRanged, pickUp, rangedOption, throwableDagger, unequipSlot, useItem } from './items.ts';
 import { type MapState, TERRAIN_BLOCKED, TERRAIN_OPEN, createMapState, isOpen, refreshSight } from './map-state.ts';
 import { freeCaptive, interact, lockedDoorAt, npcIndexAt, useNpc, offer, readLoreBook, search, stepEnds, takeFromContainer, trapAt, walkIntoLocked } from './features/index.ts';
 import { mapLevel } from './features/fixtures.ts';
@@ -70,28 +70,23 @@ export interface PlayerStats {
   finalBoss: boolean;
 }
 
-export interface PlayerState {
-  /** Sides of each Combat die, and the dice left and at most held. The Combat pool is health. */
-  combatStep: number;
-  combatDice: number;
-  combatMax: number;
-  /** Skill and Magic pools: the dice a monster's ranged attack or spell is rolled against (Spec 04), and fuel (Spec 03). */
-  skill: Pool;
-  magic: Pool;
+/**
+ * The player in play. It is the character's rules state (Spec 03, Addendum A: the only record of the pools, the
+ * level, XP, the minor abilities and the wait count) with everything the game adds around it. The Combat pool is
+ * health; Skill and Magic are fuel, and what a monster's ranged attack or spell is rolled against (Spec 04).
+ * Anything derived from abilities, such as the pack's size, is computed when needed and never stored.
+ */
+export interface PlayerState extends Character {
   /** Carried gold, which bandits steal from (Spec 04). Gems, jewelry and items arrive with task 2.9. */
   coins: number;
   /** A stealth buff gives monsters disadvantage on their notice roll (Spec 04). */
   stealth: boolean;
   dead: boolean;
-  /** Consecutive rounds spent waiting; 10 restore a Combat die, an action or move resets it (Spec 03). */
-  waited: number;
   /** Direction of the last move, so closing a door prefers the one the player faces. */
   facing: { dx: number; dy: number };
   /** What is carried in the pack (coins are `coins`), and what is worn and wielded (Spec 05). */
   pack: Item[];
   equipment: Equipment;
-  /** Inventory slots the pack has: 12, and 2 more for each Pack Mule (Spec 03). */
-  packSlots: number;
   /** Potions, wands, rods and staves identified by use, by table id (Spec 05). */
   known: string[];
   /** Rounds left of Invisibility: no notice rolls are made against the player (Spec 05). */
@@ -128,23 +123,50 @@ export interface PlayerState {
   halfRound: boolean;
 }
 
-type PlayerSetup = Pick<PlayerState, 'combatStep' | 'combatDice' | 'combatMax'> &
-  Partial<Pick<PlayerState, 'skill' | 'magic' | 'coins' | 'stealth' | 'spells' | 'abilities' | 'pack' | 'equipment' | 'packSlots' | 'known'>>;
+/** The pools of a player made without a character: the Combat pool, and Skill and Magic (one d6 each by default). */
+export interface PoolSetup {
+  combatStep: number;
+  combatDice: number;
+  combatMax: number;
+  skill?: Pool;
+  magic?: Pool;
+}
 
-/** A living player with the given Combat pool, facing south. Skill and Magic default to one d6 each. */
-export function createPlayer(setup: PlayerSetup): PlayerState {
+/** What a new player starts from: a rules character (Spec 03), or for tests just its pools. */
+export type PlayerSetup = (PoolSetup | { character: Character }) &
+  Partial<Pick<PlayerState, 'coins' | 'stealth' | 'spells' | 'abilities' | 'pack' | 'equipment' | 'known'>>;
+
+/** The character part of a new player: a copy of the given character, or a nameless level 1 one with the given pools. */
+function characterOf(setup: PoolSetup | { character: Character }): Character {
+  if ('character' in setup) return structuredClone(setup.character);
+  const { combatStep, combatDice, combatMax } = setup;
   return {
-    skill: { step: 6, dice: 1, max: 1 },
-    magic: { step: 6, dice: 1, max: 1 },
-    coins: 0,
-    stealth: false,
-    spells: [],
-    abilities: [],
-    pack: [],
-    equipment: {},
-    packSlots: PACK_BASE,
-    known: [],
-    ...setup,
+    name: '',
+    classId: '',
+    level: 1,
+    xp: 0,
+    pools: {
+      combat: { step: combatStep as Step, dice: combatDice, max: combatMax },
+      skill: { ...(setup.skill ?? { step: 6, dice: 1, max: 1 }) },
+      magic: { ...(setup.magic ?? { step: 6, dice: 1, max: 1 }) },
+    },
+    minorAbilities: [],
+    waited: 0,
+  };
+}
+
+/** A living player, facing south. */
+export function createPlayer(setup: PlayerSetup): PlayerState {
+  const { coins, stealth, spells, abilities, pack, equipment, known } = setup;
+  return {
+    ...characterOf(setup),
+    coins: coins ?? 0,
+    stealth: stealth ?? false,
+    spells: spells ?? [],
+    abilities: abilities ?? [],
+    pack: pack ?? [],
+    equipment: equipment ?? {},
+    known: known ?? [],
     invisible: 0,
     reload: 0,
     buffs: [],
@@ -153,7 +175,6 @@ export function createPlayer(setup: PlayerSetup): PlayerState {
     shrines: {},
     mapped: [],
     dead: false,
-    waited: 0,
     facing: { dx: 0, dy: 1 },
     statuses: [],
     shield: 0,
@@ -169,10 +190,7 @@ export function createPlayer(setup: PlayerSetup): PlayerState {
  * rest count a failed spellbook waits for goes up. The cost, the time passed and the save belong to the village.
  */
 export function takeRest(player: PlayerState): void {
-  player.combatDice = player.combatMax;
-  player.skill.dice = player.skill.max;
-  player.magic.dice = player.magic.max;
-  player.waited = 0;
+  restAll(player);
   player.halfRound = false;
   // Timed effects end, curses do not (Spec 07, "Lodging").
   for (let i = player.statuses.length - 1; i >= 0; i--) if (player.statuses[i]!.id !== 'cursed') player.statuses.splice(i, 1);
@@ -550,7 +568,7 @@ export class Game {
     const messages: LogMessage[] = [];
     const name = this.spells.get(book.spell)?.name ?? book.spell;
     if (player.dead) return { messages: [{ kind: 'system', text: 'You are dead.' }], spent: false, used: false };
-    const reader = { magic: player.magic, spells: player.spells, rests: player.rests, mode: checkMode(player.statuses) };
+    const reader = { magic: player.pools.magic, spells: player.spells, rests: player.rests, mode: checkMode(player.statuses) };
     // A known spell or a book waiting for a rest costs nothing.
     const ready = readiness(book, reader);
     if (ready !== 'ready') {
@@ -611,7 +629,7 @@ export class Game {
       return { messages, spent: false };
     }
     // A spear reaches 2 cells: moving toward a creature that far off, with the cell between free, attacks it (Spec 05, task 2.9).
-    if (isOpen(map, x, y) && derive(player.equipment, player.stealth).weaponTraits.includes('reach')) {
+    if (isOpen(map, x, y) && derivedFor(player).weaponTraits.includes('reach')) {
       const far = this.monsterAt(x + dx, y + dy);
       if (far) {
         playerAttacks(this, far, messages, true);
@@ -686,10 +704,10 @@ export class Game {
       // Waiting does not recover dice while poisoned (Spec 04).
       if (hasStatus(player.statuses, 'poisoned')) player.waited = 0;
       else if (waiting && !player.dead) {
-        const pool = { dice: player.combatDice, max: player.combatMax };
-        const wait = waitRound(player.waited, pool, derive(player.equipment, player.stealth).waitRounds);
+        const pool = { dice: player.pools.combat.dice, max: player.pools.combat.max };
+        const wait = waitRound(player.waited, pool, derivedFor(player).waitRounds);
         player.waited = wait.waited;
-        player.combatDice = pool.dice;
+        player.pools.combat.dice = pool.dice;
         if (wait.restored) messages.push({ kind: 'system', text: 'You feel your strength return.' });
       }
     }
@@ -705,12 +723,12 @@ export class Game {
     for (const id of mine.ended) messages.push({ kind: 'system', text: `You are no longer ${describeStatus({ id, rounds: null, clock: 0 }).toLowerCase()}.` });
     if (player.shield > 0 && --player.shield === 0) messages.push({ kind: 'system', text: 'Your shield fades.' });
     if (mine.poisonDue) {
-      if (player.combatDice <= 0) {
+      if (player.pools.combat.dice <= 0) {
         player.dead = true;
         player.deathCause = 'The poison kills you.';
         messages.push({ kind: 'combat', text: 'The poison kills you.' });
       } else {
-        player.combatDice--;
+        player.pools.combat.dice--;
         messages.push({ kind: 'combat', text: 'The poison burns in your blood.' });
       }
     }

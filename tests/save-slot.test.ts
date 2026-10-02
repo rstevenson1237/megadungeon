@@ -119,4 +119,14 @@ describe('Spec 09: export and import', () => {
     expect((await slot.read())!.player.coins).toBe(5);
     expect(serialise(saveOf(1, 5)).length).toBeGreaterThan(0);
   });
+
+  it('a slot that knows the build content refuses a save or an import made with other content, and changes nothing (Addendum A)', async () => {
+    const store = new MemoryStore();
+    await new SaveSlot(store).write(saveOf(3, 9)); // content 'v'
+    const slot = new SaveSlot(store, 'w');
+    expect(await slot.exists()).toBe(true);
+    await expect(slot.read()).rejects.toThrow('different game content');
+    await expect(slot.importText(serialise(saveOf(4, 1)))).rejects.toThrow('different game content');
+    expect((await new SaveSlot(store, 'v').read())!.player.coins).toBe(9);
+  });
 });

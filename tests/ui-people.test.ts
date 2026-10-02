@@ -51,7 +51,7 @@ describe('Spec 01 and 07: talking to people in the dungeon', () => {
     for (const label of ['Identify one item', 'Restore one Combat die', 'Lift a curse', 'Hear a rumour of nearby levels']) expect(shown(shell, label), label).toBe(true);
     press(shell, 's');
     press(shell, 'Enter');
-    expect(shell.game!.state.player.combatDice).toBe(2);
+    expect(shell.game!.state.player.pools.combat.dice).toBe(2);
     expect(shown(shell, 'Restore one Combat die (done)')).toBe(true);
   });
 

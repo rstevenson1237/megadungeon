@@ -72,6 +72,10 @@ export function runOptionsFor(bundle: ContentBundle, seed: number): RunOptions {
     spells: spellsFrom(bundle),
     items: itemDataFrom(bundle),
     content: gameContentOf(bundle),
+    themeFor: (depth) => {
+      const theme = themeAt(depth) as LevelTheme | undefined;
+      return theme && { name: theme.name, palette: theme.palette, tiles: theme.tiles };
+    },
     sizeFor: (depth) => themeAt(depth)?.size ?? 'medium',
     styleFor: (depth) => themeAt(depth) ?? PLAIN_STYLE,
     contentsFor: (depth) => {

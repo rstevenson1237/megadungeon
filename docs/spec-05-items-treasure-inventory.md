@@ -145,7 +145,7 @@ Shops buy at half value and sell at list price, and everything costs more the de
 
 Every character also starts with 20 gp in the bank. Starting gear is normal quality; the other 16 classes' gear lives in the content tables.
 
-## Clarifications (task 2.9, proposed October 1, 2026, awaiting approval)
+## Clarifications (task 2.9, proposed October 1, 2026, approved October 2, 2026)
 
 All figures are starting values for playtesting. Where the spec above is silent these fill the gap so the build can proceed; any the owner changes goes back here first.
 
@@ -189,6 +189,35 @@ All figures are starting values for playtesting. Where the spec above is silent 
 **Prices**
 
 - **Buying** costs value times (1 + 0.2 for each village below the surface); **selling** pays 50% of value with no depth multiplier (Fence adds 20% of that); a crude item's value is already half a normal one's, so it sells for half. Artifacts are priceless and cannot be sold. **Identification** costs 100 gp and **repair** 30% of value, both times the same multiplier.
+
+## Addendum A (approved October 2, 2026)
+
+From Intake Addendum A (findings A1, B1): every class needs starting gear before Phase 4 so it can be created and played. These lists use the 16 bases above, are normal quality, and may be revised in task 4.4.
+
+| Class | Starting gear |
+| --- | --- |
+| Barbarian | Great axe, leather |
+| Knight | Long sword, shield, chain |
+| Paladin | Mace, shield, leather |
+| Ranger | Short sword, shortbow with 20 arrows, leather |
+| Monk | Quarterstaff |
+| Bard | Short sword, sling with 20 stones, leather |
+| Druid | Quarterstaff, leather, one potion of Healing |
+| Necromancer | Dagger, one potion of Clarity |
+| Sorcerer | Dagger, one potion of Clarity |
+| Illusionist | Dagger, sling with 20 stones |
+| Warlock | Dagger, leather, one potion of Clarity |
+| Assassin | Short sword, two daggers, leather |
+| Alchemist | Dagger, sling with 20 stones, one potion each of Healing and Cure |
+| Shaman | Spear, leather, one potion of Healing |
+| Witch Hunter | Short sword, crossbow with 20 bolts, leather |
+| Beastmaster | Spear, shortbow with 20 arrows, leather |
+
+- **Clarification (task 3.4, proposed and approved October 2, 2026):** a new character knows the potions it starts with, by their true names, as the creation screen names them. Every other potion is disguised until identified (Spec 05).
+
+**Acceptance criteria added**
+
+- [ ] Every class starts with its listed gear, worn where it can be and the rest in the pack.
 
 ## Acceptance criteria
 

@@ -10,7 +10,7 @@ import { drawLog } from './log-pane.ts';
 import type { Overlay, OverlayResult } from './overlay.ts';
 import { type GameMenuHost, HelpOverlay, HistoryOverlay, gameMenu } from './overlays.ts';
 import { MAIN_PANE, drawPanes, inner } from './panes.ts';
-import { UI } from './palette.ts';
+import { UI, mapLook } from './palette.ts';
 import { drawMap } from './map-view.ts';
 import type { Game } from '../game/game.ts';
 import type { Run } from '../game/run.ts';
@@ -27,10 +27,11 @@ import { InventoryOverlay, TextWindow, type InventoryHost } from './inventory.ts
 import { JournalOverlay, LootOverlay, type LootHost, type OfferHost, offerMenu } from './features.ts';
 import { offeringCost } from '../game/features/index.ts';
 import { spellMenu } from './spells.ts';
-import { type ItemCtx, ctxOf, drinkPotion, equipItem, itemName, unequipSlot } from '../game/items.ts';
+import { type ItemCtx, ctxOf, derivedFor, drinkPotion, equipItem, itemName, unequipSlot } from '../game/items.ts';
+import type { ClassDef } from '../rules/character/character.ts';
 import type { ActResult } from '../game/game.ts';
 import { carriedEstimate } from '../rules/items/treasure.ts';
-import { equipped, slotsUsed } from '../rules/items/inventory.ts';
+import { equipped, slotsUsed, packSize } from '../rules/items/inventory.ts';
 import { isIdentified, displayName } from '../rules/items/magic.ts';
 import { type Item } from '../rules/items/types.ts';
 import { resolvesAtOnce, needsCell } from '../rules/magic/spells.ts';
@@ -252,11 +253,19 @@ export class Shell {
   private syncCharacter(): void {
     const player = this.run?.player;
     if (!player) return;
-    const pools = { Combat: [player.combatDice, player.combatMax], Skill: [player.skill.dice, player.skill.max], Magic: [player.magic.dice, player.magic.max] } as const;
+    // Everything below is read from the player, the one record of the character (Spec 03, Addendum A).
+    const pools = { Combat: player.pools.combat, Skill: player.pools.skill, Magic: player.pools.magic } as const;
     for (const stat of this.character.stats) {
-      stat.current = pools[stat.name][0];
-      stat.max = pools[stat.name][1];
+      stat.step = pools[stat.name].step;
+      stat.current = pools[stat.name].dice;
+      stat.max = pools[stat.name].max;
     }
+    if (player.name) this.character.name = player.name;
+    const classDef = this.run!.classDef;
+    if (classDef) this.character.className = classDef.name;
+    this.character.abilities = abilityLines(player.minorAbilities, classDef);
+    // The wait recovery counter: rounds waited so far, and how many bring a Combat die back (Spec 01, Status).
+    this.character.wait = { rounds: player.waited, needed: derivedFor(player).waitRounds };
     // Active effects with their rounds left, then a Shield (Spec 01, Status; Spec 04).
     this.character.status = [...player.statuses.map(describeStatus), ...(player.shield > 0 ? [`Shield ${player.shield}`] : [])];
     // What is worn and wielded with its quality, the slots in use and the carried estimate (Spec 01, Spec 05).
@@ -269,7 +278,7 @@ export class Shell {
           : isIdentified(item, player.known) ? '' : 'Unknown',
       }));
     }
-    this.character.inventory = { used: slotsUsed(player), total: player.packSlots };
+    this.character.inventory = { used: slotsUsed(player), total: packSize(player) };
     // The bank, XP and level come from the run (Spec 01, Spec 03, Spec 07).
     const run = this.run!;
     this.character.bank = player.town.bank;
@@ -367,7 +376,7 @@ export class Shell {
       this.log.add({ kind: 'system', text: 'You know no spells.' }, this.turn);
       return;
     }
-    this.overlays.push(spellMenu(known, player.magic, (spell) => this.beginCast(spell)));
+    this.overlays.push(spellMenu(known, player.pools.magic, (spell) => this.beginCast(spell)));
   }
 
   /** A spell chosen from the list. */
@@ -499,11 +508,23 @@ export class Shell {
   /** Draw the whole screen: panes, character, log, then any overlay on top. */
   draw(grid: Grid): void {
     drawPanes(grid, this.title);
-    if (this.game) drawMap(grid, this.game.state, this.targeting, this.cursor);
+    if (this.game) drawMap(grid, this.game.state, this.targeting, this.cursor, mapLook(this.run?.theme));
     else if (this.village) this.village.draw(grid);
     else grid.text(inner(MAIN_PANE).x + 2, inner(MAIN_PANE).y + 1, 'No level loaded.', UI.label, UI.background);
     drawCharacterPane(grid, this.character);
     drawLog(grid, this.log, this.turn);
     for (const overlay of this.overlays) overlay.draw(grid, this.turn);
   }
+}
+
+/**
+ * The Abilities block (Spec 01): the major ability first, then each minor ability drawn, by name, a stackable one
+ * drawn more than once shown once with its count (Pack Mule x2). Without a class, the minor abilities by id.
+ */
+export function abilityLines(minors: readonly string[], classDef: ClassDef | undefined): string[] {
+  const nameOf = (id: string): string => classDef?.minorAbilities.find((a) => a.id === id)?.name ?? id;
+  const counts = new Map<string, number>();
+  for (const id of minors) counts.set(id, (counts.get(id) ?? 0) + 1);
+  const lines = [...counts].map(([id, n]) => (n > 1 ? `${nameOf(id)} x${n}` : nameOf(id)));
+  return classDef ? [classDef.majorAbility.name, ...lines] : lines;
 }

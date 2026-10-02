@@ -1,5 +1,5 @@
 # The 15 starting spells (Spec 04, "Starting spell list"). Each row names an effect defined in code and
-# carries its numbers: shape, reach in cells, footprint and duration. More spells come in task 3.6.
+# carries its numbers: shape, reach in cells, footprint and duration. More spells come in task 4.6.
 - id: heal
   name: Heal
   shape: self

@@ -1,0 +1,32 @@
+# Character names (Spec 03, "Character creation"; Spec 08, Addendum A): Tab on the creation screen draws one.
+# Stub entries for task 3.4 (Spec 08, "Stub content in Phases 1 and 2"); the launch table of 150 is written in Phase 4.
+- id: name_stub_aldric
+  name: Aldric
+  tags: [stub]
+- id: name_stub_berra
+  name: Berra
+  tags: [stub]
+- id: name_stub_corwin
+  name: Corwin
+  tags: [stub]
+- id: name_stub_dunya
+  name: Dunya
+  tags: [stub]
+- id: name_stub_edric
+  name: Edric
+  tags: [stub]
+- id: name_stub_fenna
+  name: Fenna
+  tags: [stub]
+- id: name_stub_garrick
+  name: Garrick
+  tags: [stub]
+- id: name_stub_hesper
+  name: Hesper
+  tags: [stub]
+- id: name_stub_ivo
+  name: Ivo
+  tags: [stub]
+- id: name_stub_jolene
+  name: Jolene
+  tags: [stub]

@@ -9,7 +9,7 @@ import { eligibleEntries, pickWeighted } from '../core/roller.ts';
 import { chooseTemplate, type Fact } from '../core/templates.ts';
 import { bankTreasure } from '../rules/character/progression.ts';
 import { type Knowledge, describeItem, identify, isIdentified, makeMagicItem } from '../rules/items/magic.ts';
-import { addToPack } from '../rules/items/inventory.ts';
+import { addToPack, packSize } from '../rules/items/inventory.ts';
 import { buyPrice, identifyPrice, repairPrice, shopPays } from '../rules/items/prices.ts';
 import { type Item, type EquipSlot, EQUIP_SLOTS, isCursed } from '../rules/items/types.ts';
 import { BOARD_SIZE, LODGING_TURNS, QUEST_ITEM_ONE_IN, QUEST_LIMIT, appraiseAll, depositOf, lodgingPrice, rumourPrice } from '../rules/villages/economy.ts';
@@ -173,11 +173,11 @@ export class Town {
     const { player } = this.run;
     const trial = { coins: player.coins, pack: structuredClone(player.pack) };
     const want = 'count' in item ? item.count : 1;
-    if (addToPack(trial, player.packSlots, structuredClone(item)) < want) return refused(say('Your pack is full.'));
+    if (addToPack(trial, packSize(player), structuredClone(item)) < want) return refused(say('Your pack is full.'));
     const messages: LogMessage[] = [];
     if (!this.pay(this.price(item), `The ${item.name.toLowerCase()}`, messages)) return refused(...messages);
     stock.splice(at, 1);
-    addToPack(player, player.packSlots, item);
+    addToPack(player, packSize(player), item);
     if (item.kind === 'potion' && !player.known.includes(item.id)) player.known.push(item.id);
     return done(say(`You buy ${describeItem(item, this.knowledge())} for ${this.price(item)} gp.`, 'loot'));
   }
@@ -412,7 +412,7 @@ export class Town {
       const row = pickWeighted(eligibleEntries([...data.magic.values()], { depth: quest.level }), rng);
       if (row) {
         const item = makeMagicItem(row, hash32('quest-item', this.run.runSeed >>> 0, quest.id, 'item'), rng, data);
-        if (addToPack(player, player.packSlots, item) > 0) messages.push(say(`You are given ${describeItem(item, this.knowledge())} as well.`, 'loot'));
+        if (addToPack(player, packSize(player), item) > 0) messages.push(say(`You are given ${describeItem(item, this.knowledge())} as well.`, 'loot'));
         else messages.push(say('A gift is waiting for you, but your pack is full.'));
       }
     }

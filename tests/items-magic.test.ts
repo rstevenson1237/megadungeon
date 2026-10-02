@@ -262,9 +262,9 @@ describe('Spec 05: always-on effects of rings and clothing', () => {
   it('a Ring of Rest restores a Combat die in 7 rounds of waiting instead of 10', () => {
     const game = gameOn(room(10, 3, 1, 2), { combatDice: 1, combatMax: 3, equipment: { ring1: magic('ring_rest', false) }, pack: [] });
     wait(game, 6);
-    expect(game.state.player.combatDice).toBe(1);
+    expect(game.state.player.pools.combat.dice).toBe(1);
     wait(game);
-    expect(game.state.player.combatDice).toBe(2);
+    expect(game.state.player.pools.combat.dice).toBe(2);
   });
 
   it('a Ring of Might adds 1 to melee attacks', () => {
@@ -297,11 +297,11 @@ describe('Spec 05: potions', () => {
   };
 
   it('Healing restores a Combat die, Vigour two, Focus a Skill die, Clarity a Magic die; none past the maximum', () => {
-    expect(drink('potion_healing').game.state.player.combatDice).toBe(3);
-    expect(drink('potion_vigour').game.state.player.combatDice).toBe(4);
-    expect(drink('potion_vigour', { combatDice: 3, combatMax: 4 }).game.state.player.combatDice).toBe(4);
-    expect(drink('potion_focus').game.state.player.skill.dice).toBe(1);
-    expect(drink('potion_clarity').game.state.player.magic.dice).toBe(1);
+    expect(drink('potion_healing').game.state.player.pools.combat.dice).toBe(3);
+    expect(drink('potion_vigour').game.state.player.pools.combat.dice).toBe(4);
+    expect(drink('potion_vigour', { combatDice: 3, combatMax: 4 }).game.state.player.pools.combat.dice).toBe(4);
+    expect(drink('potion_focus').game.state.player.pools.skill.dice).toBe(1);
+    expect(drink('potion_clarity').game.state.player.pools.magic.dice).toBe(1);
     expect(drink('potion_healing', { combatDice: 4, combatMax: 4 }).result.messages.map((m) => m.text).join(' ')).toContain('Nothing seems to happen');
   });
 
@@ -356,7 +356,7 @@ describe('Spec 05: wands, rods, staves and worn powers', () => {
     rig(game, 1); // a 1 would fizzle a spell roll
     expect(game.use(wand, m)).toMatchObject({ spent: true });
     expect(m.dice).toBe(29);
-    expect(game.state.player.magic.dice).toBe(0); // nothing spent, and the empty pool did not matter
+    expect(game.state.player.pools.magic.dice).toBe(0); // nothing spent, and the empty pool did not matter
     expect(wand.charges).toBe(1);
     game.use(wand, m);
     expect(m.dice).toBe(28);

@@ -1,5 +1,5 @@
 # Stub entries for task 2.2 (Spec 08, "Stub content in Phases 1 and 2"): enough that a run never
-# runs out of artifacts. The launch table of 40 is written in Phase 3 (task 3.5).
+# runs out of artifacts. The launch table of 40 is written in Phase 3 (task 4.5).
 - id: stub_artifact_01
   name: Stub Relic 01
   tags: [stub]

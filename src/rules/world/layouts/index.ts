@@ -36,7 +36,7 @@ export function addPillars(cells: Uint8Array, width: number, rooms: readonly Rec
 /**
  * Carve one level's walls and floor with the named layout. `cells` is all wall on entry. Null when this
  * try came out unusable (too few rooms, too little cave), which sends generation to the next sub-seed.
- * The set piece (level 100) is a hand-authored template that arrives with task 3.10; until then it is
+ * The set piece (level 100) is a hand-authored template that arrives with task 4.10; until then it is
  * rooms and corridors.
  */
 export function carveLayout(

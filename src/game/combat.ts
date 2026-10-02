@@ -3,14 +3,13 @@
 
 import type { LogMessage } from '../core/log.ts';
 import { alertedByCombat } from '../rules/combat/awareness.ts';
-import { derive } from '../rules/items/gear.ts';
 import { theftTake } from '../rules/items/treasure.ts';
 import { hasStatus, removeStatus } from '../rules/magic/status.ts';
 import { THEFTS_BEFORE_FLEEING, monsterMelee, playerMelee } from '../rules/combat/attacks.ts';
 import { distanceSq } from '../rules/world/geometry.ts';
 import { MAX_DEPTH, type Loot } from '../rules/world/level.ts';
 import type { Game } from './game.ts';
-import { wearerHit, weaponHit } from './items.ts';
+import { derivedFor, wearerHit, weaponHit } from './items.ts';
 import type { Monster } from './monsters.ts';
 import { failQuest } from './town-state.ts';
 
@@ -117,13 +116,13 @@ export function hurtPlayer(game: Game, messages: LogMessage[], say: DieText): bo
     return false;
   }
   removeStatus(player.statuses, 'asleep');
-  if (player.combatDice <= 0) {
+  if (player.pools.combat.dice <= 0) {
     player.dead = true;
     player.deathCause = say.kill;
     messages.push({ kind: 'combat', text: say.kill });
     return false;
   }
-  player.combatDice--;
+  player.pools.combat.dice--;
   messages.push({ kind: 'combat', text: say.hit });
   wearerHit(game, messages); // armour and shield roll to break when the wearer is hit (Spec 05)
   return true;
@@ -183,8 +182,8 @@ function steal(game: Game, bandit: Monster, messages: LogMessage[]): void {
 /** The player's melee attack on a creature: one exchange (Spec 04, Attacks), with the weapon's modifier (Spec 05). */
 export function playerAttacks(game: Game, m: Monster, messages: LogMessage[], reach = false): void {
   const { player } = game.state;
-  const d = derive(player.equipment, player.stealth);
-  const exchange = playerMelee(game.rng, { step: player.combatStep, dice: player.combatDice }, { modifier: m.modifier, unaware: m.awareness !== 'alert', asleep: hasStatus(m.statuses, 'asleep') }, d.melee);
+  const d = derivedFor(player);
+  const exchange = playerMelee(game.rng, { step: player.pools.combat.step, dice: player.pools.combat.dice }, { modifier: m.modifier, unaware: m.awareness !== 'alert', asleep: hasStatus(m.statuses, 'asleep') }, d.melee);
   provoke(game, m);
   combatAt(game, m, [m]);
   if (exchange.defenderHit) {
@@ -209,8 +208,8 @@ export function playerAttacks(game: Game, m: Monster, messages: LogMessage[], re
 /** A creature's melee attack on the player: one exchange. An ambusher's first has advantage. The player's armour adds to the defence die. */
 export function monsterAttacks(game: Game, m: Monster, messages: LogMessage[]): void {
   const { player } = game.state;
-  const defence = derive(player.equipment, player.stealth).defence;
-  const exchange = monsterMelee(game.rng, m, { step: player.combatStep, dice: player.combatDice }, hasStatus(player.statuses, 'asleep'), defence);
+  const defence = derivedFor(player).defence;
+  const exchange = monsterMelee(game.rng, m, { step: player.pools.combat.step, dice: player.pools.combat.dice }, hasStatus(player.statuses, 'asleep'), defence);
   m.ambush = false;
   combatAt(game, game.state.map.player, [m]);
   if (exchange.defenderHit && hitPlayer(game, m, messages) && m.kind === 'bandit') steal(game, m, messages);

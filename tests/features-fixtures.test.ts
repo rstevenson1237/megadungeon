@@ -48,11 +48,11 @@ describe('Spec 06: fountains', () => {
       const game = gameAt(level(fixture('fountain')), 2, 3, { ...bare, skill: { step: 6, dice: 0, max: 2 }, magic: { step: 6, dice: 0, max: 2 } }, { content: only(id) });
       interact(game);
       const p = game.state.player;
-      expect(pool === 'combatDice' ? p.combatDice : p[pool].dice, id).toBe(pool === 'combatDice' ? 4 : 1);
+      expect(pool === 'combatDice' ? p.pools.combat.dice : p.pools[pool].dice, id).toBe(pool === 'combatDice' ? 4 : 1);
     }
     const full = gameAt(level(fixture('fountain')), 2, 3, { ...bare, combatDice: 4 }, { content: only('fountain_restore_combat') });
     interact(full);
-    expect(full.state.player.combatDice).toBe(4);
+    expect(full.state.player.pools.combat.dice).toBe(4);
   });
 
   it('cures poison, reveals the level map, pays coins scaled by depth, poisons, or does nothing', () => {
@@ -238,9 +238,9 @@ describe('Spec 06: sarcophagi', () => {
     const held = lift(1, 3);
     expect(said(held.result)).toContain('The lid will not budge.');
     expect(held.game.state.used.features[0]?.done).toBeUndefined();
-    expect(held.game.state.player.combatDice).toBe(3);
+    expect(held.game.state.player.pools.combat.dice).toBe(3);
     const crushed = lift(1, 1);
-    expect(crushed.game.state.player.combatDice).toBe(2);
+    expect(crushed.game.state.player.pools.combat.dice).toBe(2);
     expect(crushed.game.state.used.features[0]?.done).toBeUndefined();
   });
 
@@ -298,12 +298,12 @@ describe('Spec 06: magical runes', () => {
   it('2 to 3 does nothing and the rune is not spent; a 1 discharges, by fire or a teleport, and spends it', () => {
     const meh = onto(1, 3);
     expect(meh.game.state.used.features[0]?.done).toBeUndefined();
-    expect(meh.game.state.player.combatDice).toBe(3);
+    expect(meh.game.state.player.pools.combat.dice).toBe(3);
     const outcomes = new Set<string>();
     for (let seed = 0; seed < 80; seed++) {
       const { game } = onto(seed, 1);
       expect(game.state.used.features[0]!.done).toBe(true);
-      outcomes.add(game.state.player.combatDice < 3 ? 'fire' : 'teleport');
+      outcomes.add(game.state.player.pools.combat.dice < 3 ? 'fire' : 'teleport');
     }
     expect([...outcomes].sort()).toEqual(['fire', 'teleport']);
   });

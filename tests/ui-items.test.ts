@@ -107,7 +107,7 @@ describe('Spec 01 and 05: the inventory screen', () => {
     press(shell, 's'); // Equip is absent for a potion: the first entry is Use
     press(shell, 'w');
     press(shell, 'Enter');
-    expect(shell.game!.state.player.combatDice).toBe(3);
+    expect(shell.game!.state.player.pools.combat.dice).toBe(3);
     expect(shell.character.stats[0]).toMatchObject({ current: 3, max: 3 });
     expect(logText(shell)).toContain('It was a Potion of Healing.');
     expect(shell.character.inventory.used).toBe(0);

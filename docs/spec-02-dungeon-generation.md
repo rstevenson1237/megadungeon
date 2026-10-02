@@ -101,7 +101,7 @@ Each theme picks a size class and one of eight layout algorithms; the theme's pa
   - **Maze with crypts:** a one-cell recursive-backtracker maze on odd cells; crypts of 5 or 7 by 3 or 5 cells are cut into it, aligned to the maze.
   - **Freeform chambers:** one chamber per 330 map cells, each an ellipse with one or two smaller ellipses attached, placed apart; the chambers are joined as a spanning tree of L-shaped corridors, plus a few extra links.
   - **Disjoint rooms:** one room in about 70% of the cells of a sparse grid (22 x 10 cells each), joined as a spanning tree plus extra links, all by long corridors. Doors, and so the secret ones, come with the placement pipeline (task 2.4), which may only make a door secret where another route keeps the critical path open.
-  - **Set piece:** until the level 100 template (task 3.10) it uses rooms and corridors.
+  - **Set piece:** until the level 100 template (task 4.10) it uses rooms and corridors.
 - **Joining regions:** a separate region is joined to the main one by an L-shaped corridor between the nearest pair of cells; where the corridor crosses deep water it is a ford of shallow water, and across lava, plain floor.
 - **Stairs:** both stairs go in the interior of a room (a cell not on the rectangle's edge, and plain floor). In mazes, warrens and caves, where the far end of the level is often a dead end or a tunnel, a stair that finds no room cell far enough goes on any plain floor cell far enough instead.
 - **Fallback:** after 20 failed tries a level tries rooms and corridors with 20 more sub-seeds, and only then two fixed rooms joined by one corridor.
@@ -190,7 +190,7 @@ Cleared levels refill over time, and wandering monsters keep any level from feel
 - **Treasure does not restock**: only monsters return, so each level's treasure budget is finite.
 - **Wandering monsters:** a 1 in 200 chance each turn on a dungeon level, plus the wandering monster result on a rolled 1 for a check. They enter from out of sight, never adjacent to the player.
 - **Villages** never restock or spawn wandering monsters.
-- **Clarifications (task 2.12, proposed October 1, 2026, awaiting approval):** the original monster budget is the number of ordinary monsters the level was generated with (bosses, quest guards and opponents are not counted). Time away is counted in whole 500-turn blocks from the round the player left (a village rest adds 200 turns), each block returning 10% of the budget, rounded to a whole monster, up to 50%. Ordinary monsters alive never exceed the original budget, so a level the player left full gains nothing. Restocked monsters start asleep or unaware like any placed monster, on open cells out of sight of where the player arrives, and are drawn like a wanderer from the depth table. The 1 in 200 wandering chance is checked once per round (a hasted player's half rounds do not count) from a stream of its own, so it never changes the dice of a fight.
+- **Clarifications (task 2.12, proposed October 1, 2026, approved October 2, 2026):** the original monster budget is the number of ordinary monsters the level was generated with (bosses, quest guards and opponents are not counted). Time away is counted in whole 500-turn blocks from the round the player left (a village rest adds 200 turns), each block returning 10% of the budget, rounded to a whole monster, up to 50%. Ordinary monsters alive never exceed the original budget, so a level the player left full gains nothing. Restocked monsters start asleep or unaware like any placed monster, on open cells out of sight of where the player arrives, and are drawn like a wanderer from the depth table. The 1 in 200 wandering chance is checked once per round (a hasted player's half rounds do not count) from a stream of its own, so it never changes the dice of a fight.
 
 ## Quest goals
 
@@ -221,6 +221,40 @@ These cross-level links make finds on one level matter on another. Each has a so
 | Lift tokens | A lift keeper's token from a boss | Free or reduced lift fares for the rest of the run |
 | Artifact seals | Artifacts from bosses | Each artifact carried weakens the final boss on level 100 |
 | Collapsed passages | A lever or charge on one level | Opens a shortcut stair that skips several levels down |
+
+## Addendum A (approved October 2, 2026)
+
+From Intake Addendum A (findings A6 to A8, C2, C3). All figures are starting values for playtesting.
+
+**Contents streams and determinism**
+
+- **One stream per step:** steps 4 to 11 each draw from their own stream, derived from the level's contents seed and the step's number, instead of sharing one. A change to one table (say, a new monster row) then moves only the step that rolls it. This is generator version 4.
+- **Stored hashes cover the whole level:** the determinism test hashes the tiles and the full contents for fixed seeds, generated against a frozen copy of the stub tables kept with the tests. Content edits never change the stored hashes; generator code changes do, and those bump the generator version.
+- **Content and saves:** the tables still shape the contents, so a save made with other content is handled by Spec 09 (Addendum A).
+- **Clarification (task 3.2, proposed and approved October 2, 2026):** separate streams keep a table change out of the other steps' dice, but not out of their cells. What holds: a change never moves the steps before the one that rolls it; later steps keep their own draws, yet may shift where the changed step now takes or frees a cell (a new monster row moves some NPCs and lore, since they avoid monsters); and a level whose first try no longer validates retries with the next sub-seed, which moves everything. Measured over 227 levels, a new gem row moved only the treasure in nearly every level (v3: every step), and a new graffiti or trap row moved only its own step. The acceptance line below is read this way: the steps before the changed one never move unless the level retried.
+
+**Named rival arc**
+
+- **One rival, many appearances:** the named rival carries its loot from one appearance to the next. When the player leaves a level where it is alive, what it then carries goes with it to its next appearance.
+- **Defeat:** killing it on any appearance drops everything it carries, plus its journal (a book). It does not appear on the levels of its remaining appearances.
+- **The journal:** reading it adds a journal entry that names the stash's level. The stash is placed whether or not the journal is read, as now.
+- **Hostility carries:** a rival the player attacked is hostile at its later appearances.
+
+**A lore chain's weakness**
+
+- A chain whose end is a boss's weakness names that boss's level. Once the player has read the chain's last entry, that boss rolls with disadvantage on every melee and ranged roll against the player and on its defence against the player.
+
+**The final boss and artifact seals**
+
+- **Stub final boss:** until the level 100 set piece (task 4.10), level 100 is a rooms-and-corridors level of The Abyssal Throne theme. It places one boss drawn from the boss rows tagged `final`, rated 20d6+6, in the room farthest from the up stair. It never flees, is alert once the player is in its room, and holds no artifact.
+- **Artifact seals:** when the final boss first becomes alert, it loses one die for each artifact the player carries or wears, down to a minimum of 1. The log says so. The count is made once.
+
+**Acceptance criteria changed and added**
+
+- [ ] (Replaces the opening line of Acceptance criteria.) The generation criteria are checked over 10,000 seeds with one level each (the depth cycling over 1 to 99, every size), plus every level 1 to 100 of 100 seeds.
+- [ ] A change to one content table changes only the placement step that rolls it and the steps after it, never those before (unless the level retried), shown by tests that add a monster, gem and graffiti row and compare the steps (clarification of task 3.2).
+- [ ] The named rival carries its loot between appearances and, once killed, drops it with its journal and never appears again.
+- [ ] Reading a weakness chain's last entry weakens its boss; each artifact carried removes one die from the final boss when it becomes alert.
 
 ## Acceptance criteria
 

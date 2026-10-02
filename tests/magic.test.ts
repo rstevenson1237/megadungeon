@@ -79,19 +79,19 @@ describe('Spec 04: casting takes a round and a Magic die', () => {
     expect(result.spent).toBe(true);
     expect(game.state.round).toBe(2);
     expect(m.x).toBe(14); // it took a step
-    expect(game.state.player.magic.dice).toBe(3);
+    expect(game.state.player.pools.magic.dice).toBe(3);
   });
 
   it('a 2 to 3 works but costs the die; a 1 fizzles and costs it too', () => {
     const game = castingGame(room(20, 5, 2, 3), { combatDice: 1 });
     rig(game, 3);
     cast(game, 'heal');
-    expect(game.state.player.combatDice).toBe(2);
-    expect(game.state.player.magic.dice).toBe(2);
+    expect(game.state.player.pools.combat.dice).toBe(2);
+    expect(game.state.player.pools.magic.dice).toBe(2);
     rig(game, 1);
     const fizzle = cast(game, 'heal');
-    expect(game.state.player.combatDice).toBe(2);
-    expect(game.state.player.magic.dice).toBe(1);
+    expect(game.state.player.pools.combat.dice).toBe(2);
+    expect(game.state.player.pools.magic.dice).toBe(1);
     expect(fizzle.messages.map((m) => m.text)).toContain('The spell fizzles.');
   });
 
@@ -109,7 +109,7 @@ describe('Spec 04: casting takes a round and a Magic die', () => {
     expect(cast(game, 'arcane_bolt', far).spent).toBe(false); // 13 cells: out of reach
     expect(cast(game, 'blink', { x: 18, y: 3 }).spent).toBe(false);
     expect(game.state.round).toBe(1);
-    expect(game.state.player.magic.dice).toBe(3);
+    expect(game.state.player.pools.magic.dice).toBe(3);
   });
 });
 
@@ -119,7 +119,7 @@ describe('Spec 04: self spells', () => {
     for (const expected of [2, 3, 3]) {
       rig(game, 6);
       cast(game, 'heal');
-      expect(game.state.player.combatDice).toBe(expected);
+      expect(game.state.player.pools.combat.dice).toBe(expected);
     }
   });
 
@@ -130,10 +130,10 @@ describe('Spec 04: self spells', () => {
     expect(game.state.player.shield).toBe(9); // 10 rounds, counting the one it was cast in
     game.state.monsters.push(monsterAt(3, 3, { alert: true, modifier: 30, dice: 5, maxDice: 5, fearless: true }));
     wait(game);
-    expect(game.state.player.combatDice).toBe(3); // the first hit was absorbed
+    expect(game.state.player.pools.combat.dice).toBe(3); // the first hit was absorbed
     expect(game.state.player.shield).toBe(0);
     wait(game);
-    expect(game.state.player.combatDice).toBe(2); // the next one lands
+    expect(game.state.player.pools.combat.dice).toBe(2); // the next one lands
   });
 
   it('Shield fades after 10 rounds if nothing hits', () => {
@@ -323,7 +323,7 @@ describe('Spec 04: targeted spells', () => {
       rig(game, 3);
       cast(game, 'arcane_bolt', m);
       expect(m.dice).toBe(29); // a 2 to 3 still works
-      return game.state.player.magic.dice;
+      return game.state.player.pools.magic.dice;
     };
     expect(run(['arcane_bolt'])).toBe(3);
     expect(run([])).toBe(2);
@@ -384,12 +384,12 @@ describe('Spec 04: targeted spells', () => {
     game.state.monsters.push(m);
     rig(game, 6);
     cast(game, 'hold', m);
-    expect(game.state.player.combatDice).toBe(6); // held in round 1
+    expect(game.state.player.pools.combat.dice).toBe(6); // held in round 1
     wait(game, 2);
-    expect(game.state.player.combatDice).toBe(6); // and in rounds 2 and 3
+    expect(game.state.player.pools.combat.dice).toBe(6); // and in rounds 2 and 3
     expect(hasStatus(m.statuses, 'held')).toBe(false);
     wait(game);
-    expect(game.state.player.combatDice).toBe(5); // free in round 4
+    expect(game.state.player.pools.combat.dice).toBe(5); // free in round 4
   });
 
   it('Drain removes a die and restores a Combat die to the caster, nothing past the maximum', () => {
@@ -399,7 +399,7 @@ describe('Spec 04: targeted spells', () => {
     for (const [dice, mine] of [[3, 2], [2, 3], [1, 3]] as const) {
       rig(game, 6);
       cast(game, 'drain', m);
-      expect([m.dice, game.state.player.combatDice]).toEqual([dice, mine]);
+      expect([m.dice, game.state.player.pools.combat.dice]).toEqual([dice, mine]);
     }
   });
 
@@ -464,7 +464,7 @@ describe('Spec 04: area spells', () => {
       expect(m.dice).toBe(30);
       expect(marked).not.toContain(m);
     }
-    expect(game.state.player.combatDice).toBe(3); // the caster stood outside it
+    expect(game.state.player.pools.combat.dice).toBe(3); // the caster stood outside it
   });
 
   it('rolls once for the whole area: one die is spent, not one per creature', () => {
@@ -472,7 +472,7 @@ describe('Spec 04: area spells', () => {
     const { centre } = crowd(game);
     rig(game, 3);
     cast(game, 'fireball', centre);
-    expect(game.state.player.magic.dice).toBe(2);
+    expect(game.state.player.pools.magic.dice).toBe(2);
   });
 
   it('a targeted area hits the caster too when they stand in the footprint, as the preview shows', () => {
@@ -483,7 +483,7 @@ describe('Spec 04: area spells', () => {
     expect(t.includesPlayer()).toBe(true);
     rig(game, 6);
     cast(game, 'fireball', adjacent);
-    expect(game.state.player.combatDice).toBe(2);
+    expect(game.state.player.pools.combat.dice).toBe(2);
     expect(adjacent.dice).toBe(29);
   });
 
@@ -502,7 +502,7 @@ describe('Spec 04: area spells', () => {
     game.state.monsters.push(adjacent);
     rig(game, 6);
     cast(game, 'fireball', adjacent);
-    expect(game.state.player.combatDice).toBe(3);
+    expect(game.state.player.pools.combat.dice).toBe(3);
     expect(game.state.player.shield).toBe(0);
   });
 
@@ -543,7 +543,7 @@ describe('Spec 04: area spells', () => {
     expect({ x: east.x, y: east.y }).toEqual({ x: 8, y: 5 });
     expect({ x: southWest.x, y: southWest.y }).toEqual({ x: 2, y: 8 });
     expect({ x: distant.x, y: distant.y }).toEqual({ x: 5, y: 7 });
-    expect(game.state.player).toMatchObject({ combatDice: 3 });
+    expect(game.state.player.pools.combat.dice).toBe(3);
     expect(at(game)).toEqual({ x: 5, y: 5 });
     for (const m of [north, east, southWest]) expect(m.dice).toBe(30); // pushed, not hurt
   });

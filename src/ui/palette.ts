@@ -41,7 +41,7 @@ export const OVERLAY = {
 
 /**
  * Map colours (Spec 01: each level theme supplies palette tokens). This is the default set,
- * taken from the mockup; themes arrive in task 3.2. Remembered cells use the dimmed colour.
+ * taken from the mockup; themes arrive in task 4.2. Remembered cells use the dimmed colour.
  */
 export const MAP = {
   floor: { visible: 0x6b5638, remembered: 0x33291c },
@@ -82,3 +82,47 @@ export const TARGET = {
   /** Background for monsters inside the footprint. */
   markedBg: 0x6a4a10,
 } as const;
+
+/** The terrain colours a theme's palette can set, as the map draws them: in sight and remembered. */
+export type TerrainColours = Record<'wall' | 'floor' | 'door' | 'stairs' | 'shallowWater' | 'deepWater' | 'lava' | 'special', { visible: number; remembered: number }>;
+
+/** How a level's map looks: its terrain colours and its wall and floor glyphs (Spec 01, Rendering; Spec 08, Addendum A). */
+export interface MapLook {
+  colours: TerrainColours;
+  wallGlyph: number;
+  floorGlyph: number;
+}
+
+/** What a theme row gives the look; a theme without them draws in the default set. */
+export interface ThemeLook {
+  palette?: Record<string, string> | undefined;
+  tiles?: { wall: number; floor: number } | undefined;
+}
+
+/** The default look: the mockup's colours, # walls and · floor. */
+export const DEFAULT_LOOK: MapLook = {
+  colours: { wall: MAP.wall, floor: MAP.floor, door: MAP.door, stairs: MAP.stairs, shallowWater: MAP.shallowWater, deepWater: MAP.deepWater, lava: MAP.lava, special: MAP.special },
+  wallGlyph: 35,
+  floorGlyph: 250,
+};
+
+/** A remembered cell's colour: the colour at half brightness, as the default set's remembered colours are. */
+export const dimmed = (colour: number): number => (((colour >> 17) & 0x7f) << 16) | (((colour >> 9) & 0x7f) << 8) | ((colour >> 1) & 0x7f);
+
+/** Where each palette token lands on the map; the accent colours the specials (teleporters, levers). */
+const TOKEN_TO_TERRAIN: Readonly<Record<string, keyof TerrainColours>> = {
+  wall: 'wall', floor: 'floor', door: 'door', stairs: 'stairs', shallow_water: 'shallowWater', deep_water: 'deepWater', lava: 'lava', accent: 'special',
+};
+
+/** The look of a level of the given theme: its palette and tiles over the default set. */
+export function mapLook(theme: ThemeLook | undefined): MapLook {
+  if (!theme?.palette && !theme?.tiles) return DEFAULT_LOOK;
+  const colours = { ...DEFAULT_LOOK.colours };
+  for (const [token, hex] of Object.entries(theme.palette ?? {})) {
+    const terrain = TOKEN_TO_TERRAIN[token];
+    if (!terrain) continue;
+    const visible = parseInt(hex.slice(1), 16);
+    colours[terrain] = { visible, remembered: dimmed(visible) };
+  }
+  return { colours, wallGlyph: theme.tiles?.wall ?? DEFAULT_LOOK.wallGlyph, floorGlyph: theme.tiles?.floor ?? DEFAULT_LOOK.floorGlyph };
+}

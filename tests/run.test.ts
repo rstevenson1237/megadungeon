@@ -59,13 +59,13 @@ describe('run and stairs (Spec 02, Run layout; Spec 01, Villages)', () => {
 
   it('keeps the player (the Combat pool) and counts rounds across levels and the village', () => {
     const r = run(1);
-    r.player.combatDice = 1;
+    r.player.pools.combat.dice = 1;
     const start = r.round;
     r.travel('down');
     r.travel('up');
     r.travel('up');
     expect(r.game).toBeNull();
-    expect(r.player.combatDice).toBe(1);
+    expect(r.player.pools.combat.dice).toBe(1);
     expect(r.round).toBeGreaterThan(start + 2);
   });
 

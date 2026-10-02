@@ -160,7 +160,7 @@ All figures are starting values for playtesting.
 - **Rivals** walk to the down stair along the shortest path. They take the contents of any container or floor pile within 8 steps of their way (never a cross-level cache or stash) and fight every monster next to them, as an ordinary melee exchange in which both sides roll d6 plus modifier. A rival that reaches the down stair waits beside it; no creature ever uses stairs. Once attacked, a rival is hostile and fights as a skirmisher. A dead rival drops everything it looted on its cell.
 - **Loot taken by rivals** is recorded in the level's delta so the player finds those containers empty (Spec 06 will read it).
 
-## Clarifications (task 2.8, proposed October 1, 2026, awaiting approval)
+## Clarifications (task 2.8, proposed October 1, 2026, approved October 2, 2026)
 
 All figures are starting values for playtesting. Where the spec above is silent these fill the gap so the build can proceed; any the owner changes goes back here first.
 
@@ -191,6 +191,29 @@ All figures are starting values for playtesting. Where the spec above is silent 
 - **Poisoned:** one Combat die is lost every 20 rounds, and waiting does not recover dice. A lost die with none left is fatal, as with any hit. Village rest ends it; Cure and the hermit arrive with items and villages.
 - **Blessed and Cursed** give advantage and disadvantage on checks (Spec 03); together they cancel.
 - **The Status block** lists each active effect with its remaining rounds, then Shield.
+
+## Addendum A (approved October 2, 2026)
+
+From Intake Addendum A (finding A2: Raise, Decoy and Companion need creatures on the player's side). All figures are starting values for playtesting.
+
+**Allies**
+
+- **What:** an ally is a creature on the player's side: a raised creature (Necromancer), the companion (Beastmaster) or a phantom (Illusionist). An ally is drawn as its letter in the ally colour.
+- **Turns:** allies act in the round order like any creature, nearest first, and count toward the 50 simulated a round. They never trigger traps.
+- **Behaviour:** attack an adjacent hostile creature (fewest dice first); else move toward the nearest hostile creature in sight; else keep within 3 cells of the player. An ally's exchange with a monster is ordinary melee in which both roll d6 plus modifier (as rivals fight). Allies never attack rivals that are peaceful, traders, hermits or captives.
+- **Monsters and allies:** a hostile creature attacks an adjacent ally only when the player is not adjacent to it. An exchange with an ally is combat for awareness and noise.
+- **Player's attacks:** targeting never offers an ally, and a creature in the line of fire blocks it, allies included. An area spell hits an ally in its footprint as it would the caster.
+- **Stairs:** allies never use stairs, except the companion, which arrives with the player on the nearest free cell beside the arrival cell. In a village it waits and is not drawn. A raised ally crumbles when the player leaves the level.
+- **The phantom** stands on its cell and does not act. Alert hostile creatures within 8 cells of it treat it as the player for moving and attacking; their attacks on it pass harmlessly, with no exchange. It vanishes after 5 rounds.
+- **Kills by allies** count toward monsters killed (Spec 09).
+
+**Acceptance criteria added**
+
+- [ ] Each kind of ally follows the behaviour above in a scripted arena fight, and only the companion changes level.
+
+## Clarification (task 3.2, proposed and approved October 2, 2026)
+
+- **Turn time budget:** the plan's risks ask for a per-turn time budget test, and no spec gives the figure. Proposed: on a large level crowded with 80 alert creatures of every behaviour, a round takes under 5 ms on average and never over 50 ms (the same figure as generating a large level). Measured on the build machine: about 0.1 ms on average and 4 ms at worst.
 
 ## Acceptance criteria
 

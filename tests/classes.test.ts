@@ -40,7 +40,7 @@ const SPEC: Record<string, [string, Step[], PoolName[], Step[]]> = {
 const POOLS: PoolName[] = ['combat', 'skill', 'magic'];
 const stepsOf = (c: ReturnType<typeof createCharacter>) => POOLS.map((p) => c.pools[p].step);
 
-/** Pad a pool to 12 with test entries where the content has fewer (the full pools arrive in task 3.4). */
+/** Pad a pool to 12 with test entries where the content has fewer (the full pools arrive in task 4.4). */
 const padded = (cls: ClassDef): ClassDef => ({
   ...cls,
   minorAbilities: [
@@ -169,7 +169,7 @@ describe('Spec 03: minor abilities from the content tables', () => {
     expect(classById(built.bundle, 'warrior').minorAbilities.find((a) => a.id === 'pack_mule')?.stackable).toBe(true);
   });
 
-  it('reports every class short of its 12 until task 3.4, and counts slots per class', () => {
+  it('reports every class short of its 12 until task 4.4, and counts slots per class', () => {
     const report = buildCoverage(built.bundle).tables.find((t) => t.table === 'minor_abilities')!;
     expect(report).toMatchObject({ count: 16, minimum: 240, unit: 'slots', ok: false });
     expect(report.groups).toHaveLength(20);

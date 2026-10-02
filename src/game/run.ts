@@ -9,7 +9,7 @@ import type { LogMessage } from '../core/log.ts';
 import type { Spell } from '../core/schemas.ts';
 import { type ItemData, disguisesFor } from '../rules/items/magic.ts';
 import { generateLevel, PLAIN_STYLE, type LevelStyle } from '../rules/world/generate.ts';
-import { MAX_DEPTH, type Level, type Point, type SizeClass } from '../rules/world/level.ts';
+import { GENERATOR_VERSION, MAX_DEPTH, type Level, type Point, type SizeClass } from '../rules/world/level.ts';
 import type { LevelContents } from '../rules/world/placement/index.ts';
 import type { RunLayout } from '../rules/world/run-layout.ts';
 import { Game, type LevelDelta, type PlayerState } from './game.ts';
@@ -29,11 +29,20 @@ export function stubSize(depth: number): SizeClass {
   return (['large', 'medium', 'small'] as const)[depth % 3]!;
 }
 
+/** What a level's theme gives the screen: its name, and the palette and tiles its map draws in. */
+export interface RunTheme {
+  name: string;
+  palette?: Record<string, string> | undefined;
+  tiles?: { wall: number; floor: number } | undefined;
+}
+
 export interface RunOptions {
   /** The run layout (Spec 02): its subterranean villages join the surface as the village depths. */
   layout?: RunLayout;
   /** Size class of a dungeon level, from its theme; without it sizes cycle with depth (stub). */
   sizeFor?: (depth: number) => SizeClass;
+  /** The theme of a dungeon level: its name for the header, and its palette and tiles for the map (Spec 01, Spec 08). */
+  themeFor?: (depth: number) => RunTheme | undefined;
   /** Layout algorithm and variants of a dungeon level, from its theme; plain rooms and corridors when omitted. */
   styleFor?: (depth: number) => LevelStyle;
   /** What a dungeon level holds (Spec 02, steps 4 to 11); without it a level is bare walls, floor and stairs. */
@@ -46,8 +55,7 @@ export interface RunOptions {
   items?: ItemData;
   /** The tables features roll from: traps, fountains, debris, gods, books, monsters (Spec 06). */
   content?: GameContent;
-  /** The character's rules state and class, so deposits can level them up (Spec 03); without them XP is not tracked. */
-  character?: Character;
+  /** The character's class, so deposits can level the player up (Spec 03); without it XP is not tracked. */
   classDef?: ClassDef;
   /** Where the run starts: the surface village by default. */
   startDepth?: number;
@@ -57,6 +65,8 @@ export interface RunOptions {
   /** Who is playing and whether the seed is the seed of the day (a date), for the leaderboard (Spec 09). */
   characterId?: string;
   daily?: string;
+  /** The generator version the run's levels are built with: the current one for a new run, the saved one on a load (Spec 02). */
+  generator?: number;
   /** Supplies the level for a depth. Tests pass hand-built levels; the default generates from the seed. */
   levelFor?: (depth: number) => Level;
 }
@@ -68,6 +78,8 @@ export class Run {
   /** The id the leaderboard knows this character by, and the date if the seed is the seed of the day. */
   readonly characterId: string;
   readonly daily: string | undefined;
+  /** The generator version this run's levels are built with, kept for the whole run (Spec 02). */
+  readonly generator: number;
   depth: number;
   /** The level being played; null in a village, where there is no map (Spec 01). */
   game: Game | null = null;
@@ -77,12 +89,11 @@ export class Run {
   private readonly spells: readonly Spell[];
   private readonly items: ItemData | undefined;
   private readonly content: GameContent | undefined;
+  private readonly themeFor: ((depth: number) => RunTheme | undefined) | undefined;
   private readonly contentsFor: ((depth: number) => LevelContents | undefined) | undefined;
   private readonly peeked = new Map<number, Level>();
   /** What the villages did on arrival, until the shell has shown it. */
   private arrivals: LogMessage[] = [];
-  /** The character's rules state: XP and level (Spec 03). */
-  readonly character: Character;
   readonly classDef: ClassDef | undefined;
   /** The village services, shops, quests and the lift (Spec 07). */
   readonly town: Town;
@@ -100,8 +111,10 @@ export class Run {
     this.round = options.round ?? 1;
     this.characterId = options.characterId ?? `${runSeed >>> 0}`;
     this.daily = options.daily;
+    this.generator = options.generator ?? GENERATOR_VERSION;
     this.layout = options.layout;
     this.contentsFor = options.contentsFor;
+    this.themeFor = options.themeFor;
     this.spells = options.spells ?? [];
     this.items = options.items;
     this.content = options.content;
@@ -109,17 +122,8 @@ export class Run {
     this.villages = options.villages ?? [SURFACE, ...(options.layout?.villages.map((v) => v.level) ?? [])];
     const sizeFor = options.sizeFor ?? stubSize;
     const styleFor = options.styleFor ?? (() => PLAIN_STYLE);
-    this.levelFor = options.levelFor ?? ((d) => generateLevel(runSeed, d, sizeFor(d), styleFor(d), options.contentsFor?.(d)));
+    this.levelFor = options.levelFor ?? ((d) => generateLevel(runSeed, d, sizeFor(d), styleFor(d), options.contentsFor?.(d), this.generator));
     this.depth = options.startDepth ?? SURFACE;
-    this.character = options.character ?? {
-      name: '',
-      classId: options.classDef?.id ?? '',
-      level: 1,
-      xp: 0,
-      pools: { combat: { step: player.combatStep as Step, dice: player.combatDice, max: player.combatMax }, skill: { ...player.skill }, magic: { ...player.magic } },
-      minorAbilities: [],
-      waited: 0,
-    };
     this.classDef = options.classDef;
     this.town = new Town(this);
     this.arrive(this.depth, 'down');
@@ -161,24 +165,14 @@ export class Run {
     return this.classDef ? levelsOwed(this.character) : 0;
   }
 
-  /** Apply the next level up with the new die going to `pool`, and bring the player's pools in line (Spec 03). */
+  /** The character's rules state (Spec 03): the player itself, the one record of pools, level, XP and abilities. */
+  get character(): Character {
+    return this.player;
+  }
+
+  /** Apply the next level up with the new die going to `pool` (Spec 03). A Pack Mule drawn grows the pack at once, as its size is computed. */
   levelUp(pool: PoolName): LevelUp | null {
-    if (!this.classDef) return null;
-    const before = { combat: this.character.pools.combat.max, skill: this.character.pools.skill.max, magic: this.character.pools.magic.max };
-    const result = levelUp(this.runSeed, this.character, this.classDef, pool);
-    if (!result) return null;
-    const { player } = this;
-    const mine = { combat: { step: player.combatStep, dice: player.combatDice, max: player.combatMax }, skill: player.skill, magic: player.magic };
-    for (const name of ['combat', 'skill', 'magic'] as const) {
-      const grown = this.character.pools[name].max - before[name];
-      mine[name].step = this.character.pools[name].step;
-      mine[name].max = this.character.pools[name].max;
-      mine[name].dice += grown;
-    }
-    player.combatStep = mine.combat.step;
-    player.combatMax = mine.combat.max;
-    player.combatDice = mine.combat.dice;
-    return result;
+    return this.classDef ? levelUp(this.runSeed, this.player, this.classDef, pool) : null;
   }
 
   /** What the item actions need, from the run alone: usable in a village, where there is no level. */
@@ -190,10 +184,18 @@ export class Run {
     return this.villages.includes(this.depth);
   }
 
-  /** The main view's header (Spec 01): the village or the level and its depth. */
+  /** The theme of the level being played; none in a village. */
+  get theme(): RunTheme | undefined {
+    return this.inVillage ? undefined : this.themeFor?.(this.depth);
+  }
+
+  /** The main view's header (Spec 01): the level's theme and depth ("Goblin Warrens, Level 7"), or the village and its depth. */
   get title(): string {
     if (this.depth === SURFACE) return 'Surface Village';
-    if (!this.inVillage) return `Level ${this.depth}`;
+    if (!this.inVillage) {
+      const theme = this.theme;
+      return theme ? `${theme.name}, Level ${this.depth}` : `Level ${this.depth}`;
+    }
     const name = this.layout?.villages.find((v) => v.level === this.depth)?.name;
     return name ? `${name}, Level ${this.depth}` : `Village, Level ${this.depth}`;
   }

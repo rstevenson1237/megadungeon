@@ -27,7 +27,7 @@ describe('Spec 06: stepping on a hidden floor trap', () => {
     rig(game, 4);
     const result = stepOn(game);
     expect(said(result)).toContain('You spot a trap at the last moment and jump clear!');
-    expect(game.state.player.combatDice).toBe(4);
+    expect(game.state.player.pools.combat.dice).toBe(4);
     expect(game.state.map.player).toEqual({ x: 3, y: 3 });
     expect(game.state.revealed).toEqual([cell(level, 3, 3)]);
     expect(game.state.used.disarmed).toEqual([]); // still there
@@ -38,8 +38,8 @@ describe('Spec 06: stepping on a hidden floor trap', () => {
       const game = gameAt(trapLevel('trap_dart'), 2, 3, bare);
       rig(game, roll);
       stepOn(game);
-      expect(game.state.player.combatDice, `roll ${roll}`).toBe(3);
-      expect(game.state.player.skill.dice).toBe(2);
+      expect(game.state.player.pools.combat.dice, `roll ${roll}`).toBe(3);
+      expect(game.state.player.pools.skill.dice).toBe(2);
     }
   });
 
@@ -60,18 +60,18 @@ describe('Spec 06: stepping on a hidden floor trap', () => {
     expect(game.state.used.disarmed).toEqual([cell(lvl, 3, 3)]);
     game.act({ type: 'move', dx: -1, dy: 0 });
     stepOn(game);
-    expect(game.state.player.combatDice).toBe(3); // no second hit
+    expect(game.state.player.pools.combat.dice).toBe(3); // no second hit
   });
 });
 
 describe('Spec 06: what the floor traps do', () => {
   it('dart and pit each cost one Combat die; below level 50 the dart, fire and collapse cost two, the pit still one', () => {
-    expect(spring('trap_dart').game.state.player.combatDice).toBe(3);
-    expect(spring('trap_pit').game.state.player.combatDice).toBe(3);
-    expect(spring('trap_dart', 50).game.state.player.combatDice).toBe(3); // level 50 itself is not below it
-    expect(spring('trap_dart', 51).game.state.player.combatDice).toBe(2);
-    expect(spring('trap_pit', 80).game.state.player.combatDice).toBe(3);
-    expect(spring('trap_collapse', 51).game.state.player.combatDice).toBe(2);
+    expect(spring('trap_dart').game.state.player.pools.combat.dice).toBe(3);
+    expect(spring('trap_pit').game.state.player.pools.combat.dice).toBe(3);
+    expect(spring('trap_dart', 50).game.state.player.pools.combat.dice).toBe(3); // level 50 itself is not below it
+    expect(spring('trap_dart', 51).game.state.player.pools.combat.dice).toBe(2);
+    expect(spring('trap_pit', 80).game.state.player.pools.combat.dice).toBe(3);
+    expect(spring('trap_collapse', 51).game.state.player.pools.combat.dice).toBe(2);
     expect(trapDice(CONTENT.traps.get('trap_fire_burst')!, 51)).toBe(2);
     expect(trapDice(CONTENT.traps.get('trap_fire_burst')!, 50)).toBe(1);
     expect(trapDice(CONTENT.traps.get('trap_deep_pit')!, 90)).toBe(1);
@@ -79,7 +79,7 @@ describe('Spec 06: what the floor traps do', () => {
 
   it('a trap that takes dice kills a player with none left, as any hit does; a Shield absorbs the first', () => {
     expect(spring('trap_dart', 1, { combatDice: 0 }).game.state.player.dead).toBe(true);
-    expect(spring('trap_dart', 1, { shield: 5 }).game.state.player.combatDice).toBe(4);
+    expect(spring('trap_dart', 1, { shield: 5 }).game.state.player.pools.combat.dice).toBe(4);
     expect(spring('trap_dart', 51, { combatDice: 1, combatMax: 4 }).game.state.player.dead).toBe(true);
   });
 
@@ -122,7 +122,7 @@ describe('Spec 06: what the floor traps do', () => {
     const lvl = trapLevel('trap_collapse');
     const { game } = spring('trap_collapse');
     expect(game.state.used.collapsed).toEqual([cell(lvl, 3, 3)]);
-    expect(game.state.player.combatDice).toBe(3);
+    expect(game.state.player.pools.combat.dice).toBe(3);
     game.act({ type: 'move', dx: -1, dy: 0 });
     expect(hiddenNear(game, game.state.map.player).map((t) => t.kind)).toEqual(['debris']);
   });
@@ -139,7 +139,7 @@ describe('Spec 06: what the floor traps do', () => {
       rig(run.game!, 2);
       const result = run.game!.act({ type: 'move', dx: 1, dy: 0 })!;
       expect(result.fall).toBe(true);
-      expect(run.player.combatDice).toBe(3);
+      expect(run.player.pools.combat.dice).toBe(3);
       run.fall();
       expect(run.depth).toBe(5);
       const { x, y } = run.game!.state.map.player;
@@ -179,7 +179,7 @@ describe('Spec 06: disarming a found trap', () => {
     expect(game.state.used.disarmed).toEqual([cell(lvl, 3, 3)]);
     stepOn(game);
     expect(game.state.map.player).toEqual({ x: 3, y: 3 });
-    expect(game.state.player.combatDice).toBe(4);
+    expect(game.state.player.pools.combat.dice).toBe(4);
   });
 
   it('2 to 3 fails safely and the trap stays', () => {
@@ -187,14 +187,14 @@ describe('Spec 06: disarming a found trap', () => {
     rig(game, 3);
     expect(said(interact(game))).toContain('You fail to disarm the dart trap, but nothing happens.');
     expect(game.state.used.disarmed).toEqual([]);
-    expect(game.state.player.combatDice).toBe(4);
+    expect(game.state.player.pools.combat.dice).toBe(4);
   });
 
   it('a 1 springs it', () => {
     const { game } = found();
     rig(game, 1);
     interact(game);
-    expect(game.state.player.combatDice).toBe(3);
+    expect(game.state.player.pools.combat.dice).toBe(3);
     expect(game.state.used.disarmed).toHaveLength(1);
   });
 });

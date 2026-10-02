@@ -1,6 +1,6 @@
 # Stub entries (Spec 08): each god gives a blessing for a good offering (Blessed for the level, a curse lifted, or one
 # item identified) and a lasting buff when all three altars of its shrine set are won (Spec 02, "Shrine sets";
-# Spec 06, "Fixtures"). The launch table of 8 is written in Phase 3 (task 3.7).
+# Spec 06, "Fixtures"). The launch table of 8 is written in Phase 3 (task 4.7).
 - id: god_stub_01
   name: the Pale Lantern
   blessing: bless

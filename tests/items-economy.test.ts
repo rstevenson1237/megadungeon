@@ -1,3 +1,4 @@
+import { packSize } from '../src/rules/items/inventory.ts';
 import { describe, expect, it } from 'vitest';
 import { Game } from '../src/game/game.ts';
 import { carriedEstimate, appraise, bankable, depositValue, theftTake, APPRAISAL_HIGH, APPRAISAL_LOW } from '../src/rules/items/treasure.ts';
@@ -185,6 +186,6 @@ describe('Spec 05 and 04: bandits steal 10% of the carried treasure', () => {
 describe('Spec 05: a new run carries 12 slots', () => {
   it('a new player has an empty pack of 12 slots and no known items', () => {
     const p = new Game(1, room(5, 5, 2, 2), testPlayer({ pack: [], equipment: {} }), { items: ITEMS }).state.player;
-    expect([p.packSlots, p.known, p.invisible, p.reload]).toEqual([12, [], 0, 0]);
+    expect([packSize(p), p.known, p.invisible, p.reload]).toEqual([12, [], 0, 0]);
   });
 });

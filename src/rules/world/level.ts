@@ -20,7 +20,13 @@ export const MAX_DEPTH = 100;
  * Version of the generator. Saved with the run so an older run keeps its old generator
  * (Spec 02). Bump it for any change that alters what a seed produces.
  */
-export const GENERATOR_VERSION = 3;
+export const GENERATOR_VERSION = 4;
+
+/**
+ * Every generator version this build can still run, so a save keeps the levels it started with (Spec 02, Spec 09).
+ * Version 3 drew placement steps 4 to 11 from one shared contents stream; version 4 gives each step its own.
+ */
+export const SUPPORTED_GENERATORS: readonly number[] = [3, 4];
 
 /** One character per map cell in `Level.tiles`. */
 export const TILE = {

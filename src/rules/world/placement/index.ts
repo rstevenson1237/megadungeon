@@ -35,8 +35,8 @@ export interface PlacementInput {
   /** False for layouts whose rooms are clearings in caves: they get no doors (Spec 02, task 2.4). */
   literalRooms: boolean;
   contents: LevelContents;
-  /** The level's contents stream. */
-  rng: Rng;
+  /** The stream for each placement step, by step number 4 to 11 (Spec 02, Addendum A). */
+  steps: (step: number) => Rng;
   /** When set, a required piece that finds no place fails the try (returns null). */
   strict: boolean;
 }
@@ -46,25 +46,26 @@ export interface PlacementInput {
  * the rooms (a bolted-on vault adds one), or null in strict mode when something required would not fit.
  */
 export function placeContents(input: PlacementInput): { placements: Placements; rooms: Rect[] } | null {
-  const { cells, width, height, rng, strict } = input;
+  const { cells, width, height, steps, strict } = input;
   const { content, plan } = input.contents;
   const b = new Board(cells, width, height, input.rooms, input.up, input.down);
-  const ctx: Ctx = { b, rng, plan, content, size: input.size, depth: input.depth };
+  const base = { b, plan, content, size: input.size, depth: input.depth };
+  const at = (step: number): Ctx => ({ ...base, rng: steps(step) });
   const placements = emptyPlacements();
   let missing = 0;
 
   // Step 4: doors.
   if (input.literalRooms) {
     b.entrances = findEntrances(b);
-    placements.doors = placeDoors(b, plan.theme, rng);
+    placements.doors = placeDoors(b, plan.theme, steps(4));
   }
 
-  // The two rooms the generic steps leave alone.
+  // The two rooms the generic steps leave alone. The vault is a special, so it draws from step 11's stream.
   const bossRoom = plan.boss ? pickBossRoom(b) : undefined;
   if (bossRoom !== undefined) b.reserved.add(bossRoom);
   let vaultRoom: number | undefined;
   if (plan.pieces.some((p) => p.kind === 'vault')) {
-    vaultRoom = sealVault(b, placements.doors, bossRoom, rng) ?? carveVault(b, placements.doors, rng);
+    vaultRoom = sealVault(b, placements.doors, bossRoom, steps(11)) ?? carveVault(b, placements.doors, steps(11));
     if (vaultRoom !== undefined) {
       b.reserved.add(vaultRoom);
       b.sealed.add(vaultRoom);
@@ -73,7 +74,7 @@ export function placeContents(input: PlacementInput): { placements: Placements; 
   placements.doors.sort((p, q) => p.y - q.y || p.x - q.x);
 
   // Step 5: keys.
-  const keys = placeKeys(b, placements.doors, rng);
+  const keys = placeKeys(b, placements.doors, steps(5));
   missing += keys.missing;
   placements.piles.push(...keys.piles);
 
@@ -81,28 +82,29 @@ export function placeContents(input: PlacementInput): { placements: Placements; 
   const noSecret = b.noSecretDistances();
 
   // Hold the spots the blockers of step 11 will need, then run steps 6 to 10 around them.
-  const held = b.hold(solidPieces(plan), rng, open);
+  const held = b.hold(solidPieces(plan), steps(11), open);
 
   // Steps 6 to 10.
-  const features = placeFeatures(ctx);
-  placements.traps = placeTraps(ctx);
-  placements.monsters = placeMonsters(ctx);
+  const features = placeFeatures(at(6));
+  placements.traps = placeTraps(at(7));
+  placements.monsters = placeMonsters(at(8));
   const extraCount = plan.pieces.filter(takesParcel).length;
-  const treasure = dealTreasure(ctx, features, open, extraCount);
+  const treasure = dealTreasure(at(9), features, open, extraCount);
   placements.piles.push(...treasure.piles);
-  placements.npcs = placeNpcs(ctx);
+  const people = at(10);
+  placements.npcs = placeNpcs(people);
   const landmarks: Point[] = [input.up];
   if (input.down) landmarks.push(input.down);
   if (bossRoom !== undefined) landmarks.push({ x: b.rooms[bossRoom]!.x, y: b.rooms[bossRoom]!.y });
   const vaultDoor = placements.doors.find((d) => d.kind === 'sealed');
   if (vaultDoor) landmarks.push(vaultDoor);
-  placements.lore = placeLore(ctx, landmarks);
+  placements.lore = placeLore(people, landmarks);
   placements.features = features;
 
   // Step 11: specials.
   b.release(held);
   const built: Built = placements;
-  missing += placeSpecials(ctx, built, { open, noSecret, bossRoom, vaultRoom, extras: treasure.extras });
+  missing += placeSpecials(at(11), built, { open, noSecret, bossRoom, vaultRoom, extras: treasure.extras });
 
   if (strict && missing > 0) return null;
   return { placements, rooms: b.rooms };

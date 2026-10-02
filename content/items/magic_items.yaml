@@ -1,7 +1,7 @@
 # Stub entries (Spec 08, "Stub content in Phases 1 and 2"): a few magic items of each kind of Spec 05, enough that
 # every system can be built and tested, with the effect fields the code reads. Values are in gp and placeholders,
 # except the three potion prices the spec sets (Healing 50, Clarity 60, Cure 40). The launch table of 130 is
-# written in Phase 3 (task 3.5).
+# written in Phase 3 (task 4.5).
 - id: potion_healing
   name: Potion of Healing
   kind: potion

@@ -4,7 +4,7 @@
 
 import type { LogMessage } from '../../core/log.ts';
 import { eligibleEntries, pickWeighted } from '../../core/roller.ts';
-import { addCoins, takeFromPack } from '../../rules/items/inventory.ts';
+import { addCoins, takeFromPack, packSize } from '../../rules/items/inventory.ts';
 import { identify, isIdentified, liftAllCurses } from '../../rules/items/magic.ts';
 import type { Item } from '../../rules/items/types.ts';
 import { applyBound, applyStatus, removeStatus } from '../../rules/magic/status.ts';
@@ -66,7 +66,7 @@ export function drink(game: Game, index: number, messages: LogMessage[]): boolea
     case 'coins': {
       const [lo, hi] = row.amount!;
       const amount = game.rng.int(lo, hi) * Math.max(1, depthOf(game));
-      const got = addCoins(player, player.packSlots, amount);
+      const got = addCoins(player, packSize(player), amount);
       say(`Coins glint in the basin: ${amount} gp.`, 'loot');
       if (got < amount) addToDrops(game, map.player, [{ kind: 'coins', amount: amount - got }]);
       break;

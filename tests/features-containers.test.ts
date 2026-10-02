@@ -217,7 +217,7 @@ describe('Spec 06: trapped containers', () => {
   it('a fire burst costs a Combat die; an alarm rouses the level; a summoning brings a creature beside the chest', () => {
     const fire = start(trapped('trap_fire_burst'), bare);
     interact(fire);
-    expect(fire.state.player.combatDice).toBe(3);
+    expect(fire.state.player.pools.combat.dice).toBe(3);
 
     const alarm = start(trapped('trap_container_alarm'), bare);
     const sleeper = monsterAt(9, 1, { awareness: 'asleep', dice: 1, maxDice: 1, modifier: 0 });
@@ -310,7 +310,7 @@ describe('Spec 06: locked chests are opened as doors are', () => {
     const strained = at(lvl, locked, { pack: [] });
     rig(strained, 1);
     interact(strained);
-    expect(strained.state.player.combatDice).toBe(3);
+    expect(strained.state.player.pools.combat.dice).toBe(3);
     expect(chestLocked(strained, locked)).toBe(true);
   });
 

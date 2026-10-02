@@ -2,13 +2,13 @@
 
 Sep 30, 2026 · @Robert Stevenson
 
-This plan turns the nine approved specs into tasks across the three build phases, each ending at a gate you approve. Approved September 30, 2026.
+This plan turns the nine approved specs into tasks across the build phases, each ending at a gate you approve. Approved September 30, 2026. Revised October 1, 2026 by Intake Addendum A (`docs/00a-intake-addendum.md`): a new Phase 3, Systems closeout, finishes what Phase 2 left open, and content moves to Phase 4. The revision was approved October 2, 2026.
 
 ## Approach
 
 The build follows the approved specs exactly; any change of rule goes back into its spec first, then into code.
 
-- **Order:** build the thinnest playable loop first (Phase 1), then every system end to end with stub content (Phase 2), then fill the tables (Phase 3). No content is written in bulk until the systems that read it are proven.
+- **Order:** build the thinnest playable loop first (Phase 1), then every system end to end with stub content (Phase 2), then close out what Phase 2 left open (Phase 3), then fill the tables (Phase 4). No content is written in bulk until the systems that read it are proven.
 - **Traceability:** every task names the spec it implements, and it is done when that spec's acceptance criteria pass.
 - **Tooling:** TypeScript, Vite, Vitest for tests, the YAML to JSON content build (Spec 08), and continuous integration running tests and the content checks on every change.
 - **Deliverable per task:** working code, its tests, and a short note of anything that departed from the spec.
@@ -18,7 +18,7 @@ The build follows the approved specs exactly; any change of rule goes back into 
 
 ## Roadmap
 
-Thirty-five tasks across three phases, with a gate you approve at the start and at the end of each phase.
+Forty-six tasks across four phases, with a gate you approve at the start and at the end of each phase.
 
 Roadmap (diagram as text):
 
@@ -28,11 +28,13 @@ Roadmap (diagram as text):
 | Phase 1 (10 tasks): UI + proof of concept | Project setup and RNG; CP437 renderer and panes; input, overlays, targeting; basic generator and camera; village stub, title screen |
 | Gate: Playable slice | Walk, descend, return |
 | Phase 2 (13 tasks): Mechanics | Run layout, all generators; character, classes, combat; spells, items, features; villages and economy; save, load, leaderboard |
-| Gate: Systems complete | Full loop, stub content |
-| Phase 3 (12 tasks): Content | Style guide, then batches; themes, monsters, bosses; items, artifacts, spells; lore, rumours, quests; level 100, balance, polish |
+| Gate: Systems complete | Full loop, stub content (played October 1, 2026 with a test character) |
+| Phase 3 (11 tasks): Systems closeout | Approvals; save and test hardening; one character state; creation; effect vocabulary; all 20 major abilities; allies; Z and L; connective elements and a stub final boss; class scenarios |
+| Gate: Systems complete, replayed | Every class created, used and levelled |
+| Phase 4 (12 tasks): Content | Style guide, then batches; themes, monsters, bosses; items, artifacts, spells; lore, rumours, quests; level 100, balance, polish |
 | Gate: Content complete | Levels 1 to 100 playable |
 
-Phase 3 also has an inner checkpoint: the style guide is approved before any bulk writing begins (Spec 08).
+Phase 4 also has an inner checkpoint: the style guide is approved before any bulk writing begins (Spec 08).
 
 ## Code architecture
 
@@ -92,26 +94,46 @@ Goal: every system in Specs 02 to 09 works end to end with a few stub entries pe
 
 **Gate: Systems complete.** You play a full loop with stub content: delve, loot, bank, level up, rest, use the lift, die and try each death option.
 
-## Phase 3: Content
+## Phase 3: Systems closeout
+
+Goal: every requirement of the intake and specs has working code, so content only ever fills tables that a system already reads. Added by Intake Addendum A; each task implements the "Addendum A" section of the specs it names.
+
+| # | Task | Spec | Needs | Done when |
+| --- | --- | --- | --- | --- |
+| 3.1 | Approvals: you review the six pending clarification sections (tasks 2.8 to 2.13) and every Addendum A section; the outcomes go into the specs first, and any change you make to a built rule is fixed in code | All | Gate 2 | No section is left "awaiting approval", and the code matches every change |
+| 3.2 | Save and test hardening: one stream per placement step (generator version 4), whole-level stored hashes against frozen test tables, refusing saves from other content, the revised 10,000-seed sweep, a per-turn time budget test, and the content build before tests on a fresh clone | 02, 09 | 3.1 | Addendum A determinism and save criteria pass; a test adding a monster row moves only the monster step |
+| 3.3 | One character state and the pane: the rules character as the only record of pools, level, XP and abilities; the Abilities block and wait counter from real state; Pack Mule slots; the theme name in the header; theme palette and tile fields read by the renderer, with the default set as every theme's stub | 01, 03, 08 | 3.1 | The pane shows only real state; a drawn Pack Mule grows the pack; a theme with a palette renders in it |
+| 3.4 | Character creation: class list, name typed or random, the `character_names` table with stub names, starting spells by class, starting gear for all 20 classes, the first save on finishing, and same-seed restarts through creation | 01, 03, 05, 08, 09 | 3.3 | A run of every class starts from the title screen with the right dice, spells and gear, and saves |
+| 3.5 | Effect vocabulary: one list of effects in code, `effect` fields and their checks for minor abilities, artifacts and shrine buffs, and the 16 example minor abilities working | 03, 05, 08 | 3.3 | Every example minor ability passes its row; a row naming an unknown effect fails the build |
+| 3.6 | Major abilities, passive and trades: Q and its list, the skill-use rule, fights, extra dice adding up; Cleave, Backstab, Shield Wall, Flurry, Overchannel, Hex Breaker, Brew, Smite, Pact, and Arcane Bolt and Heal from Q | 03, 04, 06 | 3.4, 3.5 | Each listed ability passes its arena test |
+| 3.7 | Major abilities, active: Rage, Volley, Fascinate, Wild Shape, Mark, Spirit Totem | 03, 04 | 3.6 | Each listed ability passes its arena test |
+| 3.8 | Allies: ally turns and behaviour; Raise, Decoy and Companion | 03, 04 | 3.7 | Each ally kind behaves as Spec 04 Addendum A in an arena test, and only the companion changes level |
+| 3.9 | Z (wait until recovered) and L (look) | 01 | 3.3 | Every key in the key map acts; nothing logs "not yet available" |
+| 3.10 | Connective elements and the final boss: the named rival arc and its journal, a lore chain's weakness, a stub final boss on level 100, artifact seals | 02, 06, 09 | 3.2, 3.6 | Addendum A connective criteria pass; defeating the stub final boss records on the leaderboard |
+| 3.11 | Class scenarios and closeout audit: every class created through creation, using its ability in an arena, and played to level 10 with its draws in effect; a browser smoke test in CI that drives the built page (create a non-Thief character, step, cast a starting spell, rest, reload) and checks the pane shows that class's real state; and an audit marking every acceptance criterion of every spec as built and tested, stubbed, or owned by a named Phase 4 task | All | 3.4 to 3.10 | Spec 03 Addendum A criteria pass for all 20 classes; the smoke test passes in CI; the audit leaves no criterion without an owner |
+
+**Gate: Systems complete, replayed.** You play the full loop again with real classes: create any class, use its ability, delve, bank, level up with a minor draw in effect, rest, use the lift, die and try each death option.
+
+## Phase 4: Content
 
 Goal: every table reaches its Spec 08 launch minimum, the coverage report is clean, and all 100 levels play well.
 
 | # | Task | Spec | Needs | Done when |
 | --- | --- | --- | --- | --- |
-| 3.1 | Style guide with sample entries | 08 | Gate 2 | You approve the voice (inner checkpoint) |
-| 3.2 | 13 level themes: palettes, tile sets, layouts, feature weights | 02, 08 | 3.1 | Every theme renders and generates cleanly |
-| 3.3 | 150 monsters and 40 bosses | 04, 08 | 3.1 | At least 5 monsters per rating; no depth gaps |
-| 3.4 | Minor ability pools (240 slots) and starting gear for the 16 additional classes | 03, 05 | 3.1 | Every class has 12 entries and full starting gear |
-| 3.5 | 130 magic items, 40 artifacts, 100 disguise names, 50 gems and jewelry | 05, 08 | 3.1 | Item tables meet their minimums |
-| 3.6 | Spells up to the target of 30 | 04 | 3.1 | New spells pass the spell criteria |
-| 3.7 | Fountain, altar god, rune, trap and debris tables | 06 | 3.1 | Feature tables meet their minimums |
-| 3.8 | Lore: 200 books, 300 graffiti, 120 signs, 25 lore chains | 06, 08 | 3.1 | Lore tables meet their minimums; style mix within 20% |
-| 3.9 | 60 rumour templates, quest templates and items, all name tables | 07, 08 | 3.1 | Every rumour kind and quest type has templates |
-| 3.10 | Level 100 set piece and final boss | 02, 04 | 3.2, 3.3 | Level 100 generates and the boss fight works |
-| 3.11 | Balance playtests: depth pace, economy, class parity | 02, 03, 07 | 3.2 to 3.10 | Level 10 lands near depth 50 to 55; no class far behind |
-| 3.12 | Release polish: performance, browser checks, help screen | 01 | 3.11 | Every spec's criteria pass in Chrome, Firefox and Safari |
+| 4.1 | Style guide with sample entries | 08 | Gate 3 | You approve the voice (inner checkpoint) |
+| 4.2 | 13 level themes: palettes, tile sets, layouts, feature weights (the renderer reads them from task 3.3) | 02, 08 | 4.1 | Every theme renders and generates cleanly |
+| 4.3 | 150 monsters and 40 bosses | 04, 08 | 4.1 | At least 5 monsters per rating; no depth gaps |
+| 4.4 | Minor ability pools (240 slots), and any revision of the 16 classes' starting gear (an entry needing a new effect gets its code, its place in the effect list and its test in this task) | 03, 05, 08 | 4.1 | Every class has 12 entries, each naming an effect from the vocabulary |
+| 4.5 | 130 magic items, 40 artifacts, 100 disguise names, 50 gems and jewelry (an entry needing a new effect gets its code, its place in the effect list and its test in this task) | 05, 08 | 4.1 | Item tables meet their minimums |
+| 4.6 | Spells up to the target of 30 (a spell needing a new effect gets its code in this task) | 04 | 4.1 | New spells pass the spell criteria |
+| 4.7 | Fountain, altar god, rune, trap and debris tables (an entry needing a new effect gets its code, its place in the effect list and its test in this task) | 06 | 4.1 | Feature tables meet their minimums |
+| 4.8 | Lore: 200 books, 300 graffiti, 120 signs, 25 lore chains | 06, 08 | 4.1 | Lore tables meet their minimums; style mix within 20% |
+| 4.9 | 60 rumour templates, quest templates and items, all name tables | 07, 08 | 4.1 | Every rumour kind and quest type has templates |
+| 4.10 | Level 100 set piece and final boss, replacing the task 3.10 stub | 02, 04 | 4.2, 4.3 | Level 100 generates and the boss fight works, with artifact seals |
+| 4.11 | Balance playtests: depth pace, economy, class parity | 02, 03, 07 | 4.2 to 4.10 | Level 10 lands near depth 50 to 55; no class far behind |
+| 4.12 | Release polish: performance, browser checks, help screen | 01 | 4.11 | Every spec's criteria pass in Chrome, Firefox and Safari |
 
-**Gate: Content complete.** Levels 1 to 100 are playable, the coverage report is clean, and you approve release.
+**Gate: Content complete.** Levels 1 to 100 are playable, the coverage report is clean, the release policy for saves across content changes is chosen (Spec 09, Addendum A), and you approve release.
 
 ## Testing strategy
 
@@ -136,7 +158,8 @@ The content build's schema, reference and coverage checks (Spec 08) run alongsid
 | Generator edge cases | Rare seeds could break reachability | 10,000-seed sweeps in CI, plus the plain-rooms fallback (Spec 02) |
 | Off-screen simulation cost | Rivals and restocks run beyond the view | 50-creature cap (Spec 04) and a per-turn time budget test |
 | Browser storage loss | Clearing site data deletes the save | Export and import (Spec 09) and a one-time warning |
-| Save compatibility | Updates could break runs in progress | Versioned saves, migrations, retained old generators (Spec 09) |
+| Save compatibility | Updates could break runs in progress | Versioned saves, migrations, retained old generators (Spec 09); one stream per placement step and refusing saves from other content until release (Addendum A) |
+| Tasks closed short of their spec | Phase 2 closed task 2.6 on dice alone, leaving major abilities unowned | Each task's report lists every requirement of its spec rows as built, stubbed or moved, and nothing is left without an owning task |
 | Scope creep | New ideas during the build | Changes go into a spec and get approved before any code |
 
 ## Open questions
@@ -145,3 +168,5 @@ The content build's schema, reference and coverage checks (Spec 08) run alongsid
 - [x] **Hosting:** GitHub Pages, deployed from every merged task.
 - [x] **Review between gates:** a playable build after every task.
 - [x] **Task order:** approved as written.
+- [x] **Additions of October 2, 2026 (approved):** new effects allowed with code in tasks 4.4, 4.5 and 4.7; a browser smoke test and a criteria audit in task 3.11.
+- [x] **Revision of October 1, 2026 (approved October 2):** the Phase 3 Systems closeout and the move of content to Phase 4 (Intake Addendum A).

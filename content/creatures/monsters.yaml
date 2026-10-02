@@ -1,5 +1,5 @@
 # Stub entries (Spec 08, "Stub content in Phases 1 and 2"): enough that every level from 1 to 100
-# has something to place. Real monsters are written in Phase 3 (task 3.3). Ratings keep inside the
+# has something to place. Real monsters are written in Phase 3 (task 4.3). Ratings keep inside the
 # depth ceiling of Spec 02 (1 + depth / 5 dice), so each row's dice never exceed it where it appears.
 - id: stub_monster_weak
   name: stub rat
