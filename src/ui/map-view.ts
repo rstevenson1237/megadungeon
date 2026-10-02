@@ -151,6 +151,9 @@ interface Thing {
   dim?: boolean;
 }
 
+/** A Shaman's Spirit Totem (Spec 03, Addendum A), not in the core glyph table: Φ, proposed in task 3.7's clarification. */
+const TOTEM_GLYPH = 232;
+
 const CONTAINER_GLYPH = { chest: GLYPH.chest, sack: GLYPH.sack, pottery: GLYPH.pottery, rack: GLYPH.weaponRack } as const;
 const FIXTURE_GLYPH = { fountain: GLYPH.fountain, altar: GLYPH.altar, sarcophagus: GLYPH.sarcophagus, rune: GLYPH.rune } as const;
 
@@ -171,6 +174,7 @@ function featureGlyphs(state: GameState, look: MapLook): Map<number, Thing> {
     if (s.kind === 'teleporter') things.set(at(s), { glyph: GLYPH.teleporter, colour: look.colours.special });
     else if (s.kind === 'lever') things.set(at(s), { glyph: GLYPH.rod, colour: look.colours.special, dim: used.lever });
   }
+  if (state.map.totem) things.set(at(state.map.totem), { glyph: TOTEM_GLYPH, colour: MAP.fixture });
   return things;
 }
 

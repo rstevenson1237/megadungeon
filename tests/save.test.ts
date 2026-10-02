@@ -227,7 +227,7 @@ describe('Spec 09: versions and migration', () => {
     steps.length = 0;
     expect(parseSave(JSON.stringify(v2), migrations, 3).characterId).toBe('migrated');
     expect(steps).toEqual(['2->3']);
-    expect(Object.keys(MIGRATIONS)).toEqual(['1', '2', '3']); // 1 to 2: one character record; 2 to 3: effects; 3 to 4: fights and Smite
+    expect(Object.keys(MIGRATIONS)).toEqual(['1', '2', '3', '4']); // 1 to 2: one character record; 2 to 3: effects; 3 to 4: fights and Smite; 4 to 5: the companion
   });
 
   it('a format 2 save: shrine buffs and artifacts keep a passive word, which becomes its effect (task 3.5)', () => {
@@ -253,7 +253,20 @@ describe('Spec 09: versions and migration', () => {
     const now = toSave({ run: townRun(77, { pack: [] }), contentVersion: 'v' });
     const { fight: _fight, smite: _smite, ...player } = now.player;
     const loaded = parseSave(JSON.stringify({ ...now, format: 3, player }));
-    expect([loaded.format, loaded.player.fight, loaded.player.smite]).toEqual([4, null, false]);
+    expect([loaded.format, loaded.player.fight, loaded.player.smite]).toEqual([SAVE_FORMAT, null, false]);
+  });
+
+  it('a format 4 save has no companion record, and loads with a living, unhurt one (task 3.8)', () => {
+    const now = toSave({ run: townRun(77, { pack: [] }), contentVersion: 'v' });
+    const { companion: _companion, ...player } = now.player;
+    const loaded = parseSave(JSON.stringify({ ...now, format: 4, player }));
+    expect([loaded.format, loaded.player.companion]).toEqual([5, { hurt: 0, dead: false }]);
+  });
+
+  it('a hurt or dead companion is kept by the save', () => {
+    const run = townRun(77, { pack: [], abilities: ['companion'] });
+    run.player.companion = { hurt: 1, dead: true };
+    expect(parseSave(serialise(toSave({ run, contentVersion: 'v' }))).player.companion).toEqual({ hurt: 1, dead: true });
   });
 
   it('a format with a missing migration is refused rather than guessed at', () => {

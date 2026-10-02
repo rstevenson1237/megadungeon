@@ -211,11 +211,11 @@ describe('targeting in the shell (Spec 01): F then Enter is the quick shot', () 
     expect(s.targeting).not.toBeNull();
   });
 
-  it('without a game, F still logs not yet available', () => {
+  it('without a game, F says so', () => {
     const s = shellOn(open());
     s.run = null;
     press(s, 'f');
-    expect(s.log.lines(s.turn).some((l) => l.text.includes('not yet available'))).toBe(true);
+    expect(s.log.lines(s.turn).at(-1)!.text).toBe('There is no game in progress.');
   });
 });
 

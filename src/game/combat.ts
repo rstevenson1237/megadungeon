@@ -11,12 +11,13 @@ import { distanceSq } from '../rules/world/geometry.ts';
 import { MAX_DEPTH, type Loot } from '../rules/world/level.ts';
 import type { Game } from './game.ts';
 import { derived, wearerHit, weaponHit } from './items.ts';
-import { hasMajor, joinFight, monsterMeleePenalty, useOncePerFight } from './abilities.ts';
+import { combatStep, hasMajor, joinFight, monsterMeleePenalty, raging, useOncePerFight } from './abilities.ts';
 import type { Monster } from './monsters.ts';
 import { failQuest } from './town-state.ts';
 
 /** How a creature is named in the log: "the goblin", but "Corvin the Bold" for a named one. */
 export const nameOf = (m: Monster): string => (m.kind === 'monster' ? `the ${m.name}` : m.name);
+// An ally's name is kept as it reads in the log: "the raised goblin", "your companion", "the phantom".
 export const Name = (m: Monster): string => nameOf(m).replace(/^./, (c) => c.toUpperCase());
 
 /** True when the player can see the creature, so its doings are worth a log line. */
@@ -63,7 +64,7 @@ export function alert(game: Game, m: Monster): void {
 /** Combat happened at `at`: every other creature close enough is alerted (Spec 04, Awareness). Rivals ignore noise. */
 export function combatAt(game: Game, at: { x: number; y: number }, except: readonly Monster[] = []): void {
   for (const m of game.state.monsters) {
-    if (m.kind === 'rival' || except.includes(m)) continue;
+    if (m.kind === 'rival' || m.kind === 'ally' || except.includes(m)) continue;
     if (alertedByCombat(m.awareness, distanceSq(m, at))) alert(game, m);
   }
 }
@@ -81,13 +82,26 @@ export interface DieText {
 export function removeDie(game: Game, m: Monster, messages: LogMessage[], say: DieText, shown: boolean, wakes = true): void {
   m.dice--;
   if (wakes) removeStatus(m.statuses, 'asleep');
+  const { monsters, drops, player } = game.state;
+  // The companion's dice are kept on the player, who it follows between levels (Spec 03, Addendum A).
+  if (m.ally === 'companion') player.companion.hurt = Math.max(0, m.maxDice - m.dice);
   if (m.dice > 0) {
     if (shown) messages.push({ kind: 'combat', text: say.hit });
     return;
   }
   if (shown) messages.push({ kind: 'combat', text: say.kill });
-  const { monsters, drops, player } = game.state;
   monsters.splice(monsters.indexOf(m), 1);
+  if (m.ally === 'companion') {
+    player.companion.dead = true;
+    messages.push({ kind: 'warning', text: 'Your companion falls. It will return at your next village rest.' });
+  }
+  // A creature that dies may be raised for a few rounds (Raise; Spec 03, Addendum A); an ally never is.
+  if (m.kind !== 'ally') {
+    const { fallen, round } = game.state;
+    fallen.push({ creature: structuredClone(m), round });
+    while (fallen.length > 0 && fallen[0]!.round < round - RAISE_WITHIN_ROUNDS) fallen.shift();
+  }
+  if (game.state.mark === m.id) game.state.mark = null; // a mark lasts until the creature dies (Spec 03, Addendum A)
   if (m.kind === 'monster') player.stats.kills++;
   // The final boss on level 100 is the last achievement (Spec 09, task 2.13).
   if (m.role === 'boss' && game.state.map.level.depth === MAX_DEPTH) player.stats.finalBoss = true;
@@ -202,8 +216,11 @@ function steal(game: Game, bandit: Monster, messages: LogMessage[]): void {
   }
 }
 
-/** A creature that fights the player: a monster, a bandit, or a rival once it has turned hostile. */
-export const isHostile = (m: Monster): boolean => m.kind !== 'rival' || m.hostile;
+/** A creature that fights the player: a monster, a bandit, or a rival once it has turned hostile. Never an ally. */
+export const isHostile = (m: Monster): boolean => m.kind !== 'ally' && (m.kind !== 'rival' || m.hostile);
+
+/** Raise calls up a creature that died in the last 3 rounds (Spec 03, Addendum A). */
+export const RAISE_WITHIN_ROUNDS = 3;
 
 /**
  * Hits that remove more than one die (Spec 03, Addendum A, "Extra dice add up"): each named source adds one die to
@@ -216,6 +233,9 @@ export function extraDice(game: Game, m: Monster, messages: LogMessage[], source
     removeDie(game, m, messages, { hit: `${what}: ${nameOf(m)} loses another die.`, kill: `${what}: ${nameOf(m)} dies.` }, true);
   }
 }
+
+/** Mark (Spec 03, Addendum A): each of the player's hits on the marked creature removes one extra die. */
+export const markExtra = (game: Game, m: Monster): string[] => (game.state.mark === m.id ? ['Mark'] : []);
 
 /** How a player's melee hit came about: its winning margin, and whether it is a Backstab, a Cleave, or the answer to a creature's attack. */
 interface MeleeHit {
@@ -236,6 +256,7 @@ function playerHits(game: Game, m: Monster, messages: LogMessage[], hit: MeleeHi
   const d = derived(game);
   const extras: string[] = [];
   if (hit.backstab) extras.push('Backstab');
+  extras.push(...markExtra(game, m));
   if (hasMajor(player, 'flurry') && hit.margin >= 3) extras.push('Flurry');
   if (player.smite) {
     player.smite = false;
@@ -282,6 +303,9 @@ function cleave(game: Game, messages: LogMessage[]): void {
   }
 }
 
+/** Rage (Spec 03, Addendum A): while it runs, a melee tie between the player and a creature hits only the creature. */
+const ragingTie = (game: Game, exchange: { attacker: number; defender: number }): boolean => exchange.attacker === exchange.defender && raging(game.state.player);
+
 /** Backstab (Spec 03, Addendum A): a Light weapon (not bare hands) against an asleep or unaware creature. */
 const backstabs = (game: Game, m: Monster): boolean =>
   hasMajor(game.state.player, 'backstab') && derived(game).weaponTraits.includes('light') && (m.awareness !== 'alert' || hasStatus(m.statuses, 'asleep'));
@@ -301,12 +325,12 @@ export function playerAttacks(game: Game, m: Monster, messages: LogMessage[], re
     return;
   }
   const d = derived(game);
-  const exchange = playerMelee(game.rng, { step: player.pools.combat.step, dice: player.pools.combat.dice }, { modifier: m.modifier, unaware: m.awareness !== 'alert', asleep: hasStatus(m.statuses, 'asleep') }, d.melee, tagMode(game, m));
+  const exchange = playerMelee(game.rng, { step: combatStep(player), dice: player.pools.combat.dice }, { modifier: m.modifier, unaware: m.awareness !== 'alert', asleep: hasStatus(m.statuses, 'asleep') }, d.melee, tagMode(game, m));
   provoke(game, m);
   combatAt(game, m, [m]);
   if (exchange.defenderHit) playerHits(game, m, messages, { margin: exchange.attacker - exchange.defender, cleaved });
-  // A spear's reach cannot be answered from 2 cells away (Spec 05, task 2.9).
-  if (exchange.attackerHit && !reach) hitPlayer(game, m, messages);
+  // A spear's reach cannot be answered from 2 cells away (Spec 05, task 2.9); in a Rage a tie hits only the creature (Spec 03, Addendum A).
+  if (exchange.attackerHit && !reach && !ragingTie(game, exchange)) hitPlayer(game, m, messages);
 }
 
 /**
@@ -317,9 +341,9 @@ export function monsterAttacks(game: Game, m: Monster, messages: LogMessage[]): 
   const { player } = game.state;
   joinFight(player, game.state.round);
   const defence = derived(game).defence;
-  const exchange = monsterMelee(game.rng, m, { step: player.pools.combat.step, dice: player.pools.combat.dice }, hasStatus(player.statuses, 'asleep'), defence, tagMode(game, m), monsterMeleePenalty(player));
+  const exchange = monsterMelee(game.rng, m, { step: combatStep(player), dice: player.pools.combat.dice }, hasStatus(player.statuses, 'asleep'), defence, tagMode(game, m), monsterMeleePenalty(player));
   m.ambush = false;
   combatAt(game, game.state.map.player, [m]);
-  if (exchange.defenderHit && hitPlayer(game, m, messages) && m.kind === 'bandit') steal(game, m, messages);
+  if (exchange.defenderHit && !ragingTie(game, exchange) && hitPlayer(game, m, messages) && m.kind === 'bandit') steal(game, m, messages);
   if (exchange.attackerHit) playerHits(game, m, messages, { margin: exchange.defender - exchange.attacker, counter: true });
 }

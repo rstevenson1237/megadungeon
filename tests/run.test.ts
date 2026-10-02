@@ -199,10 +199,13 @@ describe('the village and the stairs in the shell (Spec 01, Overlays and screens
     expect(shell.log.lines(shell.turn).some((l) => l.text.includes('climb to level 1'))).toBe(true);
   });
 
-  it('keys with no village action log not yet available; Esc opens the game menu', () => {
+  it('keys with no village action say why, with no round spent; Esc opens the game menu', () => {
     const shell = newShell();
     press(shell, 'l');
-    expect(shell.log.lines(shell.turn).some((l) => l.text.includes('not yet available'))).toBe(true);
+    expect(shell.log.lines(shell.turn).at(-1)!.text).toBe('There is no map to look at in a village.');
+    press(shell, 'z');
+    expect(shell.log.lines(shell.turn).at(-1)!.text).toBe('There is no waiting in a village; rest at the lodging to recover.');
+    expect(shell.log.lines(shell.turn).some((l) => l.text.includes('not yet available'))).toBe(false);
     press(shell, 'Escape');
     expect(shell.overlays).toHaveLength(1);
     expect(shell.run!.inVillage).toBe(true);

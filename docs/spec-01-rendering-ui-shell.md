@@ -206,6 +206,20 @@ From Intake Addendum A (findings A1, A4, A5, B5). All figures are starting value
 
 **Header line:** a dungeon level's header is its theme's name and depth ("Goblin Warrens, Level 7"); a village shows its name and depth as now.
 
+- **Clarification (task 3.9, proposed and approved October 2, 2026):** where the rules above leave a detail open, the build reads it as follows.
+  - **Z, "the player is hit":** a Combat die lost, or a blow a Shield or Shield Wall turns, which is logged as combat and so stops it too. "A creature comes into view" does not count allies. When a newcomer stops the wait, the log says so ("You stop waiting: the goblin comes into view."). The refusals read "You are already at full strength." and "The poison stops you recovering by waiting."
+  - **L, the cursor:** it moves over the cells the main view shows now; the camera stays on the player. Tab and Shift+Tab include allies; the first Tab goes to the nearest creature and the first Shift+Tab to the farthest.
+  - **L, the description:** its parts are joined by semicolons: you, the creature, a trader, hermit or captive (name and role), the items, the feature, then the terrain.
+    - A creature reads as its name and rating, then its awareness (asleep, unaware or alert; "peaceful" for a rival not yet attacked, "ally" for an ally), then its statuses with their rounds left.
+    - Items are named as the pick-up list names them.
+    - A feature's state is one of: looted, open, smashed, trapped (a found container trap), dry, offered, spent, pulled, searched. A found floor trap shows its kind, and the Spirit Totem shows too.
+    - A door reads as open, closed, locked or sealed; a secret door reads as wall until it is found.
+    - A remembered cell never shows creatures or items.
+  - **Keys with nothing to act on** spend no round and say why, so nothing logs "not yet available":
+    - With no game in progress: "There is no game in progress."
+    - Tab or Shift+Tab outside targeting: "There is nothing to target." Enter outside a menu or targeting: "There is nothing to confirm."
+    - In a village, Space and Z say "There is no waiting in a village; rest at the lodging to recover." X, G, F and L say there is nothing to search, pick up or shoot at, or no map to look at.
+
 **Acceptance criteria added**
 
 - [ ] Creation lists all 20 classes with their dice, ability and gear, takes a typed or random name, and starts and saves a run.

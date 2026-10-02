@@ -6,6 +6,7 @@ import { type Pool, type RollMode, type RollResult, combineModes, rollPool } fro
 import { checkMode } from '../../rules/magic/status.ts';
 import type { Feature, FloorTrap, Point } from '../../rules/world/level.ts';
 import type { FeatureState, Game } from '../game.ts';
+import { combatStep } from '../abilities.ts';
 
 export const ORTH: readonly (readonly [number, number])[] = [
   [0, -1],
@@ -61,7 +62,8 @@ export const isContainer = (f: Feature | undefined): f is Container => f?.type =
 /** The player's Skill, Magic or Combat die as a pool, which a check rolls without spending. */
 export function poolFor(game: Game, name: 'skill' | 'magic' | 'combat'): Pool {
   const { player } = game.state;
-  return name === 'combat' ? { ...player.pools.combat } : player.pools[name];
+  // Wild Shape steps the Combat die up for checks too (Spec 03, Addendum A).
+  return name === 'combat' ? { ...player.pools.combat, step: combatStep(player) } : player.pools[name];
 }
 
 /**
