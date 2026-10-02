@@ -9,7 +9,9 @@ import { npcRating } from '../rules/world/depth.ts';
 import type { Level, Loot, MonsterRole, PlacedMonster } from '../rules/world/level.ts';
 
 export type { Speed };
-export type CreatureKind = 'monster' | 'bandit' | 'rival';
+export type CreatureKind = 'monster' | 'bandit' | 'rival' | 'ally';
+/** The three kinds of ally (Spec 04, Addendum A): a raised creature, the Beastmaster's companion, the Illusionist's phantom. */
+export type AllyKind = 'raised' | 'companion' | 'phantom';
 
 /** Shots a skirmisher (or a hostile rival) carries before it closes in (Spec 04, task 2.7). */
 export const SKIRMISHER_SHOTS = 6;
@@ -61,6 +63,10 @@ export interface Monster {
   home: { x: number; y: number };
   /** The quest whose opponent it is: its death meets that quest's goal (Spec 07, task 2.11). */
   quest?: string;
+  /** Which kind of ally it is, for a creature on the player's side (`kind: 'ally'`; Spec 04, Addendum A). */
+  ally?: AllyKind;
+  /** Rounds left before a raised ally crumbles or a phantom vanishes, counting the round it came. */
+  expires?: number;
 }
 
 /** Colour names used by the monster tables (Spec 08), as 24-bit colours; any other name draws light grey. */
@@ -69,6 +75,13 @@ export const DEFAULT_MONSTER_COLOUR = 0xc8c8c8;
 /** Bandits and rivals have no table row; they draw as B and R. */
 export const BANDIT = { glyph: 'B', colour: 0xd06a5a } as const;
 export const RIVAL = { glyph: 'R', colour: 0x6ab0d0 } as const;
+/** Allies draw in the ally colour (Spec 04, Addendum A); the companion as d and the phantom as @ (task 3.8). */
+export const ALLY_COLOUR = 0xe0c050;
+export const COMPANION_GLYPH = 'd';
+export const PHANTOM_GLYPH = '@';
+
+/** True for a creature on the player's side. */
+export const isAlly = (m: Monster): boolean => m.kind === 'ally';
 
 /** "3d6+1", "d6", "2d6-1" (Spec 01 target block). */
 export function ratingText(m: Pick<Monster, 'maxDice' | 'modifier'>): string {

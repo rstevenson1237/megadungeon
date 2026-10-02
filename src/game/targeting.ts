@@ -5,7 +5,7 @@ import { bearingFromNorth, distanceCells, distanceSq, lineCells, squareFootprint
 import type { Point } from '../rules/world/level.ts';
 import type { Game } from './game.ts';
 import { isClear } from './map-state.ts';
-import type { Monster } from './monsters.ts';
+import { type Monster, isAlly } from './monsters.ts';
 
 /** What a targeted action reaches: one creature, or a square footprint around the chosen cell. */
 export type TargetShape = { kind: 'single' } | { kind: 'area'; size: 3 | 5 };
@@ -29,7 +29,8 @@ export function validTargets(game: Game, range: number, allow: (m: Monster) => b
       .slice(0, -1)
       .every((c) => isClear(map, c.x, c.y) && !game.monsterAt(c.x, c.y));
   return game.state.monsters
-    .filter((m) => map.visible[m.y * width + m.x] === 1 && distanceSq(from, m) <= range * range && allow(m) && clear(m))
+    // Targeting never offers an ally (Spec 04, Addendum A), though one in the line blocks it.
+    .filter((m) => !isAlly(m) && map.visible[m.y * width + m.x] === 1 && distanceSq(from, m) <= range * range && allow(m) && clear(m))
     .sort((a, b) => distanceSq(from, a) - distanceSq(from, b) || bearingFromNorth(from, a) - bearingFromNorth(from, b));
 }
 

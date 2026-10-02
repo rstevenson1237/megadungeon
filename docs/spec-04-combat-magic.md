@@ -207,6 +207,20 @@ From Intake Addendum A (finding A2: Raise, Decoy and Companion need creatures on
 - **The phantom** stands on its cell and does not act. Alert hostile creatures within 8 cells of it treat it as the player for moving and attacking; their attacks on it pass harmlessly, with no exchange. It vanishes after 5 rounds.
 - **Kills by allies** count toward monsters killed (Spec 09).
 
+- **Clarification (task 3.8, proposed October 2, 2026, awaiting approval):** where the rules above and the Raise, Decoy and Companion rows (Spec 03, Addendum A) leave a detail open, the build reads it as follows.
+  - **What an ally is:** a creature in the level's list, always alert. It makes no notice rolls, never flees and rolls no morale. A raised ally keeps the speed it had.
+  - **Drawing:** the ally colour is gold (#E0C050). A raised ally keeps its letter and is "the raised goblin" in the log; the companion is drawn as d and is "your companion"; the phantom is drawn as @.
+  - **An ally's turn:** "adjacent" is the four cells beside it, as for every creature's melee; with several foes holding the fewest dice, the first from north clockwise is attacked. "In sight" means in the player's sight. It moves by the shortest walk. "Within 3 cells of the player" counts diagonals as one step, and an ally already that close stands still.
+  - **Peaceful rivals and allies** never fight each other.
+  - **Monsters and allies:** a hunting creature that is not next to the player (or the phantom it takes for the player) but is next to an ally, other than the phantom, fights that ally in melee instead of moving or shooting. This applies to every behaviour, skirmishers and casters included. The ally is the first beside it from north clockwise.
+  - **The phantom** stands in for the player only for hunting: fleeing, Frightened, notice rolls and morale still go by the player. "Within 8 cells" is a straight line. A shot or spell aimed at it spends a shot and does nothing. Nothing touches it, spells included. Walking into it is blocked and spends no round. There is one at a time; a new Decoy takes the place of the old one. Its cell follows the Blink rules, so shallow water counts.
+  - **Area spells:** a targeted area spell (Fireball, Blizzard) hits an ally in its footprint. A spell centred on the caster (Thunderclap, Turn Undead) spares allies, as it spares the caster.
+  - **Walking into an ally:** walking into a raised ally or the companion trades places with it, as one move.
+  - **Lifetimes:** a raised ally's 20 rounds and a phantom's 5 count the round it came, as timed abilities do.
+  - **Raise:** "in the last 3 rounds" is the round it is used in and the two before. The 8 cells are a straight line, and the cell must be in the player's sight now. If something stands on that cell, Q says so and no round is spent. A raised ally carries nothing. Raising another while one stands makes the first crumble. A creature raised once cannot be raised again, and a fallen ally is never raised.
+  - **The companion:** its dice come from the character's level. The dice it loses are kept on the player and travel with it; they come back only at a village rest, not by waiting. It arrives on the free cell nearest the player: the four beside first, then the diagonals, each from north clockwise. With none free beside the player, it takes the nearest free cell on the level. After a fall it lands beside the player too. The save keeps its dice lost and whether it is dead (save format 5).
+  - **Kills:** a creature an ally kills counts toward monsters killed; an ally's death does not.
+
 **Acceptance criteria added**
 
 - [ ] Each kind of ally follows the behaviour above in a scripted arena fight, and only the companion changes level.

@@ -178,7 +178,7 @@ export const MAJOR_KINDS: Readonly<Record<string, MajorKind>> = {
   companion: 'passive',
 };
 
-/** The major abilities with a rule in code so far (tasks 3.6 and 3.7); Raise, Decoy and Companion come with task 3.8. */
+/** The major abilities with a rule in code (tasks 3.6 to 3.8): all 20. */
 export const BUILT_MAJORS: readonly string[] = [
   'cleave',
   'arcane_bolt',
@@ -197,6 +197,9 @@ export const BUILT_MAJORS: readonly string[] = [
   'wild_shape',
   'mark',
   'spirit_totem',
+  'raise',
+  'decoy',
+  'companion',
 ];
 
 /** Whether the player has a major ability, by id. */
@@ -265,6 +268,7 @@ export const shieldWallReady = (player: PlayerState): boolean => hasMajor(player
 
 /** What Q says of a passive ability: it works by itself, with no round spent (Spec 03, Addendum A). */
 export function passiveNote(player: PlayerState, id: string, name: string): string {
+  if (id === 'companion') return player.companion.dead ? 'Your companion has fallen; it returns at your next village rest.' : 'Your companion fights beside you by itself.';
   if (id === 'shield_wall') return `Shield Wall works by itself: ${shieldWallReady(player) ? 'it is ready for the first hit of a fight' : 'it has turned a blow in this fight'}.`;
   return `${name} works by itself; there is nothing to use.`;
 }

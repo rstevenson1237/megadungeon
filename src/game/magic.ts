@@ -14,7 +14,7 @@ import { Name, combatAt, hurtPlayer, isHostile, nameOf, provoke, removeDie, seen
 import { fightReady, hasMajor, joinFight, useOncePerFight } from './abilities.ts';
 import type { Game } from './game.ts';
 import { TERRAIN_BLOCKED, isOpen } from './map-state.ts';
-import type { Monster } from './monsters.ts';
+import { type Monster, isAlly } from './monsters.ts';
 import { type TargetSpec, validTargets } from './targeting.ts';
 
 /** What a spell is aimed at: a creature, or for Blink a cell. */
@@ -169,7 +169,10 @@ function heal(game: Game, messages: LogMessage[], text: string): boolean {
 
 /** The creatures in a spell's area, or the one it is aimed at. */
 function victimsOf(game: Game, spell: Spell, aim: Aim | undefined): Monster[] {
-  const { monsters, map } = game.state;
+  const { map } = game.state;
+  // An area spell hits an ally in its footprint as it would the caster, so one centred on the caster spares allies; the
+  // phantom is an illusion and nothing touches it (Spec 04, Addendum A, as task 3.8 reads it).
+  const monsters = game.state.monsters.filter((m) => m.ally !== 'phantom' && !(spell.centred && isAlly(m)));
   if (spell.shape === 'target') return isMonster(aim) ? [aim] : [];
   if (spell.centred) {
     const reach = reachOf(spell);

@@ -52,7 +52,8 @@ import { restock, teleportPlayer, wanderer } from './features/spawn.ts';
 import { WANDER_ONE_IN } from '../rules/world/restock.ts';
 import { type Aim, castSpell, spellAimError } from './magic.ts';
 import { type MajorAim, activeProblem, useActiveMajor, waitRoundsNow } from './actives.ts';
-import { type Monster, spawnAll } from './monsters.ts';
+import { allyRoundEnds, placeCompanion } from './allies.ts';
+import { type Monster, isAlly, spawnAll } from './monsters.ts';
 import type { Fact } from '../core/templates.ts';
 import { type TownState, freshTown } from './town-state.ts';
 
@@ -143,6 +144,11 @@ export interface PlayerState extends Character {
   fight: Fight | null;
   /** Smite is readied for the next melee hit (Spec 03, Addendum A). */
   smite: boolean;
+  /**
+   * The Beastmaster's companion (Spec 03 and 04, Addendum A), which follows the player between levels: the dice it
+   * has lost (its dice come from the character's level), and whether it is dead until the next village rest.
+   */
+  companion: { hurt: number; dead: boolean };
 }
 
 /** The pools of a player made without a character: the Combat pool, and Skill and Magic (one d6 each by default). */
@@ -207,6 +213,7 @@ export function createPlayer(setup: PlayerSetup): PlayerState {
     timed: [],
     fight: null,
     smite: false,
+    companion: { hurt: 0, dead: false },
   };
 }
 
@@ -224,6 +231,8 @@ export function takeRest(player: PlayerState): void {
   player.reload = 0;
   player.timed = [];
   player.fight = null;
+  // A companion's lost dice come back, and a dead one returns (Spec 03, Addendum A).
+  player.companion = { hurt: 0, dead: false };
   player.rests++;
 }
 
@@ -282,6 +291,8 @@ export interface GameState {
   spent: string[];
   /** The creature an Assassin has marked, by its id, until it dies or the player leaves the level (Spec 03, Addendum A). Not saved. */
   mark: number | null;
+  /** Creatures that died on this visit, with the round, newest last: what Raise can call up (Spec 03, Addendum A). Not saved. */
+  fallen: { creature: Monster; round: number }[];
 }
 
 /** What an action leaves for the shell and the run to carry out (Spec 06): a level change, or something to show. */
@@ -398,11 +409,14 @@ export class Game {
       used: delta ? structuredClone(delta.used) : freshUsed(),
       spent: [],
       mark: null,
+      fallen: [],
     };
     // A level a map fragment has mapped shows its layout the first time it is entered (Spec 02, task 2.10).
     if (!delta && player.mapped.includes(level.depth)) mapLevel(this);
     // On a return, the time away refills the level with monsters, out of sight of the arrival (Spec 02, task 2.12).
     if (delta) restock(this, round - delta.turnLeft);
+    // The companion arrives with the player (Spec 04, Addendum A).
+    placeCompanion(this);
   }
 
   /** Snapshot what a revisit must replay: doors, explored cells, the living creatures and what they dropped or took. */
@@ -411,7 +425,8 @@ export class Game {
     return {
       explored: map.exploration.explored.slice(),
       openDoors: map.openDoors.slice(),
-      monsters: structuredClone(monsters),
+      // Allies never stay behind: a raised ally crumbles, a phantom fades, and the companion goes with the player (Spec 04, Addendum A).
+      monsters: structuredClone(monsters.filter((m) => !isAlly(m))),
       drops: structuredClone(drops),
       looted: structuredClone(looted),
       revealed: revealed.slice(),
@@ -424,6 +439,7 @@ export class Game {
   /** Land on a random walkable cell, as after a fall (Spec 06): no creature, no trap. */
   landAnywhere(): void {
     teleportPlayer(this, []);
+    placeCompanion(this);
   }
 
   /** Recompute what the player sees after the player moves or a door opens (Blink uses it). */
@@ -702,6 +718,29 @@ export class Game {
     return { messages, spent: false, stairs };
   }
 
+  /**
+   * Walking into an ally (Spec 04, Addendum A, as task 3.8 reads it): a raised ally or the companion trades places with
+   * the player, as one move; the phantom does not move, so it blocks the way and no round is spent.
+   */
+  private swap(ally: Monster, dx: number, dy: number, messages: LogMessage[]): ActResult {
+    if (ally.ally === 'phantom') {
+      messages.push({ kind: 'system', text: 'Your phantom stands in the way.' });
+      return { messages, spent: false };
+    }
+    const { map } = this.state;
+    const from = { ...map.player };
+    const was = { x: ally.x, y: ally.y };
+    // The ally steps to the player's cell first, so it stands there when the creatures act; a move that fails puts it back.
+    ally.x = from.x;
+    ally.y = from.y;
+    const result = this.move(dx, dy, messages);
+    if (map.player.x === from.x && map.player.y === from.y) {
+      ally.x = was.x;
+      ally.y = was.y;
+    }
+    return result;
+  }
+
   private move(dx: number, dy: number, messages: LogMessage[]): ActResult {
     const { map, player } = this.state;
     const { level } = map;
@@ -712,6 +751,7 @@ export class Game {
     if (x < 0 || y < 0 || x >= level.width || y >= level.height) return { messages, spent: false };
 
     const monster = this.monsterAt(x, y);
+    if (monster && isAlly(monster)) return this.swap(monster, dx, dy, messages);
     if (monster) {
       playerAttacks(this, monster, messages);
       return this.endRound(messages);
@@ -724,7 +764,7 @@ export class Game {
     // A spear reaches 2 cells: moving toward a creature that far off, with the cell between free, attacks it (Spec 05, task 2.9).
     if (isOpen(map, x, y) && derived(this).weaponTraits.includes('reach')) {
       const far = this.monsterAt(x + dx, y + dy);
-      if (far) {
+      if (far && !isAlly(far)) {
         playerAttacks(this, far, messages, true);
         return this.endRound(messages);
       }
@@ -818,6 +858,7 @@ export class Game {
     for (const id of mine.ended) messages.push({ kind: 'system', text: `You are no longer ${describeStatus({ id, rounds: null, clock: 0 }).toLowerCase()}.` });
     if (player.shield > 0 && --player.shield === 0) messages.push({ kind: 'system', text: 'Your shield fades.' });
     for (const name of tickTimed(player)) messages.push({ kind: 'system', text: `${name} ends.` });
+    allyRoundEnds(this, messages);
     if (mine.poisonDue) {
       if (player.pools.combat.dice <= 0) {
         player.dead = true;

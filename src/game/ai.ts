@@ -11,11 +11,11 @@ import { cannotAct, effectiveSpeed, hasStatus } from '../rules/magic/status.ts';
 import { distanceSq, lineCells } from '../rules/world/geometry.ts';
 import { distancesFrom } from '../rules/world/grid.ts';
 import { TILE, type Point } from '../rules/world/level.ts';
-import { Name, addLoot, alert, combatAt, damage, hitPlayer, monsterAttacks, provoke, seen } from './combat.ts';
+import { Name, addLoot, alert, combatAt, damage, hitPlayer, isHostile, monsterAttacks, provoke, seen } from './combat.ts';
 import { contentsOf, stateOf, trapAt } from './features/index.ts';
 import type { Game } from './game.ts';
 import { TERRAIN_BLOCKED, TERRAIN_OPEN, isClear, refreshSight } from './map-state.ts';
-import type { Monster } from './monsters.ts';
+import { type Monster, isAlly } from './monsters.ts';
 
 /** At most this many creatures act per round, nearest first (Spec 04). */
 export const MAX_SIMULATED = 50;
@@ -26,6 +26,10 @@ const SHOOT_RANGE_SQ = 6 * 6;
 /** A coward flees when the player is within 4 cells and closes in beyond 6. */
 const COWARD_NEAR_SQ = 4 * 4;
 const COWARD_FAR_SQ = 6 * 6;
+/** Alert hostile creatures this close to a phantom take it for the player (Spec 04, Addendum A). */
+const PHANTOM_LURE_SQ = 8 * 8;
+/** An ally with nothing to fight keeps within this many cells of the player. */
+const ALLY_LEASH = 3;
 /** Unaware creatures wander within this many cells of where they were placed. */
 const WANDER_RADIUS = 3;
 /** A rival turns aside for loot this many steps away. */
@@ -41,6 +45,8 @@ const NESW: readonly (readonly [number, number])[] = [
 /** Everything a round of creature turns needs, built once per round. */
 class Round {
   private playerDist: Int32Array | null = null;
+  /** Walking distances to other cells (a phantom, an ally's foe), by cell index. */
+  private toCell = new Map<number, Int32Array>();
   private rivalTerrain: Uint8Array | null = null;
   private stairDist: Int32Array | null = null;
 
@@ -70,6 +76,26 @@ class Round {
     return (this.playerDist ??= distancesFrom(this.withoutTraps(map.terrain), map.level.width, map.level.height, map.player, (t) => t === TERRAIN_OPEN));
   }
 
+  /** Walking distance from a cell to every cell, on the same terrain as `fromPlayer`. */
+  from(at: Point): Int32Array {
+    const { map } = this.game.state;
+    const key = at.y * map.level.width + at.x;
+    let dist = this.toCell.get(key);
+    if (!dist) this.toCell.set(key, (dist = distancesFrom(this.withoutTraps(map.terrain), map.level.width, map.level.height, at, (t) => t === TERRAIN_OPEN)));
+    return dist;
+  }
+
+  /**
+   * What a hunting creature goes for: the player, or a phantom within 8 cells of an alert hostile creature, which it
+   * takes for the player for moving and attacking (Spec 04, Addendum A).
+   */
+  goalOf(m: Monster): Goal {
+    const { map, monsters } = this.game.state;
+    const phantom = monsters.find((a) => a.ally === 'phantom');
+    if (phantom && m.awareness === 'alert' && isHostile(m) && distanceSq(m, phantom) <= PHANTOM_LURE_SQ) return { at: phantom, phantom, dist: () => this.from(phantom) };
+    return { at: map.player, phantom: null, dist: () => this.fromPlayer() };
+  }
+
   /** Terrain as a rival sees it: a closed normal door is passable, because a rival opens it. */
   terrainForRivals(): Uint8Array {
     if (this.rivalTerrain) return this.rivalTerrain;
@@ -88,6 +114,14 @@ class Round {
     if (!stair) return null;
     return (this.stairDist ??= distancesFrom(this.terrainForRivals(), map.level.width, map.level.height, stair, (t) => t === TERRAIN_OPEN));
   }
+}
+
+/** Where a hunting creature heads and what it attacks: the player, or a phantom it takes for the player. */
+interface Goal {
+  at: Point;
+  phantom: Monster | null;
+  /** Walking distance to the goal from every cell. */
+  dist: () => Int32Array;
 }
 
 /** The player's cell and whether the creature stands in sight of it (the player sees it and it sees the player). */
@@ -125,10 +159,9 @@ function stepDownhill(game: Game, m: Monster, dist: Int32Array, width: number): 
  * Step to the free neighbour that is strictly farther from the player by walking distance, the
  * one straight-line farthest when several tie, so a runner heads away rather than sideways.
  */
-function stepAway(game: Game, m: Monster, dist: Int32Array, width: number): boolean {
+function stepAway(game: Game, m: Monster, dist: Int32Array, width: number, from: Point = game.state.map.player): boolean {
   const here = dist[m.y * width + m.x]!;
   if (here < 0) return false;
-  const from = game.state.map.player;
   let best: Point | null = null;
   let bestDist = here;
   let bestSq = -1;
@@ -150,11 +183,11 @@ function stepAway(game: Game, m: Monster, dist: Int32Array, width: number): bool
   return true;
 }
 
-/** True when a ranged attack can reach the player: in sight, in reach and a clear line with no creature between. */
-function clearShot(game: Game, m: Monster): boolean {
+/** True when a ranged attack can reach the goal: in sight, in reach and a clear line with no creature between. */
+function clearShot(game: Game, m: Monster, at: Point = game.state.map.player): boolean {
   const { map } = game.state;
-  if (!sees(game, m) || distanceSq(m, map.player) > SHOOT_RANGE_SQ) return false;
-  return lineCells(m, map.player)
+  if (!sees(game, m) || distanceSq(m, at) > SHOOT_RANGE_SQ) return false;
+  return lineCells(m, at)
     .slice(0, -1)
     .every((c) => isClear(map, c.x, c.y) && !game.monsterAt(c.x, c.y));
 }
@@ -174,8 +207,25 @@ function shoot(game: Game, m: Monster, messages: LogMessage[]): void {
   else messages.push({ kind: 'combat', text: `${Name(m)} ${caster(m) ? 'casts at' : 'shoots at'} you and misses.` });
 }
 
-/** Step toward the player along the shortest path; false when there is none or it is blocked. */
-const approach = (round: Round, m: Monster): boolean => stepDownhill(round.game, m, round.fromPlayer(), round.width);
+/** Step toward the goal along the shortest path; false when there is none or it is blocked. */
+const approach = (round: Round, m: Monster, goal: Goal): boolean => stepDownhill(round.game, m, goal.dist(), round.width);
+
+/** Attack the goal in melee: the player, or a phantom, whose attacks pass harmlessly with no exchange (Spec 04, Addendum A). */
+function strike(round: Round, m: Monster, goal: Goal): void {
+  const { game, messages } = round;
+  if (!goal.phantom) return monsterAttacks(game, m, messages);
+  m.ambush = false;
+  if (seen(game, m)) messages.push({ kind: 'combat', text: `${Name(m)} attacks the phantom, and the blow passes through it.` });
+}
+
+/** A ranged attack or spell at the goal; one at a phantom passes harmlessly. */
+function fireAt(round: Round, m: Monster, goal: Goal): void {
+  const { game, messages } = round;
+  if (!goal.phantom) return shoot(game, m, messages);
+  if (!caster(m)) m.shots--;
+  m.ambush = false;
+  if (seen(game, m)) messages.push({ kind: 'combat', text: `${Name(m)} ${caster(m) ? 'casts at' : 'shoots at'} the phantom, to no effect.` });
+}
 
 // --- Awareness, tracking and morale: once a round, before the creature acts ---
 
@@ -184,6 +234,7 @@ function checkRound(round: Round, m: Monster): void {
   const { map, player } = game.state;
   const visible = sees(game, m);
 
+  if (m.kind === 'ally') return; // allies notice nothing and never flee
   if (m.kind === 'rival') {
     if (m.hostile && m.fleeing) trackFleeing(m, visible);
     return;
@@ -238,21 +289,20 @@ function wander(game: Game, m: Monster): void {
   m.y = y;
 }
 
-/** Charge: attack when next to the player, else close the distance. */
-function charge(round: Round, m: Monster): void {
-  const { game, messages } = round;
-  if (orthAdjacent(m, game.state.map.player)) monsterAttacks(game, m, messages);
-  else approach(round, m);
+/** Charge: attack when next to the goal, else close the distance. */
+function charge(round: Round, m: Monster, goal: Goal): void {
+  if (orthAdjacent(m, goal.at)) strike(round, m, goal);
+  else approach(round, m, goal);
 }
 
-/** Pack: head for a different free cell beside the player, so the group surrounds. */
-function surround(round: Round, m: Monster): void {
-  const { game, messages } = round;
+/** Pack: head for a different free cell beside the goal, so the group surrounds. */
+function surround(round: Round, m: Monster, goal: Goal): void {
+  const { game } = round;
   const { map } = game.state;
-  if (orthAdjacent(m, map.player)) return monsterAttacks(game, m, messages);
+  if (orthAdjacent(m, goal.at)) return strike(round, m, goal);
   const { width, height } = map.level;
-  const goals = NESW.map(([dx, dy]) => ({ x: map.player.x + dx, y: map.player.y + dy })).filter((p) => free(game, p.x, p.y));
-  if (goals.length === 0) return void approach(round, m);
+  const goals = NESW.map(([dx, dy]) => ({ x: goal.at.x + dx, y: goal.at.y + dy })).filter((p) => free(game, p.x, p.y));
+  if (goals.length === 0) return void approach(round, m, goal);
   goals.sort((a, b) => Math.abs(a.x - m.x) + Math.abs(a.y - m.y) - (Math.abs(b.x - m.x) + Math.abs(b.y - m.y)));
   // Other creatures and the player are walls to the route, so a pack member blocked by its own pack goes around.
   const terrain = map.terrain.slice();
@@ -260,36 +310,34 @@ function surround(round: Round, m: Monster): void {
   terrain[map.player.y * width + map.player.x] = TERRAIN_BLOCKED;
   terrain[goals[0]!.y * width + goals[0]!.x] = TERRAIN_OPEN;
   const toGoal = distancesFrom(terrain, width, height, goals[0]!, (t) => t === TERRAIN_OPEN);
-  if (!stepDownhill(game, m, toGoal, width)) approach(round, m);
+  if (!stepDownhill(game, m, toGoal, width)) approach(round, m, goal);
 }
 
 /** Skirmisher and caster: keep 3 to 5 cells away and attack at range; close in when out of shots or cornered. */
-function keepDistance(round: Round, m: Monster): void {
-  const { game, messages } = round;
-  const { map } = game.state;
-  const d2 = distanceSq(m, map.player);
-  if (!caster(m) && m.shots <= 0) return charge(round, m);
+function keepDistance(round: Round, m: Monster, goal: Goal): void {
+  const { game } = round;
+  const d2 = distanceSq(m, goal.at);
+  if (!caster(m) && m.shots <= 0) return charge(round, m, goal);
   if (d2 < KEEP_AWAY_SQ) {
-    if (stepAway(game, m, round.fromPlayer(), round.width)) return;
-    // Cornered: fight in melee if next to the player, else shoot if there is a line.
-    if (orthAdjacent(m, map.player)) return monsterAttacks(game, m, messages);
-    if (clearShot(game, m)) shoot(game, m, messages);
+    if (stepAway(game, m, goal.dist(), round.width, goal.at)) return;
+    // Cornered: fight in melee if next to the goal, else shoot if there is a line.
+    if (orthAdjacent(m, goal.at)) return strike(round, m, goal);
+    if (clearShot(game, m, goal.at)) fireAt(round, m, goal);
     return;
   }
-  if (clearShot(game, m)) shoot(game, m, messages);
-  else approach(round, m);
+  if (clearShot(game, m, goal.at)) fireAt(round, m, goal);
+  else approach(round, m, goal);
 }
 
 /** Coward: keeps away from a near player, fights only when cornered, closes in from afar. */
-function skulk(round: Round, m: Monster): void {
-  const { game, messages } = round;
-  const { map } = game.state;
-  const d2 = distanceSq(m, map.player);
+function skulk(round: Round, m: Monster, goal: Goal): void {
+  const { game } = round;
+  const d2 = distanceSq(m, goal.at);
   if (d2 <= COWARD_NEAR_SQ) {
-    if (stepAway(game, m, round.fromPlayer(), round.width)) return;
-    if (orthAdjacent(m, map.player)) monsterAttacks(game, m, messages);
+    if (stepAway(game, m, goal.dist(), round.width, goal.at)) return;
+    if (orthAdjacent(m, goal.at)) strike(round, m, goal);
   } else if (d2 > COWARD_FAR_SQ) {
-    approach(round, m);
+    approach(round, m, goal);
   }
 }
 
@@ -301,17 +349,75 @@ function flee(round: Round, m: Monster): void {
 }
 
 function hunt(round: Round, m: Monster): void {
+  const goal = round.goalOf(m);
+  // A hostile creature attacks an adjacent ally only when the player (or what it takes for the player) is not adjacent to it.
+  if (!orthAdjacent(m, goal.at)) {
+    const ally = besideAlly(round.game, m);
+    if (ally) return fightAlly(round, m, ally);
+  }
   switch (m.behaviour) {
     case 'skirmisher':
     case 'caster':
-      return keepDistance(round, m);
+      return keepDistance(round, m, goal);
     case 'pack':
-      return surround(round, m);
+      return surround(round, m, goal);
     case 'coward':
-      return skulk(round, m);
+      return skulk(round, m, goal);
     default: // brute, ambusher and the stub rows
-      return charge(round, m);
+      return charge(round, m, goal);
   }
+}
+
+// --- Allies (Spec 04, Addendum A) ---
+
+/** An ally in one of the four cells beside a creature, the first from north clockwise: never the phantom, which no one can strike. */
+function besideAlly(game: Game, m: Monster): Monster | undefined {
+  for (const [dx, dy] of NESW) {
+    const a = game.monsterAt(m.x + dx, m.y + dy);
+    if (a && isAlly(a) && a.ally !== 'phantom') return a;
+  }
+  return undefined;
+}
+
+/**
+ * One exchange between an ally and a creature, `attacker` first: ordinary melee in which both roll d6 plus modifier,
+ * as rivals fight. It is combat for awareness and noise, and the creature an ally attacks is provoked.
+ */
+function allyExchange(round: Round, attacker: Monster, defender: Monster): void {
+  const { game, messages } = round;
+  const exchange = creatureMelee(game.rng, { modifier: attacker.modifier, unaware: attacker.awareness !== 'alert' }, { modifier: defender.modifier, unaware: defender.awareness !== 'alert', asleep: hasStatus(defender.statuses, 'asleep') });
+  attacker.ambush = false;
+  if (!isAlly(defender)) provoke(game, defender);
+  combatAt(game, defender, [attacker, defender]);
+  if (exchange.defenderHit) damage(game, defender, messages, attacker);
+  if (exchange.attackerHit && game.state.monsters.includes(defender) && game.state.monsters.includes(attacker)) damage(game, attacker, messages, defender);
+}
+
+const fightAlly = (round: Round, m: Monster, ally: Monster): void => allyExchange(round, m, ally);
+
+/**
+ * An ally's turn (Spec 04, Addendum A): attack an adjacent hostile creature, fewest dice first; else move toward the
+ * nearest hostile creature in sight; else keep within 3 cells of the player. The phantom does not act. Peaceful
+ * rivals, traders, hermits and captives are never attacked.
+ */
+function allyTurn(round: Round, a: Monster): void {
+  if (a.ally === 'phantom') return;
+  const { game } = round;
+  const { map, monsters } = game.state;
+  let target: Monster | undefined;
+  for (const [dx, dy] of NESW) {
+    const o = game.monsterAt(a.x + dx, a.y + dy);
+    if (o && isHostile(o) && (!target || o.dice < target.dice)) target = o;
+  }
+  if (target) return allyExchange(round, a, target);
+  const foe = monsters
+    .filter((o) => isHostile(o) && map.visible[o.y * round.width + o.x] === 1)
+    .sort((p, q) => distanceSq(a, p) - distanceSq(a, q) || p.id - q.id)[0];
+  if (foe) {
+    stepDownhill(game, a, round.from(foe), round.width);
+    return;
+  }
+  if (Math.max(Math.abs(a.x - map.player.x), Math.abs(a.y - map.player.y)) > ALLY_LEASH) stepDownhill(game, a, round.fromPlayer(), round.width);
 }
 
 // --- Rivals: a peaceful rival travels to the down stair, fights monsters beside it and takes loot on the way ---
@@ -416,7 +522,7 @@ function rivalWalks(round: Round, rival: Monster): void {
 
 function rivalTurn(round: Round, rival: Monster): void {
   const { game } = round;
-  const next = game.state.monsters.find((o) => o !== rival && o.kind !== 'rival' && orthAdjacent(o, rival));
+  const next = game.state.monsters.find((o) => o !== rival && o.kind !== 'rival' && !isAlly(o) && orthAdjacent(o, rival));
   if (next) rivalFights(round, rival, next);
   else rivalWalks(round, rival);
   loot(game, rival);
@@ -450,7 +556,8 @@ export function creaturesAct(game: Game, messages: LogMessage[]): void {
         m.stunned = false; // a mace's stun costs its next action (Spec 05)
         continue;
       }
-      if (m.kind === 'rival' && !m.hostile) rivalTurn(round, m);
+      if (isAlly(m)) allyTurn(round, m);
+      else if (m.kind === 'rival' && !m.hostile) rivalTurn(round, m);
       else if (m.awareness === 'asleep') break;
       else if (m.awareness === 'unaware') wander(game, m);
       else if (m.fleeing || hasStatus(m.statuses, 'frightened')) flee(round, m);

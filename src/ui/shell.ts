@@ -37,6 +37,7 @@ import { isIdentified, displayName } from '../rules/items/magic.ts';
 import { type Item } from '../rules/items/types.ts';
 import { resolvesAtOnce, needsCell } from '../rules/magic/spells.ts';
 import { fascinateTargets, markTargets, volleyProblem, volleyTargets, waitRoundsNow } from '../game/actives.ts';
+import { canDecoyAt, decoyCells } from '../game/allies.ts';
 import type { Monster } from '../game/monsters.ts';
 
 export class Shell {
@@ -443,6 +444,7 @@ export class Shell {
       return;
     }
     if (id === 'volley' || id === 'fascinate' || id === 'mark') return this.aimAbility(id);
+    if (id === 'decoy') return this.placeDecoy();
     this.applyResult(game.useMajor());
   }
 
@@ -467,6 +469,18 @@ export class Shell {
     this.aimingAbility = { id };
     this.targeting = new Targeting(game, { range, shape: { kind: 'single' } }, targets);
     this.showTarget();
+  }
+
+  /** Decoy (Spec 03, Addendum A): a cursor as for Blink picks a visible free cell within 5 for the phantom. */
+  private placeDecoy(): void {
+    const game = this.game!;
+    const cells = decoyCells(game);
+    if (cells.length === 0) {
+      this.log.add({ kind: 'system', text: 'There is nowhere to place the phantom.' }, this.turn);
+      return;
+    }
+    this.aimingAbility = { id: 'decoy' };
+    this.cursor = new CellCursor(game, (at) => canDecoyAt(game, at), cells);
   }
 
   /** Enter while aiming an ability: Volley's first choice asks for a second when there is one; anything else is used. */
@@ -548,8 +562,15 @@ export class Shell {
         cursor.move(command.dx, command.dy);
         return;
       case 'confirm': {
+        const decoy = this.aimingAbility?.id === 'decoy';
         if (!cursor.ok) {
-          this.log.add({ kind: 'system', text: 'You cannot blink there.' }, this.turn);
+          this.log.add({ kind: 'system', text: decoy ? 'You cannot place the phantom there.' : 'You cannot blink there.' }, this.turn);
+          return;
+        }
+        if (decoy) {
+          const at = { ...cursor.at };
+          this.stopAiming();
+          this.applyResult(this.game!.useMajor(at));
           return;
         }
         const spell = this.casting!;

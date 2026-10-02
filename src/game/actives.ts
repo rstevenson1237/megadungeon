@@ -12,7 +12,8 @@ import { nameOf } from './combat.ts';
 import type { Game } from './game.ts';
 import { derived, fireVolley, rangedOption } from './items.ts';
 import { TERRAIN_LIQUID, TERRAIN_OPEN } from './map-state.ts';
-import type { Monster } from './monsters.ts';
+import { type Monster, isAlly } from './monsters.ts';
+import { canDecoyAt, decoy, raise, raiseProblem } from './allies.ts';
 import { validTargets } from './targeting.ts';
 
 /** Waiting beside a Spirit Totem restores a Combat die every 5 rounds (Spec 03, Addendum A). */
@@ -20,15 +21,17 @@ export const TOTEM_WAIT_ROUNDS = 5;
 /** Fascinate holds its target for d6 rounds. */
 export const FASCINATE_DIE = 6;
 
-/** What an active major ability is aimed at: a creature (Fascinate, Mark), one or two (Volley), or nothing. */
-export type MajorAim = Monster | readonly Monster[] | undefined;
+/** What an active major ability is aimed at: a creature (Fascinate, Mark), one or two (Volley), a cell (Decoy), or nothing. */
+export type MajorAim = Monster | readonly Monster[] | Point | undefined;
+
+const isCell = (aim: MajorAim): aim is Point => aim !== undefined && !Array.isArray(aim) && !('dice' in aim);
 
 /** Creatures in sight, nearest first then clockwise from north: no range limit and no line of fire needed. */
 export function inSight(game: Game, allow: (m: Monster) => boolean = () => true): Monster[] {
   const { map } = game.state;
   const from = map.player;
   return game.state.monsters
-    .filter((m) => map.visible[m.y * map.level.width + m.x] === 1 && allow(m))
+    .filter((m) => !isAlly(m) && map.visible[m.y * map.level.width + m.x] === 1 && allow(m))
     .sort((a, b) => distanceSq(from, a) - distanceSq(from, b) || bearingFromNorth(from, a) - bearingFromNorth(from, b));
 }
 
@@ -111,6 +114,10 @@ export function activeProblem(game: Game, id: string, aim: MajorAim): string | u
       return one(markTargets(game), 'unaware creature');
     case 'spirit_totem':
       return totemCell(game) ? undefined : 'There is no room beside you for a totem.';
+    case 'raise':
+      return raiseProblem(game);
+    case 'decoy':
+      return isCell(aim) && canDecoyAt(game, aim) ? undefined : 'You cannot place the phantom there.';
     default:
       return undefined;
   }
@@ -162,6 +169,12 @@ export function useActiveMajor(game: Game, id: string, name: string, aim: MajorA
     case 'spirit_totem':
       placeTotem(game, totemCell(game)!);
       messages.push({ kind: 'system', text: 'You raise a spirit totem beside you.' });
+      break;
+    case 'raise':
+      raise(game, messages);
+      break;
+    case 'decoy':
+      decoy(game, aim as Point, messages);
       break;
     default:
       break;

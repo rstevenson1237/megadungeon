@@ -12,7 +12,7 @@ import { type Monster, creature } from './monsters.ts';
 import { Run, type RunOptions } from './run.ts';
 
 /** The save format. Bump it with every change to what is stored, and add a migration from the format before. */
-export const SAVE_FORMAT = 4;
+export const SAVE_FORMAT = 5;
 /** The generator versions this build can still build levels with; a save keeps the one it started with (Spec 02, Spec 09). */
 export { SUPPORTED_GENERATORS };
 
@@ -201,7 +201,13 @@ export function migrate3to4(data: Record<string, unknown>): Record<string, unkno
   return { ...data, player: { ...player, fight: player.fight ?? null, smite: player.smite ?? false } };
 }
 
-export const MIGRATIONS: Readonly<Record<number, Migration>> = { 1: migrate1to2, 2: migrate2to3, 3: migrate3to4 };
+/** Format 5 keeps the Beastmaster's companion, its dice lost and whether it is dead (Spec 03 and 04, Addendum A; task 3.8). */
+export function migrate4to5(data: Record<string, unknown>): Record<string, unknown> {
+  const player = (data.player ?? {}) as Record<string, unknown>;
+  return { ...data, player: { ...player, companion: player.companion ?? { hurt: 0, dead: false } } };
+}
+
+export const MIGRATIONS: Readonly<Record<number, Migration>> = { 1: migrate1to2, 2: migrate2to3, 3: migrate3to4, 4: migrate4to5 };
 
 /**
  * Read a save from its text: upgrade an older format step by step, and refuse, with a clear message and nothing

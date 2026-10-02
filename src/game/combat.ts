@@ -17,6 +17,7 @@ import { failQuest } from './town-state.ts';
 
 /** How a creature is named in the log: "the goblin", but "Corvin the Bold" for a named one. */
 export const nameOf = (m: Monster): string => (m.kind === 'monster' ? `the ${m.name}` : m.name);
+// An ally's name is kept as it reads in the log: "the raised goblin", "your companion", "the phantom".
 export const Name = (m: Monster): string => nameOf(m).replace(/^./, (c) => c.toUpperCase());
 
 /** True when the player can see the creature, so its doings are worth a log line. */
@@ -63,7 +64,7 @@ export function alert(game: Game, m: Monster): void {
 /** Combat happened at `at`: every other creature close enough is alerted (Spec 04, Awareness). Rivals ignore noise. */
 export function combatAt(game: Game, at: { x: number; y: number }, except: readonly Monster[] = []): void {
   for (const m of game.state.monsters) {
-    if (m.kind === 'rival' || except.includes(m)) continue;
+    if (m.kind === 'rival' || m.kind === 'ally' || except.includes(m)) continue;
     if (alertedByCombat(m.awareness, distanceSq(m, at))) alert(game, m);
   }
 }
@@ -81,13 +82,25 @@ export interface DieText {
 export function removeDie(game: Game, m: Monster, messages: LogMessage[], say: DieText, shown: boolean, wakes = true): void {
   m.dice--;
   if (wakes) removeStatus(m.statuses, 'asleep');
+  const { monsters, drops, player } = game.state;
+  // The companion's dice are kept on the player, who it follows between levels (Spec 03, Addendum A).
+  if (m.ally === 'companion') player.companion.hurt = Math.max(0, m.maxDice - m.dice);
   if (m.dice > 0) {
     if (shown) messages.push({ kind: 'combat', text: say.hit });
     return;
   }
   if (shown) messages.push({ kind: 'combat', text: say.kill });
-  const { monsters, drops, player } = game.state;
   monsters.splice(monsters.indexOf(m), 1);
+  if (m.ally === 'companion') {
+    player.companion.dead = true;
+    messages.push({ kind: 'warning', text: 'Your companion falls. It will return at your next village rest.' });
+  }
+  // A creature that dies may be raised for a few rounds (Raise; Spec 03, Addendum A); an ally never is.
+  if (m.kind !== 'ally') {
+    const { fallen, round } = game.state;
+    fallen.push({ creature: structuredClone(m), round });
+    while (fallen.length > 0 && fallen[0]!.round < round - RAISE_WITHIN_ROUNDS) fallen.shift();
+  }
   if (game.state.mark === m.id) game.state.mark = null; // a mark lasts until the creature dies (Spec 03, Addendum A)
   if (m.kind === 'monster') player.stats.kills++;
   // The final boss on level 100 is the last achievement (Spec 09, task 2.13).
@@ -203,8 +216,11 @@ function steal(game: Game, bandit: Monster, messages: LogMessage[]): void {
   }
 }
 
-/** A creature that fights the player: a monster, a bandit, or a rival once it has turned hostile. */
-export const isHostile = (m: Monster): boolean => m.kind !== 'rival' || m.hostile;
+/** A creature that fights the player: a monster, a bandit, or a rival once it has turned hostile. Never an ally. */
+export const isHostile = (m: Monster): boolean => m.kind !== 'ally' && (m.kind !== 'rival' || m.hostile);
+
+/** Raise calls up a creature that died in the last 3 rounds (Spec 03, Addendum A). */
+export const RAISE_WITHIN_ROUNDS = 3;
 
 /**
  * Hits that remove more than one die (Spec 03, Addendum A, "Extra dice add up"): each named source adds one die to
