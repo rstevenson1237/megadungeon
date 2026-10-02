@@ -244,6 +244,11 @@ From Intake Addendum A (findings A2, A3, B3, B4). All figures are starting value
 
 - The character's rules state is the only record of the pools, the level, XP and the minor abilities. The game reads and changes it, and the pane only reads it. Anything derived from abilities (pack slots, wait rounds, sell bonus) is computed from it when needed, never copied.
 
+- **Clarification (task 3.11, proposed October 2, 2026, awaiting approval):** the last criterion below is read as follows.
+  - **"Plays to level 10"** means the scripted scenario: create the character on the creation screen, use its ability with Q in an arena, then bank enough treasure in the village for level 10 and take the nine level-up screens.
+  - **"With its draws in effect"** means each minor ability drawn does what its row says once drawn. An active one (Sanctuary, Purify) is offered by Q. Any other one changes what the player's numbers are (pack slots, wait rounds, a roll's advantage and the like).
+  - **Classes with short pools:** until task 4.4 writes the pools of 12, only the Warrior, Mage, Thief and Priest have minor abilities (the four examples each). They draw until their pool runs out: nine for the Warrior, with Pack Mule repeating, and four for each of the others. The other 16 classes draw none yet. The same scenario covers their draws once task 4.4 lands.
+
 **Acceptance criteria added**
 
 - [ ] Each of the 20 major abilities works as its row says, in a scripted arena test per class, and Q on a passive ability spends no round.

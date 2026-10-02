@@ -37,6 +37,10 @@ jobs:
         run: npm test
       - name: Build
         run: npm run build
+      - name: Install Chromium for the smoke test
+        run: npx playwright install --with-deps chromium
+      - name: Browser smoke test
+        run: npm run smoke
       - uses: actions/upload-pages-artifact@v3
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
         with:

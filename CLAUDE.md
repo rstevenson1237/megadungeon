@@ -20,6 +20,7 @@ Everything is already designed and approved. The documents in `docs/` are the sp
 | `docs/spec-08-content-tables.md` | YAML content format, rolling, table catalog, templates, validation |
 | `docs/spec-09-save-load-run.md` | Run lifecycle, saves, death options, leaderboard, versioning |
 | `docs/10-implementation-plan.md` | The 46 tasks in order, with dependencies, gates, testing and risks |
+| `docs/11-closeout-audit.md` | Every acceptance criterion of every spec: built and tested, stubbed, or owned by a Phase 4 task (task 3.11) |
 | `mockup/ui-mockup.html` | The approved UI mockup (open in a browser) |
 
 ## Rules for every task
@@ -53,6 +54,7 @@ Everything is already designed and approved. The documents in `docs/` are the sp
 /src/game         turn loop, AI, save and leaderboard
 /src/ui           renderer, panes and overlays, input and targeting
 /tests            unit tests, seed sweeps, determinism checks, scenarios
+/e2e              the browser smoke test (Playwright), run in CI on the built page
 /tools            content build, coverage report
 ```
 
@@ -63,4 +65,4 @@ Everything is already designed and approved. The documents in `docs/` are the sp
 
 ## Where things stand
 
-Phases 1 and 2 are built. Intake Addendum A (`docs/00a-intake-addendum.md`) adds Phase 3, Systems closeout, and moves content to Phase 4. Task 3.1 is done: on October 2, 2026 the owner approved every pending clarification section and every "Addendum A" section as written, so no built rule changed. Tasks 3.2 to 3.4 are done, with every clarification approved. Task 3.5 is done, with every clarification approved. Tasks 3.6 and 3.7 are done, with every clarification approved. Task 3.8 is done, with every clarification approved. Task 3.9 is done, with every clarification approved. Task 3.10 is done; its proposed clarification, in Spec 02, awaits approval. Next is task 3.11.
+Phases 1 and 2 are built. Intake Addendum A (`docs/00a-intake-addendum.md`) adds Phase 3, Systems closeout, and moves content to Phase 4. Task 3.1 is done: on October 2, 2026 the owner approved every pending clarification section and every "Addendum A" section as written, so no built rule changed. Tasks 3.2 to 3.4 are done, with every clarification approved. Task 3.5 is done, with every clarification approved. Tasks 3.6 and 3.7 are done, with every clarification approved. Task 3.8 is done, with every clarification approved. Task 3.9 is done, with every clarification approved. Task 3.10 is done; its proposed clarification, in Spec 02, awaits approval. Task 3.11 is done; its proposed clarification, in Spec 03, awaits approval, and the audit is `docs/11-closeout-audit.md`. Phase 3 is complete: next is the gate Systems complete, replayed, which waits for the owner's approval before Phase 4.

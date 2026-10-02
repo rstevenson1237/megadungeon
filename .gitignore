@@ -3,3 +3,5 @@ dist/
 src/generated/
 coverage/
 *.log
+test-results/
+playwright-report/

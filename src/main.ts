@@ -54,6 +54,8 @@ if (root) {
       app.draw(grid);
       renderer.render(grid);
     };
+    // The text of the screen as last drawn, read-only, for the browser smoke test (plan, task 3.11): the canvas has no text of its own.
+    Object.assign(window, { megadungeon: { screen: (): string => grid.lines().join('\n') } });
     window.addEventListener('keydown', (e) => {
       if (app.handleKey(e)) {
         e.preventDefault();
