@@ -102,18 +102,25 @@ export class App {
   /** Start a run in the surface village, and save it at once so Continue always has something to load (Spec 09). */
   startRun(choice: RunChoice, inherit?: Inheritance): void {
     const character = this.deps.newCharacter();
-    const combat = character.stats.find((s) => s.name === 'Combat')!;
     const kit = this.deps.kit?.();
+    const rules = this.deps.rules?.();
+    const combat = character.stats.find((s) => s.name === 'Combat')!;
     const pool = (name: 'Skill' | 'Magic') => {
       const stat = character.stats.find((s) => s.name === name);
       return stat ? { step: stat.step as Step, dice: stat.current, max: stat.max } : undefined;
     };
+    // The rules character is the player's own record (Spec 03, Addendum A); without one, the pane's pools stand in.
+    const start = rules
+      ? { character: rules.character }
+      : {
+          combatStep: combat.step,
+          combatDice: combat.current,
+          combatMax: combat.max,
+          ...(pool('Skill') ? { skill: pool('Skill')! } : {}),
+          ...(pool('Magic') ? { magic: pool('Magic')! } : {}),
+        };
     const player = createPlayer({
-      combatStep: combat.step,
-      combatDice: combat.current,
-      combatMax: combat.max,
-      ...(pool('Skill') ? { skill: pool('Skill')! } : {}),
-      ...(pool('Magic') ? { magic: pool('Magic')! } : {}),
+      ...start,
       spells: this.deps.startingSpells?.(choice.seed) ?? [],
       abilities: [...(this.deps.abilities ?? [])],
       ...(kit ? { pack: kit.pack, equipment: kit.equipment } : {}),
@@ -122,11 +129,10 @@ export class App {
       player.town.bank = inherit.bank;
       if (inherit.item) player.pack.push(inherit.item);
     }
-    const rules = this.deps.rules?.();
     const characterId = this.deps.characterId?.(choice.seed) ?? `${choice.seed >>> 0}-${Date.now().toString(36)}`;
     const run = new Run(choice.seed, player, {
       ...this.deps.runOptions?.(choice.seed),
-      ...(rules ? { character: rules.character, classDef: rules.classDef } : {}),
+      ...(rules ? { classDef: rules.classDef } : {}),
       characterId,
       ...(choice.daily ? { daily: choice.daily } : {}),
     }); // starts in the surface village
@@ -145,10 +151,10 @@ export class App {
         return;
       }
       const base = this.deps.runOptions?.(save.seed);
-      const classDef = this.deps.classOf?.(save.character.classId) ?? this.deps.rules?.().classDef;
+      const classDef = this.deps.classOf?.(save.player.classId) ?? this.deps.rules?.().classDef;
       const run = restoreRun(save, base ?? {}, classDef);
       const pane = this.deps.newCharacter();
-      pane.name = save.character.name || pane.name;
+      pane.name = save.player.name || pane.name;
       this.enter(pane, run, { kind: 'system', text: `Continuing at the village of your last rest. Seed ${formatSeed(save.seed)}.` });
     } catch (error) {
       if (title) title.notice = error instanceof SaveError ? error.message : `The save could not be read: ${String(error)}`;
@@ -211,7 +217,7 @@ export class App {
       const text = await this.deps.upload?.();
       if (text === undefined) return;
       const save = await this.deps.saves!.importText(text);
-      shell.log.add({ kind: 'system', text: `The save of ${save.character.name || 'a character'} is loaded into this browser. Quit to the title screen and choose Continue to play it.` }, shell.turn);
+      shell.log.add({ kind: 'system', text: `The save of ${save.player.name || 'a character'} is loaded into this browser. Quit to the title screen and choose Continue to play it.` }, shell.turn);
     } catch (error) {
       shell.log.add({ kind: 'warning', text: error instanceof SaveError ? error.message : `The file could not be read: ${String(error)}` }, shell.turn);
     }

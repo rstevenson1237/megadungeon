@@ -116,9 +116,9 @@ describe('Spec 04: reading a spellbook in the game', () => {
 
   it('a village rest restores every die and counts for the next retry', () => {
     const game = newGame();
-    game.state.player.magic.dice = 0;
+    game.state.player.pools.magic.dice = 0;
     takeRest(game.state.player);
-    expect(game.state.player.magic.dice).toBe(3);
+    expect(game.state.player.pools.magic.dice).toBe(3);
     expect(game.state.player.rests).toBe(1);
   });
 });

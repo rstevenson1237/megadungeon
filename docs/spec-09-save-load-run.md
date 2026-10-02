@@ -132,6 +132,7 @@ From Intake Addendum A (findings A1, C2).
 
 - **Saves across content changes before release:** until the Content complete gate, a save whose content fingerprint differs from the running build's is refused: "This save was made with different game content and cannot be loaded by this version." Nothing is changed, and the player starts a new run. This replaces, until then, the rule that the content version never blocks a load.
 - **After release:** the policy is chosen before the Content complete gate. Either the save stores each visited level's generated contents, so a revisit never depends on the tables, or the tables that placement rolls are frozen at release and later updates only add retired-safe rows.
+- **Save format 2 (task 3.3):** with one record of the character (Spec 03, Addendum A), the character's level, XP, minor abilities, pools and wait count are stored inside the player, and the pack's size is no longer stored. A format 1 save migrates on load, taking the player's live pools.
 - **First save:** a run is saved when character creation finishes (Spec 01, Addendum A), replacing the stand-in that saved at run start. A new character on the same seed goes through creation with the seed fixed.
 
 **Acceptance criteria added**

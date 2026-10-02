@@ -6,7 +6,7 @@ import type { LogMessage } from '../../core/log.ts';
 import { createRng, hash32 } from '../../core/rng.ts';
 import { chooseTemplate, type Fact } from '../../core/templates.ts';
 import { type Knowledge, describeItem, identify, isIdentified, liftAllCurses } from '../../rules/items/magic.ts';
-import { addToPack } from '../../rules/items/inventory.ts';
+import { addToPack, packSize } from '../../rules/items/inventory.ts';
 import { traderPrice } from '../../rules/items/prices.ts';
 import { type Item, EQUIP_SLOTS } from '../../rules/items/types.ts';
 import { type HermitService, hermitPrice } from '../../rules/villages/economy.ts';
@@ -82,9 +82,9 @@ export function buyFromTrader(game: Game, index: number, which: number): LogMess
   if (player.coins < price) return [say(`${price} gp is more than the ${player.coins} gp you carry.`)];
   const trial = { coins: player.coins - price, pack: structuredClone(player.pack) };
   const want = 'count' in item ? item.count : 1;
-  if (addToPack(trial, player.packSlots, structuredClone(item)) < want) return [say('Your pack is full.')];
+  if (addToPack(trial, packSize(player), structuredClone(item)) < want) return [say('Your pack is full.')];
   player.coins -= price;
-  addToPack(player, player.packSlots, item);
+  addToPack(player, packSize(player), item);
   (npcState(game, index).bought ??= []).push(which);
   const k: Knowledge = { known: player.known, disguises: game.disguises };
   return [say(`You buy ${describeItem(item, k)} for ${price} gp.`, 'loot')];
@@ -147,8 +147,8 @@ export function useHermit(game: Game, index: number, service: HermitService, ite
       messages.push(say(`The hermit squints at it. "${describeItem(item, k)}."${'cursed' in item && item.cursed ? ' It is cursed.' : ''}`, 'discovery'));
       break;
     case 'restore':
-      if (player.combatDice >= player.combatMax) return [say('You are unhurt.')];
-      player.combatDice++;
+      if (player.pools.combat.dice >= player.pools.combat.max) return [say('You are unhurt.')];
+      player.pools.combat.dice++;
       messages.push(say('The hermit binds your wounds. One Combat die returns.', 'discovery'));
       break;
     case 'curse': {

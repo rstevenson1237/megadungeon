@@ -107,12 +107,12 @@ describe('Spec 07: the bank', () => {
 
   it('a level up adds a die in the chosen pool to the character and to the player, arriving full', () => {
     const run = townRun(1, { coins: 2000 });
-    const before = run.player.skill.max;
+    const before = run.player.pools.skill.max;
     run.town.deposit();
     const result = run.levelUp('skill');
     expect(result?.level).toBe(2);
-    expect(run.player.skill.max).toBe(before + 1);
-    expect(run.player.skill.dice).toBe(run.player.skill.max);
+    expect(run.player.pools.skill.max).toBe(before + 1);
+    expect(run.player.pools.skill.dice).toBe(run.player.pools.skill.max);
     expect(run.character.level).toBe(2);
   });
 
@@ -135,9 +135,9 @@ describe('Spec 07: lodging', () => {
   it('a rest costs 10 gp times the multiplier, restores every pool, clears timed effects but not curses, and passes 200 turns', () => {
     const run = townRun(2, {}, 1);
     run.player.town.bank = 100;
-    run.player.combatDice = 0;
-    run.player.skill.dice = 0;
-    run.player.magic.dice = 0;
+    run.player.pools.combat.dice = 0;
+    run.player.pools.skill.dice = 0;
+    run.player.pools.magic.dice = 0;
     applyStatus(run.player.statuses, 'poisoned', 10);
     applyStatus(run.player.statuses, 'slowed', 10);
     applyStatus(run.player.statuses, 'blessed', null);
@@ -146,9 +146,9 @@ describe('Spec 07: lodging', () => {
     const result = run.town.rest();
     expect(result.ok).toBe(true);
     expect(run.player.town.bank).toBe(100 - 12);
-    expect(run.player.combatDice).toBe(run.player.combatMax);
-    expect(run.player.skill.dice).toBe(run.player.skill.max);
-    expect(run.player.magic.dice).toBe(run.player.magic.max);
+    expect(run.player.pools.combat.dice).toBe(run.player.pools.combat.max);
+    expect(run.player.pools.skill.dice).toBe(run.player.pools.skill.max);
+    expect(run.player.pools.magic.dice).toBe(run.player.pools.magic.max);
     for (const id of ['poisoned', 'slowed', 'blessed'] as const) expect(hasStatus(run.player.statuses, id)).toBe(false);
     expect(hasStatus(run.player.statuses, 'cursed')).toBe(true);
     expect(run.round).toBe(round + 200);

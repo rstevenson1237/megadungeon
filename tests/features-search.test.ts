@@ -54,7 +54,7 @@ describe('Spec 06: searching', () => {
     const said = texts(search(game));
     expect(said).toContain('You search and find nothing.');
     expect(game.state.revealed).toEqual([]);
-    expect(game.state.player.skill.dice).toBe(2);
+    expect(game.state.player.pools.skill.dice).toBe(2);
     expect(hiddenNear(game, game.state.map.player)).toHaveLength(3);
   });
 
@@ -88,7 +88,7 @@ describe('Spec 06: searching', () => {
     rig(game, 6, 1);
     search(game);
     expect(game.state.revealed).toEqual([]);
-    expect(game.state.player.skill.dice).toBe(0);
+    expect(game.state.player.pools.skill.dice).toBe(0);
   });
 
   it('a 1 on any check triggers the Search negative effect once, not once per hidden thing', () => {

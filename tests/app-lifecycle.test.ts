@@ -1,3 +1,4 @@
+import { SAVE_FORMAT } from '../src/game/save.ts';
 import { describe, expect, it } from 'vitest';
 import { removeDie } from '../src/game/combat.ts';
 import { Leaderboard, MemoryStorage } from '../src/game/leaderboard.ts';
@@ -143,7 +144,7 @@ describe('Spec 09: continue', () => {
     run.player.coins = 999;
     run.player.town.bank = 12345;
     dungeon(r);
-    run.player.combatDice = 0;
+    run.player.pools.combat.dice = 0;
     press(r.app, 'Escape', 'w', 'Enter'); // Quit without saving
     expect(r.app.shell).toBeNull();
     await flush();
@@ -157,7 +158,7 @@ describe('Spec 09: continue', () => {
     expect(back.player.coins).toBe(7);
     expect(back.player.town.bank).toBeLessThan(100);
     expect(back.player.rests).toBe(1);
-    expect(back.player.combatDice).toBe(back.player.combatMax);
+    expect(back.player.pools.combat.dice).toBe(back.player.pools.combat.max);
     expect(r.app.shell!.character.bank).toBe(back.player.town.bank);
   });
 
@@ -382,7 +383,7 @@ describe('Spec 09: export and import from the game menu', () => {
     expect(downloads).toHaveLength(1);
     expect(downloads[0]![0]).toMatch(/^megadungeon-[0-9A-F]{8}\.save\.json$/);
     const text1 = downloads[0]![1];
-    expect(JSON.parse(text1).format).toBe(1);
+    expect(JSON.parse(text1).format).toBe(SAVE_FORMAT);
 
     const other = new MemoryStore();
     const fresh = new App({ ...r.app['deps'], saves: new SaveSlot(other), download: () => undefined, upload: async () => next });

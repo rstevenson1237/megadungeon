@@ -208,11 +208,11 @@ describe('Spec 07: the tavern, quests', () => {
     const game = gameOn(room(8, 5, 1, 1));
     game.state.player = failed.run.player;
     const goblin = creature({ id: 2, name: 'goblin', glyph: 'g', colour: 0, x: 3, y: 3, dice: 2, modifier: 0 });
-    const dice = failed.run.player.combatDice;
+    const dice = failed.run.player.pools.combat.dice;
     rig(game, 1, 1); // each blow meant for the player falls on the captive
     hitPlayer(game, goblin, []);
     expect(failed.run.player.town.escorts).toHaveLength(1);
-    expect(failed.run.player.combatDice).toBe(dice);
+    expect(failed.run.player.pools.combat.dice).toBe(dice);
     rig(game, 1);
     const messages: { text: string }[] = [];
     hitPlayer(game, goblin, messages as never);

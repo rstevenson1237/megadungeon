@@ -61,7 +61,7 @@ export const isContainer = (f: Feature | undefined): f is Container => f?.type =
 /** The player's Skill, Magic or Combat die as a pool, which a check rolls without spending. */
 export function poolFor(game: Game, name: 'skill' | 'magic' | 'combat'): Pool {
   const { player } = game.state;
-  return name === 'combat' ? { step: player.combatStep as Pool['step'], dice: player.combatDice, max: player.combatMax } : player[name];
+  return name === 'combat' ? { ...player.pools.combat } : player.pools[name];
 }
 
 /**

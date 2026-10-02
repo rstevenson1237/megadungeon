@@ -44,7 +44,7 @@ export function timeRounds(game: Game, rounds: number): { mean: number; worst: n
   for (let i = 0; i < rounds; i++) {
     const t = performance.now();
     game.act({ type: 'wait' });
-    game.state.player.combatDice = game.state.player.combatMax; // never let the test character die
+    game.state.player.pools.combat.dice = game.state.player.pools.combat.max; // never let the test character die
     worst = Math.max(worst, performance.now() - t);
   }
   return { mean: (performance.now() - start) / rounds, worst };

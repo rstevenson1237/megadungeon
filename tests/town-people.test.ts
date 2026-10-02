@@ -109,7 +109,7 @@ describe('Spec 07: hermits', () => {
     const game = at(level(hermit), 2, { equipment: { ring1: ring } });
     applyStatus(game.state.player.statuses, 'cursed', null);
     useHermit(game, 0, 'restore');
-    expect(game.state.player.combatDice).toBe(2);
+    expect(game.state.player.pools.combat.dice).toBe(2);
     useHermit(game, 0, 'curse');
     expect((ring as { cursed: boolean }).cursed).toBe(false);
     expect(hasStatus(game.state.player.statuses, 'cursed')).toBe(false);

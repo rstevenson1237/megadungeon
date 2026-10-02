@@ -3,10 +3,11 @@ import { Shell } from '../src/ui/shell.ts';
 import type { PlayerState } from '../src/game/game.ts';
 import { buyPrice, sellPrice } from '../src/rules/items/prices.ts';
 import { gear, magic, press, screenText, testCharacter, townRun } from './helpers.ts';
+import type { TestSetup } from './helpers.ts';
 
 const shown = (shell: Shell, s: string): boolean => screenText(shell).some((l) => l.includes(s));
 const logText = (shell: Shell): string => shell.log.lines(shell.turn).map((l) => l.text).join(' | ');
-const shellFor = (extra: Partial<PlayerState> = {}, at = 0, seed = 12345): Shell => {
+const shellFor = (extra: TestSetup = {}, at = 0, seed = 12345): Shell => {
   const shell = new Shell('', testCharacter());
   shell.setRun(townRun(seed, extra, at));
   return shell;
@@ -53,13 +54,13 @@ describe('Spec 01 and 07: the village screens', () => {
   it('a deposit across thresholds opens one level-up screen per level, in order, each giving a full die in the pool chosen', () => {
     const shell = shellFor({ coins: 4100 });
     const run = shell.run!;
-    const skill = run.player.skill.max;
+    const skill = run.player.pools.skill.max;
     choose(shell, 'Bank');
     press(shell, 'Enter');
     expect(shown(shell, 'You reach level 2')).toBe(true);
     choose(shell, 'Skill');
     expect(run.character.level).toBe(2);
-    expect(run.player.skill.max).toBe(skill + 1);
+    expect(run.player.pools.skill.max).toBe(skill + 1);
     expect(shell.character.level).toBe(2);
     expect(shown(shell, 'You reach level 3')).toBe(true);
     choose(shell, 'Combat');
@@ -74,7 +75,7 @@ describe('Spec 01 and 07: the village screens', () => {
     choose(shell, 'Lodging');
     expect(shown(shell, '10 gp')).toBe(true);
     press(shell, 'Enter');
-    expect(shell.run!.player.combatDice).toBe(shell.run!.player.combatMax);
+    expect(shell.run!.player.pools.combat.dice).toBe(shell.run!.player.pools.combat.max);
     expect(shell.run!.player.town.bank).toBe(10);
     expect(logText(shell)).toContain('You wake rested.');
   });

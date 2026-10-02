@@ -4,7 +4,7 @@
 import type { Command } from '../game/commands.ts';
 import { type ItemCtx, inspectItem, itemName } from '../game/items.ts';
 import { describeItem } from '../rules/items/magic.ts';
-import { slotsUsed } from '../rules/items/inventory.ts';
+import { slotsUsed, packSize } from '../rules/items/inventory.ts';
 import { EQUIP_SLOTS, type EquipSlot, type Item } from '../rules/items/types.ts';
 import type { Grid } from './grid.ts';
 import { FULL_WINDOW, Menu, type MenuItem, type Overlay, type OverlayResult, centred, drawWindow } from './overlay.ts';
@@ -70,7 +70,7 @@ export class InventoryOverlay implements Overlay {
     const area = inner(FULL_WINDOW);
     const { player } = this.ctx;
     const used = slotsUsed(player);
-    grid.text(area.x + 1, area.y, `Slots ${used}/${player.packSlots}`, used > player.packSlots ? UI.statCombat : UI.value, UI.background);
+    grid.text(area.x + 1, area.y, `Slots ${used}/${packSize(player)}`, used > packSize(player) ? UI.statCombat : UI.value, UI.background);
     grid.text(area.x + 20, area.y, `${player.coins} gp`, UI.gold, UI.background);
     const rows = this.rows();
     const listTop = area.y + 2;

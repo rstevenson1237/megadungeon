@@ -47,7 +47,7 @@ describe('Spec 01 and 04: casting from the keyboard', () => {
     press(shell, 'Enter');
     expect(shell.overlays).toHaveLength(0);
     expect(shell.game!.state.round).toBe(2);
-    expect(shell.game!.state.player).toMatchObject({ combatDice: 2 });
+    expect(shell.game!.state.player.pools.combat.dice).toBe(2);
     expect(shell.character.stats[0]).toMatchObject({ name: 'Combat', current: 2, max: 3 });
     expect(lastLog(shell)).toContain('You cast Heal.');
   });

@@ -128,11 +128,11 @@ describe('Spec 04: poisoned', () => {
     const game = gameOn(room(10, 3, 1, 2), { combatDice: 4, combatMax: 4 });
     applyStatus(game.state.player.statuses, 'poisoned', null);
     wait(game, 19);
-    expect(game.state.player.combatDice).toBe(4);
+    expect(game.state.player.pools.combat.dice).toBe(4);
     wait(game);
-    expect(game.state.player.combatDice).toBe(3);
+    expect(game.state.player.pools.combat.dice).toBe(3);
     wait(game, 40);
-    expect(game.state.player.combatDice).toBe(1);
+    expect(game.state.player.pools.combat.dice).toBe(1);
     expect(hasStatus(game.state.player.statuses, 'poisoned')).toBe(true);
   });
 
@@ -141,10 +141,10 @@ describe('Spec 04: poisoned', () => {
     applyStatus(game.state.player.statuses, 'poisoned', null);
     // The 20th round takes the die; the player has none left to recover with.
     wait(game, 19);
-    expect(game.state.player.combatDice).toBe(1);
+    expect(game.state.player.pools.combat.dice).toBe(1);
     const healthy = gameOn(room(10, 3, 1, 2), { combatDice: 1, combatMax: 4 });
     wait(healthy, 10);
-    expect(healthy.state.player.combatDice).toBe(2); // the same ten rounds restore one die when not poisoned
+    expect(healthy.state.player.pools.combat.dice).toBe(2); // the same ten rounds restore one die when not poisoned
   });
 
   it('a poison tick with no Combat dice left is fatal, as any hit is', () => {
@@ -178,7 +178,7 @@ describe('Spec 04: poisoned', () => {
     applyStatus(game.state.player.statuses, 'cursed', null);
     takeRest(game.state.player);
     const p = game.state.player;
-    expect([p.combatDice, p.magic.dice, p.skill.dice, p.rests]).toEqual([3, 2, 2, 1]);
+    expect([p.pools.combat.dice, p.pools.magic.dice, p.pools.skill.dice, p.rests]).toEqual([3, 2, 2, 1]);
     expect(hasStatus(p.statuses, 'poisoned')).toBe(false);
     expect(hasStatus(p.statuses, 'cursed')).toBe(true); // a rest does not lift a curse
   });
@@ -237,7 +237,7 @@ describe('Spec 04: asleep and held', () => {
     applyStatus(m.statuses, 'held', 9);
     game.state.monsters.push(m);
     wait(game, 3);
-    expect(game.state.player.combatDice).toBe(2); // it never struck
+    expect(game.state.player.pools.combat.dice).toBe(2); // it never struck
     expect(hasStatus(m.statuses, 'held')).toBe(true);
   });
 
@@ -261,7 +261,7 @@ describe('Spec 04: asleep and held', () => {
     sleeper.state.monsters.push(hitter);
     applyStatus(sleeper.state.player.statuses, 'asleep', 20);
     wait(sleeper);
-    expect(sleeper.state.player.combatDice).toBe(3);
+    expect(sleeper.state.player.pools.combat.dice).toBe(3);
     expect(hasStatus(sleeper.state.player.statuses, 'asleep')).toBe(false);
   });
 });

@@ -10,12 +10,10 @@ import { TILE } from '../rules/world/level.ts';
 import { GLYPH, toCp437 } from './cp437.ts';
 import { cameraOrigin } from './camera.ts';
 import { COLS, type Grid } from './grid.ts';
-import { ITEM_COLOURS, MAP, NPC_LOOK, TARGET } from './palette.ts';
+import { DEFAULT_LOOK, ITEM_COLOURS, MAP, NPC_LOOK, TARGET, type MapLook } from './palette.ts';
 import { MAIN_PANE, inner } from './panes.ts';
 
 const GLYPH_PLAYER = 64;
-const GLYPH_FLOOR = 250;
-const GLYPH_WALL = 35;
 const GLYPH_UP = 60;
 const GLYPH_DOWN = 62;
 const GLYPH_DOOR_CLOSED = 43;
@@ -23,31 +21,35 @@ const GLYPH_DOOR_OPEN = 39;
 const GLYPH_SHALLOW = 126;
 const GLYPH_LIQUID = 247;
 const GLYPH_TRAP = 94; // ^
+/** The targeting path draws as dots (Spec 01, Targeting), whatever floor glyph the theme uses. */
+const GLYPH_DOT = 250;
 
 /** Glyph and colour pair for a terrain character in one of its two drawn states. */
-function terrain(tile: string, visible: boolean, open: boolean): [number, number] {
+function terrain(tile: string, visible: boolean, open: boolean, look: MapLook): [number, number] {
   const state = visible ? 'visible' : 'remembered';
+  const c = look.colours;
   switch (tile) {
     case TILE.wall:
-      return [GLYPH_WALL, MAP.wall[state]];
+      return [look.wallGlyph, c.wall[state]];
     case TILE.stairsUp:
-      return [GLYPH_UP, MAP.stairs[state]];
+      return [GLYPH_UP, c.stairs[state]];
     case TILE.stairsDown:
-      return [GLYPH_DOWN, MAP.stairs[state]];
+      return [GLYPH_DOWN, c.stairs[state]];
     case TILE.door:
-      return [open ? GLYPH_DOOR_OPEN : GLYPH_DOOR_CLOSED, MAP.door[state]];
+      return [open ? GLYPH_DOOR_OPEN : GLYPH_DOOR_CLOSED, c.door[state]];
     case TILE.shallowWater:
-      return [GLYPH_SHALLOW, MAP.shallowWater[state]];
+      return [GLYPH_SHALLOW, c.shallowWater[state]];
     case TILE.deepWater:
-      return [GLYPH_LIQUID, MAP.deepWater[state]];
+      return [GLYPH_LIQUID, c.deepWater[state]];
     case TILE.lava:
-      return [GLYPH_LIQUID, MAP.lava[state]];
+      return [GLYPH_LIQUID, c.lava[state]];
     default:
-      return [GLYPH_FLOOR, MAP.floor[state]];
+      return [look.floorGlyph, c.floor[state]];
   }
 }
 
-export function drawMap(grid: Grid, state: GameState, targeting: Targeting | null = null, cursor: CellCursor | null = null): void {
+/** Draw the level; `look` is its theme's colours and tiles (Spec 01, Rendering), the default set when omitted. */
+export function drawMap(grid: Grid, state: GameState, targeting: Targeting | null = null, cursor: CellCursor | null = null, look: MapLook = DEFAULT_LOOK): void {
   const view = inner(MAIN_PANE);
   const { level, exploration, visible, player, openDoors } = state.map;
   const origin = cameraOrigin(level.width, level.height, player, view.w, view.h);
@@ -64,7 +66,7 @@ export function drawMap(grid: Grid, state: GameState, targeting: Targeting | nul
       .map((p) => p.y * level.width + p.x)
       .filter((i) => found.has(i)),
   );
-  const things = featureGlyphs(state);
+  const things = featureGlyphs(state, look);
   const piles = pileGlyphs(state);
   // Level cell to screen cell, or null when off the window.
   const screen = (x: number, y: number): [number, number] | null => {
@@ -82,7 +84,7 @@ export function drawMap(grid: Grid, state: GameState, targeting: Targeting | nul
       if (!exploration.explored[i]) continue;
       // A secret door that was found draws as a door, closed or open.
       const tile = secrets.has(i) ? TILE.door : level.tiles[ly]![lx]!;
-      const [glyph, fg] = terrain(tile, visible[i] === 1, open.has(i));
+      const [glyph, fg] = terrain(tile, visible[i] === 1, open.has(i), look);
       grid.set(view.x + vx, view.y + vy, glyph, fg, MAP.background);
       if (traps.has(i)) grid.set(view.x + vx, view.y + vy, GLYPH_TRAP, MAP.trap[visible[i] === 1 ? 'visible' : 'remembered'], MAP.background);
       // Features, then loose items (visible cells only), under any monster (Spec 01, draw order).
@@ -132,7 +134,7 @@ function drawTargeting(grid: Grid, t: Targeting, screen: (x: number, y: number) 
   }
   for (const c of t.path()) {
     const at = screen(c.x, c.y);
-    if (at) grid.set(at[0], at[1], GLYPH_FLOOR, TARGET.path, grid.bg[at[1] * COLS + at[0]]!);
+    if (at) grid.set(at[0], at[1], GLYPH_DOT, TARGET.path, grid.bg[at[1] * COLS + at[0]]!);
   }
   for (const m of t.marked()) {
     const at = screen(m.x, m.y);
@@ -153,7 +155,7 @@ const CONTAINER_GLYPH = { chest: GLYPH.chest, sack: GLYPH.sack, pottery: GLYPH.p
 const FIXTURE_GLYPH = { fountain: GLYPH.fountain, altar: GLYPH.altar, sarcophagus: GLYPH.sarcophagus, rune: GLYPH.rune } as const;
 
 /** What stands on each cell of the level besides terrain: containers, fixtures, debris, wall marks and specials (Spec 01, core glyph table). */
-function featureGlyphs(state: GameState): Map<number, Thing> {
+function featureGlyphs(state: GameState, look: MapLook): Map<number, Thing> {
   const { level } = state.map;
   const { looted, used } = state;
   const at = (p: { x: number; y: number }): number => p.y * level.width + p.x;
@@ -166,8 +168,8 @@ function featureGlyphs(state: GameState): Map<number, Thing> {
   });
   for (const m of level.lore) things.set(at(m), { glyph: m.kind === 'rune' ? GLYPH.rune : GLYPH.sign, colour: m.kind === 'rune' ? MAP.rune : MAP.sign, dim: m.kind === 'rune' && used.marks.includes(level.lore.indexOf(m)) });
   for (const s of level.specials) {
-    if (s.kind === 'teleporter') things.set(at(s), { glyph: GLYPH.teleporter, colour: MAP.special });
-    else if (s.kind === 'lever') things.set(at(s), { glyph: GLYPH.rod, colour: MAP.special, dim: used.lever });
+    if (s.kind === 'teleporter') things.set(at(s), { glyph: GLYPH.teleporter, colour: look.colours.special });
+    else if (s.kind === 'lever') things.set(at(s), { glyph: GLYPH.rod, colour: look.colours.special, dim: used.lever });
   }
   return things;
 }

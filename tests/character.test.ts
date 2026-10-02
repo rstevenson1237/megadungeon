@@ -192,18 +192,18 @@ describe('Spec 03: melee and health', () => {
   it('in the turn loop, 10 consecutive waits restore a die and an action or move resets the count', () => {
     const g = gameOn(room(6, 3, 1, 1), { combatDice: 0, combatMax: 2 });
     for (let i = 0; i < 9; i++) g.act({ type: 'wait' });
-    expect(g.state.player.combatDice).toBe(0);
+    expect(g.state.player.pools.combat.dice).toBe(0);
     g.act({ type: 'move', dx: 1, dy: 0 }); // a move resets the count
     expect(g.state.player.waited).toBe(0);
     for (let i = 0; i < 9; i++) g.act({ type: 'wait' });
-    expect(g.state.player.combatDice).toBe(0);
+    expect(g.state.player.pools.combat.dice).toBe(0);
     const last = g.act({ type: 'wait' });
-    expect(g.state.player.combatDice).toBe(1);
+    expect(g.state.player.pools.combat.dice).toBe(1);
     expect(last?.messages.some((m) => /strength/.test(m.text))).toBe(true);
     for (let i = 0; i < 10; i++) g.act({ type: 'wait' });
-    expect(g.state.player.combatDice).toBe(2);
+    expect(g.state.player.pools.combat.dice).toBe(2);
     for (let i = 0; i < 25; i++) g.act({ type: 'wait' }); // full: nothing banks
-    expect(g.state.player.combatDice).toBe(2);
+    expect(g.state.player.pools.combat.dice).toBe(2);
   });
 
   it('the count builds one round at a time while waiting', () => {

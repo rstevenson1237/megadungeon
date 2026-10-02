@@ -206,3 +206,6 @@ export function spendAmmo(pack: Item[], type: AmmoType): boolean {
   if (--stack.count <= 0) pack.splice(pack.indexOf(stack), 1);
   return true;
 }
+
+/** The pack's size for a character: computed from the minor abilities drawn, never stored (Spec 03, Addendum A). */
+export const packSize = (character: { minorAbilities: readonly string[] }): number => packCapacity(character.minorAbilities);

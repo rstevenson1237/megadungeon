@@ -8,7 +8,7 @@ import { pickWeighted } from '../core/roller.ts';
 import type { Spell } from '../core/schemas.ts';
 import { playerRanged } from '../rules/combat/attacks.ts';
 import { breaks, derive, makeGear, rollQuality, type Derived } from '../rules/items/gear.ts';
-import { addCoins, addToPack, ammoCount, equip as equipRule, equipped, spendAmmo, takeFromPack, unequip as unequipRule } from '../rules/items/inventory.ts';
+import { addCoins, addToPack, ammoCount, equip as equipRule, equipped, spendAmmo, takeFromPack, unequip as unequipRule, packSize } from '../rules/items/inventory.ts';
 import {
   type Knowledge,
   describeItem,
@@ -110,7 +110,7 @@ export function fireRanged(game: Game, target: Monster, messages: LogMessage[]):
   const option = rangedOption(game)!;
   const d = derived(game);
   const adjacent = Math.max(Math.abs(target.x - map.player.x), Math.abs(target.y - map.player.y)) <= 1;
-  const result = playerRanged(game.rng, player.skill, adjacent, d.rangedMode === 'disadvantage');
+  const result = playerRanged(game.rng, player.pools.skill, adjacent, d.rangedMode === 'disadvantage');
   provoke(game, target);
   combatAt(game, target, [target]);
   const weapon = readied(game);
@@ -236,7 +236,7 @@ export function lootLine(game: Game, loot: Loot, index: number, at: Point): stri
  */
 export function takeLoot(game: Game, loot: Loot, index: number, at: Point, messages: LogMessage[]): { left?: Loot; full: boolean } {
   const { player } = game.state;
-  const capacity = player.packSlots;
+  const capacity = packSize(player);
   if (loot.kind === 'lift_token') {
     player.town.liftToken = true;
     messages.push({ kind: 'loot', text: "You take the lift keeper's token. Lift fares are halved from now on." });
@@ -296,7 +296,7 @@ const VERB: Partial<Record<Item['kind'], string>> = { weapon: 'wield', staff: 'w
 /** Wield or wear an item from the pack. A cursed item sticks and curses the wearer at once (Spec 05). */
 export function equipItem(ctx: ItemCtx, item: Item, messages: LogMessage[]): boolean {
   const { player } = ctx;
-  const result = equipRule(player, player.packSlots, item);
+  const result = equipRule(player, packSize(player), item);
   if (!result.ok) {
     messages.push({ kind: 'system', text: result.reason });
     return false;
@@ -314,7 +314,7 @@ export function equipItem(ctx: ItemCtx, item: Item, messages: LogMessage[]): boo
 export function unequipSlot(ctx: ItemCtx, slot: EquipSlot, messages: LogMessage[]): boolean {
   const { player } = ctx;
   const item = player.equipment[slot];
-  const result = unequipRule(player, player.packSlots, slot);
+  const result = unequipRule(player, packSize(player), slot);
   if (!result.ok) {
     messages.push({ kind: 'system', text: result.reason });
     return false;
@@ -344,12 +344,7 @@ export function dropItem(game: Game, item: Item, messages: LogMessage[]): boolea
 
 /** Restore dice to a pool of the player's, up to its maximum. */
 export function restore(player: PlayerState, pool: 'combat' | 'skill' | 'magic', dice: number): number {
-  if (pool === 'combat') {
-    const gained = Math.max(0, Math.min(dice, player.combatMax - player.combatDice));
-    player.combatDice += gained;
-    return gained;
-  }
-  const p = player[pool];
+  const p = player.pools[pool];
   const gained = Math.max(0, Math.min(dice, p.max - p.dice));
   p.dice += gained;
   return gained;

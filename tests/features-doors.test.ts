@@ -79,7 +79,7 @@ describe('Spec 06: picking a lock', () => {
     expect(result.spent).toBe(true);
     expect(open(game)).toBe(true);
     expect(stack(game, 'lockpicks')!.count).toBe(3);
-    expect(game.state.player.skill.dice).toBe(2); // a check costs no die
+    expect(game.state.player.pools.skill.dice).toBe(2); // a check costs no die
   });
 
   it('2 to 3 fails and leaves the door to try again', () => {
@@ -153,11 +153,11 @@ describe('Spec 06: forcing a lock', () => {
     rig(game, 3);
     interact(game);
     expect(open(game)).toBe(false);
-    expect(game.state.player.combatDice).toBe(4);
+    expect(game.state.player.pools.combat.dice).toBe(4);
     rig(game, 1);
     const said = interact(game).messages.map((m) => m.text);
     expect(open(game)).toBe(false);
-    expect(game.state.player.combatDice).toBe(3);
+    expect(game.state.player.pools.combat.dice).toBe(3);
     expect(said.join(' ')).toContain('The strain tears something in you');
   });
 

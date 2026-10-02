@@ -63,8 +63,19 @@ export const monsterSchema = z.strictObject({
 // Bosses (Spec 02, step 11) have the same fields as monsters; the table is rolled by depth.
 export const bossSchema = monsterSchema;
 
+/** A 24-bit colour in content, written #rrggbb. */
+const colourHex = z.string().regex(/^#[0-9a-fA-F]{6}$/, 'a colour is written #rrggbb');
+
+/** The palette tokens a theme gives its map (Spec 08, Addendum A). */
+export const PALETTE_TOKENS = ['wall', 'floor', 'door', 'stairs', 'shallow_water', 'deep_water', 'lava', 'accent'] as const;
+export type PaletteToken = (typeof PALETTE_TOKENS)[number];
+
+/** The wall glyphs a theme may use (Spec 01, core glyph table): #, or the solid and dark shade blocks. */
+export const WALL_GLYPHS = [35, 219, 178] as const;
+
 // Level themes (Spec 02, "Run layout" and "Level sizes and layouts"). The unlock level is the first
-// level of `depth`. Palette, tiles and feature weights are added by tasks 2.3, 2.4 and 3.2.
+// level of `depth`. Feature weights came with task 2.4; palette and tiles with task 3.3 (Spec 08, Addendum A),
+// both optional until task 4.2: a theme without them draws in the default set.
 export const levelThemeSchema = z.strictObject({
   ...baseFields,
   name: z.string().min(1),
@@ -78,6 +89,13 @@ export const levelThemeSchema = z.strictObject({
   // and weight or count multipliers per feature kind (the intake's feature bias).
   doors: z.partialRecord(z.enum(DOOR_WEIGHT_KEYS), z.number().min(0)).optional(),
   features: z.partialRecord(z.enum(FEATURE_KEYS), z.number().positive()).optional(),
+  palette: z.strictObject(Object.fromEntries(PALETTE_TOKENS.map((t) => [t, colourHex])) as Record<PaletteToken, typeof colourHex>).optional(),
+  tiles: z
+    .strictObject({
+      wall: z.union(WALL_GLYPHS.map((g) => z.literal(g)) as unknown as [z.ZodLiteral<35>, z.ZodLiteral<219>, z.ZodLiteral<178>]),
+      floor: z.number().int().min(0).max(255),
+    })
+    .optional(),
 });
 
 // Artifacts (Spec 02, "Run layout"): just a name until task 2.9 gives them powers.

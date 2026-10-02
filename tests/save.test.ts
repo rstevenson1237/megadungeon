@@ -47,7 +47,8 @@ describe('Spec 09: what a save holds', () => {
     run.player.journal.push({ depth: 3, kind: 'sign', id: 's', text: 'a sign' });
     const save = toSave({ run, contentVersion: 'abc123', now: new Date('2026-10-01T12:00:00Z') });
     expect(save).toMatchObject({ format: SAVE_FORMAT, generator: GENERATOR_VERSION, content: 'abc123', seed: 77, depth: 0, savedAt: '2026-10-01T12:00:00.000Z' });
-    expect(save.character.name).toBe('Mara');
+    expect(save.player.name).toBe('Mara');
+    expect(save).not.toHaveProperty('character');
     expect(save.player.town.bank).toBe(345);
     expect(save.player.known).toEqual(['potion_cure']);
     expect(save.player.journal).toHaveLength(1);
@@ -175,6 +176,32 @@ describe('Spec 09: versions and migration', () => {
     expect(parseSave(text, undefined, undefined, 'old-tables').content).toBe('old-tables');
   });
 
+  it('a format 1 save, with the character beside the player, loads as one record whose pools are the live ones', () => {
+    const run = townRun(21, { combatStep: 8, combatDice: 1, combatMax: 3, skill: { step: 8, dice: 0, max: 2 }, magic: { step: 4, dice: 1, max: 1 } });
+    run.player.xp = 4500;
+    run.player.level = 3;
+    run.player.minorAbilities.push('pack_mule', 'fence');
+    run.player.waited = 4;
+    const now = toSave({ run, contentVersion: 'v' });
+    // Format 1 as task 2.13 wrote it: the player held the live pools, the wait count and the pack's size, and the
+    // character beside it held level, XP, the minor abilities and a stale copy of the pools.
+    const { pools, name, classId, level, xp, minorAbilities, waited, ...rest } = now.player;
+    const v1 = {
+      ...now,
+      format: 1,
+      character: { name, classId, level, xp, minorAbilities, waited: 0, pools: { combat: { step: 8, dice: 3, max: 3 }, skill: { step: 8, dice: 2, max: 2 }, magic: { step: 4, dice: 1, max: 1 } } },
+      player: { ...rest, combatStep: 8, combatDice: 1, combatMax: 3, skill: pools.skill, magic: pools.magic, waited, packSlots: 16 },
+    };
+    const loaded = parseSave(JSON.stringify(v1));
+    expect(loaded.format).toBe(2);
+    expect(loaded).not.toHaveProperty('character');
+    expect(loaded.player).not.toHaveProperty('packSlots');
+    expect(loaded.player).not.toHaveProperty('combatDice');
+    expect(loaded.player.pools).toEqual({ combat: { step: 8, dice: 1, max: 3 }, skill: { step: 8, dice: 0, max: 2 }, magic: { step: 4, dice: 1, max: 1 } });
+    expect([loaded.player.name, loaded.player.level, loaded.player.xp, loaded.player.minorAbilities, loaded.player.waited]).toEqual(['Mara', 3, 4500, ['pack_mule', 'fence'], 4]);
+    expect(rebuild(run, JSON.stringify(v1)).player.pools.combat.dice).toBe(1);
+  });
+
   it('a save from each earlier format version loads through its migrations, step by step', () => {
     // Pretend the format has moved on to 3: format 1 saves renamed a field at 2, and added one at 3.
     const steps: string[] = [];
@@ -200,7 +227,7 @@ describe('Spec 09: versions and migration', () => {
     steps.length = 0;
     expect(parseSave(JSON.stringify(v2), migrations, 3).characterId).toBe('migrated');
     expect(steps).toEqual(['2->3']);
-    expect(Object.keys(MIGRATIONS)).toEqual([]); // format 1 is the first: nothing to migrate from yet
+    expect(Object.keys(MIGRATIONS)).toEqual(['1']); // format 1 to 2: the character folded into the player
   });
 
   it('a format with a missing migration is refused rather than guessed at', () => {

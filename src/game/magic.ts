@@ -4,7 +4,8 @@
 
 import type { LogMessage } from '../core/log.ts';
 import type { Spell } from '../core/schemas.ts';
-import { derive, spellMode } from '../rules/items/gear.ts';
+import { spellMode } from '../rules/items/gear.ts';
+import { derivedFor } from './items.ts';
 import { castRoll, reachOf, resolvesAtOnce } from '../rules/magic/spells.ts';
 import { type StatusId, STATUS_NAMES, applyStatus } from '../rules/magic/status.ts';
 import { distanceSq, squareFootprint } from '../rules/world/geometry.ts';
@@ -85,7 +86,7 @@ export function castSpell(game: Game, spell: Spell, aim: Aim | undefined, messag
   }
   // The Mage's major ability: Arcane Bolt loses no die on a 2 to 3 (Spec 03).
   const lossFree = spell.id === 'arcane_bolt' && player.abilities.includes('arcane_bolt');
-  const roll = castRoll(game.rng, player.magic, lossFree, spellMode(derive(player.equipment, player.stealth), spell.shape));
+  const roll = castRoll(game.rng, player.pools.magic, lossFree, spellMode(derivedFor(player), spell.shape));
   messages.push({ kind: 'combat', text: `You cast ${spell.name}${at}.` });
   if (roll.success) apply(game, spell, aim, messages);
   else messages.push({ kind: 'warning', text: 'The spell fizzles.' });
@@ -126,8 +127,8 @@ const rounds = (game: Game, spell: Spell): number | null => (spell.rounds === 'd
 /** Restore one Combat die to the player, up to the pool's maximum. Says something only when one came back. */
 function heal(game: Game, messages: LogMessage[], text: string): boolean {
   const { player } = game.state;
-  if (player.combatDice >= player.combatMax) return false;
-  player.combatDice++;
+  if (player.pools.combat.dice >= player.pools.combat.max) return false;
+  player.pools.combat.dice++;
   messages.push({ kind: 'system', text });
   return true;
 }

@@ -78,12 +78,12 @@ describe('Gate: Systems complete', () => {
     press(app, 'Escape');
 
     // Rest: saves the game.
-    run.player.combatDice = 0;
+    run.player.pools.combat.dice = 0;
     choose(app, 'Lodging');
     press(app, 'Enter');
     press(app, 'Escape');
     await flush();
-    expect(run.player.combatDice).toBe(run.player.combatMax);
+    expect(run.player.pools.combat.dice).toBe(run.player.pools.combat.max);
     expect(await new SaveSlot(store).exists()).toBe(true);
 
     // The lift: another village, once it has been visited.

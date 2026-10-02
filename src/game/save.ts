@@ -5,14 +5,14 @@
 // Two things are packed to keep a full run's save well under 1 MB: the explored cells of a level become runs, and a
 // living monster keeps only the fields that differ from a fresh one.
 
-import type { Character, ClassDef } from '../rules/character/character.ts';
+import type { ClassDef } from '../rules/character/character.ts';
 import { SUPPORTED_GENERATORS } from '../rules/world/level.ts';
 import { type LevelDelta, type PlayerState } from './game.ts';
 import { type Monster, creature } from './monsters.ts';
 import { Run, type RunOptions } from './run.ts';
 
 /** The save format. Bump it with every change to what is stored, and add a migration from the format before. */
-export const SAVE_FORMAT = 1;
+export const SAVE_FORMAT = 2;
 /** The generator versions this build can still build levels with; a save keeps the one it started with (Spec 02, Spec 09). */
 export { SUPPORTED_GENERATORS };
 
@@ -40,7 +40,7 @@ export interface SaveData {
   /** The village of the last rest, the only place a save is made. */
   depth: number;
   round: number;
-  character: Character;
+  /** The player, which is also the character's rules state (Spec 03, Addendum A; save format 2). */
   player: PlayerState;
   deltas: Record<number, PackedDelta>;
 }
@@ -129,7 +129,6 @@ export function toSave({ run, contentVersion, now = new Date() }: SaveSource): S
     savedAt: now.toISOString(),
     depth: run.depth,
     round: run.round,
-    character: run.character,
     player: run.player,
     deltas: Object.fromEntries(Object.entries(run.deltas).map(([depth, delta]) => [depth, packDelta(delta)])),
   });
@@ -141,8 +140,20 @@ export const serialise = (save: SaveData): string => JSON.stringify(save);
 
 /** A step from one save format to the next. */
 export type Migration = (data: Record<string, unknown>) => Record<string, unknown>;
-/** `migrations[n]` upgrades a format-n save to format n + 1. None is needed yet: format 1 is the first. */
-export const MIGRATIONS: Readonly<Record<number, Migration>> = {};
+/**
+ * Format 1 kept the character's rules state (level, XP, minor abilities, pools) beside the player, whose own copy of
+ * the pools and wait count was the live one, and stored the pack's size. Format 2 has one record: the player.
+ */
+export function migrate1to2(data: Record<string, unknown>): Record<string, unknown> {
+  const { character, ...rest } = data as { character?: Record<string, unknown>; player?: Record<string, unknown> } & Record<string, unknown>;
+  const old = (rest.player ?? {}) as Record<string, unknown> & { combatStep?: number; combatDice?: number; combatMax?: number; skill?: unknown; magic?: unknown; waited?: number };
+  const { combatStep, combatDice, combatMax, skill, magic, waited, packSlots: _slots, ...kept } = old as typeof old & { packSlots?: number };
+  const pools = { combat: { step: combatStep, dice: combatDice, max: combatMax }, skill, magic };
+  return { ...rest, player: { ...(character ?? {}), ...kept, pools, waited: waited ?? 0 } };
+}
+
+/** `migrations[n]` upgrades a format-n save to format n + 1. */
+export const MIGRATIONS: Readonly<Record<number, Migration>> = { 1: migrate1to2 };
 
 /**
  * Read a save from its text: upgrade an older format step by step, and refuse, with a clear message and nothing
@@ -173,7 +184,7 @@ export function parseSave(
   if (!SUPPORTED_GENERATORS.includes(save.generator)) {
     throw new SaveError('unsupported', `This save's levels were built with generator ${save.generator}, which this version of the game no longer has.`);
   }
-  for (const key of ['seed', 'depth', 'round', 'character', 'player', 'deltas', 'characterId'] as const) {
+  for (const key of ['seed', 'depth', 'round', 'player', 'deltas', 'characterId'] as const) {
     if (save[key] === undefined) throw new SaveError('invalid', `The save is damaged: it has no ${key}.`);
   }
   if (REFUSE_OTHER_CONTENT && content !== undefined && save.content !== content) {
@@ -189,7 +200,6 @@ export function restoreRun(save: SaveData, base: RunOptions, classDef?: ClassDef
     startDepth: save.depth,
     round: save.round,
     deltas: Object.fromEntries(Object.entries(save.deltas).map(([depth, delta]) => [Number(depth), unpackDelta(delta)])),
-    character: save.character,
     ...(classDef ? { classDef } : {}),
     characterId: save.characterId,
     generator: save.generator,

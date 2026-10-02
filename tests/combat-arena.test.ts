@@ -235,22 +235,22 @@ describe('Spec 04: behaviours, each recognisable in a scripted arena fight', () 
 
   it('caster: a spell that beats the Magic die removes a Combat die', () => {
     const game = gameOn(room(10, 3, 1, 2), { combatDice: 6, combatMax: 6 });
-    game.state.player.magic = { step: 6, dice: 0, max: 1 }; // defends at disadvantage
+    game.state.player.pools.magic = { step: 6, dice: 0, max: 1 }; // defends at disadvantage
     const m = monsterAt(5, 2, { alert: true, behaviour: 'caster', modifier: 6, dice: 3, maxDice: 3 });
     game.state.monsters.push(m);
-    const before = game.state.player.combatDice;
+    const before = game.state.player.pools.combat.dice;
     const out = game.act({ type: 'wait' })!;
-    expect(game.state.player.combatDice).toBe(before - 1);
+    expect(game.state.player.pools.combat.dice).toBe(before - 1);
     expect(out.messages.map((x) => x.text)).toContain('The goblin blasts you.');
-    expect(game.state.player.magic.dice).toBe(0);
+    expect(game.state.player.pools.magic.dice).toBe(0);
   });
 
   it('skirmisher shots are defended with the Skill die, not spent', () => {
     const game = gameOn(room(10, 3, 1, 2), sturdy);
-    game.state.player.skill = { step: 6, dice: 1, max: 1 };
+    game.state.player.pools.skill = { step: 6, dice: 1, max: 1 };
     game.state.monsters.push(monsterAt(5, 2, { alert: true, behaviour: 'skirmisher', modifier: -6 }));
     wait(game, 3);
-    expect(game.state.player.skill.dice).toBe(1);
+    expect(game.state.player.pools.skill.dice).toBe(1);
   });
 
   it('ambusher: waits unaware where it stands, then its first attack has advantage and only its first', () => {
@@ -361,7 +361,7 @@ describe('Spec 04: bandits', () => {
     b.maxDice = 5;
     game.state.monsters.push(b);
     const first = game.act({ type: 'wait' })!;
-    expect(game.state.player.combatDice).toBe(5);
+    expect(game.state.player.pools.combat.dice).toBe(5);
     expect(game.state.player.coins).toBe(90);
     expect(b.carried).toEqual([{ kind: 'coins', amount: 10 }]);
     expect(first.messages.map((m) => m.text)).toContain('Bram steals 10 gp.');
@@ -393,7 +393,7 @@ describe('Spec 04: bandits', () => {
     const b = bandit(2, 2);
     game.state.monsters.push(b);
     wait(game, 3);
-    expect(game.state.player.combatDice).toBe(3);
+    expect(game.state.player.pools.combat.dice).toBe(3);
     expect(b).toMatchObject({ thefts: 0, carried: [], fleeing: false });
   });
 
@@ -440,7 +440,7 @@ describe('Spec 04: rivals', () => {
     wait(game, 60);
     expect(Math.abs(r.x - 24) + Math.abs(r.y - 1)).toBeLessThanOrEqual(1);
     expect(game.state.map.level.tiles[r.y]![r.x]).not.toBe('>'); // beside the stair, never on it
-    expect(game.state.player.combatDice).toBe(6);
+    expect(game.state.player.pools.combat.dice).toBe(6);
     expect(r.hostile).toBe(false);
   });
 
@@ -449,7 +449,7 @@ describe('Spec 04: rivals', () => {
     const r = rival(2, 1);
     game.state.monsters.push(r);
     wait(game, 20);
-    expect(game.state.player.combatDice).toBe(6);
+    expect(game.state.player.pools.combat.dice).toBe(6);
     expect(r.hostile).toBe(false);
   });
 
@@ -556,7 +556,7 @@ describe('Spec 04: ranged weapons spend ammunition', () => {
       game.fire(m);
       expect(m.awareness).toBe('alert');
       if (m.dice < 30) hits++;
-      lost += 3 - game.state.player.skill.dice;
+      lost += 3 - game.state.player.pools.skill.dice;
     }
     // d6: hits on 2 or more (5 in 6), die lost on 1 to 3 (half)
     expect(hits / 1500).toBeCloseTo(5 / 6, 1);

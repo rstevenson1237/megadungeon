@@ -128,12 +128,12 @@ describe('both seed options start a run (task 1.10)', () => {
   it('starts each run with its own character, so a second run is not carrying the first one\'s wounds', () => {
     const app = make();
     press(app, 'Enter');
-    app.shell!.run!.player.combatDice = 0;
+    app.shell!.run!.player.pools.combat.dice = 0;
     app.shell!.character.stats[0]!.current = 0;
     press(app, 'Escape', 'w', 'Enter'); // game menu, Quit without saving (the last item)
     expect(app.shell).toBeNull();
     press(app, 'Enter');
-    expect(app.shell!.run!.player.combatDice).toBe(2);
+    expect(app.shell!.run!.player.pools.combat.dice).toBe(2);
     expect(app.shell!.character.stats[0]!.current).toBe(2);
   });
 });

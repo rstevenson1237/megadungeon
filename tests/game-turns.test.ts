@@ -180,7 +180,7 @@ describe('stub melee (Spec 03, Melee; Spec 04, Attacks)', () => {
     expect(first.messages.map((x) => x.text)).toEqual(['You hit the goblin.', 'You kill the goblin.']);
     expect(first.messages.every((x) => x.kind === 'combat')).toBe(true);
     expect(game.state.monsters).toHaveLength(0);
-    expect(game.state.player.combatDice).toBe(2);
+    expect(game.state.player.pools.combat.dice).toBe(2);
     game.act({ type: 'move', dx: 1, dy: 0 }); // now an empty cell: the player steps in
     expect(game.state.map.player).toEqual({ x: 2, y: 2 });
   });
@@ -189,9 +189,9 @@ describe('stub melee (Spec 03, Melee; Spec 04, Attacks)', () => {
     const game = gameOn(room(8, 3, 1, 2));
     game.state.monsters.push(monsterAt(2, 2, { modifier: 6, alert: true })); // always beats a d6
     game.act({ type: 'wait' });
-    expect(game.state.player.combatDice).toBe(1);
+    expect(game.state.player.pools.combat.dice).toBe(1);
     game.act({ type: 'wait' });
-    expect(game.state.player.combatDice).toBe(0);
+    expect(game.state.player.pools.combat.dice).toBe(0);
     const fatal = game.act({ type: 'wait' })!;
     expect(fatal.messages.map((x) => x.text)).toEqual(['The goblin kills you.']);
     expect(game.state.player.dead).toBe(true);

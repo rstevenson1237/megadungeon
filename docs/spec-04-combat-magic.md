@@ -211,7 +211,7 @@ From Intake Addendum A (finding A2: Raise, Decoy and Companion need creatures on
 
 - [ ] Each kind of ally follows the behaviour above in a scripted arena fight, and only the companion changes level.
 
-## Clarification (task 3.2, proposed October 2, 2026, awaiting approval)
+## Clarification (task 3.2, proposed and approved October 2, 2026)
 
 - **Turn time budget:** the plan's risks ask for a per-turn time budget test, and no spec gives the figure. Proposed: on a large level crowded with 80 alert creatures of every behaviour, a round takes under 5 ms on average and never over 50 ms (the same figure as generating a large level). Measured on the build machine: about 0.1 ms on average and 4 ms at worst.
 

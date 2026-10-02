@@ -150,6 +150,7 @@ From Intake Addendum A (findings A1, A3, A9, A10).
 
 - **`character_names`** (People, launch minimum 150): `id`, `name` (1 to 16 characters: letters, space, apostrophe, hyphen), and the shared filter fields. Stub entries are written in task 3.4.
 - **`level_themes`** gains `palette` (24-bit colours for the tokens wall, floor, door, stairs, shallow water, deep water, lava and accent) and `tiles` (the wall glyph: 35, 219 or 178; and the floor glyph). Both are optional until task 4.2; a theme without them uses the default set.
+- **Clarification (task 3.3, proposed October 2, 2026, awaiting approval):** colours are written `#rrggbb`, and a palette, when given, names all eight tokens. A remembered cell draws its token's colour at half brightness, as the default set's remembered colours roughly are. The `accent` token colours the specials (teleporters and levers). Features, items and creatures keep their own colours.
 - **`bosses`:** rows tagged `final` are the pool for level 100's final boss (Spec 02, Addendum A).
 - **`traps`:** the tag `magic` marks a magic trap (Hex Breaker; Void Halls' bias).
 - **`minor_abilities`:** the example Blessed is renamed Hallowed, with id `hallowed` (Spec 03, Addendum A). It has not been released, so Stable ids is not broken.

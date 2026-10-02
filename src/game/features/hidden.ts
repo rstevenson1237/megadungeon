@@ -5,7 +5,7 @@
 import type { LogMessage } from '../../core/log.ts';
 import { eligibleEntries, pickWeighted } from '../../core/roller.ts';
 import type { Trap } from '../../core/schemas.ts';
-import { addCoins, addToPack } from '../../rules/items/inventory.ts';
+import { addCoins, addToPack, packSize } from '../../rules/items/inventory.ts';
 import { makeAmmo, makeLockpicks, makeMagicItem } from '../../rules/items/magic.ts';
 import { makeGear } from '../../rules/items/gear.ts';
 import type { Item } from '../../rules/items/types.ts';
@@ -121,7 +121,7 @@ export function makeFindItem(game: Game, id: string, count: number | undefined, 
 export function giveItem(game: Game, item: Item, messages: LogMessage[], name: string): void {
   const { player, map } = game.state;
   const want = 'count' in item ? item.count : 1;
-  const got = addToPack(player, player.packSlots, item);
+  const got = addToPack(player, packSize(player), item);
   if (got > 0) messages.push({ kind: 'loot', text: `You take ${name}.` });
   if (got < want) {
     addToDrops(game, map.player, [{ kind: 'item', item: got > 0 && 'count' in item ? ({ ...item, count: want - got } as Item) : item }]);
@@ -140,7 +140,7 @@ function debrisFind(game: Game, cell: number, messages: LogMessage[]): void {
     const [lo, hi] = row.amount!;
     const amount = game.rng.int(lo, hi) * Math.max(1, depthOf(game));
     const { player, map } = game.state;
-    const got = addCoins(player, player.packSlots, amount);
+    const got = addCoins(player, packSize(player), amount);
     messages.push({ kind: 'loot', text: `In the debris you find ${row.name}: ${amount} gp.` });
     if (got < amount) addToDrops(game, map.player, [{ kind: 'coins', amount: amount - got }]);
     return;
