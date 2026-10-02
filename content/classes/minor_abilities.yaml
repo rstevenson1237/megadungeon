@@ -1,5 +1,5 @@
 # Minor abilities (Spec 03, "Minor abilities"). These are the examples the spec gives for the four core
-# classes; the full pools of 12 for all 20 classes are written in task 3.4. Effects are code (tasks 2.7 to 2.10).
+# classes; the full pools of 12 for all 20 classes are written in task 4.4. Effects are code (tasks 2.7 to 2.10).
 - id: hardy
   name: Hardy
   text: Waiting restores a Combat die in 8 rounds

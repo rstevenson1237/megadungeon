@@ -190,6 +190,33 @@ All figures are starting values for playtesting. Where the spec above is silent 
 
 - **Buying** costs value times (1 + 0.2 for each village below the surface); **selling** pays 50% of value with no depth multiplier (Fence adds 20% of that); a crude item's value is already half a normal one's, so it sells for half. Artifacts are priceless and cannot be sold. **Identification** costs 100 gp and **repair** 30% of value, both times the same multiplier.
 
+## Addendum A (proposed October 1, 2026, awaiting approval)
+
+From Intake Addendum A (findings A1, B1): every class needs starting gear before Phase 4 so it can be created and played. These lists use the 16 bases above, are normal quality, and may be revised in task 4.4.
+
+| Class | Starting gear |
+| --- | --- |
+| Barbarian | Great axe, leather |
+| Knight | Long sword, shield, chain |
+| Paladin | Mace, shield, leather |
+| Ranger | Short sword, shortbow with 20 arrows, leather |
+| Monk | Quarterstaff |
+| Bard | Short sword, sling with 20 stones, leather |
+| Druid | Quarterstaff, leather, one potion of Healing |
+| Necromancer | Dagger, one potion of Clarity |
+| Sorcerer | Dagger, one potion of Clarity |
+| Illusionist | Dagger, sling with 20 stones |
+| Warlock | Dagger, leather, one potion of Clarity |
+| Assassin | Short sword, two daggers, leather |
+| Alchemist | Dagger, sling with 20 stones, one potion each of Healing and Cure |
+| Shaman | Spear, leather, one potion of Healing |
+| Witch Hunter | Short sword, crossbow with 20 bolts, leather |
+| Beastmaster | Spear, shortbow with 20 arrows, leather |
+
+**Acceptance criteria added**
+
+- [ ] Every class starts with its listed gear, worn where it can be and the rest in the pack.
+
 ## Acceptance criteria
 
 - [ ] Equipped items use no pack slots; stacks follow the per-slot table; a full pack refuses pickups.

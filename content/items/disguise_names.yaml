@@ -1,6 +1,6 @@
 # Stub entries (Spec 08): the unidentified look of a potion, ring, wand, rod or staff (Spec 05). "cloudy blue" is
 # shown as "a cloudy blue potion". Every kind needs at least as many names as it has magic items. The launch table
-# of 100 is written in Phase 3 (task 3.5).
+# of 100 is written in Phase 3 (task 4.5).
 - { id: potion_look_cloudy_blue, name: cloudy blue, kind: potion, tags: [stub] }
 - { id: potion_look_fizzing_red, name: fizzing red, kind: potion, tags: [stub] }
 - { id: potion_look_murky_green, name: murky green, kind: potion, tags: [stub] }

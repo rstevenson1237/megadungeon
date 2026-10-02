@@ -145,6 +145,76 @@ Creation takes three choices and starts the character in the surface village.
 
 The character starts at level 1 with one full die per pool at the class's steps, the class's starting equipment (items spec), 12 inventory slots, and 20 gp in the bank (Spec 05). A new character started on the same seed after a death also carries 10% of the previous bank and the one recovered item.
 
+## Addendum A (proposed October 1, 2026, awaiting approval)
+
+From Intake Addendum A (findings A2, A3, B3, B4). All figures are starting values for playtesting.
+
+**Using abilities**
+
+- **Q** uses the major ability. When the character also has minor abilities that are used (actives), Q opens a short list, major first, and Enter chooses; with one usable ability Q uses it at once.
+- **Active abilities are skill uses:** a Skill die as in Resolving rolls (4 or more works; 2 to 3 works and the die is lost; 1 fails and the die is lost; an empty pool rolls with disadvantage and loses nothing more). One round unless stated.
+- **No roll:** passive and triggered abilities work by themselves, and Q says so with no round spent. Pact and Smite need no roll either: they are trades.
+- **Spells:** a major ability that is a spell (Arcane Bolt, Heal) is always known, and Q casts it as C would.
+- **A fight** begins with the first exchange involving the player (melee, ranged, or a spell aimed at a creature). It ends after 10 rounds in a row with no exchange involving the player. "Once per fight" resets when a fight ends.
+- **Extra dice add up:** an effect that makes a hit "remove 2 dice" adds one die to that hit, and several such effects add (Mark with a crossbow removes 3).
+- **Timed abilities** (Rage, Wild Shape, Sanctuary) show in the Status block with their rounds left; they are not among the eight status effects.
+
+**The 20 major abilities**
+
+| Class | Ability | Kind | Rule |
+| --- | --- | --- | --- |
+| Warrior | Cleave | Passive | A player melee hit that kills makes one more melee exchange at once against another adjacent hostile creature (the first clockwise from north). No extra round, and it carries only once |
+| Mage | Arcane Bolt | Spell | Always known; loses no die on 2 to 3 (built in task 2.8) |
+| Thief | Backstab | Passive | A melee attack with a Light weapon on an asleep or unaware creature hits without an exchange (the creature does not roll) and removes 2 dice. Bare hands are not Light |
+| Priest | Heal | Spell | Always known |
+| Barbarian | Rage | Active | For 10 rounds, a melee tie hits only the monster |
+| Knight | Shield Wall | Passive | The first hit taken in each fight is ignored; armour does not roll to break. The pane shows when it is ready |
+| Paladin | Smite | Trade | Q readies it (no round; Q again cancels). The next melee hit spends one Magic die, with no roll, and removes one extra die. It cannot be readied with no Magic die |
+| Ranger | Volley | Active | Needs a readied ranged weapon (not a thrown dagger). Q enters targeting; Enter picks a first and then a second, different target (with one valid target it fires at that one). One Skill roll as a ranged attack resolves both, spending one shot per target |
+| Monk | Flurry | Passive | Winning a melee exchange by 3 or more removes one extra die |
+| Bard | Fascinate | Active | Any creature in sight (no range limit, no line of fire needed) is Held for d6 rounds. It makes no noise and alerts no one |
+| Druid | Wild Shape | Active | +1 Combat step for 20 rounds, never past d12 |
+| Necromancer | Raise | Active | The most recent creature to die within 8 cells and in sight in the last 3 rounds, not a boss, rises on its cell as an ally (Spec 04) with its starting dice and modifier for 20 rounds, then crumbles. One raised ally at a time |
+| Sorcerer | Overchannel | Passive | The first spell roll of 2 to 3 in each fight loses no die |
+| Illusionist | Decoy | Active | A cursor as for Blink picks a visible free cell within 5; a phantom stands there for 5 rounds (Spec 04, Allies) |
+| Warlock | Pact | Trade | One round, no roll: lose one Combat die and gain one Magic die. Needs a Combat die to give and a Magic die missing |
+| Assassin | Mark | Active | Targets an asleep or unaware creature in sight. It stays marked until it dies or the player leaves the level, one mark at a time; each of the player's hits on it removes one extra die |
+| Alchemist | Brew | Passive | Every potion shows its true kind once seen (in the pack, a shop, a trader's stock or on the floor in view). At each village rest one potion, drawn from the potion rows by the village's depth and seeded by the run seed and rest count, goes into the pack; with no room the log says so and it is lost |
+| Shaman | Spirit Totem | Active | A totem on a free adjacent cell blocks movement but not sight, one at a time, until the player leaves the level. Waiting while next to it (any of the 8 cells) restores a Combat die every 5 rounds; with other wait effects the shortest wins |
+| Witch Hunter | Hex Breaker | Passive | A magical rune never discharges on the player (a 1 simply fails); traps tagged `magic` do nothing when sprung; ranged hits on a creature with the caster behaviour remove one extra die |
+| Beastmaster | Companion | Passive | An animal ally (Spec 04) with 1 die (d6+0), gaining a die at character levels 4, 7 and 10. It follows the player between levels and villages; if killed it returns at the next village rest |
+
+**The example minor abilities** (Minor abilities table), as effects from the Spec 08 vocabulary
+
+| Ability | Rule |
+| --- | --- |
+| Hardy | Waiting restores a Combat die in 8 rounds |
+| Weapon Master | +1 on melee rolls with the weapon base wielded when drawn; drawn bare-handed, it attaches to the next weapon equipped |
+| Pack Mule | +2 pack slots, stackable; the pack grows the moment it is drawn |
+| Second Wind | Once per level visit: when a hit leaves the player with one Combat die, regain one |
+| Focus | Advantage on spell rolls while no hostile creature is adjacent |
+| Scholar | A spellbook shows its spell and a book its lore-chain place before reading; reading a spellbook learns it on 2 to 3 as well as on 4 or more (a decision in Intake Addendum A) |
+| Widen | An area spell's footprint grows by one cell each way (3 x 3 to 5 x 5); a caster-centred spell reaches one cell further |
+| Mana Well | Potions that restore Magic dice restore one extra |
+| Keen Eye | Advantage on search checks and passive notice |
+| Light Step | On the avoid check for a hidden floor trap, 2 to 3 jumps clear like a 4 or more, and a 1 springs it one time in two |
+| Fence | +20% when selling (built) |
+| Quick Hands | Opening a container whose trap is not found makes a Skill check: only a 1 springs it; otherwise the trap is found, not sprung |
+| Hallowed (was Blessed) | Advantage on Combat checks and melee defence against creatures tagged `undead`. Renamed so it does not share a name with the Blessed status (a decision in Intake Addendum A) |
+| Sanctuary | Active: for 3 rounds, monsters take -2 on melee rolls against the player |
+| Tithe | Village rest is free |
+| Purify | Active: lifts the curse of one worn cursed item (and the Cursed status if no curse is left), or else ends Poisoned |
+
+**One owner for the dice**
+
+- The character's rules state is the only record of the pools, the level, XP and the minor abilities. The game reads and changes it, and the pane only reads it. Anything derived from abilities (pack slots, wait rounds, sell bonus) is computed from it when needed, never copied.
+
+**Acceptance criteria added**
+
+- [ ] Each of the 20 major abilities works as its row says, in a scripted arena test per class, and Q on a passive ability spends no round.
+- [ ] Each example minor ability works as its row says, and a Pack Mule drawn at level up grows the pack at once.
+- [ ] A character created through the creation screen in each class plays to level 10 with its draws in effect.
+
 ## Acceptance criteria
 
 - [ ] Each roll type resolves exactly as the Resolving rolls table says, verified by unit tests over every face of every step, with and without advantage and disadvantage.

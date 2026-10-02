@@ -1,5 +1,5 @@
 # Stub entries for task 2.1 (Spec 08, "Stub content in Phases 1 and 2"): one template per
-# rumour kind so every kind has text. The launch table of 60 is written in Phase 3 (task 3.9).
+# rumour kind so every kind has text. The launch table of 60 is written in Phase 3 (task 4.9).
 - id: stub_rumour_vault
   needs: vault
   text:

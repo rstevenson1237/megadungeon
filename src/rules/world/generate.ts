@@ -203,7 +203,7 @@ function build(
   };
 }
 
-/** The algorithm that really builds a level: the set piece is rooms and corridors until task 3.10. */
+/** The algorithm that really builds a level: the set piece is rooms and corridors until task 4.10. */
 const algorithmFor = (layout: LayoutAlgorithm): LayoutAlgorithm => (layout === 'set_piece' ? 'rooms_and_corridors' : layout);
 
 /**

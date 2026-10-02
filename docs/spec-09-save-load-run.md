@@ -123,8 +123,20 @@ All figures are starting values for playtesting. Where the spec above is silent 
 - **Return to last save** loads the current save; if it cannot be read the player is sent to the title screen.
 - **Entries** hold seed (with the date for a seed of the day), name, class, level reached, deepest level, monsters killed, score (total XP), outcome, cause and level of death, and date. A character has one entry, identified by an id given at the start of the run; a later moment updates it. A character who dies after reaching level 100 or beating the final boss keeps that better outcome and gains the cause and level of death.
 - **Deepest level** counts every dungeon level arrived on, by stairs, teleporter, lever or fall. **Monsters killed** counts every monster that dies on a level the player is on, whoever killed it.
-- **Reaching level 100** is recorded on arrival. **The final boss** is the monster with the boss role on level 100; the boss itself arrives with the level 100 set piece (task 3.10), and until then only the check is built.
+- **Reaching level 100** is recorded on arrival. **The final boss** is the monster with the boss role on level 100; a stub final boss arrives with task 3.10 (Addendum A), and the real one with the level 100 set piece (task 4.10).
 - **The leaderboard** shows all runs, or only the runs of the seed of the day of a date (today's when opened); Enter switches the view.
+
+## Addendum A (proposed October 1, 2026, awaiting approval)
+
+From Intake Addendum A (findings A1, C2).
+
+- **Saves across content changes before release:** until the Content complete gate, a save whose content fingerprint differs from the running build's is refused: "This save was made with different game content and cannot be loaded by this version." Nothing is changed, and the player starts a new run. This replaces, until then, the rule that the content version never blocks a load.
+- **After release:** the policy is chosen before the Content complete gate. Either the save stores each visited level's generated contents, so a revisit never depends on the tables, or the tables that placement rolls are frozen at release and later updates only add retired-safe rows.
+- **First save:** a run is saved when character creation finishes (Spec 01, Addendum A), replacing the stand-in that saved at run start. A new character on the same seed goes through creation with the seed fixed.
+
+**Acceptance criteria added**
+
+- [ ] Before release, a save with a different content fingerprint is refused with the message above and changes nothing.
 
 ## Acceptance criteria
 

@@ -41,7 +41,7 @@ export const OVERLAY = {
 
 /**
  * Map colours (Spec 01: each level theme supplies palette tokens). This is the default set,
- * taken from the mockup; themes arrive in task 3.2. Remembered cells use the dimmed colour.
+ * taken from the mockup; themes arrive in task 4.2. Remembered cells use the dimmed colour.
  */
 export const MAP = {
   floor: { visible: 0x6b5638, remembered: 0x33291c },

@@ -1,7 +1,7 @@
 # The 13 level themes of Spec 02 and the intake. `depth` starts at the unlock level.
 # `stamp`, `liquid` and `pillared` are layout variants (Spec 02, task 2.3). `doors` and `features` are the
 # placement variants of task 2.4: door weights, and the intake's feature bias (the first kind listed x3, the others
-# x2). Palettes and tile sets are added with task 3.2.
+# x2). Palettes and tile sets are added with task 4.2.
 - id: cellars_and_crypts
   name: Cellars and Crypts
   depth: [1, 99]

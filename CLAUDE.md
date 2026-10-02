@@ -9,6 +9,7 @@ Everything is already designed and approved. The documents in `docs/` are the sp
 | File | Covers |
 | --- | --- |
 | `docs/00-intake.md` | Vision, pillars and every original requirement |
+| `docs/00a-intake-addendum.md` | Addendum A: what Phases 1 and 2 left open, and the new Phase 3 Systems closeout |
 | `docs/spec-01-rendering-ui-shell.md` | Screen grid, renderer, CP437 font, panes, key map, targeting, overlays |
 | `docs/spec-02-dungeon-generation.md` | Seeds, run layout, level sizes, layout algorithms, pipeline, reachability, depth scaling, restocking, quests, connective elements |
 | `docs/spec-03-character-system.md` | Stats, dice pools, roll resolution, health, XP, the 20 classes, minor abilities |
@@ -18,7 +19,7 @@ Everything is already designed and approved. The documents in `docs/` are the sp
 | `docs/spec-07-villages-economy.md` | Village services, bank, lodging, lift, shops, tavern, traders, hermits |
 | `docs/spec-08-content-tables.md` | YAML content format, rolling, table catalog, templates, validation |
 | `docs/spec-09-save-load-run.md` | Run lifecycle, saves, death options, leaderboard, versioning |
-| `docs/10-implementation-plan.md` | The 35 tasks in order, with dependencies, gates, testing and risks |
+| `docs/10-implementation-plan.md` | The 46 tasks in order, with dependencies, gates, testing and risks |
 | `mockup/ui-mockup.html` | The approved UI mockup (open in a browser) |
 
 ## Rules for every task
@@ -27,7 +28,8 @@ Everything is already designed and approved. The documents in `docs/` are the sp
 - **When a spec is unclear, wrong or silent, stop and ask.** Propose the spec change in plain words; do not code around it. Approved changes are recorded in the spec file first, then implemented.
 - **One task at a time,** in the order of `docs/10-implementation-plan.md`, only after the tasks it needs are done.
 - **A task is done when** its spec's acceptance criteria pass, with tests that prove it.
-- **Stop at every gate** (Playable slice, Systems complete, Content complete) and wait for approval before starting the next phase. Phase 3 also stops after the style guide (task 3.1).
+- **Stop at every gate** (Playable slice, Systems complete, Systems complete replayed, Content complete) and wait for approval before starting the next phase. Phase 3 also stops after its approvals task (3.1), and Phase 4 after the style guide (task 4.1).
+- **Specs carry "Addendum A" sections** from Intake Addendum A; they are part of the spec once approved.
 - **After each task,** report briefly: what was built, which tests prove it, any departure from the spec, and the next task.
 
 ## Engineering rules
@@ -59,6 +61,6 @@ Everything is already designed and approved. The documents in `docs/` are the sp
 - **Font:** IBM VGA 9x16 style, proposed as Px437 IBM VGA 9x16 from the Ultimate Oldschool PC Font Pack. Confirm its licence (believed CC BY-SA 4.0) and add the attribution before bundling it into a glyph atlas.
 - **GitHub Pages** serves from a sub-path, so set Vite's `base` to the repository name.
 
-## Start here: Task 1.1
+## Where things stand
 
-Project setup: GitHub repository, Vite, TypeScript, Vitest, CI, GitHub Pages deploy, and a stub content build (YAML to JSON). Done when build, tests and the content check run in CI, and a page deploys to GitHub Pages. Then continue with task 1.2.
+Phases 1 and 2 are built. Intake Addendum A (`docs/00a-intake-addendum.md`) adds Phase 3, Systems closeout, and moves content to Phase 4. Start with task 3.1: the owner approves the pending clarification sections and every "Addendum A" section before any Phase 3 code.

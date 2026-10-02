@@ -1,5 +1,5 @@
 # Stub entries for task 2.4 (Spec 05, "Treasure and appraisal"): gems and jewelry tiered by depth, with base
-# values in gp. The launch table of 50 is written in Phase 3 (task 3.5).
+# values in gp. The launch table of 50 is written in Phase 3 (task 4.5).
 - id: gem_stub_quartz
   name: quartz
   kind: gem

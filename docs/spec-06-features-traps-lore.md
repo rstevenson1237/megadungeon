@@ -183,6 +183,16 @@ All figures are starting values for playtesting. Where the spec above is silent 
 - **Rune word:** each wall rune read teaches its letter. E on the marked altar speaks the word once every letter is known, giving Blessed until the player leaves the level.
 - **Vault:** the vault key found on one level opens the sealed door of the named vault.
 
+## Addendum A (proposed October 1, 2026, awaiting approval)
+
+From Intake Addendum A (findings A2, A3, A7). Class abilities change some rolls in this spec; the rules live in Spec 03, Addendum A, and are listed here so this spec stays complete.
+
+- **Searching:** Keen Eye gives advantage on search checks and on passive notice, so a notice roll with Keen Eye is made normally.
+- **Floor traps:** Light Step changes the avoid check (2 to 3 jumps clear; a 1 springs the trap one time in two). Hex Breaker makes traps tagged `magic` do nothing when sprung.
+- **Container traps:** Quick Hands gives a Skill check on opening a container whose trap is not found; only a 1 springs it, otherwise the trap is found.
+- **Runes:** for a Witch Hunter (Hex Breaker), a rune never discharges; a 1 simply fails.
+- **Books:** Scholar shows a spellbook's spell and a book's lore-chain place before reading. A named rival's journal is a book (Spec 02, Addendum A).
+
 ## Acceptance criteria
 
 - [ ] A search rolls once per hidden thing in the 8 surrounding cells and applies at most one negative effect.

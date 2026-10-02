@@ -192,6 +192,25 @@ All figures are starting values for playtesting. Where the spec above is silent 
 - **Blessed and Cursed** give advantage and disadvantage on checks (Spec 03); together they cancel.
 - **The Status block** lists each active effect with its remaining rounds, then Shield.
 
+## Addendum A (proposed October 1, 2026, awaiting approval)
+
+From Intake Addendum A (finding A2: Raise, Decoy and Companion need creatures on the player's side). All figures are starting values for playtesting.
+
+**Allies**
+
+- **What:** an ally is a creature on the player's side: a raised creature (Necromancer), the companion (Beastmaster) or a phantom (Illusionist). An ally is drawn as its letter in the ally colour.
+- **Turns:** allies act in the round order like any creature, nearest first, and count toward the 50 simulated a round. They never trigger traps.
+- **Behaviour:** attack an adjacent hostile creature (fewest dice first); else move toward the nearest hostile creature in sight; else keep within 3 cells of the player. An ally's exchange with a monster is ordinary melee in which both roll d6 plus modifier (as rivals fight). Allies never attack rivals that are peaceful, traders, hermits or captives.
+- **Monsters and allies:** a hostile creature attacks an adjacent ally only when the player is not adjacent to it. An exchange with an ally is combat for awareness and noise.
+- **Player's attacks:** targeting never offers an ally, and a creature in the line of fire blocks it, allies included. An area spell hits an ally in its footprint as it would the caster.
+- **Stairs:** allies never use stairs, except the companion, which arrives with the player on the nearest free cell beside the arrival cell. In a village it waits and is not drawn. A raised ally crumbles when the player leaves the level.
+- **The phantom** stands on its cell and does not act. Alert hostile creatures within 8 cells of it treat it as the player for moving and attacking; their attacks on it pass harmlessly, with no exchange. It vanishes after 5 rounds.
+- **Kills by allies** count toward monsters killed (Spec 09).
+
+**Acceptance criteria added**
+
+- [ ] Each kind of ally follows the behaviour above in a scripted arena fight, and only the companion changes level.
+
 ## Acceptance criteria
 
 - [ ] Nothing on the level moves until the player spends an action; free actions (inventory, look, targeting) cost no round.

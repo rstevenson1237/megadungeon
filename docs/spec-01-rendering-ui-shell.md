@@ -180,6 +180,38 @@ Menus draw as boxed overlays over the main view, so the character pane and log s
 | Death | Full grid | Cause and depth, then: return to last save, new character on the same seed keeping 10% of bank and one item, or new seed |
 | Leaderboard | Full grid | From local storage: seed, name, class, level, deepest level, monsters killed |
 
+## Addendum A (proposed October 1, 2026, awaiting approval)
+
+From Intake Addendum A (findings A1, A4, A5, B5). All figures are starting values for playtesting.
+
+**Character creation screen** (full grid; Spec 03, Character creation)
+
+- **When:** after the title screen's new game, once the seed is chosen; and after the death screen's "New character, same seed", with the seed fixed.
+- **Step 1, class:** the 20 classes in Spec 03 table order, the four core classes first. The selected class shows its starting dice, major ability (name and text), level 10 dice, number of starting spells and starting gear. Arrows or W/S move, Enter chooses, Esc goes back (to the title, or to the death screen).
+- **Step 2, name:** typed, 1 to 16 characters: letters, space, apostrophe and hyphen. This is the one place where W, A, S and D type letters. Backspace deletes; Tab fills a random name from the `character_names` table (seeded by the run seed and the number of names asked for); Enter confirms, and an empty name takes a random one; Esc goes back to the class list.
+- **Inheritance:** after a same-seed death the screen also shows the bank and the item the new character keeps (Spec 09).
+- **On confirm** the run starts in the surface village and is saved at once (Spec 09).
+
+**Z: wait until recovered**
+
+- Z repeats the Space wait, one round at a time, until a Combat die returns. Every round is an ordinary wait, so the monsters act and the wait counter climbs.
+- **It stops early** when a creature comes into view that was not in view when the wait began, the player is hit or gains a status, or a combat or warning message is logged.
+- **With nothing to wait for** (a full Combat pool, or Poisoned, which stops recovery) it says so and spends no round.
+
+**L: look**
+
+- A free action. A cursor starts on the player; W A S D or the arrows move it within the main view, and Tab and Shift+Tab jump between visible creatures.
+- The bottom row of the main view describes the cell under the cursor. A visible cell lists its creature (name, rating, awareness and statuses), its items, its feature with its state (looted, dry, open, a found trap's kind) and its terrain. A remembered cell gives its feature and terrain, marked "remembered". An unseen cell says "You have not seen there."
+- Esc, Enter or L ends looking.
+
+**Header line:** a dungeon level's header is its theme's name and depth ("Goblin Warrens, Level 7"); a village shows its name and depth as now.
+
+**Acceptance criteria added**
+
+- [ ] Creation lists all 20 classes with their dice, ability and gear, takes a typed or random name, and starts and saves a run.
+- [ ] Z stops on each listed interruption and when a die returns, and refuses with nothing to wait for.
+- [ ] L describes visible, remembered and unseen cells and costs no round.
+
 ## Acceptance criteria
 
 The shell is done when all of these pass in current Chrome, Firefox and Safari on desktop.

@@ -75,7 +75,7 @@ describe('the eight layout algorithms (Spec 02, "Level sizes and layouts")', () 
     expect(actual).toEqual(GOLDEN);
   });
 
-  it('uses rooms and corridors for the set piece until task 3.10', () => {
+  it('uses rooms and corridors for the set piece until task 4.10', () => {
     const level = generateLevel(5, MAX_DEPTH, 'large', { layout: 'set_piece' });
     expect(level.layout).toBe('rooms_and_corridors');
     expect(level.downStair).toBeNull();

@@ -1,7 +1,7 @@
 # The 20 classes (Spec 03, "Classes"). Starting steps, the pool stepped at levels 4, 7 and 9, and the major ability.
 # Ability effects are code (tasks 2.7 to 2.9); the text is the spec's. `spells` is how many spells the class starts
 # with and the one it always has (Spec 04, "Spells"); classes without it start with none. `gear` is the starting
-# equipment of the four core classes (Spec 05); the other 16 are written in task 3.4.
+# equipment of the four core classes (Spec 05); the other 16 are written in task 4.4.
 - id: warrior
   name: Warrior
   start: { combat: 8, skill: 6, magic: 4 }
