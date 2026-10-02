@@ -8,6 +8,7 @@ import { wrapText } from '../log.ts';
 import { check, depthOf } from './common.ts';
 import { negative } from './hidden.ts';
 import { hasMajor } from '../abilities.ts';
+import { weaknessOf } from '../connective.ts';
 
 /** The width a text window wraps its lines to. */
 export const READ_WIDTH = 56;
@@ -45,8 +46,15 @@ export function readMark(game: Game, index: number, messages: LogMessage[]): boo
   const depth = depthOf(game);
   const where = `${mark.id}@${mark.x},${mark.y}`;
   if (mark.kind === 'sign' || mark.kind === 'graffiti') {
-    addJournal(player, { depth, kind: mark.kind, id: where, text: mark.text });
-    show(game, mark.kind === 'sign' ? 'Sign' : 'Graffiti', mark.text, 'discovery', messages, mark.kind === 'sign' ? 'read a sign' : 'read the graffiti');
+    // A lore chain's last entry that is a boss's weakness names the boss's level, and reading it weakens that boss (Spec 02, Addendum A).
+    const boss = mark.link !== undefined && mark.index === undefined ? weaknessOf(game.links, mark.link) : undefined;
+    const text = boss === undefined ? mark.text : `${mark.text} It tells of the weakness of the boss of level ${boss}.`;
+    addJournal(player, { depth, kind: mark.kind, id: where, text });
+    show(game, mark.kind === 'sign' ? 'Sign' : 'Graffiti', text, 'discovery', messages, mark.kind === 'sign' ? 'read a sign' : 'read the graffiti');
+    if (boss !== undefined && !player.weaknesses.includes(boss)) {
+      player.weaknesses.push(boss);
+      messages.push({ kind: 'discovery', text: `You know the weakness of the boss of level ${boss}.` });
+    }
     return true;
   }
   if (used.marks.includes(index)) {
@@ -68,7 +76,7 @@ export function readMark(game: Game, index: number, messages: LogMessage[]): boo
 
 /** Read a book from the pack (Spec 06): one round, kept in the journal, and the book stays so it can be dropped or sold. */
 export function readLoreBook(game: Game, book: BookItem, messages: LogMessage[]): boolean {
-  const text = game.content.books.get(book.id)?.text ?? 'The pages are blank, or too faded to read.';
+  const text = book.text ?? game.content.books.get(book.id)?.text ?? 'The pages are blank, or too faded to read.';
   addJournal(game.state.player, { depth: depthOf(game), kind: 'book', id: book.id, text });
   show(game, 'Book', text, 'discovery', messages, 'read a book');
   return true;

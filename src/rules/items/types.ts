@@ -124,6 +124,8 @@ export interface TreasureItem extends Base {
 
 export interface BookItem extends Base {
   kind: 'book';
+  /** A book whose text is not a table row's, such as the named rival's journal (Spec 02, Addendum A). */
+  text?: string;
 }
 
 export interface SpellbookItem extends Base {

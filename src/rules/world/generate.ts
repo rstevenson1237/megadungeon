@@ -20,6 +20,7 @@ import {
 } from './grid.ts';
 import { carveLayout, DEFAULT_STYLE, type LayoutStyle } from './layouts/index.ts';
 import {
+  FINAL_BOSS_GENERATOR,
   GENERATOR_VERSION,
   LEVEL_SIZES,
   SUPPORTED_GENERATORS,
@@ -172,6 +173,12 @@ export function placeStairs(
   const down = rng.pick(candidates);
   cells[down.y * width + down.x] = STAIRS_DOWN;
   return { up, down };
+}
+
+/** What a generator version places: before version 5 level 100 had no final boss, so its plan drops it (Spec 02, Addendum A). */
+function contentsFor(version: number, contents: LevelContents | undefined): LevelContents | undefined {
+  if (!contents || version >= FINAL_BOSS_GENERATOR || !contents.plan.boss?.final) return contents;
+  return { ...contents, plan: { ...contents.plan, boss: undefined } };
 }
 
 /**
@@ -331,6 +338,7 @@ export function generateLevel(
 ): Level {
   if (!SUPPORTED_GENERATORS.includes(version)) throw new RangeError(`generator version ${version} is not in this build`);
   if (!Number.isInteger(depth) || depth < 1 || depth > MAX_DEPTH) throw new RangeError(`bad level number: ${depth}`);
+  contents = contentsFor(version, contents);
   const seed = levelSeed(runSeed, depth);
   for (let n = 0; n < MAX_ATTEMPTS; n++) {
     const level = attempt(version, runSeed, depth, size, style, subSeed(seed, n), n + 1, false, contents);

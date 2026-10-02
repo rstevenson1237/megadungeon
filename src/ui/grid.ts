@@ -1,7 +1,7 @@
 // The cell model (Spec 01, "Screen grid and panes", "Rendering"): a fixed
 // 100 x 40 grid; each cell holds a glyph code (0-255) and 24-bit colours.
 
-import { toCp437 } from './cp437.ts';
+import { CP437_TO_UNICODE, toCp437 } from './cp437.ts';
 
 export const COLS = 100;
 export const ROWS = 40;
@@ -48,5 +48,10 @@ export class Grid {
     this.glyph.fill(0);
     this.fg.fill(0);
     this.bg.fill(bg & 0xffffff);
+  }
+
+  /** The screen as text, one line per row, each glyph as its Unicode character (read by the browser smoke test). */
+  lines(): string[] {
+    return Array.from({ length: ROWS }, (_, y) => Array.from({ length: COLS }, (_, x) => CP437_TO_UNICODE[this.glyph[y * COLS + x]!]).join(''));
   }
 }

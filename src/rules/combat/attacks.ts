@@ -30,10 +30,11 @@ export interface MeleeExchange extends MeleeOutcome {
  * monster rolls with disadvantage (Spec 04). Higher hits; a tie hits both. `mode` is any other advantage on the
  * player's die, such as Hallowed against the undead (Spec 03, Addendum A).
  */
-export function playerMelee(rng: Rng, combat: DieSource, monster: { modifier: number; unaware: boolean; asleep?: boolean }, attackMod = 0, mode: RollMode = 'normal'): MeleeExchange {
+export function playerMelee(rng: Rng, combat: DieSource, monster: { modifier: number; unaware: boolean; asleep?: boolean; mode?: RollMode }, attackMod = 0, mode: RollMode = 'normal'): MeleeExchange {
   // Melee against an Asleep creature has advantage (Spec 04, Status effects). The weapon's modifier adds to the die (Spec 05).
   const attacker = poolDie(rng, combat, combineModes(monster.asleep ? 'advantage' : 'normal', mode)) + attackMod;
-  const defender = monsterDie(rng, monster.modifier, monster.unaware ? 'disadvantage' : 'normal');
+  // `monster.mode` is a mode on all of the creature's rolls against the player, such as a boss's known weakness (Spec 02, Addendum A).
+  const defender = monsterDie(rng, monster.modifier, combineModes(monster.unaware ? 'disadvantage' : 'normal', monster.mode ?? 'normal'));
   return { ...meleeOutcome(attacker, defender), attacker, defender };
 }
 
@@ -44,14 +45,14 @@ export function playerMelee(rng: Rng, combat: DieSource, monster: { modifier: nu
  */
 export function monsterMelee(
   rng: Rng,
-  monster: { modifier: number; ambush: boolean },
+  monster: { modifier: number; ambush: boolean; mode?: RollMode },
   combat: DieSource,
   playerAsleep = false,
   defenceMod = 0,
   defenceMode: RollMode = 'normal',
   penalty = 0,
 ): MeleeExchange {
-  const attacker = monsterDie(rng, monster.modifier, monster.ambush || playerAsleep ? 'advantage' : 'normal') - penalty;
+  const attacker = monsterDie(rng, monster.modifier, combineModes(monster.ambush || playerAsleep ? 'advantage' : 'normal', monster.mode ?? 'normal')) - penalty;
   // Armour and shield modifiers add to the player's die when defending against melee only (Spec 05).
   const defender = poolDie(rng, combat, defenceMode) + defenceMod;
   return { ...meleeOutcome(attacker, defender), attacker, defender };
@@ -77,8 +78,8 @@ export function playerRanged(rng: Rng, skill: Pool, adjacent: boolean, disadvant
  * Monster ranged attack or spell: d6 plus modifier against one unspent Skill die (ranged) or Magic die
  * (spell) of the player. Only a higher total hits; a tie misses.
  */
-export function monsterRanged(rng: Rng, modifier: number, defence: DieSource): { hit: boolean; attacker: number; defender: number } {
-  const attacker = monsterDie(rng, modifier);
+export function monsterRanged(rng: Rng, modifier: number, defence: DieSource, mode: RollMode = 'normal'): { hit: boolean; attacker: number; defender: number } {
+  const attacker = monsterDie(rng, modifier, mode);
   const defender = poolDie(rng, defence);
   return { hit: attacker > defender, attacker, defender };
 }

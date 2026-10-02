@@ -14,6 +14,7 @@ import { derived, wearerHit, weaponHit } from './items.ts';
 import { combatStep, hasMajor, joinFight, monsterMeleePenalty, raging, useOncePerFight } from './abilities.ts';
 import type { Monster } from './monsters.ts';
 import { failQuest } from './town-state.ts';
+import { breakSeals, rivalDies, weakMode } from './connective.ts';
 
 /** How a creature is named in the log: "the goblin", but "Corvin the Bold" for a named one. */
 export const nameOf = (m: Monster): string => (m.kind === 'monster' ? `the ${m.name}` : m.name);
@@ -52,6 +53,7 @@ export function alert(game: Game, m: Monster): void {
     m.awareness = 'alert';
     m.lost = 0;
   }
+  breakSeals(game, m); // the final boss, the first time it is alert (Spec 02, Addendum A)
   if (m.behaviour !== 'pack') return;
   for (const other of game.state.monsters) {
     if (other !== m && other.group === m.group && other.behaviour === 'pack' && other.awareness !== 'alert') {
@@ -107,6 +109,7 @@ export function removeDie(game: Game, m: Monster, messages: LogMessage[], say: D
   if (m.role === 'boss' && game.state.map.level.depth === MAX_DEPTH) player.stats.finalBoss = true;
   // An opponent's death meets its quest's goal, to be paid on the next arrival in a village (Spec 07, task 2.11).
   if (m.quest && !player.town.goals.includes(m.quest)) player.town.goals.push(m.quest);
+  rivalDies(game, m); // the named rival drops its loot and its journal, and never appears again (Spec 02, Addendum A)
   if (m.carried.length > 0) {
     drops.push({ x: m.x, y: m.y, contents: m.carried });
     if (shown) messages.push({ kind: 'loot', text: `${Name(m)} drops ${describe(m.carried)}.` });
@@ -325,7 +328,7 @@ export function playerAttacks(game: Game, m: Monster, messages: LogMessage[], re
     return;
   }
   const d = derived(game);
-  const exchange = playerMelee(game.rng, { step: combatStep(player), dice: player.pools.combat.dice }, { modifier: m.modifier, unaware: m.awareness !== 'alert', asleep: hasStatus(m.statuses, 'asleep') }, d.melee, tagMode(game, m));
+  const exchange = playerMelee(game.rng, { step: combatStep(player), dice: player.pools.combat.dice }, { modifier: m.modifier, unaware: m.awareness !== 'alert', asleep: hasStatus(m.statuses, 'asleep'), mode: weakMode(game, m) }, d.melee, tagMode(game, m));
   provoke(game, m);
   combatAt(game, m, [m]);
   if (exchange.defenderHit) playerHits(game, m, messages, { margin: exchange.attacker - exchange.defender, cleaved });
@@ -341,7 +344,7 @@ export function monsterAttacks(game: Game, m: Monster, messages: LogMessage[]): 
   const { player } = game.state;
   joinFight(player, game.state.round);
   const defence = derived(game).defence;
-  const exchange = monsterMelee(game.rng, m, { step: combatStep(player), dice: player.pools.combat.dice }, hasStatus(player.statuses, 'asleep'), defence, tagMode(game, m), monsterMeleePenalty(player));
+  const exchange = monsterMelee(game.rng, { ...m, mode: weakMode(game, m) }, { step: combatStep(player), dice: player.pools.combat.dice }, hasStatus(player.statuses, 'asleep'), defence, tagMode(game, m), monsterMeleePenalty(player));
   m.ambush = false;
   combatAt(game, game.state.map.player, [m]);
   if (exchange.defenderHit && !ragingTie(game, exchange) && hitPlayer(game, m, messages) && m.kind === 'bandit') steal(game, m, messages);

@@ -14,15 +14,16 @@ import { FROZEN, GOLDEN_CASES, frozenLevel, levelHash } from './frozen.ts';
 const GOLDEN: Record<number, readonly number[]> = {
   3: [1377192405, 2391738355, 2781338382, 1599728655, 1211507975, 1594066818, 2414900546, 2710281323, 1287150800, 3941704079, 3553031795, 2902157400, 368094642],
   4: [2499789697, 3919751097, 2419653366, 1526465663, 1893042836, 1484175144, 3592912404, 3067319704, 461384772, 3215958730, 4184165187, 3105824461, 1933411304],
+  5: [1358187966, 401916266, 3947795311, 1351391474, 49190838, 1693818337, 712843584, 1931088945, 3545963933, 953043770, 1626563608, 3348045515, 3478798162],
 };
 
 describe('Spec 02, Addendum A: determinism of whole levels', () => {
-  it('the current generator is version 4, and this build still has version 3', () => {
-    expect(GENERATOR_VERSION).toBe(4);
-    expect(SUPPORTED_GENERATORS).toEqual([3, 4]);
+  it('the current generator is version 5, and this build still has versions 3 and 4', () => {
+    expect(GENERATOR_VERSION).toBe(5);
+    expect(SUPPORTED_GENERATORS).toEqual([3, 4, 5]);
   });
 
-  for (const version of [3, 4]) {
+  for (const version of [3, 4, 5]) {
     it(`generator ${version} matches the stored hashes of whole levels for fixed seeds`, () => {
       const actual = GOLDEN_CASES.map(([seed, depth]) => {
         const level = frozenLevel(seed, depth, version)!;
