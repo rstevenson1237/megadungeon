@@ -205,7 +205,7 @@ From Intake Addendum A (findings A2, A3, B3, B4). All figures are starting value
 | Tithe | Village rest is free |
 | Purify | Active: lifts the curse of one worn cursed item (and the Cursed status if no curse is left), or else ends Poisoned |
 
-- **Clarification (task 3.5, proposed October 2, 2026, awaiting approval):** where a row above leaves a detail open, the build reads it as follows.
+- **Clarification (task 3.5, proposed and approved October 2, 2026):** where a row above leaves a detail open, the build reads it as follows.
   - **Hallowed:** no check is made against a creature (the Combat checks are forcing a lock and lifting a lid), so "Combat checks and melee defence against creatures tagged `undead`" is read as the player's Combat die in every melee exchange with such a creature, attacking and defending.
   - **Scholar:** in this build every spellbook comes from a shop already named by its spell, and no book holds a lore-chain place (a chain's entries are graffiti), so the showing half of Scholar has nothing to act on yet; it is built as soon as a book carries a chain place. The learning half (2 to 3 learns) is built.
   - **Light Step:** a 1 that does not spring the trap (the other time in two) jumps clear like a 4 or more, so the trap is found.
