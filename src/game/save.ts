@@ -12,7 +12,7 @@ import { type Monster, creature } from './monsters.ts';
 import { Run, type RunOptions } from './run.ts';
 
 /** The save format. Bump it with every change to what is stored, and add a migration from the format before. */
-export const SAVE_FORMAT = 3;
+export const SAVE_FORMAT = 4;
 /** The generator versions this build can still build levels with; a save keeps the one it started with (Spec 02, Spec 09). */
 export { SUPPORTED_GENERATORS };
 
@@ -195,7 +195,13 @@ export function migrate2to3(data: Record<string, unknown>): Record<string, unkno
   return out;
 }
 
-export const MIGRATIONS: Readonly<Record<number, Migration>> = { 1: migrate1to2, 2: migrate2to3 };
+/** Format 4 keeps the fight in progress and whether Smite is readied (Spec 03, Addendum A; task 3.6): a format 3 save has neither. */
+export function migrate3to4(data: Record<string, unknown>): Record<string, unknown> {
+  const player = (data.player ?? {}) as Record<string, unknown>;
+  return { ...data, player: { ...player, fight: player.fight ?? null, smite: player.smite ?? false } };
+}
+
+export const MIGRATIONS: Readonly<Record<number, Migration>> = { 1: migrate1to2, 2: migrate2to3, 3: migrate3to4 };
 
 /**
  * Read a save from its text: upgrade an older format step by step, and refuse, with a clear message and nothing

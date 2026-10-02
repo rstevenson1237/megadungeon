@@ -6,6 +6,7 @@ import type { LogMessage } from '../core/log.ts';
 import { LOSE_TRACK_ROUNDS, NOTICE_RANGE, noticeRoll } from '../rules/combat/awareness.ts';
 import { creatureMelee, failsMorale, monsterRanged } from '../rules/combat/attacks.ts';
 import { derived } from './items.ts';
+import { joinFight } from './abilities.ts';
 import { cannotAct, effectiveSpeed, hasStatus } from '../rules/magic/status.ts';
 import { distanceSq, lineCells } from '../rules/world/geometry.ts';
 import { distancesFrom } from '../rules/world/grid.ts';
@@ -167,6 +168,7 @@ function shoot(game: Game, m: Monster, messages: LogMessage[]): void {
   const defence = caster(m) ? player.pools.magic : player.pools.skill;
   const result = monsterRanged(game.rng, m.modifier, defence);
   m.ambush = false;
+  joinFight(player, game.state.round); // an exchange involving the player (Spec 03, Addendum A)
   combatAt(game, game.state.map.player, [m]);
   if (result.hit) hitPlayer(game, m, messages, caster(m) ? 'blasts' : 'shoots');
   else messages.push({ kind: 'combat', text: `${Name(m)} ${caster(m) ? 'casts at' : 'shoots at'} you and misses.` });

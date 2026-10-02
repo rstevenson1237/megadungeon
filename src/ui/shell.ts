@@ -7,7 +7,7 @@ import { drawCharacterPane, type CharacterPaneData } from './character-pane.ts';
 import type { Grid } from './grid.ts';
 import { type KeyInput, keyToCommand } from './input.ts';
 import { drawLog } from './log-pane.ts';
-import type { Overlay, OverlayResult } from './overlay.ts';
+import { Menu, type Overlay, type OverlayResult } from './overlay.ts';
 import { type GameMenuHost, HelpOverlay, HistoryOverlay, gameMenu } from './overlays.ts';
 import { MAIN_PANE, drawPanes, inner } from './panes.ts';
 import { UI, mapLook } from './palette.ts';
@@ -32,7 +32,7 @@ import type { ClassDef } from '../rules/character/character.ts';
 import type { ActResult } from '../game/game.ts';
 import { carriedEstimate } from '../rules/items/treasure.ts';
 import { equipped, slotsUsed } from '../rules/items/inventory.ts';
-import { packSizeOf } from '../game/abilities.ts';
+import { BUILT_MAJORS, MAJOR_KINDS, activeAbilities, majorOf, packSizeOf, passiveNote, shieldWallReady } from '../game/abilities.ts';
 import { isIdentified, displayName } from '../rules/items/magic.ts';
 import { type Item } from '../rules/items/types.ts';
 import { resolvesAtOnce, needsCell } from '../rules/magic/spells.ts';
@@ -217,6 +217,9 @@ export class Shell {
       case 'cast':
         this.openSpells();
         return;
+      case 'ability':
+        this.openAbilities();
+        return;
       case 'inventory':
         this.openInventory();
         return;
@@ -273,6 +276,9 @@ export class Shell {
       ...player.statuses.map(describeStatus),
       ...(player.shield > 0 ? [`Shield ${player.shield}`] : []),
       ...(player.timed ?? []).map((t) => `${t.name} ${t.rounds}`),
+      // Trades and once-per-fight abilities that are ready (Spec 03, Addendum A: "the pane shows when it is ready").
+      ...(player.smite ? ['Smite ready'] : []),
+      ...(shieldWallReady(player) ? ['Shield Wall ready'] : []),
     ];
     // What is worn and wielded with its quality, the slots in use and the carried estimate (Spec 01, Spec 05).
     const ctx = this.itemCtx();
@@ -383,6 +389,65 @@ export class Shell {
       return;
     }
     this.overlays.push(spellMenu(known, player.pools.magic, (spell) => this.beginCast(spell)));
+  }
+
+  /**
+   * Q (Spec 03, Addendum A): the major ability, or, when minor abilities that are used (actives) are drawn too, a short
+   * list with the major first, where Enter chooses. With one usable ability Q uses it at once.
+   */
+  private openAbilities(): void {
+    const run = this.run;
+    if (!run) {
+      this.log.add({ kind: 'system', text: 'You have no ability to use.' }, this.turn);
+      return;
+    }
+    const { player } = run;
+    const content = run.gameContent;
+    const major = majorOf(player);
+    const entries: { name: string; use: () => void }[] = [];
+    if (major) entries.push({ name: content.majorNames.get(major) ?? major, use: () => this.useMajor(major) });
+    for (const id of activeAbilities(player, content.minors)) entries.push({ name: content.minorNames.get(id) ?? id, use: () => this.useMinor(id) });
+    if (entries.length === 0) {
+      this.log.add({ kind: 'system', text: 'You have no ability to use.' }, this.turn);
+      return;
+    }
+    if (entries.length === 1) {
+      entries[0]!.use();
+      return;
+    }
+    this.overlays.push(new Menu('Abilities', entries.map((e) => ({ label: e.name, choose: (): OverlayResult => (e.use(), { close: true }) })), 'Enter uses, Esc closes.'));
+  }
+
+  /** Use the major ability: a spell is cast as C would; anything else goes to the game, or in a village is explained. */
+  private useMajor(id: string): void {
+    const game = this.game;
+    const player = this.run!.player;
+    const name = this.run!.gameContent.majorNames.get(id) ?? id;
+    if (MAJOR_KINDS[id] === 'passive' && BUILT_MAJORS.includes(id)) {
+      this.log.add({ kind: 'system', text: passiveNote(player, id, name) }, this.turn);
+      return;
+    }
+    if (!game) {
+      this.log.add({ kind: 'system', text: `You can use ${name} only in the dungeon.` }, this.turn);
+      return;
+    }
+    if (MAJOR_KINDS[id] === 'spell') {
+      const spell = game.spells.get(id);
+      if (spell && player.spells.includes(id)) this.beginCast(spell);
+      else this.log.add({ kind: 'system', text: `You do not know ${name}.` }, this.turn);
+      return;
+    }
+    this.applyResult(game.useMajor());
+  }
+
+  /** Use an active minor ability (a skill use); only in the dungeon. */
+  private useMinor(id: string): void {
+    const game = this.game;
+    if (!game) {
+      this.log.add({ kind: 'system', text: `You can use ${this.run!.gameContent.minorNames.get(id) ?? id} only in the dungeon.` }, this.turn);
+      return;
+    }
+    this.applyResult(game.useAbility(id));
   }
 
   /** A spell chosen from the list. */

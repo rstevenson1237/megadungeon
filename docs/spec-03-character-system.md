@@ -184,6 +184,18 @@ From Intake Addendum A (findings A2, A3, B3, B4). All figures are starting value
 | Witch Hunter | Hex Breaker | Passive | A magical rune never discharges on the player (a 1 simply fails); traps tagged `magic` do nothing when sprung; ranged hits on a creature with the caster behaviour remove one extra die |
 | Beastmaster | Companion | Passive | An animal ally (Spec 04) with 1 die (d6+0), gaining a die at character levels 4, 7 and 10. It follows the player between levels and villages; if killed it returns at the next village rest |
 
+- **Clarification (task 3.6, proposed October 2, 2026, awaiting approval):** where the rules above leave a detail open, the build reads it as follows.
+  - **Once per fight** applies only while a fight is on. A hit taken with no fight on (a trap sprung while exploring) is not turned by Shield Wall, and a spell rolled with no fight on (a self spell before any exchange) gets no help from Overchannel. A creature's attack is an exchange, so it begins the fight before its hit lands.
+  - **Backstab** is a melee attack, so it begins or continues a fight although the creature does not roll.
+  - **Shield Wall and a Shield spell:** the spell's Shield absorbs a hit first; Shield Wall turns the first hit that reaches the player.
+  - **A hit back:** when the player wins an exchange a creature began, that hit is a player melee hit too: Flurry, a readied Smite and Cleave apply to it (weapon breakage, a mace's stun and a flame blade still apply only to the player's own attacks, as built).
+  - **Smite:** a miss does not spend it. If the Magic die is gone by the time the hit lands, Smite fades and the log says so.
+  - **Brew:** "every potion shows its true kind once seen" is built as every potion kind being known to an Alchemist, since any potion the screen shows has been seen. The surface village brews from the level 1 rows.
+  - **Hex Breaker:** the stub teleport trap is tagged `magic`; the launch traps are tagged in task 4.7.
+  - **Q in a village:** a passive ability says so; anything else says it can be used only in the dungeon. Q with a spell ability casts it only if it is known, which creation always makes it.
+  - **Not yet built:** until tasks 3.7 and 3.8, Q on Rage, Volley, Fascinate, Wild Shape, Mark, Spirit Totem, Raise, Decoy and Companion says the ability is not yet available.
+  - **The pane:** the Status block shows "Smite ready" while Smite is readied and "Shield Wall ready" while Shield Wall has not turned a blow in this fight.
+
 **The example minor abilities** (Minor abilities table), as effects from the Spec 08 vocabulary
 
 | Ability | Rule |

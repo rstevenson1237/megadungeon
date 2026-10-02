@@ -22,9 +22,9 @@ import {
 import type { EquipSlot, GearItem, Item } from '../rules/items/types.ts';
 import { applyStatus, removeStatus } from '../rules/magic/status.ts';
 import type { Loot, Point } from '../rules/world/level.ts';
-import { combatAt, damage, nameOf, provoke, removeDie } from './combat.ts';
+import { combatAt, damage, extraDice, nameOf, provoke, removeDie } from './combat.ts';
 import type { Game, PlayerState } from './game.ts';
-import { type MinorEffects, bindWielded, derivedFor, packSizeOf } from './abilities.ts';
+import { type MinorEffects, bindWielded, derivedFor, hasMajor, joinFight, knownIds, packSizeOf } from './abilities.ts';
 import { mapLevel } from './features/fixtures.ts';
 import { type Aim, castSpell, spellAimError } from './magic.ts';
 import { TERRAIN_OPEN } from './map-state.ts';
@@ -37,7 +37,7 @@ export const derived = (game: Game): Derived => derivedFor(game.state.player, ga
 
 /** What the player knows of their items: kinds found out by use, and this run's disguises. */
 export function knowledge(game: Game): Knowledge {
-  return { known: game.state.player.known, disguises: game.disguises };
+  return { known: knownIds(game.state.player, game.items.magic.values()), disguises: game.disguises };
 }
 
 /**
@@ -113,6 +113,7 @@ export function fireRanged(game: Game, target: Monster, messages: LogMessage[]):
   const d = derived(game);
   const adjacent = Math.max(Math.abs(target.x - map.player.x), Math.abs(target.y - map.player.y)) <= 1;
   const result = playerRanged(game.rng, player.pools.skill, adjacent, d.rangedMode === 'disadvantage');
+  joinFight(player, game.state.round); // an exchange involving the player (Spec 03, Addendum A)
   provoke(game, target);
   combatAt(game, target, [target]);
   const weapon = readied(game);
@@ -120,8 +121,10 @@ export function fireRanged(game: Game, target: Monster, messages: LogMessage[]):
     const dagger = throwableDagger(game)!;
     if (dagger.from === 'pack') player.pack.splice(player.pack.indexOf(dagger.item), 1);
     else delete player.equipment.main;
-    if (result.success) damage(game, target, messages, 'player');
-    else messages.push({ kind: 'combat', text: `Your throw misses ${nameOf(target)}.` });
+    if (result.success) {
+      damage(game, target, messages, 'player');
+      extraDice(game, target, messages, hexBreaker(game, target));
+    } else messages.push({ kind: 'combat', text: `Your throw misses ${nameOf(target)}.` });
     land(game, dagger.item, target, messages);
   } else {
     spendAmmo(player.pack, weapon!.ammo!);
@@ -130,11 +133,15 @@ export function fireRanged(game: Game, target: Monster, messages: LogMessage[]):
       damage(game, target, messages, 'player');
       // A crossbow bolt removes 2 dice (Spec 05).
       if (weapon!.traits.includes('heavy') && game.state.monsters.includes(target)) removeDie(game, target, messages, { hit: `The bolt tears into ${nameOf(target)}.`, kill: `The bolt kills ${nameOf(target)}.` }, true);
+      extraDice(game, target, messages, hexBreaker(game, target));
       weaponHit(game, weapon!, messages);
     } else messages.push({ kind: 'combat', text: `Your shot misses ${nameOf(target)}.` });
   }
   if (result.dieLost) messages.push({ kind: 'combat', text: 'You lose a Skill die.' });
 }
+
+/** Hex Breaker (Spec 03, Addendum A): a ranged hit on a creature with the caster behaviour removes one more die. */
+const hexBreaker = (game: Game, target: Monster): string[] => (hasMajor(game.state.player, 'hex_breaker') && target.behaviour === 'caster' ? ['Hex Breaker'] : []);
 
 /** A thrown dagger lands on the target's cell or a free cell beside it, where it can be picked up. */
 function land(game: Game, dagger: GearItem, target: Monster, messages: LogMessage[]): void {
@@ -358,6 +365,7 @@ export function drinkPotion(ctx: ItemCtx, item: Extract<Item, { kind: 'potion' }
   const { player } = ctx;
   const say = (text: string, kind: LogMessage['kind'] = 'system'): void => void messages.push({ kind, text });
   const before = itemName(ctx, item);
+  const shown = isIdentified(item, ctx.knowledge.known); // an Alchemist sees what it is already (Brew)
   takeFromPack(player.pack, item, 1);
   switch (item.effect) {
     case 'restore_dice':
@@ -382,7 +390,7 @@ export function drinkPotion(ctx: ItemCtx, item: Extract<Item, { kind: 'potion' }
       break;
     }
   }
-  if (revealByUse(item, player.known)) say(`It was a ${item.name}.`, 'discovery');
+  if (revealByUse(item, player.known) && !shown) say(`It was a ${item.name}.`, 'discovery');
 }
 
 /**

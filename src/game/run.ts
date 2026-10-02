@@ -20,7 +20,7 @@ import { levelUp, levelsOwed, type LevelUp } from '../rules/character/progressio
 import { type GameContent, noContent } from './content.ts';
 import type { ItemCtx } from './items.ts';
 import { Town } from './town.ts';
-import { bindDrawn } from './abilities.ts';
+import { bindDrawn, knownIds } from './abilities.ts';
 
 /** The surface village sits above level 1. */
 export const SURFACE = 0;
@@ -184,7 +184,7 @@ export class Run {
   ctx(): ItemCtx {
     return {
       player: this.player,
-      knowledge: { known: this.player.known, disguises: this.disguises },
+      knowledge: { known: knownIds(this.player, this.items?.magic.values() ?? []), disguises: this.disguises },
       spells: new Map(this.spells.map((sp) => [sp.id, sp])),
       minors: this.gameContent.minors,
     };

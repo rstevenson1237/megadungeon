@@ -9,7 +9,21 @@ import { type Item, type Equipment, type EquipSlot } from '../rules/items/types.
 import { type Buff } from '../rules/items/gear.ts';
 import { type ItemData, disguisesFor, itemDataFrom, type Knowledge } from '../rules/items/magic.ts';
 import { type GameContent, noContent } from './content.ts';
-import { type TimedAbility, cannotUse, tickTimed, useActive } from './abilities.ts';
+import {
+  BUILT_MAJORS,
+  type Fight,
+  MAJOR_KINDS,
+  type TimedAbility,
+  cannotUse,
+  fightRoundEnds,
+  majorOf,
+  makePact,
+  pactProblem,
+  passiveNote,
+  tickTimed,
+  toggleSmite,
+  useActive,
+} from './abilities.ts';
 import type { Pool, Step } from '../rules/character/dice.ts';
 import type { Character } from '../rules/character/character.ts';
 import { restAll, waitRound } from '../rules/character/health.ts';
@@ -124,6 +138,10 @@ export interface PlayerState extends Character {
   halfRound: boolean;
   /** Timed abilities running, such as Sanctuary, with their rounds left (Spec 03, Addendum A). */
   timed: TimedAbility[];
+  /** The fight in progress, if any (Spec 03, Addendum A, "A fight"). */
+  fight: Fight | null;
+  /** Smite is readied for the next melee hit (Spec 03, Addendum A). */
+  smite: boolean;
 }
 
 /** The pools of a player made without a character: the Combat pool, and Skill and Magic (one d6 each by default). */
@@ -186,6 +204,8 @@ export function createPlayer(setup: PlayerSetup): PlayerState {
     stats: { deepest: 0, kills: 0, won: false, finalBoss: false },
     halfRound: false,
     timed: [],
+    fight: null,
+    smite: false,
   };
 }
 
@@ -202,6 +222,7 @@ export function takeRest(player: PlayerState): void {
   player.invisible = 0;
   player.reload = 0;
   player.timed = [];
+  player.fight = null;
   player.rests++;
 }
 
@@ -616,6 +637,40 @@ export class Game {
     return this.endRound(messages);
   }
 
+  /**
+   * Q on the major ability (Spec 03, Addendum A). A passive one works by itself, and Q says so with no round spent;
+   * Smite is readied or cancelled with no round; Pact is one round with no roll. A spell (Arcane Bolt, Heal) is cast
+   * as C would cast it, which the shell starts, so it never comes here.
+   */
+  useMajor(): ActResult {
+    const { player } = this.state;
+    if (player.dead) return { messages: [{ kind: 'system', text: 'You are dead.' }], spent: false };
+    const id = majorOf(player);
+    const say = (text: string): ActResult => ({ messages: [{ kind: 'system', text }], spent: false });
+    if (!id) return say('You have no class ability.');
+    const name = this.content.majorNames.get(id) ?? id;
+    if (!BUILT_MAJORS.includes(id)) return say(`${name} is not yet available.`);
+    switch (MAJOR_KINDS[id]) {
+      case 'passive':
+        return say(passiveNote(player, id, name));
+      case 'spell':
+        return say(`Cast ${name} with C.`);
+      default:
+        break;
+    }
+    const messages: LogMessage[] = [];
+    if (id === 'smite') {
+      toggleSmite(player, messages);
+      return { messages, spent: false };
+    }
+    const problem = pactProblem(player);
+    if (problem) return say(problem);
+    const helpless = this.helpless(messages);
+    if (helpless) return helpless;
+    makePact(player, messages);
+    return this.endRound(messages);
+  }
+
   /** An Asleep or Held player cannot act: the action is lost and the round goes by (Spec 04, Status effects). */
   private helpless(messages: LogMessage[]): ActResult | undefined {
     if (!cannotAct(this.state.player.statuses)) return undefined;
@@ -735,6 +790,8 @@ export class Game {
         if (wait.restored) messages.push({ kind: 'system', text: 'You feel your strength return.' });
       }
     }
+    // A fight ends after 10 rounds in a row with no exchange involving the player (Spec 03, Addendum A).
+    fightRoundEnds(player, this.state.round);
     this.state.round++;
   }
 

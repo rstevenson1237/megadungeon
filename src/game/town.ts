@@ -10,7 +10,7 @@ import { chooseTemplate, type Fact } from '../core/templates.ts';
 import { bankTreasure } from '../rules/character/progression.ts';
 import { type Knowledge, describeItem, identify, isIdentified, makeMagicItem } from '../rules/items/magic.ts';
 import { addToPack } from '../rules/items/inventory.ts';
-import { derivedFor, packSizeOf } from './abilities.ts';
+import { derivedFor, hasMajor, knownIds, packSizeOf } from './abilities.ts';
 import { buyPrice, identifyPrice, repairPrice, shopPays } from '../rules/items/prices.ts';
 import { type Item, type EquipSlot, EQUIP_SLOTS, isCursed } from '../rules/items/types.ts';
 import { BOARD_SIZE, LODGING_TURNS, QUEST_ITEM_ONE_IN, QUEST_LIMIT, appraiseAll, depositOf, lodgingPrice, rumourPrice } from '../rules/villages/economy.ts';
@@ -76,7 +76,7 @@ export class Town {
   }
 
   private knowledge(): Knowledge {
-    return { known: this.run.player.known, disguises: this.run.disguises };
+    return { known: knownIds(this.run.player, this.run.itemData?.magic.values() ?? []), disguises: this.run.disguises };
   }
 
   /** Take a payment from the bank; false, with a message, when the balance is short (Spec 07). */
@@ -132,8 +132,26 @@ export class Town {
     takeRest(this.run.player);
     this.run.round += LODGING_TURNS;
     messages.push(say(this.restPrice > 0 ? `You pay ${this.restPrice} gp and sleep. You wake rested.` : 'The bed is given freely. You sleep and wake rested.', 'discovery'));
+    this.brew(messages);
     this.run.onRest?.();
     return done(...messages);
+  }
+
+  /**
+   * Brew (Spec 03, Addendum A): at each village rest an Alchemist makes one potion, drawn from the potion rows by the
+   * village's depth and seeded by the run seed and the rest count. With no room in the pack it is lost.
+   */
+  private brew(messages: LogMessage[]): void {
+    const { player } = this.run;
+    const data = this.run.itemData;
+    if (!hasMajor(player, 'brew') || !data) return;
+    const rng = createRng(hash32('brew', this.run.runSeed >>> 0, player.rests));
+    const rows = eligibleEntries([...data.magic.values()].filter((r) => r.kind === 'potion'), { depth: Math.max(1, this.run.depth) });
+    const row = pickWeighted(rows, rng);
+    if (!row) return;
+    const potion = makeMagicItem(row, hash32('brew-item', this.run.runSeed >>> 0, player.rests), rng, data);
+    if (addToPack(player, this.packSize(), potion) > 0) messages.push(say(`You brew a ${row.name} as you rest.`, 'loot'));
+    else messages.push(say(`You brew a ${row.name}, but your pack is full and it is lost.`, 'warning'));
   }
 
   // --- Lift ---
@@ -201,10 +219,11 @@ export class Town {
     // Fence: a `sell_bonus` effect adds its percent (Spec 03, Addendum A).
     const bonus = this.derived().sellBonus;
     const rows: { item: Item; price: number; worn?: EquipSlot }[] = [];
-    for (const item of player.pack) rows.push({ item, price: shopPays(item, data, player.known, bonus) });
+    const { known } = this.knowledge();
+    for (const item of player.pack) rows.push({ item, price: shopPays(item, data, known, bonus) });
     for (const slot of EQUIP_SLOTS) {
       const item = player.equipment[slot];
-      if (item) rows.push({ item, price: shopPays(item, data, player.known, bonus), worn: slot });
+      if (item) rows.push({ item, price: shopPays(item, data, known, bonus), worn: slot });
     }
     return rows.filter((r) => r.price > 0);
   }
@@ -233,7 +252,8 @@ export class Town {
   /** Everything carried or worn that is not yet known for what it is. */
   unidentified(): Item[] {
     const { player } = this.run;
-    return [...player.pack, ...EQUIP_SLOTS.map((s) => player.equipment[s])].filter((i): i is Item => i !== undefined && !isIdentified(i, player.known));
+    const { known } = this.knowledge();
+    return [...player.pack, ...EQUIP_SLOTS.map((s) => player.equipment[s])].filter((i): i is Item => i !== undefined && !isIdentified(i, known));
   }
 
   get identifyPrice(): number {

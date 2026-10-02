@@ -6,7 +6,7 @@ import type { LogMessage } from '../../core/log.ts';
 import { eligibleEntries, pickWeighted } from '../../core/roller.ts';
 import { addCoins, takeFromPack } from '../../rules/items/inventory.ts';
 import { effectOf, identify, isIdentified, liftAllCurses } from '../../rules/items/magic.ts';
-import { packSizeOf } from '../abilities.ts';
+import { hasMajor, packSizeOf } from '../abilities.ts';
 import type { Item } from '../../rules/items/types.ts';
 import { applyBound, applyStatus, removeStatus } from '../../rules/magic/status.ts';
 import { treasureBudget } from '../../rules/world/depth.ts';
@@ -241,10 +241,10 @@ export function stepOnRune(game: Game, messages: LogMessage[]): void {
     state.done = true;
     player.shield = Math.max(player.shield, 20);
     messages.push({ kind: 'discovery', text: 'The rune flares, and a ward settles over you.' });
-  } else if (roll.negative) {
+  } else if (roll.negative && !hasMajor(player, 'hex_breaker')) {
     state.done = true;
     negative(game, 'rune', messages);
-  } else messages.push({ kind: 'system', text: 'The rune glows faintly, then dims.' });
+  } else messages.push({ kind: 'system', text: 'The rune glows faintly, then dims.' }); // for a Hex Breaker a 1 simply fails (Spec 06, Addendum A)
 }
 
 // --- Specials: teleporter, lever, rune altar ---

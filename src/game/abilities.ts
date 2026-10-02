@@ -149,3 +149,127 @@ function purify(player: PlayerState, messages: LogMessage[]): void {
   removeStatus(player.statuses, 'poisoned');
   messages.push({ kind: 'discovery', text: 'The poison leaves you.' });
 }
+
+// --- Major abilities (Spec 03, Addendum A, "The 20 major abilities") ---
+
+/** How each major ability is used (Spec 03, Addendum A): by itself, as a trade, as a spell, or as a skill use with Q. */
+export type MajorKind = 'passive' | 'trade' | 'spell' | 'active';
+
+export const MAJOR_KINDS: Readonly<Record<string, MajorKind>> = {
+  cleave: 'passive',
+  arcane_bolt: 'spell',
+  backstab: 'passive',
+  heal: 'spell',
+  rage: 'active',
+  shield_wall: 'passive',
+  smite: 'trade',
+  volley: 'active',
+  flurry: 'passive',
+  fascinate: 'active',
+  wild_shape: 'active',
+  raise: 'active',
+  overchannel: 'passive',
+  decoy: 'active',
+  pact: 'trade',
+  mark: 'active',
+  brew: 'passive',
+  spirit_totem: 'active',
+  hex_breaker: 'passive',
+  companion: 'passive',
+};
+
+/** The major abilities with a rule in code so far (task 3.6); the actives and the companion come with tasks 3.7 and 3.8. */
+export const BUILT_MAJORS: readonly string[] = ['cleave', 'arcane_bolt', 'backstab', 'heal', 'shield_wall', 'smite', 'flurry', 'overchannel', 'pact', 'brew', 'hex_breaker'];
+
+/** Whether the player has a major ability, by id. */
+export const hasMajor = (player: Pick<PlayerState, 'abilities'>, id: string): boolean => player.abilities.includes(id);
+
+/** The player's major ability: the first in `abilities` (one per class). */
+export const majorOf = (player: Pick<PlayerState, 'abilities'>): string | undefined => player.abilities[0];
+
+// --- Fights (Spec 03, Addendum A, "A fight") ---
+
+/** Rounds in a row with no exchange involving the player that end a fight. */
+export const FIGHT_QUIET_ROUNDS = 10;
+
+/** A fight in progress: the round of the last exchange involving the player, and what was used once in it. */
+export interface Fight {
+  last: number;
+  used: string[];
+}
+
+/**
+ * An exchange involving the player (melee, ranged, or a spell aimed at a creature) in round `round`: it begins a
+ * fight, or keeps the one going.
+ */
+export function joinFight(player: PlayerState, round: number): void {
+  if (player.fight) player.fight.last = round;
+  else player.fight = { last: round, used: [] };
+}
+
+/** True while a fight is on. */
+export const inFight = (player: PlayerState): boolean => player.fight != null;
+
+/** The end of round `round`: a fight with no exchange for 10 rounds in a row ends, and its once-per-fight uses come back. */
+export function fightRoundEnds(player: PlayerState, round: number): void {
+  if (player.fight && round - player.fight.last >= FIGHT_QUIET_ROUNDS) player.fight = null;
+}
+
+/** Whether a once-per-fight use is still to come in the fight now on (none outside a fight). */
+export const fightReady = (player: PlayerState, key: string): boolean => player.fight != null && !player.fight.used.includes(key);
+
+/** Spend a once-per-fight use: true when it was there to spend. */
+export function useOncePerFight(player: PlayerState, key: string): boolean {
+  if (!fightReady(player, key)) return false;
+  player.fight!.used.push(key);
+  return true;
+}
+
+/** Shield Wall is ready: the player has it and no hit has been ignored in this fight (Spec 03, Addendum A). */
+export const shieldWallReady = (player: PlayerState): boolean => hasMajor(player, 'shield_wall') && !(player.fight?.used.includes('shield_wall') ?? false);
+
+/** What Q says of a passive ability: it works by itself, with no round spent (Spec 03, Addendum A). */
+export function passiveNote(player: PlayerState, id: string, name: string): string {
+  if (id === 'shield_wall') return `Shield Wall works by itself: ${shieldWallReady(player) ? 'it is ready for the first hit of a fight' : 'it has turned a blow in this fight'}.`;
+  return `${name} works by itself; there is nothing to use.`;
+}
+
+/**
+ * Pact (Spec 03, Addendum A): a trade with no roll, one Combat die for one Magic die. Why it cannot be made now, or
+ * undefined when it can.
+ */
+export function pactProblem(player: PlayerState): string | undefined {
+  if (player.pools.combat.dice <= 0) return 'You have no Combat die to give.';
+  if (player.pools.magic.dice >= player.pools.magic.max) return 'Your Magic dice are full.';
+  return undefined;
+}
+
+export function makePact(player: PlayerState, messages: LogMessage[]): void {
+  player.pools.combat.dice--;
+  player.pools.magic.dice++;
+  messages.push({ kind: 'system', text: 'You strike the pact: a Combat die for a Magic die.' });
+}
+
+/** Smite (Spec 03, Addendum A): Q readies it, Q again cancels; it cannot be readied with no Magic die. No round either way. */
+export function toggleSmite(player: PlayerState, messages: LogMessage[]): void {
+  if (player.smite) {
+    player.smite = false;
+    messages.push({ kind: 'system', text: 'You lower your guard: Smite is no longer readied.' });
+    return;
+  }
+  if (player.pools.magic.dice <= 0) {
+    messages.push({ kind: 'system', text: 'You need a Magic die to ready Smite.' });
+    return;
+  }
+  player.smite = true;
+  messages.push({ kind: 'system', text: 'Smite is readied: your next melee hit spends a Magic die.' });
+}
+
+/**
+ * What the player knows of potions: an Alchemist's Brew shows every potion's true kind once seen (Spec 03, Addendum
+ * A), and a potion shown to the player has been seen, so every potion kind counts as known to them.
+ */
+export function knownIds(player: Pick<PlayerState, 'abilities' | 'known'>, potions: Iterable<{ id: string; kind: string }>): string[] {
+  if (!hasMajor(player, 'brew')) return player.known;
+  return [...new Set([...player.known, ...[...potions].filter((r) => r.kind === 'potion').map((r) => r.id)])];
+}

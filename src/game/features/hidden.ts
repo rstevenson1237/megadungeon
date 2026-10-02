@@ -6,7 +6,7 @@ import type { LogMessage } from '../../core/log.ts';
 import { eligibleEntries, pickWeighted } from '../../core/roller.ts';
 import type { Trap } from '../../core/schemas.ts';
 import { addCoins, addToPack } from '../../rules/items/inventory.ts';
-import { packSizeOf } from '../abilities.ts';
+import { hasMajor, packSizeOf } from '../abilities.ts';
 import { makeAmmo, makeLockpicks, makeMagicItem } from '../../rules/items/magic.ts';
 import { makeGear } from '../../rules/items/gear.ts';
 import type { Item } from '../../rules/items/types.ts';
@@ -170,6 +170,11 @@ function loseDice(game: Game, trap: Trap, messages: LogMessage[]): void {
 export function triggerTrap(game: Game, trap: Trap, at: Point, messages: LogMessage[]): void {
   const { player } = game.state;
   messages.push({ kind: 'warning', text: `You set off a ${trap.name}!` });
+  // Hex Breaker: a trap tagged `magic` does nothing when sprung (Spec 03, Addendum A; Spec 06, Addendum A).
+  if (hasMajor(player, 'hex_breaker') && trap.tags?.includes('magic')) {
+    messages.push({ kind: 'discovery', text: 'Its magic breaks against you, and nothing happens.' });
+    return;
+  }
   switch (trap.effect) {
     case 'lose_dice':
       loseDice(game, trap, messages);

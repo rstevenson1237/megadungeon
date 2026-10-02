@@ -7,6 +7,7 @@ import type { Game, JournalEntry, PlayerState } from '../game.ts';
 import { wrapText } from '../log.ts';
 import { check, depthOf } from './common.ts';
 import { negative } from './hidden.ts';
+import { hasMajor } from '../abilities.ts';
 
 /** The width a text window wraps its lines to. */
 export const READ_WIDTH = 56;
@@ -58,10 +59,10 @@ export function readMark(game: Game, index: number, messages: LogMessage[]): boo
     if (mark.link !== undefined && mark.index !== undefined) (player.letters[mark.link] ??= {})[mark.index] = mark.text;
     addJournal(player, { depth, kind: 'rune', id: where, text: `A rune of ${mark.text}.` });
     messages.push({ kind: 'discovery', text: `The rune burns itself into your mind: ${mark.text}.` });
-  } else if (roll.negative) {
+  } else if (roll.negative && !hasMajor(player, 'hex_breaker')) {
     used.marks.push(index);
     negative(game, 'rune', messages);
-  } else messages.push({ kind: 'system', text: 'The rune glows faintly, then dims.' });
+  } else messages.push({ kind: 'system', text: 'The rune glows faintly, then dims.' }); // for a Hex Breaker a 1 simply fails (Spec 06, Addendum A)
   return true;
 }
 

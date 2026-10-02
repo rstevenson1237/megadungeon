@@ -76,8 +76,10 @@ describe('every key acts or logs "not yet available"', () => {
     const handled = press(shell, key, shift);
     expect(handled).toBe(true);
     const acted = shell.overlays.length > 0;
-    // Casting (task 2.8) and the inventory (task 2.9) act: with no run to act in they say so instead.
-    const logged = shell.log.lines(shell.turn).some((l) => l.text.endsWith('is not yet available.') || l.text.startsWith('There is nothing to cast') || l.text.startsWith('There is nothing to carry'));
+    // Casting (task 2.8), the inventory (task 2.9) and Q (task 3.6) act: with no run to act in they say so instead.
+    const logged = shell.log.lines(shell.turn).some(
+      (l) => l.text.endsWith('is not yet available.') || l.text.startsWith('There is nothing to cast') || l.text.startsWith('There is nothing to carry') || l.text === 'You have no ability to use.',
+    );
     expect(acted || logged).toBe(true);
   });
 

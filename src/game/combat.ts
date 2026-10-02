@@ -11,7 +11,7 @@ import { distanceSq } from '../rules/world/geometry.ts';
 import { MAX_DEPTH, type Loot } from '../rules/world/level.ts';
 import type { Game } from './game.ts';
 import { derived, wearerHit, weaponHit } from './items.ts';
-import { monsterMeleePenalty } from './abilities.ts';
+import { hasMajor, joinFight, monsterMeleePenalty, useOncePerFight } from './abilities.ts';
 import type { Monster } from './monsters.ts';
 import { failQuest } from './town-state.ts';
 
@@ -117,6 +117,11 @@ export function hurtPlayer(game: Game, messages: LogMessage[], say: DieText): bo
     messages.push({ kind: 'combat', text: 'Your shield absorbs the blow.' });
     return false;
   }
+  // Shield Wall: the first hit taken in each fight is ignored, and armour does not roll to break (Spec 03, Addendum A).
+  if (hasMajor(player, 'shield_wall') && useOncePerFight(player, 'shield_wall')) {
+    messages.push({ kind: 'combat', text: 'Your shield wall turns the blow.' });
+    return false;
+  }
   removeStatus(player.statuses, 'asleep');
   if (player.pools.combat.dice <= 0) {
     player.dead = true;
@@ -197,18 +202,54 @@ function steal(game: Game, bandit: Monster, messages: LogMessage[]): void {
   }
 }
 
-/** The player's melee attack on a creature: one exchange (Spec 04, Attacks), with the weapon's modifier (Spec 05). */
-export function playerAttacks(game: Game, m: Monster, messages: LogMessage[], reach = false): void {
+/** A creature that fights the player: a monster, a bandit, or a rival once it has turned hostile. */
+export const isHostile = (m: Monster): boolean => m.kind !== 'rival' || m.hostile;
+
+/**
+ * Hits that remove more than one die (Spec 03, Addendum A, "Extra dice add up"): each named source adds one die to
+ * the hit, and several add. Called after the hit's own die; does nothing once the creature is dead.
+ */
+export function extraDice(game: Game, m: Monster, messages: LogMessage[], sources: readonly string[]): void {
+  if (sources.length === 0) return;
+  const what = sources.join(' and ');
+  for (let i = 0; i < sources.length && game.state.monsters.includes(m); i++) {
+    removeDie(game, m, messages, { hit: `${what}: ${nameOf(m)} loses another die.`, kill: `${what}: ${nameOf(m)} dies.` }, true);
+  }
+}
+
+/** How a player's melee hit came about: its winning margin, and whether it is a Backstab, a Cleave, or the answer to a creature's attack. */
+interface MeleeHit {
+  margin: number;
+  backstab?: boolean;
+  cleaved?: boolean;
+  counter?: boolean;
+}
+
+/**
+ * A melee hit by the player on a creature (Spec 04; Spec 05), with what the major abilities add (Spec 03, Addendum
+ * A): Backstab, Flurry (winning by 3 or more) and a readied Smite (spending a Magic die, with no roll) each remove one
+ * more die; a hit that kills carries into another adjacent hostile creature once (Cleave). A hit answering a
+ * creature's attack has no weapon effects, as before.
+ */
+function playerHits(game: Game, m: Monster, messages: LogMessage[], hit: MeleeHit): void {
   const { player } = game.state;
   const d = derived(game);
-  const exchange = playerMelee(game.rng, { step: player.pools.combat.step, dice: player.pools.combat.dice }, { modifier: m.modifier, unaware: m.awareness !== 'alert', asleep: hasStatus(m.statuses, 'asleep') }, d.melee, tagMode(game, m));
-  provoke(game, m);
-  combatAt(game, m, [m]);
-  if (exchange.defenderHit) {
-    damage(game, m, messages, 'player');
-    const alive = game.state.monsters.includes(m);
+  const extras: string[] = [];
+  if (hit.backstab) extras.push('Backstab');
+  if (hasMajor(player, 'flurry') && hit.margin >= 3) extras.push('Flurry');
+  if (player.smite) {
+    player.smite = false;
+    if (player.pools.magic.dice > 0) {
+      player.pools.magic.dice--;
+      extras.push('Smite');
+    } else messages.push({ kind: 'system', text: 'Smite fades: you have no Magic die to spend.' });
+  }
+  damage(game, m, messages, 'player');
+  extraDice(game, m, messages, extras);
+  const alive = game.state.monsters.includes(m);
+  if (!hit.counter) {
     // A mace stuns when the hit wins by 3 or more (Spec 05).
-    if (alive && d.weaponTraits.includes('stun') && exchange.attacker - exchange.defender >= 3) {
+    if (alive && d.weaponTraits.includes('stun') && hit.margin >= 3) {
       m.stunned = true;
       messages.push({ kind: 'combat', text: `${Name(m)} is stunned.` });
     }
@@ -219,17 +260,66 @@ export function playerAttacks(game: Game, m: Monster, messages: LogMessage[], re
     const weapon = player.equipment.main;
     if (weapon?.kind === 'weapon') weaponHit(game, weapon, messages);
   }
+  if (!game.state.monsters.includes(m) && !hit.cleaved) cleave(game, messages);
+}
+
+/** The eight cells around a point, clockwise from north (Spec 03, Addendum A, Cleave). */
+const CLOCKWISE: readonly (readonly [number, number])[] = [[0, -1], [1, -1], [1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1]];
+
+/**
+ * Cleave (Spec 03, Addendum A): a player melee hit that kills makes one more melee exchange at once against another
+ * adjacent hostile creature, the first clockwise from north. No extra round, and it carries only once.
+ */
+function cleave(game: Game, messages: LogMessage[]): void {
+  const { player, map } = game.state;
+  if (!hasMajor(player, 'cleave') || player.dead) return;
+  for (const [dx, dy] of CLOCKWISE) {
+    const next = game.monsterAt(map.player.x + dx, map.player.y + dy);
+    if (!next || !isHostile(next)) continue;
+    messages.push({ kind: 'combat', text: `You cleave on into ${nameOf(next)}.` });
+    playerAttacks(game, next, messages, false, true);
+    return;
+  }
+}
+
+/** Backstab (Spec 03, Addendum A): a Light weapon (not bare hands) against an asleep or unaware creature. */
+const backstabs = (game: Game, m: Monster): boolean =>
+  hasMajor(game.state.player, 'backstab') && derived(game).weaponTraits.includes('light') && (m.awareness !== 'alert' || hasStatus(m.statuses, 'asleep'));
+
+/**
+ * The player's melee attack on a creature: one exchange (Spec 04, Attacks), with the weapon's modifier (Spec 05). It
+ * is an exchange involving the player, so it begins or continues a fight (Spec 03, Addendum A). A Backstab hits with
+ * no exchange: the creature does not roll. `cleaved` marks the one extra attack a Cleave makes.
+ */
+export function playerAttacks(game: Game, m: Monster, messages: LogMessage[], reach = false, cleaved = false): void {
+  const { player } = game.state;
+  joinFight(player, game.state.round);
+  if (backstabs(game, m)) {
+    provoke(game, m);
+    combatAt(game, m, [m]);
+    playerHits(game, m, messages, { margin: 0, backstab: true, cleaved });
+    return;
+  }
+  const d = derived(game);
+  const exchange = playerMelee(game.rng, { step: player.pools.combat.step, dice: player.pools.combat.dice }, { modifier: m.modifier, unaware: m.awareness !== 'alert', asleep: hasStatus(m.statuses, 'asleep') }, d.melee, tagMode(game, m));
+  provoke(game, m);
+  combatAt(game, m, [m]);
+  if (exchange.defenderHit) playerHits(game, m, messages, { margin: exchange.attacker - exchange.defender, cleaved });
   // A spear's reach cannot be answered from 2 cells away (Spec 05, task 2.9).
   if (exchange.attackerHit && !reach) hitPlayer(game, m, messages);
 }
 
-/** A creature's melee attack on the player: one exchange. An ambusher's first has advantage. The player's armour adds to the defence die. */
+/**
+ * A creature's melee attack on the player: one exchange, which begins or continues a fight. An ambusher's first has
+ * advantage. The player's armour adds to the defence die; a player who wins it hits back.
+ */
 export function monsterAttacks(game: Game, m: Monster, messages: LogMessage[]): void {
   const { player } = game.state;
+  joinFight(player, game.state.round);
   const defence = derived(game).defence;
   const exchange = monsterMelee(game.rng, m, { step: player.pools.combat.step, dice: player.pools.combat.dice }, hasStatus(player.statuses, 'asleep'), defence, tagMode(game, m), monsterMeleePenalty(player));
   m.ambush = false;
   combatAt(game, game.state.map.player, [m]);
   if (exchange.defenderHit && hitPlayer(game, m, messages) && m.kind === 'bandit') steal(game, m, messages);
-  if (exchange.attackerHit) damage(game, m, messages, 'player');
+  if (exchange.attackerHit) playerHits(game, m, messages, { margin: exchange.defender - exchange.attacker, counter: true });
 }
