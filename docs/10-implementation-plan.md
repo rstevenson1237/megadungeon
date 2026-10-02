@@ -110,7 +110,7 @@ Goal: every requirement of the intake and specs has working code, so content onl
 | 3.8 | Allies: ally turns and behaviour; Raise, Decoy and Companion | 03, 04 | 3.7 | Each ally kind behaves as Spec 04 Addendum A in an arena test, and only the companion changes level |
 | 3.9 | Z (wait until recovered) and L (look) | 01 | 3.3 | Every key in the key map acts; nothing logs "not yet available" |
 | 3.10 | Connective elements and the final boss: the named rival arc and its journal, a lore chain's weakness, a stub final boss on level 100, artifact seals | 02, 06, 09 | 3.2, 3.6 | Addendum A connective criteria pass; defeating the stub final boss records on the leaderboard |
-| 3.11 | Class scenarios: every class created through creation, using its ability in an arena, and played to level 10 with its draws in effect | 03 | 3.4 to 3.10 | Spec 03 Addendum A criteria pass for all 20 classes |
+| 3.11 | Class scenarios and closeout audit: every class created through creation, using its ability in an arena, and played to level 10 with its draws in effect; a browser smoke test in CI that drives the built page (create a non-Thief character, step, cast a starting spell, rest, reload) and checks the pane shows that class's real state; and an audit marking every acceptance criterion of every spec as built and tested, stubbed, or owned by a named Phase 4 task | All | 3.4 to 3.10 | Spec 03 Addendum A criteria pass for all 20 classes; the smoke test passes in CI; the audit leaves no criterion without an owner |
 
 **Gate: Systems complete, replayed.** You play the full loop again with real classes: create any class, use its ability, delve, bank, level up with a minor draw in effect, rest, use the lift, die and try each death option.
 
@@ -123,10 +123,10 @@ Goal: every table reaches its Spec 08 launch minimum, the coverage report is cle
 | 4.1 | Style guide with sample entries | 08 | Gate 3 | You approve the voice (inner checkpoint) |
 | 4.2 | 13 level themes: palettes, tile sets, layouts, feature weights (the renderer reads them from task 3.3) | 02, 08 | 4.1 | Every theme renders and generates cleanly |
 | 4.3 | 150 monsters and 40 bosses | 04, 08 | 4.1 | At least 5 monsters per rating; no depth gaps |
-| 4.4 | Minor ability pools (240 slots), and any revision of the 16 classes' starting gear | 03, 05, 08 | 4.1 | Every class has 12 entries, each naming an effect from the vocabulary |
-| 4.5 | 130 magic items, 40 artifacts, 100 disguise names, 50 gems and jewelry | 05, 08 | 4.1 | Item tables meet their minimums |
+| 4.4 | Minor ability pools (240 slots), and any revision of the 16 classes' starting gear (an entry needing a new effect gets its code, its place in the effect list and its test in this task) | 03, 05, 08 | 4.1 | Every class has 12 entries, each naming an effect from the vocabulary |
+| 4.5 | 130 magic items, 40 artifacts, 100 disguise names, 50 gems and jewelry (an entry needing a new effect gets its code, its place in the effect list and its test in this task) | 05, 08 | 4.1 | Item tables meet their minimums |
 | 4.6 | Spells up to the target of 30 (a spell needing a new effect gets its code in this task) | 04 | 4.1 | New spells pass the spell criteria |
-| 4.7 | Fountain, altar god, rune, trap and debris tables | 06 | 4.1 | Feature tables meet their minimums |
+| 4.7 | Fountain, altar god, rune, trap and debris tables (an entry needing a new effect gets its code, its place in the effect list and its test in this task) | 06 | 4.1 | Feature tables meet their minimums |
 | 4.8 | Lore: 200 books, 300 graffiti, 120 signs, 25 lore chains | 06, 08 | 4.1 | Lore tables meet their minimums; style mix within 20% |
 | 4.9 | 60 rumour templates, quest templates and items, all name tables | 07, 08 | 4.1 | Every rumour kind and quest type has templates |
 | 4.10 | Level 100 set piece and final boss, replacing the task 3.10 stub | 02, 04 | 4.2, 4.3 | Level 100 generates and the boss fight works, with artifact seals |
@@ -168,4 +168,5 @@ The content build's schema, reference and coverage checks (Spec 08) run alongsid
 - [x] **Hosting:** GitHub Pages, deployed from every merged task.
 - [x] **Review between gates:** a playable build after every task.
 - [x] **Task order:** approved as written.
+- [x] **Additions of October 2, 2026 (approved):** new effects allowed with code in tasks 4.4, 4.5 and 4.7; a browser smoke test and a criteria audit in task 3.11.
 - [x] **Revision of October 1, 2026 (approved October 2):** the Phase 3 Systems closeout and the move of content to Phase 4 (Intake Addendum A).
