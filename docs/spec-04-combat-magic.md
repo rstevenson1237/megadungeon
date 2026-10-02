@@ -207,7 +207,7 @@ From Intake Addendum A (finding A2: Raise, Decoy and Companion need creatures on
 - **The phantom** stands on its cell and does not act. Alert hostile creatures within 8 cells of it treat it as the player for moving and attacking; their attacks on it pass harmlessly, with no exchange. It vanishes after 5 rounds.
 - **Kills by allies** count toward monsters killed (Spec 09).
 
-- **Clarification (task 3.8, proposed October 2, 2026, awaiting approval):** where the rules above and the Raise, Decoy and Companion rows (Spec 03, Addendum A) leave a detail open, the build reads it as follows.
+- **Clarification (task 3.8, proposed and approved October 2, 2026):** where the rules above and the Raise, Decoy and Companion rows (Spec 03, Addendum A) leave a detail open, the build reads it as follows.
   - **What an ally is:** a creature in the level's list, always alert. It makes no notice rolls, never flees and rolls no morale. A raised ally keeps the speed it had.
   - **Drawing:** the ally colour is gold (#E0C050). A raised ally keeps its letter and is "the raised goblin" in the log; the companion is drawn as d and is "your companion"; the phantom is drawn as @.
   - **An ally's turn:** "adjacent" is the four cells beside it, as for every creature's melee; with several foes holding the fewest dice, the first from north clockwise is attacked. "In sight" means in the player's sight. It moves by the shortest walk. "Within 3 cells of the player" counts diagonals as one step, and an ally already that close stands still.
