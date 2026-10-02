@@ -6,7 +6,7 @@
 // living monster keeps only the fields that differ from a fresh one.
 
 import type { Character, ClassDef } from '../rules/character/character.ts';
-import { GENERATOR_VERSION } from '../rules/world/level.ts';
+import { SUPPORTED_GENERATORS } from '../rules/world/level.ts';
 import { type LevelDelta, type PlayerState } from './game.ts';
 import { type Monster, creature } from './monsters.ts';
 import { Run, type RunOptions } from './run.ts';
@@ -14,7 +14,13 @@ import { Run, type RunOptions } from './run.ts';
 /** The save format. Bump it with every change to what is stored, and add a migration from the format before. */
 export const SAVE_FORMAT = 1;
 /** The generator versions this build can still build levels with; a save keeps the one it started with (Spec 02, Spec 09). */
-export const SUPPORTED_GENERATORS: readonly number[] = [GENERATOR_VERSION];
+export { SUPPORTED_GENERATORS };
+
+/**
+ * Until the Content complete gate, a save made with other content is refused (Spec 09, Addendum A): the tables shape
+ * what a level holds, so its deltas would land on a different level. The policy for after release is chosen at that gate.
+ */
+export const REFUSE_OTHER_CONTENT = true;
 
 /** A monster as saved: what a fresh monster of its name and place already has is left out. */
 type PackedMonster = Partial<Monster> & Pick<Monster, 'id' | 'name' | 'glyph' | 'colour' | 'x' | 'y' | 'dice' | 'modifier'>;
@@ -41,7 +47,7 @@ export interface SaveData {
 
 export class SaveError extends Error {
   constructor(
-    readonly reason: 'newer' | 'unsupported' | 'invalid',
+    readonly reason: 'newer' | 'unsupported' | 'invalid' | 'content',
     message: string,
   ) {
     super(message);
@@ -115,7 +121,7 @@ export function toSave({ run, contentVersion, now = new Date() }: SaveSource): S
   if (!run.inVillage) throw new RangeError('a game is saved only in a village');
   return structuredClone({
     format: SAVE_FORMAT,
-    generator: GENERATOR_VERSION,
+    generator: run.generator,
     content: contentVersion,
     seed: run.runSeed,
     ...(run.daily ? { daily: run.daily } : {}),
@@ -142,7 +148,12 @@ export const MIGRATIONS: Readonly<Record<number, Migration>> = {};
  * Read a save from its text: upgrade an older format step by step, and refuse, with a clear message and nothing
  * touched, a save from a newer game, one built by a generator this build no longer has, or one that is not a save.
  */
-export function parseSave(text: string, migrations: Readonly<Record<number, Migration>> = MIGRATIONS, current = SAVE_FORMAT): SaveData {
+export function parseSave(
+  text: string,
+  migrations: Readonly<Record<number, Migration>> = MIGRATIONS,
+  current = SAVE_FORMAT,
+  content?: string,
+): SaveData {
   let data: Record<string, unknown>;
   try {
     data = JSON.parse(text) as Record<string, unknown>;
@@ -165,6 +176,9 @@ export function parseSave(text: string, migrations: Readonly<Record<number, Migr
   for (const key of ['seed', 'depth', 'round', 'character', 'player', 'deltas', 'characterId'] as const) {
     if (save[key] === undefined) throw new SaveError('invalid', `The save is damaged: it has no ${key}.`);
   }
+  if (REFUSE_OTHER_CONTENT && content !== undefined && save.content !== content) {
+    throw new SaveError('content', 'This save was made with different game content and cannot be loaded by this version.');
+  }
   return save;
 }
 
@@ -178,6 +192,7 @@ export function restoreRun(save: SaveData, base: RunOptions, classDef?: ClassDef
     character: save.character,
     ...(classDef ? { classDef } : {}),
     characterId: save.characterId,
+    generator: save.generator,
     ...(save.daily ? { daily: save.daily } : {}),
   });
 }

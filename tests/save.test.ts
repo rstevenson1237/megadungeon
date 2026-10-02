@@ -158,8 +158,21 @@ describe('Spec 09: versions and migration', () => {
 
   it('a save built by a generator this build no longer has is refused', () => {
     expect(SUPPORTED_GENERATORS).toContain(GENERATOR_VERSION);
-    const text = JSON.stringify({ ...save(), generator: GENERATOR_VERSION - 1 });
+    const text = JSON.stringify({ ...save(), generator: Math.min(...SUPPORTED_GENERATORS) - 1 });
     expect(() => parseSave(text)).toThrow('no longer has');
+  });
+
+  it('a save from different content is refused before release, with a plain message and nothing changed (Addendum A)', () => {
+    const text = JSON.stringify({ ...save(), content: 'old-tables' });
+    try {
+      parseSave(text, undefined, undefined, 'new-tables');
+      throw new Error('should have been refused');
+    } catch (error) {
+      expect(error).toBeInstanceOf(SaveError);
+      expect((error as SaveError).reason).toBe('content');
+      expect((error as SaveError).message).toBe('This save was made with different game content and cannot be loaded by this version.');
+    }
+    expect(parseSave(text, undefined, undefined, 'old-tables').content).toBe('old-tables');
   });
 
   it('a save from each earlier format version loads through its migrations, step by step', () => {

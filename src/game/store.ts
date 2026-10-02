@@ -28,7 +28,11 @@ export const CURRENT = 'current';
 const recordKey = (n: number): string => `save-${n}`;
 
 export class SaveSlot {
-  constructor(private readonly store: KeyValueStore) {}
+  /** `content` is this build's content fingerprint: saves made with other content are refused (Spec 09, Addendum A). */
+  constructor(
+    private readonly store: KeyValueStore,
+    private readonly content?: string,
+  ) {}
 
   /** The text of the current save, if there is one. */
   async readText(): Promise<string | undefined> {
@@ -43,7 +47,7 @@ export class SaveSlot {
   /** The current save, read and upgraded; undefined when there is none. Throws `SaveError` for one that cannot be read. */
   async read(): Promise<SaveData | undefined> {
     const text = await this.readText();
-    return text === undefined ? undefined : parseSave(text);
+    return text === undefined ? undefined : parseSave(text, undefined, undefined, this.content);
   }
 
   /**
@@ -73,7 +77,7 @@ export class SaveSlot {
 
   /** Take a save from a file: it must be readable by this game, or nothing changes. Returns what it was. */
   async importText(text: string): Promise<SaveData> {
-    const save = parseSave(text);
+    const save = parseSave(text, undefined, undefined, this.content);
     await this.write(save);
     return save;
   }

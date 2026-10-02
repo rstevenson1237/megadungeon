@@ -231,6 +231,7 @@ From Intake Addendum A (findings A6 to A8, C2, C3). All figures are starting val
 - **One stream per step:** steps 4 to 11 each draw from their own stream, derived from the level's contents seed and the step's number, instead of sharing one. A change to one table (say, a new monster row) then moves only the step that rolls it. This is generator version 4.
 - **Stored hashes cover the whole level:** the determinism test hashes the tiles and the full contents for fixed seeds, generated against a frozen copy of the stub tables kept with the tests. Content edits never change the stored hashes; generator code changes do, and those bump the generator version.
 - **Content and saves:** the tables still shape the contents, so a save made with other content is handled by Spec 09 (Addendum A).
+- **Clarification (task 3.2, proposed October 2, 2026, awaiting approval):** separate streams keep a table change out of the other steps' dice, but not out of their cells. What holds: a change never moves the steps before the one that rolls it; later steps keep their own draws, yet may shift where the changed step now takes or frees a cell (a new monster row moves some NPCs and lore, since they avoid monsters); and a level whose first try no longer validates retries with the next sub-seed, which moves everything. Measured over 227 levels, a new gem row moved only the treasure in nearly every level (v3: every step), and a new graffiti or trap row moved only its own step. The acceptance line below is read this way: the steps before the changed one never move unless the level retried.
 
 **Named rival arc**
 
@@ -251,7 +252,7 @@ From Intake Addendum A (findings A6 to A8, C2, C3). All figures are starting val
 **Acceptance criteria changed and added**
 
 - [ ] (Replaces the opening line of Acceptance criteria.) The generation criteria are checked over 10,000 seeds with one level each (the depth cycling over 1 to 99, every size), plus every level 1 to 100 of 100 seeds.
-- [ ] A change to one content table changes only the placement step that rolls it, shown by a test that adds a monster row and compares the other steps.
+- [ ] A change to one content table changes only the placement step that rolls it and the steps after it, never those before (unless the level retried), shown by tests that add a monster, gem and graffiti row and compare the steps (clarification of task 3.2).
 - [ ] The named rival carries its loot between appearances and, once killed, drops it with its journal and never appears again.
 - [ ] Reading a weakness chain's last entry weakens its boss; each artifact carried removes one die from the final boss when it becomes alert.
 

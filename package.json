@@ -13,6 +13,7 @@
     "content:report": "tsx tools/content-build.ts --report",
     "content:strict": "tsx tools/content-build.ts --check --strict",
     "typecheck": "npm run content:build && tsc --noEmit",
+    "pretest": "npm run content:build",
     "test": "vitest run",
     "dev": "npm run content:build && vite",
     "build": "npm run typecheck && vite build",

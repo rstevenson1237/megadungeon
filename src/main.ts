@@ -70,7 +70,7 @@ if (root) {
   let redraw = (): void => undefined;
   const app = new App({
     // The one save slot of this browser, the leaderboard and the one-time warning live in the browser (Spec 09).
-    saves: new SaveSlot(idbStore()),
+    saves: new SaveSlot(idbStore(), contentVersionOf(bundle as ContentBundle)),
     board: new Leaderboard(localStorage),
     flags: localStorage,
     contentVersion: contentVersionOf(bundle as ContentBundle),

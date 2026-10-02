@@ -9,7 +9,7 @@ import type { LogMessage } from '../core/log.ts';
 import type { Spell } from '../core/schemas.ts';
 import { type ItemData, disguisesFor } from '../rules/items/magic.ts';
 import { generateLevel, PLAIN_STYLE, type LevelStyle } from '../rules/world/generate.ts';
-import { MAX_DEPTH, type Level, type Point, type SizeClass } from '../rules/world/level.ts';
+import { GENERATOR_VERSION, MAX_DEPTH, type Level, type Point, type SizeClass } from '../rules/world/level.ts';
 import type { LevelContents } from '../rules/world/placement/index.ts';
 import type { RunLayout } from '../rules/world/run-layout.ts';
 import { Game, type LevelDelta, type PlayerState } from './game.ts';
@@ -57,6 +57,8 @@ export interface RunOptions {
   /** Who is playing and whether the seed is the seed of the day (a date), for the leaderboard (Spec 09). */
   characterId?: string;
   daily?: string;
+  /** The generator version the run's levels are built with: the current one for a new run, the saved one on a load (Spec 02). */
+  generator?: number;
   /** Supplies the level for a depth. Tests pass hand-built levels; the default generates from the seed. */
   levelFor?: (depth: number) => Level;
 }
@@ -68,6 +70,8 @@ export class Run {
   /** The id the leaderboard knows this character by, and the date if the seed is the seed of the day. */
   readonly characterId: string;
   readonly daily: string | undefined;
+  /** The generator version this run's levels are built with, kept for the whole run (Spec 02). */
+  readonly generator: number;
   depth: number;
   /** The level being played; null in a village, where there is no map (Spec 01). */
   game: Game | null = null;
@@ -100,6 +104,7 @@ export class Run {
     this.round = options.round ?? 1;
     this.characterId = options.characterId ?? `${runSeed >>> 0}`;
     this.daily = options.daily;
+    this.generator = options.generator ?? GENERATOR_VERSION;
     this.layout = options.layout;
     this.contentsFor = options.contentsFor;
     this.spells = options.spells ?? [];
@@ -109,7 +114,7 @@ export class Run {
     this.villages = options.villages ?? [SURFACE, ...(options.layout?.villages.map((v) => v.level) ?? [])];
     const sizeFor = options.sizeFor ?? stubSize;
     const styleFor = options.styleFor ?? (() => PLAIN_STYLE);
-    this.levelFor = options.levelFor ?? ((d) => generateLevel(runSeed, d, sizeFor(d), styleFor(d), options.contentsFor?.(d)));
+    this.levelFor = options.levelFor ?? ((d) => generateLevel(runSeed, d, sizeFor(d), styleFor(d), options.contentsFor?.(d), this.generator));
     this.depth = options.startDepth ?? SURFACE;
     this.character = options.character ?? {
       name: '',

@@ -233,3 +233,24 @@ export function sweep(from: number, to: number): SweepStats {
   }
   return stats;
 }
+
+/**
+ * Every level 1 to 100 of each seed in [from, to), villages left out (Spec 02, Addendum A: the sweep also covers
+ * every level of 100 seeds, so the deepest levels and level 100 are checked as well as the depth-cycled sweep).
+ */
+export function sweepEveryLevel(from: number, to: number): SweepStats {
+  const stats: SweepStats = { levels: 0, fallbacks: 0, failures: [] };
+  for (let seed = from; seed < to; seed++) {
+    const options = runOptionsFor(BUNDLE, seed);
+    for (let depth = 1; depth <= 100; depth++) {
+      if (isVillageLevel(options.layout!, depth)) continue;
+      const contents = options.contentsFor!(depth)!;
+      const level = generateLevel(seed, depth, options.sizeFor!(depth), options.styleFor!(depth), contents);
+      stats.levels++;
+      if (level.fallback) stats.fallbacks++;
+      const problem = checkPlacement(level, contents.plan) ?? checkPlan(level, contents.plan);
+      if (problem) stats.failures.push(`seed ${seed} level ${depth}: ${problem}`);
+    }
+  }
+  return stats;
+}
