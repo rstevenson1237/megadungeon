@@ -2,7 +2,7 @@
 // the cross-level links that the run layout assigned to this level.
 
 import { bossCeiling, ratingCeiling } from '../depth.ts';
-import type { Feature, Loot, LoreMark, Npc, PlacedMonster, Pile, Point, Special } from '../level.ts';
+import { FINAL_BOSS_RATING, type Feature, type Loot, type LoreMark, type Npc, type PlacedMonster, type Pile, type Point, type Special } from '../level.ts';
 import type { Board } from './board.ts';
 import { farFromUp, placedFrom, rollRow, withinCeiling, type Ctx } from './contents.ts';
 import type { LevelPlan, Piece, QuestGoal } from './plan.ts';
@@ -113,12 +113,14 @@ export function placeSpecials(ctx: Ctx, built: Built, input: SpecialsInput): num
   }
 
   // The boss: in the farthest room of the open region, with its artifact and any lift token.
+  // On level 100 it is the final boss: a row tagged `final`, rated 20d6+6, with no artifact (Spec 02, Addendum A).
   if (plan.boss) {
-    const row = rollRow(ctx, withinCeiling(content.bosses, bossCeiling(depth)));
+    const row = plan.boss.final ? rollRow(ctx, content.bosses, ['final']) : rollRow(ctx, withinCeiling(content.bosses, bossCeiling(depth)));
     const at = input.bossRoom === undefined ? undefined : nearestCentre(b, input.bossRoom);
     if (row && at) {
       b.put(at);
       const boss = placedFrom(row, at, group++, 'boss');
+      if (plan.boss.final) Object.assign(boss, { ...FINAL_BOSS_RATING, final: true });
       if (plan.boss.artifactId && plan.boss.artifactName) boss.artifact = { id: plan.boss.artifactId, name: plan.boss.artifactName };
       if (plan.boss.liftToken) boss.liftToken = true;
       built.monsters.push(boss);

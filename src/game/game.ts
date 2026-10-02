@@ -55,6 +55,8 @@ import { type MajorAim, activeProblem, useActiveMajor, waitRoundsNow } from './a
 import { allyRoundEnds, placeCompanion } from './allies.ts';
 import { type Monster, isAlly, spawnAll } from './monsters.ts';
 import type { Fact } from '../core/templates.ts';
+import type { Link } from '../rules/world/run-layout.ts';
+import { type RivalArc, rivalsArrive } from './connective.ts';
 import { type TownState, freshTown } from './town-state.ts';
 
 export { MAX_SIMULATED, actionsInRound };
@@ -123,6 +125,10 @@ export interface PlayerState extends Character {
   shrines: Record<string, number>;
   /** Levels a map fragment has mapped (Spec 02): their layout shows on arrival. */
   mapped: number[];
+  /** The named rival's progress by link: what it carries between appearances, whether it is hostile or dead (Spec 02, Addendum A). */
+  rivals: Record<string, RivalArc>;
+  /** Levels whose boss's weakness the player has read at the end of a lore chain (Spec 02, Addendum A). */
+  weaknesses: number[];
   /** Active status effects (Spec 04, "Status effects"). */
   statuses: StatusEffect[];
   /** Rounds left of a Shield, which absorbs the next hit (Spec 04, task 2.8); 0 when there is none. */
@@ -205,6 +211,8 @@ export function createPlayer(setup: PlayerSetup): PlayerState {
     letters: {},
     shrines: {},
     mapped: [],
+    rivals: {},
+    weaknesses: [],
     dead: false,
     facing: { dx: 0, dy: 1 },
     statuses: [],
@@ -361,6 +369,8 @@ export interface ArrivalOptions {
   content?: GameContent;
   /** The villages above this level: prices of traders and hermits, and what a hermit's rumour may say (Spec 07). */
   above?: { villagesAbove: number; facts: () => Fact[] };
+  /** The run layout's cross-level links: a rival's stash and a lore chain's boss (Spec 02, Addendum A). */
+  links?: readonly Link[];
 }
 
 export class Game {
@@ -380,6 +390,10 @@ export class Game {
   readonly above: { villagesAbove: number; facts: () => Fact[] };
   /** What the last action asked the run to do next: change level by a fall or a teleport, or show something. Not saved. */
   pending: PendingEffects = {};
+  /** The run layout's cross-level links. Derived from the seed, so never saved. */
+  readonly links: readonly Link[];
+  /** Log lines raised where no message list is at hand (the artifact seals), given out at the end of the action. Not saved. */
+  queued: LogMessage[] = [];
 
   constructor(
     readonly runSeed: number,
@@ -398,6 +412,7 @@ export class Game {
     this.items = arrival.items ?? itemDataFrom({ tables: {} });
     this.content = arrival.content ?? noContent();
     this.above = arrival.above ?? { villagesAbove: 0, facts: () => [] };
+    this.links = arrival.links ?? [];
     this.disguises = disguisesFor(runSeed, this.items.magic.values(), this.items.disguiseNames);
     const at = arrival.at ?? (arrival.stair === 'down' ? level.downStair ?? level.upStair : level.upStair);
     this.state = {
@@ -416,6 +431,8 @@ export class Game {
     };
     // A level a map fragment has mapped shows its layout the first time it is entered (Spec 02, task 2.10).
     if (!delta && player.mapped.includes(level.depth)) mapLevel(this);
+    // The named rival is gone once killed, hostile once attacked, and carries what it took from the last level (Spec 02, Addendum A).
+    rivalsArrive(this);
     // On a return, the time away refills the level with monsters, out of sight of the arrival (Spec 02, task 2.12).
     if (delta) restock(this, round - delta.turnLeft);
     // The companion arrives with the player (Spec 04, Addendum A).
@@ -842,6 +859,12 @@ export class Game {
    * twice a round, so every first action of a pair passes no time; a slowed one takes two rounds to act.
    */
   private endRound(messages: LogMessage[], waiting = false): ActResult {
+    const result = this.endRoundOnce(messages, waiting);
+    result.messages.push(...this.queued.splice(0));
+    return result;
+  }
+
+  private endRoundOnce(messages: LogMessage[], waiting: boolean): ActResult {
     const { player } = this.state;
     if (!waiting) player.waited = 0;
     const speed = effectiveSpeed('normal', player.statuses);

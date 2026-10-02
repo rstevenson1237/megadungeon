@@ -80,7 +80,8 @@ export interface LevelPlan {
   /** The level below is a village, so no deep pit may open here (Spec 06). */
   villageBelow: boolean;
   teleporterTo: number | undefined;
-  boss: { artifactId: string | null; artifactName: string | null; liftToken: boolean } | undefined;
+  /** The level's boss; on level 100 the final boss, which holds no artifact (Spec 02, Addendum A). */
+  boss: { artifactId: string | null; artifactName: string | null; liftToken: boolean; final?: boolean } | undefined;
   quests: QuestGoal[];
   pieces: Piece[];
 }
@@ -196,17 +197,20 @@ export function planLevel(
   depth: number,
 ): LevelPlan {
   const boss = layout.bosses.find((b) => b.level === depth);
+  const final = depth === MAX_DEPTH ? { artifactId: null, artifactName: null, liftToken: false, final: true } : undefined;
   return {
     runSeed: layout.seed,
     depth,
     theme,
     villageBelow: depth < MAX_DEPTH && isVillageLevel(layout, depth + 1),
     teleporterTo: teleporterPartner(layout, depth),
-    boss: boss && {
-      artifactId: boss.artifactId,
-      artifactName: boss.artifactName,
-      liftToken: layout.links.some((l) => l.type === 'lift_token' && l.level === depth),
-    },
+    boss:
+      final ??
+      (boss && {
+        artifactId: boss.artifactId,
+        artifactName: boss.artifactName,
+        liftToken: layout.links.some((l) => l.type === 'lift_token' && l.level === depth),
+      }),
     quests: layout.quests.filter((q) => q.level === depth).map((q) => questGoal(layout.seed, q, content)),
     pieces: piecesOn(layout, content, depth),
   };

@@ -20,13 +20,19 @@ export const MAX_DEPTH = 100;
  * Version of the generator. Saved with the run so an older run keeps its old generator
  * (Spec 02). Bump it for any change that alters what a seed produces.
  */
-export const GENERATOR_VERSION = 4;
+export const GENERATOR_VERSION = 5;
 
 /**
  * Every generator version this build can still run, so a save keeps the levels it started with (Spec 02, Spec 09).
- * Version 3 drew placement steps 4 to 11 from one shared contents stream; version 4 gives each step its own.
+ * Version 3 drew placement steps 4 to 11 from one shared contents stream; version 4 gives each step its own; version 5
+ * places the stub final boss on level 100 (Spec 02, Addendum A; task 3.10).
  */
-export const SUPPORTED_GENERATORS: readonly number[] = [3, 4];
+export const SUPPORTED_GENERATORS: readonly number[] = [3, 4, 5];
+
+/** The final boss's rating, 20d6+6 (Spec 02, Depth scaling). */
+export const FINAL_BOSS_RATING = { dice: 20, modifier: 6 } as const;
+/** The generator version from which level 100 holds the stub final boss (Spec 02, Addendum A). */
+export const FINAL_BOSS_GENERATOR = 5;
 
 /** One character per map cell in `Level.tiles`. */
 export const TILE = {
@@ -134,6 +140,8 @@ export interface PlacedMonster extends Point {
   /** A boss's artifact (Spec 02, Run layout) and whether it carries the lift token. */
   artifact?: { id: string; name: string };
   liftToken?: boolean;
+  /** The final boss on level 100 (Spec 02, Addendum A). */
+  final?: boolean;
 }
 
 export interface Npc extends Point {

@@ -21,6 +21,7 @@ import { type GameContent, noContent } from './content.ts';
 import type { ItemCtx } from './items.ts';
 import { Town } from './town.ts';
 import { bindDrawn, knownIds } from './abilities.ts';
+import { rivalsLeave } from './connective.ts';
 
 /** The surface village sits above level 1. */
 export const SURFACE = 0;
@@ -218,6 +219,7 @@ export class Run {
   /** Leave the level being played: keep its delta, carry the round, and end what was bound to the level (Spec 06). */
   private leave(): void {
     if (this.game) {
+      rivalsLeave(this.game); // the named rival takes what it carries on to its next appearance (Spec 02, Addendum A)
       this.deltas[this.depth] = this.game.captureDelta();
       this.round = this.game.state.round;
     }
@@ -293,6 +295,7 @@ export class Run {
       spells: this.spells,
       ...(this.items ? { items: this.items } : {}),
       ...(this.content ? { content: this.content } : {}),
+      links: this.layout?.links ?? [],
       above: { villagesAbove: this.town.number(depth), facts: () => this.town.rumourFacts(Math.max(0, ...this.villages.filter((v) => v < depth))) },
     });
   }

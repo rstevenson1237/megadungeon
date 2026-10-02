@@ -12,7 +12,7 @@ import { type Monster, creature } from './monsters.ts';
 import { Run, type RunOptions } from './run.ts';
 
 /** The save format. Bump it with every change to what is stored, and add a migration from the format before. */
-export const SAVE_FORMAT = 5;
+export const SAVE_FORMAT = 6;
 /** The generator versions this build can still build levels with; a save keeps the one it started with (Spec 02, Spec 09). */
 export { SUPPORTED_GENERATORS };
 
@@ -207,7 +207,13 @@ export function migrate4to5(data: Record<string, unknown>): Record<string, unkno
   return { ...data, player: { ...player, companion: player.companion ?? { hurt: 0, dead: false } } };
 }
 
-export const MIGRATIONS: Readonly<Record<number, Migration>> = { 1: migrate1to2, 2: migrate2to3, 3: migrate3to4, 4: migrate4to5 };
+/** Format 6 keeps the named rival's progress and the bosses whose weakness the player has read (Spec 02, Addendum A; task 3.10). */
+export function migrate5to6(data: Record<string, unknown>): Record<string, unknown> {
+  const player = (data.player ?? {}) as Record<string, unknown>;
+  return { ...data, player: { ...player, rivals: player.rivals ?? {}, weaknesses: player.weaknesses ?? [] } };
+}
+
+export const MIGRATIONS: Readonly<Record<number, Migration>> = { 1: migrate1to2, 2: migrate2to3, 3: migrate3to4, 4: migrate4to5, 5: migrate5to6 };
 
 /**
  * Read a save from its text: upgrade an older format step by step, and refuse, with a clear message and nothing

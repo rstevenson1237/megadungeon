@@ -67,6 +67,11 @@ export interface Monster {
   ally?: AllyKind;
   /** Rounds left before a raised ally crumbles or a phantom vanishes, counting the round it came. */
   expires?: number;
+  /** The final boss on level 100 (Spec 02, Addendum A), and whether the artifact seals have been counted against it. */
+  final?: boolean;
+  sealed?: boolean;
+  /** The named rival's link (Spec 02, Addendum A): one rival across its appearances. */
+  link?: string;
 }
 
 /** Colour names used by the monster tables (Spec 08), as 24-bit colours; any other name draws light grey. */
@@ -144,6 +149,7 @@ export const spawn = (p: PlacedMonster, id: number, rng?: Rng): Monster => {
     // A boss carries its artifact and drops it where it dies (Spec 05, task 2.9).
     carried: [...(p.artifact ? [{ kind: 'artifact' as const, id: p.artifact.id, name: p.artifact.name }] : []), ...(p.liftToken ? [{ kind: 'lift_token' as const }] : [])],
     ...(p.quest ? { quest: p.quest } : {}),
+    ...(p.final ? { final: true } : {}),
   });
 };
 
@@ -167,6 +173,7 @@ export function spawnAll(level: Level, rng?: Rng): Monster[] {
         kind: npc.kind,
         behaviour: rival ? 'skirmisher' : 'brute',
         hostile: !rival,
+        ...(rival && npc.link ? { link: npc.link } : {}),
       }),
     );
   });

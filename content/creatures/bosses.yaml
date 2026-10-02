@@ -24,3 +24,13 @@
   behaviour: stub
   depth: [61, 99]
   tags: [stub]
+# The stub final boss for task 3.10 (Spec 02, Addendum A): level 100 draws its boss from the rows tagged `final`,
+# rated 20d6+6. The level 100 set piece and the real final boss replace it in task 4.10.
+- id: stub_final_boss
+  name: stub abyssal king
+  glyph: K
+  colour: moss
+  rating: 20d6+6
+  behaviour: stub
+  depth: [100, 100]
+  tags: [stub, final]
