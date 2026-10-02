@@ -1,6 +1,7 @@
 import { resolve } from 'node:path';
 import type { Rng } from '../src/core/rng.ts';
 import type { Spell } from '../src/core/schemas.ts';
+import type { App } from '../src/ui/app.ts';
 import { Game, type ArrivalOptions, type PlayerState, type PoolSetup, createPlayer } from '../src/game/game.ts';
 import { Run, type RunOptions } from '../src/game/run.ts';
 import { GENERATOR_VERSION, emptyPlacements, type Level, type Point } from '../src/rules/world/level.ts';
@@ -249,4 +250,15 @@ export function townRun(seed = 12345, extra: TestSetup = {}, at = 0, more: Parti
   const startDepth = at === 0 ? 0 : options.layout!.villages[at - 1]!.level;
   const player = withSetup(createPlayer({ character: createCharacter('Mara', thief), pack: [], equipment: {} }), { combatStep: 6, combatDice: 2, combatMax: 3, skill: { step: 6, dice: 1, max: 1 }, magic: { step: 6, dice: 1, max: 1 }, ...extra });
   return new Run(seed, player, { ...options, startDepth, classDef: thief, ...more });
+}
+
+/** On the creation screen: pick the class by name and type the name, as a player would (Spec 01, Addendum A). */
+export function createAs(app: App, className: string, name: string): void {
+  const creation = app.creation;
+  if (!creation) throw new Error('not on the creation screen');
+  for (let i = 0; i < 20 && creation.card.cls.name !== className; i++) app.handleKey({ key: 's' });
+  if (creation.card.cls.name !== className) throw new Error(`no class "${className}"`);
+  app.handleKey({ key: 'Enter' });
+  for (const ch of name) app.handleKey({ key: ch });
+  app.handleKey({ key: 'Enter' });
 }

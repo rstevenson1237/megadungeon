@@ -43,6 +43,15 @@ const baseFields = {
   style: z.string().min(1).optional(),
 };
 
+/** A character's name (Spec 01, Addendum A): 1 to 16 characters of letters, spaces, apostrophes and hyphens. */
+export const CHARACTER_NAME = /^[A-Za-z' -]{1,16}$/;
+
+// Character names (Spec 03, "Character creation"; Spec 08, Addendum A): the random names creation offers.
+export const characterNameSchema = z.strictObject({
+  ...baseFields,
+  name: z.string().regex(CHARACTER_NAME, 'a name is 1 to 16 letters, spaces, apostrophes or hyphens').refine((n) => n.trim() === n && n.length > 0, 'a name has no spaces at its ends'),
+});
+
 export const villageNameSchema = z.strictObject({
   ...baseFields,
   name: z.string().min(1),
@@ -373,11 +382,13 @@ export type QuestTemplate = z.infer<typeof questTemplateSchema>;
 export type Trap = z.infer<typeof trapSchema>;
 export type GemJewelry = z.infer<typeof gemJewelrySchema>;
 export type MagicItem = z.infer<typeof magicItemSchema>;
+export type CharacterName = z.infer<typeof characterNameSchema>;
 export type QuestItem = z.infer<typeof questItemSchema>;
 export type LoreChain = z.infer<typeof loreChainSchema>;
 
 /** Table name (the YAML file name without extension) to its entry schema. */
 export const tableSchemas = {
+  character_names: characterNameSchema,
   village_names: villageNameSchema,
   monsters: monsterSchema,
   level_themes: levelThemeSchema,

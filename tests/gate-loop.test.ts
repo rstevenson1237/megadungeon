@@ -9,7 +9,8 @@ import { itemDataFrom } from '../src/rules/items/magic.ts';
 import { App } from '../src/ui/app.ts';
 import { COLS, Grid } from '../src/ui/grid.ts';
 import { CP437_TO_UNICODE } from '../src/ui/cp437.ts';
-import { content, testCharacter } from './helpers.ts';
+import { content, createAs } from './helpers.ts';
+import { creationContentOf } from '../src/game/lifecycle.ts';
 
 // The Systems complete gate (plan, Phase 2): a full loop with stub content: delve, loot, bank, level up, rest, use the
 // lift, die and try each death option. The dungeon part is played through the real shell and game; what the player would
@@ -38,18 +39,16 @@ describe('Gate: Systems complete', () => {
     const store = new MemoryStore();
     const board = new Leaderboard(new MemoryStorage());
     const app = new App({
-      newCharacter: testCharacter,
+      creation: creationContentOf(content().bundle),
       randomSeed: () => 0x2468ace0,
       now: () => new Date('2026-10-01T12:00:00Z'),
       runOptions: (seed) => runOptionsFor(content().bundle, seed),
-      rules: () => ({ character: createCharacter('Mara', thief), classDef: thief }),
-      classOf: () => thief,
-      kit: () => startingKit(thief.gear ?? [], itemDataFrom(content().bundle)),
       saves: new SaveSlot(store),
       board,
       flags: new MemoryStorage(),
     });
-    press(app, 'Enter'); // new game, random seed: the surface village
+    press(app, 'Enter'); // new game, random seed
+    createAs(app, 'Thief', 'Mara'); // then character creation: the surface village
     await flush();
     const run = app.shell!.run!;
     expect(run.depth).toBe(0);
@@ -118,6 +117,7 @@ describe('Gate: Systems complete', () => {
     second.player.deathCause = 'A trap.';
     press(app, 'x');
     press(app, 's', 'Enter', 'Enter'); // keep the first item
+    createAs(app, 'Warrior', 'Brannoc'); // creation again, with the seed fixed
     await flush();
     expect(app.shell!.run!.runSeed).toBe(run.runSeed);
     expect(app.shell!.run!.character.xp).toBe(0);

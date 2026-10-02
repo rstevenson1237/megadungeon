@@ -5,12 +5,13 @@ import { COLS, Grid } from '../src/ui/grid.ts';
 import { CP437_TO_UNICODE } from '../src/ui/cp437.ts';
 import { generateLevel } from '../src/rules/world/generate.ts';
 import { stubSize } from '../src/game/run.ts';
-import { testCharacter } from './helpers.ts';
+import { content, createAs } from './helpers.ts';
+import { creationContentOf } from '../src/game/lifecycle.ts';
 
 const DAY = new Date('2026-10-01T23:30:00Z');
 const make = (seeds: number[] = [0x0a1b2c3d, 0xdeadbeef], now: Date = DAY): App => {
   let n = 0;
-  return new App({ newCharacter: testCharacter, randomSeed: () => seeds[n++ % seeds.length]!, now: () => now });
+  return new App({ creation: creationContentOf(content().bundle), randomSeed: () => seeds[n++ % seeds.length]!, now: () => now });
 };
 const screen = (app: App): string[] => {
   const g = new Grid();
@@ -86,24 +87,27 @@ describe('both seed options start a run (task 1.10)', () => {
     const app = make();
     press(app, 'Enter');
     expect(app.title).toBeNull();
+    expect(app.creation).not.toBeNull(); // character creation comes first (Spec 01, Addendum A)
+    createAs(app, 'Thief', 'Mara');
     const run = app.shell!.run!;
     expect(run.runSeed).toBe(0x0a1b2c3d);
     expect(run.inVillage).toBe(true);
     expect(text(app)).toContain('Surface Village');
-    expect(app.shell!.log.lines(app.shell!.turn).some((l) => l.text === 'New run, random seed: 0A1B2C3D.')).toBe(true);
+    expect(app.shell!.log.lines(app.shell!.turn).some((l) => l.text.endsWith('New run, random seed: 0A1B2C3D.'))).toBe(true);
   });
 
   it('new game with the seed of the day uses the hash of the UTC date', () => {
     const app = make();
     press(app, 's', 'Enter');
+    createAs(app, 'Thief', 'Mara');
     expect(app.shell!.run!.runSeed).toBe(seedOfTheDay('2026-10-01'));
-    expect(app.shell!.log.lines(app.shell!.turn).some((l) => l.text.startsWith('New run, seed of the day 2026-10-01:'))).toBe(true);
+    expect(app.shell!.log.lines(app.shell!.turn).some((l) => l.text.includes('New run, seed of the day 2026-10-01:'))).toBe(true);
   });
 
   it('E also confirms', () => {
     const app = make();
     press(app, 'e');
-    expect(app.shell).not.toBeNull();
+    expect(app.creation).not.toBeNull();
   });
 
   it('the same seed gives the same level 1 however the run was started', () => {
@@ -111,6 +115,8 @@ describe('both seed options start a run (task 1.10)', () => {
     const b = make([1], new Date('2026-10-01T01:00:00Z'));
     press(a, 's', 'Enter');
     press(b, 's', 'Enter');
+    createAs(a, 'Warrior', 'Ada');
+    createAs(b, 'Mage', 'Bo');
     for (const app of [a, b]) press(app, 'w', 'Enter'); // Go down
     const level = (app: App) => app.shell!.game!.state.map.level;
     expect(JSON.stringify(level(a))).toBe(JSON.stringify(level(b)));
@@ -122,19 +128,23 @@ describe('both seed options start a run (task 1.10)', () => {
     const b = make([1], new Date('2026-10-02T12:00:00Z'));
     press(a, 's', 'Enter');
     press(b, 's', 'Enter');
+    createAs(a, 'Thief', 'Mara');
+    createAs(b, 'Thief', 'Mara');
     expect(a.shell!.run!.runSeed).not.toBe(b.shell!.run!.runSeed);
   });
 
   it('starts each run with its own character, so a second run is not carrying the first one\'s wounds', () => {
     const app = make();
     press(app, 'Enter');
+    createAs(app, 'Thief', 'Mara');
     app.shell!.run!.player.pools.combat.dice = 0;
     app.shell!.character.stats[0]!.current = 0;
     press(app, 'Escape', 'w', 'Enter'); // game menu, Quit without saving (the last item)
     expect(app.shell).toBeNull();
     press(app, 'Enter');
-    expect(app.shell!.run!.player.pools.combat.dice).toBe(2);
-    expect(app.shell!.character.stats[0]!.current).toBe(2);
+    createAs(app, 'Thief', 'Mara');
+    expect(app.shell!.run!.player.pools.combat.dice).toBe(1);
+    expect(app.shell!.character.stats[0]!.current).toBe(1);
   });
 });
 

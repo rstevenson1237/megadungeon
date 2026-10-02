@@ -3,18 +3,17 @@
 // when a new run begins; the leaderboard; and the three ways on from a death.
 
 import { formatSeed } from '../core/rng.ts';
-import { type PlayerState, createPlayer } from '../game/game.ts';
+import type { PlayerState } from '../game/game.ts';
 import { Leaderboard, type TextStorage } from '../game/leaderboard.ts';
-import { boardEntry, nextBank, recoverableItems } from '../game/lifecycle.ts';
+import { type CreationContent, boardEntry, levelTenSteps, nextBank, randomName, recoverableItems, startingPlayer } from '../game/lifecycle.ts';
 import { SaveError, restoreRun, toSave } from '../game/save.ts';
 import type { SaveSlot } from '../game/store.ts';
-import type { Step } from '../rules/character/dice.ts';
-import type { Character, ClassDef } from '../rules/character/character.ts';
+import type { ClassDef } from '../rules/character/character.ts';
 import { describeItem } from '../rules/items/magic.ts';
-import type { Kit } from '../rules/items/kit.ts';
 import type { Item } from '../rules/items/types.ts';
 import { Run, type RunOptions } from '../game/run.ts';
 import type { CharacterPaneData } from './character-pane.ts';
+import { type ClassCard, CreationScreen } from './creation.ts';
 import { type DeathChoice, DeathScreen } from './death.ts';
 import type { Grid } from './grid.ts';
 import { type KeyInput, keyToCommand } from './input.ts';
@@ -23,19 +22,10 @@ import { Shell } from './shell.ts';
 import { type RunChoice, TitleScreen, type TitleDeps } from './title.ts';
 
 export interface AppDeps extends TitleDeps {
-  /** A fresh character for a new run (test data until creation exists). */
-  newCharacter: () => CharacterPaneData;
+  /** The classes, names, items and spells character creation needs (Spec 03, Character creation). */
+  creation: CreationContent;
   /** Run options for a seed: the run layout and level sizes from the content (task 2.2). */
   runOptions?: (seed: number) => RunOptions;
-  /** The spells a new character knows, and the major abilities with a rule in code (test data until creation exists). */
-  startingSpells?: (seed: number) => string[];
-  abilities?: readonly string[];
-  /** What the new character carries and wields (test data until creation exists). */
-  kit?: () => Kit;
-  /** The character's rules state and class, so banking treasure can level it up (Spec 03; test data until creation exists). */
-  rules?: () => { character: Character; classDef: ClassDef };
-  /** The class of a saved character, to carry on playing it. */
-  classOf?: (classId: string) => ClassDef | undefined;
   /** The one save slot of this browser (Spec 09); without it nothing is saved. */
   saves?: SaveSlot;
   /** The leaderboard in local storage (Spec 09). */
@@ -53,17 +43,37 @@ export interface AppDeps extends TitleDeps {
   characterId?: (seed: number) => string;
 }
 
-/** What a new character on the seed brings from the one who died (Spec 09). */
+/** What a new character on the seed brings from the one who died (Spec 09), and how the creation screen names it. */
 interface Inheritance {
   bank: number;
   item?: Item | undefined;
+  label: string;
 }
+
+/** The character pane before the run fills it in: everything else comes from the player (Spec 03, Addendum A). */
+const blankPane = (): CharacterPaneData => ({
+  name: '',
+  className: '',
+  level: 1,
+  xp: 0,
+  xpNext: 2000,
+  bank: 0,
+  carried: 0,
+  stats: (['Combat', 'Skill', 'Magic'] as const).map((name) => ({ name, step: 6, current: 1, max: 1 })),
+  equipment: [],
+  abilities: [],
+  status: [],
+  wait: { rounds: 0, needed: 10 },
+  inventory: { used: 0, total: 12 },
+});
 
 const WARNED = 'megadungeon.warned';
 const WARNING = 'Your save lives in this browser only: clearing site data deletes it. Export it from the game menu.';
 
 export class App {
   title: TitleScreen | null = null;
+  /** Character creation, between the title (or a death) and the run (Spec 01, Addendum A). */
+  creation: CreationScreen | null = null;
   shell: Shell | null = null;
   death: DeathScreen | null = null;
   /** The full-grid leaderboard opened from the title screen. */
@@ -81,9 +91,10 @@ export class App {
   openTitle(): void {
     this.shell = null;
     this.death = null;
+    this.creation = null;
     this.leaderboard = null;
     const warned = this.deps.flags?.getItem(WARNED) === '1';
-    this.title = new TitleScreen((choice) => this.startRun(choice), {
+    this.title = new TitleScreen((choice) => this.openCreation(choice), {
       ...this.deps,
       onContinue: () => void this.continueGame(),
       ...(this.deps.board ? { onLeaderboard: () => (this.leaderboard = new LeaderboardOverlay(this.deps.board!, this.today, FULL_GRID)) } : {}),
@@ -99,32 +110,44 @@ export class App {
     );
   }
 
-  /** Start a run in the surface village, and save it at once so Continue always has something to load (Spec 09). */
-  startRun(choice: RunChoice, inherit?: Inheritance): void {
-    const character = this.deps.newCharacter();
-    const kit = this.deps.kit?.();
-    const rules = this.deps.rules?.();
-    const combat = character.stats.find((s) => s.name === 'Combat')!;
-    const pool = (name: 'Skill' | 'Magic') => {
-      const stat = character.stats.find((s) => s.name === name);
-      return stat ? { step: stat.step as Step, dice: stat.current, max: stat.max } : undefined;
-    };
-    // The rules character is the player's own record (Spec 03, Addendum A); without one, the pane's pools stand in.
-    const start = rules
-      ? { character: rules.character }
-      : {
-          combatStep: combat.step,
-          combatDice: combat.current,
-          combatMax: combat.max,
-          ...(pool('Skill') ? { skill: pool('Skill')! } : {}),
-          ...(pool('Magic') ? { magic: pool('Magic')! } : {}),
-        };
-    const player = createPlayer({
-      ...start,
-      spells: this.deps.startingSpells?.(choice.seed) ?? [],
-      abilities: [...(this.deps.abilities ?? [])],
-      ...(kit ? { pack: kit.pack, equipment: kit.equipment } : {}),
+  /** What the creation screen shows about each class: its dice, ability, spells and gear. */
+  private cards(): ClassCard[] {
+    const { classes, items, spells } = this.deps.creation;
+    const nameOf = (id: string): string => items.bases.get(id)?.name ?? items.magic.get(id)?.name ?? spells.find((sp) => sp.id === id)?.name ?? id;
+    return classes.map((cls) => ({
+      cls,
+      levelTen: levelTenSteps(cls),
+      spells: !cls.spells ? 'none' : cls.spells.always ? `${cls.spells.count} (${nameOf(cls.spells.always)}${cls.spells.count > 1 ? ` and ${cls.spells.count - 1} more` : ''})` : `${cls.spells.count}, drawn at random`,
+      gear: (cls.gear ?? []).map((g) => (g.count && g.count > 1 ? `${g.count} ${nameOf(g.id)}` : nameOf(g.id))),
+    }));
+  }
+
+  /**
+   * Character creation for a chosen seed (Spec 01, Addendum A). After a same-seed death it shows what the new character
+   * keeps, and Esc goes back to the death screen; from the title, Esc goes back to the title.
+   */
+  openCreation(choice: RunChoice, inherit?: Inheritance): void {
+    const death = this.death;
+    const which = choice.daily ? `Seed of the day ${choice.daily}: ${formatSeed(choice.seed)}` : `Random seed ${formatSeed(choice.seed)}`;
+    this.creation = new CreationScreen({
+      cards: this.cards(),
+      seed: which,
+      ...(inherit ? { inheritance: inherit.label } : {}),
+      randomName: (asked) => randomName(choice.seed, asked, this.deps.creation.names),
+      done: (cls, name) => this.startRun(choice, cls, name, inherit),
+      back: () => {
+        this.creation = null;
+        if (inherit && death) this.death = death;
+        else this.openTitle();
+      },
     });
+    this.title = null;
+    this.death = null;
+  }
+
+  /** Start a run in the surface village with the created character, and save it at once (Spec 09, Addendum A: the first save). */
+  startRun(choice: RunChoice, cls: ClassDef, name: string, inherit?: Inheritance): void {
+    const player = startingPlayer(choice.seed, name, cls, this.deps.creation);
     if (inherit) {
       player.town.bank = inherit.bank;
       if (inherit.item) player.pack.push(inherit.item);
@@ -132,12 +155,12 @@ export class App {
     const characterId = this.deps.characterId?.(choice.seed) ?? `${choice.seed >>> 0}-${Date.now().toString(36)}`;
     const run = new Run(choice.seed, player, {
       ...this.deps.runOptions?.(choice.seed),
-      ...(rules ? { classDef: rules.classDef } : {}),
+      classDef: cls,
       characterId,
       ...(choice.daily ? { daily: choice.daily } : {}),
     }); // starts in the surface village
     const which = choice.daily ? `seed of the day ${choice.daily}` : 'random seed';
-    this.enter(character, run, { kind: 'system', text: `New run, ${which}: ${formatSeed(choice.seed)}.` });
+    this.enter(blankPane(), run, { kind: 'system', text: `${name} the ${cls.name} sets out. New run, ${which}: ${formatSeed(choice.seed)}.` });
     this.save(false);
   }
 
@@ -151,11 +174,9 @@ export class App {
         return;
       }
       const base = this.deps.runOptions?.(save.seed);
-      const classDef = this.deps.classOf?.(save.player.classId) ?? this.deps.rules?.().classDef;
+      const classDef = this.deps.creation.classes.find((c) => c.id === save.player.classId);
       const run = restoreRun(save, base ?? {}, classDef);
-      const pane = this.deps.newCharacter();
-      pane.name = save.player.name || pane.name;
-      this.enter(pane, run, { kind: 'system', text: `Continuing at the village of your last rest. Seed ${formatSeed(save.seed)}.` });
+      this.enter(blankPane(), run, { kind: 'system', text: `Continuing at the village of your last rest. Seed ${formatSeed(save.seed)}.` });
     } catch (error) {
       if (title) title.notice = error instanceof SaveError ? error.message : `The save could not be read: ${String(error)}`;
     }
@@ -178,6 +199,7 @@ export class App {
     this.deps.flags?.setItem(WARNED, '1');
     this.title = null;
     this.death = null;
+    this.creation = null;
     this.shell = shell;
   }
 
@@ -252,9 +274,14 @@ export class App {
       case 'new_seed':
         this.openTitle();
         break;
-      case 'same_seed':
-        this.startRun({ seed: dead.runSeed, ...(dead.daily ? { daily: dead.daily } : {}) }, { bank: nextBank(dead.player.town.bank), item: choice.item });
+      case 'same_seed': {
+        // Creation opens with the seed fixed, showing what the new character keeps (Spec 09; Addendum A).
+        const bank = nextBank(dead.player.town.bank);
+        const kept = choice.item ? describeItem(choice.item, dead.ctx().knowledge) : undefined;
+        const label = `From your last character you keep ${bank} gp in the bank${kept ? ` and ${kept}` : ''}.`;
+        this.openCreation({ seed: dead.runSeed, ...(dead.daily ? { daily: dead.daily } : {}) }, { bank, item: choice.item, label });
         break;
+      }
       case 'save':
         this.title = null;
         await this.continueGame();
@@ -278,6 +305,7 @@ export class App {
       this.death.handle(command);
       return true;
     }
+    if (this.creation) return this.creation.handle(e);
     if (this.shell) return this.shell.handleKey(e);
     if (!command) return false;
     this.title?.handle(command);
@@ -287,6 +315,7 @@ export class App {
   draw(grid: Grid): void {
     if (this.leaderboard) this.leaderboard.draw(grid);
     else if (this.death) this.death.draw(grid);
+    else if (this.creation) this.creation.draw(grid);
     else if (this.shell) this.shell.draw(grid);
     else this.title?.draw(grid);
   }
