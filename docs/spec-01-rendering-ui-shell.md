@@ -206,7 +206,7 @@ From Intake Addendum A (findings A1, A4, A5, B5). All figures are starting value
 
 **Header line:** a dungeon level's header is its theme's name and depth ("Goblin Warrens, Level 7"); a village shows its name and depth as now.
 
-- **Clarification (task 3.9, proposed October 2, 2026, awaiting approval):** where the rules above leave a detail open, the build reads it as follows.
+- **Clarification (task 3.9, proposed and approved October 2, 2026):** where the rules above leave a detail open, the build reads it as follows.
   - **Z, "the player is hit":** a Combat die lost, or a blow a Shield or Shield Wall turns, which is logged as combat and so stops it too. "A creature comes into view" does not count allies. When a newcomer stops the wait, the log says so ("You stop waiting: the goblin comes into view."). The refusals read "You are already at full strength." and "The poison stops you recovering by waiting."
   - **L, the cursor:** it moves over the cells the main view shows now; the camera stays on the player. Tab and Shift+Tab include allies; the first Tab goes to the nearest creature and the first Shift+Tab to the farthest.
   - **L, the description:** its parts are joined by semicolons: you, the creature, a trader, hermit or captive (name and role), the items, the feature, then the terrain.
