@@ -184,7 +184,7 @@ From Intake Addendum A (findings A2, A3, B3, B4). All figures are starting value
 | Witch Hunter | Hex Breaker | Passive | A magical rune never discharges on the player (a 1 simply fails); traps tagged `magic` do nothing when sprung; ranged hits on a creature with the caster behaviour remove one extra die |
 | Beastmaster | Companion | Passive | An animal ally (Spec 04) with 1 die (d6+0), gaining a die at character levels 4, 7 and 10. It follows the player between levels and villages; if killed it returns at the next village rest |
 
-- **Clarification (task 3.6, proposed October 2, 2026, awaiting approval):** where the rules above leave a detail open, the build reads it as follows.
+- **Clarification (task 3.6, proposed and approved October 2, 2026):** where the rules above leave a detail open, the build reads it as follows.
   - **Once per fight** applies only while a fight is on. A hit taken with no fight on (a trap sprung while exploring) is not turned by Shield Wall, and a spell rolled with no fight on (a self spell before any exchange) gets no help from Overchannel. A creature's attack is an exchange, so it begins the fight before its hit lands.
   - **Backstab** is a melee attack, so it begins or continues a fight although the creature does not roll.
   - **Shield Wall and a Shield spell:** the spell's Shield absorbs a hit first; Shield Wall turns the first hit that reaches the player.
@@ -196,7 +196,7 @@ From Intake Addendum A (findings A2, A3, B3, B4). All figures are starting value
   - **Not yet built:** until tasks 3.7 and 3.8, Q on Rage, Volley, Fascinate, Wild Shape, Mark, Spirit Totem, Raise, Decoy and Companion says the ability is not yet available.
   - **The pane:** the Status block shows "Smite ready" while Smite is readied and "Shield Wall ready" while Shield Wall has not turned a blow in this fight.
 
-- **Clarification (task 3.7, proposed October 2, 2026, awaiting approval):** where the rows for the six active major abilities leave a detail open, the build reads it as follows.
+- **Clarification (task 3.7, proposed and approved October 2, 2026):** where the rows for the six active major abilities leave a detail open, the build reads it as follows.
   - **The skill use:** Rage, Fascinate, Wild Shape, Mark and Spirit Totem each roll one Skill die as a skill use. A failed use spends the round and does nothing. Volley's skill use is its one ranged roll; there is no second roll.
   - **Rage and Wild Shape:** their rounds count the round they are used in, as Sanctuary's do; using one again while it runs starts its rounds again, and two never add. Rage covers every melee exchange between the player and a creature, whoever began it. Wild Shape steps up the Combat die rolled in melee, attacking and defending, and in Combat checks; the pool itself and the die the pane shows do not change. At d12 it can still be used and gives nothing.
   - **Fascinate** is aimed in targeting over every creature in sight, nearest first. On a success the d6 is rolled and the creature is Held (Spec 04: a creature already Held keeps the longer duration). It is not an exchange: no fight begins, and the creature stays as aware as it was (a rival stays peaceful).
