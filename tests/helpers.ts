@@ -54,6 +54,9 @@ export const SPELLS: Spell[] = spellsFrom(content().bundle);
 export const spell = (id: string): Spell => SPELLS.find((s) => s.id === id)!;
 export const ITEMS = itemDataFrom(content().bundle);
 export const CONTENT = gameContentOf(content().bundle);
+/** True when `text` says a creature of the monsters table tagged `tag` appeared ("A cave rat appears!"). */
+export const appears = (text: string, tag: string): boolean =>
+  CONTENT.monsters.filter((m) => m.tags?.includes(tag)).some((m) => text.includes(`A ${m.name} appears!`));
 
 let nextUid = 1;
 /** A piece of gear from its base. Artifact quality by default, so a rigged roll is never eaten by a break roll. */

@@ -7,7 +7,7 @@ import { validTargets } from '../src/game/targeting.ts';
 import { blinkCells } from '../src/game/magic.ts';
 import { hasStatus } from '../src/rules/magic/status.ts';
 import type { Feature, Level, Loot } from '../src/rules/world/level.ts';
-import { CONTENT, ITEMS, SPELLS, cell, gameOn, gear, keyItem, monsterAt, picksItem, rig, room, slingKit, spell, testPlayer, withThings } from './helpers.ts';
+import { CONTENT, ITEMS, appears, SPELLS, cell, gameOn, gear, keyItem, monsterAt, picksItem, rig, room, slingKit, spell, testPlayer, withThings } from './helpers.ts';
 
 type Container = Extract<Feature, { type: 'container' }>;
 const coins = (amount: number): Loot => ({ kind: 'coins', amount });
@@ -194,7 +194,7 @@ describe('Spec 06: pottery', () => {
     for (let seed = 0; seed < 800; seed++) {
       const game = new Game(seed, level(pot([])), testPlayer(bare), { items: ITEMS, content: CONTENT, spells: SPELLS });
       game.state.map.player = { x: 2, y: 3 };
-      if (said(interact(game)).includes('A stub rat appears!')) released++;
+      if (appears(said(interact(game)), 'vermin')) released++;
     }
     expect(released / 800).toBeCloseTo(1 / 8, 1);
   });
@@ -226,7 +226,7 @@ describe('Spec 06: trapped containers', () => {
     expect(sleeper.awareness).toBe('alert');
 
     const summoning = start(trapped('trap_summoning'), bare);
-    expect(said(interact(summoning))).toMatch(/A stub \w+ appears!/);
+    expect(said(interact(summoning))).toMatch(/A [\w -]+ appears!/);
     expect(summoning.state.monsters).toHaveLength(1);
     expect(summoning.state.monsters[0]!.awareness).toBe('alert');
     // Where it appears: beside the chest, before it moves.
