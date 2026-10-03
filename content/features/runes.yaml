@@ -1,20 +1,57 @@
-# Stub entries for task 2.4 (Spec 02, "Rune words"): rune-word letters. Effect runes arrive with task 2.10;
-# the launch table of 10 is written in Phase 3 (task 4.7).
+# Runes (Spec 06, "Fixtures"; Spec 02, "Rune words"): the rune-word letters, one row for each of the 26 capitals, so a
+# word of 4 to 6 letters can be any of them. The floor and wall rune effects are fixed in code and need no row. The
+# launch table (task 4.7) replaces the eight stub letters.
 - id: rune_letter_a
   name: rune of A
   letter: A
+- id: rune_letter_b
+  name: rune of B
+  letter: B
+- id: rune_letter_c
+  name: rune of C
+  letter: C
+- id: rune_letter_d
+  name: rune of D
+  letter: D
 - id: rune_letter_e
   name: rune of E
   letter: E
+- id: rune_letter_f
+  name: rune of F
+  letter: F
+- id: rune_letter_g
+  name: rune of G
+  letter: G
+- id: rune_letter_h
+  name: rune of H
+  letter: H
+- id: rune_letter_i
+  name: rune of I
+  letter: I
+- id: rune_letter_j
+  name: rune of J
+  letter: J
 - id: rune_letter_k
   name: rune of K
   letter: K
+- id: rune_letter_l
+  name: rune of L
+  letter: L
+- id: rune_letter_m
+  name: rune of M
+  letter: M
 - id: rune_letter_n
   name: rune of N
   letter: N
 - id: rune_letter_o
   name: rune of O
   letter: O
+- id: rune_letter_p
+  name: rune of P
+  letter: P
+- id: rune_letter_q
+  name: rune of Q
+  letter: Q
 - id: rune_letter_r
   name: rune of R
   letter: R
@@ -24,3 +61,21 @@
 - id: rune_letter_t
   name: rune of T
   letter: T
+- id: rune_letter_u
+  name: rune of U
+  letter: U
+- id: rune_letter_v
+  name: rune of V
+  letter: V
+- id: rune_letter_w
+  name: rune of W
+  letter: W
+- id: rune_letter_x
+  name: rune of X
+  letter: X
+- id: rune_letter_y
+  name: rune of Y
+  letter: Y
+- id: rune_letter_z
+  name: rune of Z
+  letter: Z
