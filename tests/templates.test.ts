@@ -212,9 +212,8 @@ describe('stub rumours are true for the run', () => {
       const level = String(c.fact!.values.level);
       expect(c.text.toLowerCase()).toContain(`level ${level}`);
       // no digits other than the fact's level can appear
-      expect(c.text.match(/\d+/g) ?? []).toEqual([level]);
-      if (c.fact!.values.boss) expect(c.text.toLowerCase()).toContain('the hollow king');
-      if (c.fact!.values.rival) expect(c.text).toContain('Mara the Quick');
+      for (const n of c.text.match(/\d+/g) ?? []) expect(n).toBe(level);
+      // the launch rumours name no boss or rival, only what the tavern supplies (level, and a boss's artifact)
     }
     expect([...kinds].sort()).toEqual(['boss', 'fountain', 'rival_stash', 'teleporter', 'trap_level', 'vault']);
   });

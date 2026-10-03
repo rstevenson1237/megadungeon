@@ -1,7 +1,32 @@
-# Stub entries for task 2.4 (Spec 02, "Named rival"). The launch table of 30 is written in Phase 3 (task 4.3).
-- id: rival_stub_01
-  name: Corvin the Bold
-- id: rival_stub_02
-  name: Sera Quickhand
-- id: rival_stub_03
-  name: Mordrin Vale
+# Named rivals (Spec 02, "Named rival"): the launch table of 30 written in task 4.9. A given name with a nickname or
+# surname, plain ASCII, at most 25 characters, no style tags (see docs/12-content-style-guide.md).
+- { id: rival_corvin_the_bold, name: Corvin the Bold }
+- { id: rival_sera_quickhand, name: Sera Quickhand }
+- { id: rival_mordrin_vale, name: Mordrin Vale }
+- { id: rival_tamsin_black, name: Tamsin Black }
+- { id: rival_old_hob, name: Old Hob }
+- { id: rival_edda_stonefist, name: Edda Stonefist }
+- { id: rival_jorin_tallow, name: Jorin Tallow }
+- { id: rival_marek_the_lame, name: Marek the Lame }
+- { id: rival_ilsa_greycloak, name: Ilsa Greycloak }
+- { id: rival_brother_wend, name: Brother Wend }
+- { id: rival_alder_finch, name: Alder Finch }
+- { id: rival_bryn_the_younger, name: Bryn the Younger }
+- { id: rival_cato_redmane, name: Cato Redmane }
+- { id: rival_dara_nightingale, name: Dara Nightingale }
+- { id: rival_fenna_lowry, name: Fenna Lowry }
+- { id: rival_garrick_thorne, name: Garrick Thorne }
+- { id: rival_hesper_wynn, name: Hesper Wynn }
+- { id: rival_isolde_marsh, name: Isolde Marsh }
+- { id: rival_kell_the_quiet, name: Kell the Quiet }
+- { id: rival_lorcan_ashe, name: Lorcan Ashe }
+- { id: rival_maud_ironside, name: Maud Ironside }
+- { id: rival_nessa_crowe, name: Nessa Crowe }
+- { id: rival_osric_hale, name: Osric Hale }
+- { id: rival_petra_swift, name: Petra Swift }
+- { id: rival_quill_harker, name: Quill Harker }
+- { id: rival_rolf_deepdigger, name: Rolf Deepdigger }
+- { id: rival_sister_maren, name: Sister Maren }
+- { id: rival_torvin_gale, name: Torvin Gale }
+- { id: rival_ursa_kettle, name: Ursa Kettle }
+- { id: rival_wat_the_tinker, name: Wat the Tinker }

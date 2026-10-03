@@ -1,17 +1,302 @@
-# Stub entries for task 2.4 (Spec 02, step 10). The launch table of 300 is written in Phase 3 (task 4.9).
-- id: npc_name_stub_01
-  name: Brannoch
-- id: npc_name_stub_02
-  name: Ilse Varrow
-- id: npc_name_stub_03
-  name: Old Tam
-- id: npc_name_stub_04
-  name: Sorrel
-- id: npc_name_stub_05
-  name: Garrick Dunn
-- id: npc_name_stub_06
-  name: Maud
-- id: npc_name_stub_07
-  name: Wick
-- id: npc_name_stub_08
-  name: Tilda Ashe
+# NPC names (Spec 04; Spec 07): the launch table of 300 written in task 4.9. Villagers, captives, hermits, traders and delvers.
+# Mixed given names, given name plus surname, and nicknames or occupations. Plain ASCII, 1 to 25 characters, no articles.
+- { id: npc_name_001, name: Brannoch }
+- { id: npc_name_002, name: Sorrel }
+- { id: npc_name_003, name: Maud }
+- { id: npc_name_004, name: Wick }
+- { id: npc_name_005, name: Alder }
+- { id: npc_name_006, name: Bessel }
+- { id: npc_name_007, name: Cormac }
+- { id: npc_name_008, name: Dunstan }
+- { id: npc_name_009, name: Edric }
+- { id: npc_name_010, name: Fenna }
+- { id: npc_name_011, name: Gorm }
+- { id: npc_name_012, name: Hesper }
+- { id: npc_name_013, name: Isolt }
+- { id: npc_name_014, name: Joss }
+- { id: npc_name_015, name: Kestrel }
+- { id: npc_name_016, name: Lorcan }
+- { id: npc_name_017, name: Mabyn }
+- { id: npc_name_018, name: Nessa }
+- { id: npc_name_019, name: Osric }
+- { id: npc_name_020, name: Perrin }
+- { id: npc_name_021, name: Quill }
+- { id: npc_name_022, name: Rowan }
+- { id: npc_name_023, name: Sybil }
+- { id: npc_name_024, name: Torvald }
+- { id: npc_name_025, name: Ulric }
+- { id: npc_name_026, name: Vesna }
+- { id: npc_name_027, name: Wynn }
+- { id: npc_name_028, name: Yarrow }
+- { id: npc_name_029, name: Aldous }
+- { id: npc_name_030, name: Berta }
+- { id: npc_name_031, name: Cuthred }
+- { id: npc_name_032, name: Dilys }
+- { id: npc_name_033, name: Eadric }
+- { id: npc_name_034, name: Frith }
+- { id: npc_name_035, name: Godwin }
+- { id: npc_name_036, name: Hild }
+- { id: npc_name_037, name: Ivo }
+- { id: npc_name_038, name: Jorund }
+- { id: npc_name_039, name: Kenric }
+- { id: npc_name_040, name: Leofa }
+- { id: npc_name_041, name: Nell }
+- { id: npc_name_042, name: Odda }
+- { id: npc_name_043, name: Pell }
+- { id: npc_name_044, name: Ranulf }
+- { id: npc_name_045, name: Sigrid }
+- { id: npc_name_046, name: Thurstan }
+- { id: npc_name_047, name: Una }
+- { id: npc_name_048, name: Vorn }
+- { id: npc_name_049, name: Wilmot }
+- { id: npc_name_050, name: Ysolde }
+- { id: npc_name_051, name: Anselm }
+- { id: npc_name_052, name: Brigid }
+- { id: npc_name_053, name: Cadoc }
+- { id: npc_name_054, name: Drusa }
+- { id: npc_name_055, name: Elric }
+- { id: npc_name_056, name: Fulk }
+- { id: npc_name_057, name: Gwen }
+- { id: npc_name_058, name: Hamo }
+- { id: npc_name_059, name: Imke }
+- { id: npc_name_060, name: Jory }
+- { id: npc_name_061, name: Kolvar }
+- { id: npc_name_062, name: Lunn }
+- { id: npc_name_063, name: Mercy }
+- { id: npc_name_064, name: Narn }
+- { id: npc_name_065, name: Orrin }
+- { id: npc_name_066, name: Petra }
+- { id: npc_name_067, name: Rhys }
+- { id: npc_name_068, name: Sable }
+- { id: npc_name_069, name: Tegan }
+- { id: npc_name_070, name: Udo }
+- { id: npc_name_071, name: Verity }
+- { id: npc_name_072, name: Wystan }
+- { id: npc_name_073, name: Yorick }
+- { id: npc_name_074, name: Alis }
+- { id: npc_name_075, name: Bodil }
+- { id: npc_name_076, name: Corin }
+- { id: npc_name_077, name: Dagny }
+- { id: npc_name_078, name: Emmet }
+- { id: npc_name_079, name: Fritha }
+- { id: npc_name_080, name: Gunnar }
+- { id: npc_name_081, name: Hob }
+- { id: npc_name_082, name: Idony }
+- { id: npc_name_083, name: Jasper }
+- { id: npc_name_084, name: Kell }
+- { id: npc_name_085, name: Lark }
+- { id: npc_name_086, name: Madoc }
+- { id: npc_name_087, name: Nym }
+- { id: npc_name_088, name: Oswin }
+- { id: npc_name_089, name: Pip }
+- { id: npc_name_090, name: Rurik }
+- { id: npc_name_091, name: Selwyn }
+- { id: npc_name_092, name: Tansy }
+- { id: npc_name_093, name: Ulla }
+- { id: npc_name_094, name: Vance }
+- { id: npc_name_095, name: Wat }
+- { id: npc_name_096, name: Yrsa }
+- { id: npc_name_097, name: Ada }
+- { id: npc_name_098, name: Bram }
+- { id: npc_name_099, name: Cerys }
+- { id: npc_name_100, name: Dov }
+- { id: npc_name_101, name: Eda }
+- { id: npc_name_102, name: Finn }
+- { id: npc_name_103, name: Garrow }
+- { id: npc_name_104, name: Hettie }
+- { id: npc_name_105, name: Iona }
+- { id: npc_name_106, name: Jem }
+- { id: npc_name_107, name: Kit }
+- { id: npc_name_108, name: Lysa }
+- { id: npc_name_109, name: Merrin }
+- { id: npc_name_110, name: Nan }
+- { id: npc_name_111, name: Orla }
+- { id: npc_name_112, name: Pym }
+- { id: npc_name_113, name: Reeve }
+- { id: npc_name_114, name: Sef }
+- { id: npc_name_115, name: Tobin }
+- { id: npc_name_116, name: Ursa }
+- { id: npc_name_117, name: Vik }
+- { id: npc_name_118, name: Wren }
+- { id: npc_name_119, name: Yaro }
+- { id: npc_name_120, name: Zane }
+- { id: npc_name_121, name: Ilse Varrow }
+- { id: npc_name_122, name: Garrick Dunn }
+- { id: npc_name_123, name: Tilda Ashe }
+- { id: npc_name_124, name: Hugh Marlow }
+- { id: npc_name_125, name: Edda Thorne }
+- { id: npc_name_126, name: Piers Holloway }
+- { id: npc_name_127, name: Agnes Cobb }
+- { id: npc_name_128, name: Wendel Frost }
+- { id: npc_name_129, name: Marta Quint }
+- { id: npc_name_130, name: Osbert Lathe }
+- { id: npc_name_131, name: Joan Fenwick }
+- { id: npc_name_132, name: Corwin Reade }
+- { id: npc_name_133, name: Elsbeth Crane }
+- { id: npc_name_134, name: Dorian Pike }
+- { id: npc_name_135, name: Hanna Brightwater }
+- { id: npc_name_136, name: Roland Skeld }
+- { id: npc_name_137, name: Lena Moorcroft }
+- { id: npc_name_138, name: Fergus Tull }
+- { id: npc_name_139, name: Aveline Stoke }
+- { id: npc_name_140, name: Bertram Hale }
+- { id: npc_name_141, name: Cecily Dray }
+- { id: npc_name_142, name: Dougal Marsh }
+- { id: npc_name_143, name: Emmeline Rook }
+- { id: npc_name_144, name: Fulbert Gant }
+- { id: npc_name_145, name: Gisela Thatch }
+- { id: npc_name_146, name: Harwin Sedge }
+- { id: npc_name_147, name: Isobel Crowe }
+- { id: npc_name_148, name: Jory Penhallow }
+- { id: npc_name_149, name: Katrin Voss }
+- { id: npc_name_150, name: Leif Ostrander }
+- { id: npc_name_151, name: Mirren Dale }
+- { id: npc_name_152, name: Nolan Gray }
+- { id: npc_name_153, name: Orsolya Kent }
+- { id: npc_name_154, name: Perrin Vask }
+- { id: npc_name_155, name: Rosamund Ellery }
+- { id: npc_name_156, name: Silas Brandt }
+- { id: npc_name_157, name: Thea Wolcott }
+- { id: npc_name_158, name: Ulf Harrowgate }
+- { id: npc_name_159, name: Vera Lindqvist }
+- { id: npc_name_160, name: Walter Gosse }
+- { id: npc_name_161, name: Yvain Mercer }
+- { id: npc_name_162, name: Alma Tolliver }
+- { id: npc_name_163, name: Benedict Roe }
+- { id: npc_name_164, name: Clara Whitlow }
+- { id: npc_name_165, name: Denholm Fry }
+- { id: npc_name_166, name: Eloise Garth }
+- { id: npc_name_167, name: Fenwick Oake }
+- { id: npc_name_168, name: Greta Halloran }
+- { id: npc_name_169, name: Hamnet Pryce }
+- { id: npc_name_170, name: Ingrid Salt }
+- { id: npc_name_171, name: Jocelyn Bray }
+- { id: npc_name_172, name: Kaspar Lund }
+- { id: npc_name_173, name: Lettice Ward }
+- { id: npc_name_174, name: Marek Doyle }
+- { id: npc_name_175, name: Nora Penn }
+- { id: npc_name_176, name: Osgar Bligh }
+- { id: npc_name_177, name: Phoebe Marrow }
+- { id: npc_name_178, name: Quentin Ash }
+- { id: npc_name_179, name: Ruth Calder }
+- { id: npc_name_180, name: Stellan Vogt }
+- { id: npc_name_181, name: Tessa Rennick }
+- { id: npc_name_182, name: Udell Pargeter }
+- { id: npc_name_183, name: Violet Sharrow }
+- { id: npc_name_184, name: Willem Strand }
+- { id: npc_name_185, name: Yolande Birch }
+- { id: npc_name_186, name: Alaric Dene }
+- { id: npc_name_187, name: Brenna Fell }
+- { id: npc_name_188, name: Cedric Lowe }
+- { id: npc_name_189, name: Dorcas Hurn }
+- { id: npc_name_190, name: Eamon Tarr }
+- { id: npc_name_191, name: Flora Kettle }
+- { id: npc_name_192, name: Gideon Blythe }
+- { id: npc_name_193, name: Hester Quarrel }
+- { id: npc_name_194, name: Ivar Nash }
+- { id: npc_name_195, name: Jenet Moss }
+- { id: npc_name_196, name: Kendrick Voll }
+- { id: npc_name_197, name: Lorna Pettigrew }
+- { id: npc_name_198, name: Mathis Corrin }
+- { id: npc_name_199, name: Nessa Greaves }
+- { id: npc_name_200, name: Oren Tallis }
+- { id: npc_name_201, name: Prudence Wold }
+- { id: npc_name_202, name: Raoul Dacey }
+- { id: npc_name_203, name: Sabine Orme }
+- { id: npc_name_204, name: Tomas Rudd }
+- { id: npc_name_205, name: Ursula Finch }
+- { id: npc_name_206, name: Vidar Kane }
+- { id: npc_name_207, name: Wilhelmina Bask }
+- { id: npc_name_208, name: Xander Pole }
+- { id: npc_name_209, name: Yseult Garner }
+- { id: npc_name_210, name: Zeb Harker }
+- { id: npc_name_211, name: Adela Thornby }
+- { id: npc_name_212, name: Bryn Castor }
+- { id: npc_name_213, name: Cora Spindle }
+- { id: npc_name_214, name: Drew Halloway }
+- { id: npc_name_215, name: Edith Mallory }
+- { id: npc_name_216, name: Foster Gaunt }
+- { id: npc_name_217, name: Gwyneth Rudge }
+- { id: npc_name_218, name: Hal Pennick }
+- { id: npc_name_219, name: Imogen Sark }
+- { id: npc_name_220, name: Jonas Wray }
+- { id: npc_name_221, name: Kirsten Holt }
+- { id: npc_name_222, name: Lowell Gage }
+- { id: npc_name_223, name: Moira Lacey }
+- { id: npc_name_224, name: Nigel Ferrow }
+- { id: npc_name_225, name: Olwen Starke }
+- { id: npc_name_226, name: Pascal Rye }
+- { id: npc_name_227, name: Rhona Dunmore }
+- { id: npc_name_228, name: Sander Kell }
+- { id: npc_name_229, name: Tamsin Vale }
+- { id: npc_name_230, name: Ulrich Fenn }
+- { id: npc_name_231, name: Vesper Lyle }
+- { id: npc_name_232, name: Wystan Cray }
+- { id: npc_name_233, name: Ysabel Dunne }
+- { id: npc_name_234, name: Aldric Penry }
+- { id: npc_name_235, name: Brigitte Shaw }
+- { id: npc_name_236, name: Casimir Dole }
+- { id: npc_name_237, name: Dena Rowntree }
+- { id: npc_name_238, name: Marian Tolle }
+- { id: npc_name_239, name: Old Tam }
+- { id: npc_name_240, name: Hob the Cooper }
+- { id: npc_name_241, name: Mad Jenet }
+- { id: npc_name_242, name: Lame Wat }
+- { id: npc_name_243, name: Tom Tanner }
+- { id: npc_name_244, name: Black Bess }
+- { id: npc_name_245, name: Granny Orme }
+- { id: npc_name_246, name: Crooked Ned }
+- { id: npc_name_247, name: "One-Eyed Peg" }
+- { id: npc_name_248, name: Brother Anselm }
+- { id: npc_name_249, name: Sister Maren }
+- { id: npc_name_250, name: Dun the Smith }
+- { id: npc_name_251, name: Widow Harrow }
+- { id: npc_name_252, name: Red Rafe }
+- { id: npc_name_253, name: Quiet Mags }
+- { id: npc_name_254, name: Will the Chandler }
+- { id: npc_name_255, name: Old Marrow }
+- { id: npc_name_256, name: Salt Annie }
+- { id: npc_name_257, name: Gaffer Pike }
+- { id: npc_name_258, name: Hag Mother Thorn }
+- { id: npc_name_259, name: Jack Lantern }
+- { id: npc_name_260, name: Tallow Joan }
+- { id: npc_name_261, name: Fat Osbern }
+- { id: npc_name_262, name: Wat the Ferryman }
+- { id: npc_name_263, name: Mistress Quill }
+- { id: npc_name_264, name: Goodwife Brack }
+- { id: npc_name_265, name: Little Dob }
+- { id: npc_name_266, name: Ned the Digger }
+- { id: npc_name_267, name: Sexton Blay }
+- { id: npc_name_268, name: Peg the Brewer }
+- { id: npc_name_269, name: Hollow Hal }
+- { id: npc_name_270, name: Fiddler Rune }
+- { id: npc_name_271, name: Longshanks Gil }
+- { id: npc_name_272, name: Mute Aldith }
+- { id: npc_name_273, name: Baker Hugh }
+- { id: npc_name_274, name: Old Mother Wend }
+- { id: npc_name_275, name: Cob the Mason }
+- { id: npc_name_276, name: Tinker Brisk }
+- { id: npc_name_277, name: Nan the Weaver }
+- { id: npc_name_278, name: Grey Alfric }
+- { id: npc_name_279, name: Smiling Colm }
+- { id: npc_name_280, name: Bent Jonas }
+- { id: npc_name_281, name: Warden Hask }
+- { id: npc_name_282, name: Father Edmund }
+- { id: npc_name_283, name: Piper Dill }
+- { id: npc_name_284, name: Reeve Almund }
+- { id: npc_name_285, name: Scrivener Pell }
+- { id: npc_name_286, name: Old Gundrun }
+- { id: npc_name_287, name: Lamplighter Fitch }
+- { id: npc_name_288, name: Tess the Thatcher }
+- { id: npc_name_289, name: Roper Ham }
+- { id: npc_name_290, name: Swift Kerra }
+- { id: npc_name_291, name: Dim Robin }
+- { id: npc_name_292, name: Hermit Ostry }
+- { id: npc_name_293, name: Barnaby Bonesetter }
+- { id: npc_name_294, name: Ratcatcher Dunn }
+- { id: npc_name_295, name: Cutpurse Lil }
+- { id: npc_name_296, name: Brewer Ambrose }
+- { id: npc_name_297, name: Candlemaker Faye }
+- { id: npc_name_298, name: Shepherd Corm }
+- { id: npc_name_299, name: Gravedigger Moll }
+- { id: npc_name_300, name: Sour Matthias }

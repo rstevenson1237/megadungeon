@@ -1,28 +1,314 @@
-# Stub entries for task 2.1 (Spec 08, "Stub content in Phases 1 and 2"): one template per
-# rumour kind so every kind has text. The launch table of 60 is written in Phase 3 (task 4.9).
-- id: stub_rumour_vault
+# Rumour templates (Spec 07, "Rumours"; Spec 08, "Text templates"): the launch table of 60 written in task 4.9, ten for each kind of fact.
+# The tavern supplies only {level} for every kind, and {artifact} for the boss kind when the boss holds one, so every boss
+# template keeps at least one phrasing without {artifact}. Each phrasing states the fact and nothing more. Styled templates
+# (dry, grim) stay between 13% and 18% of the table.
+- id: rumour_vault_01
   needs: vault
   text:
-    - "They say a sealed vault waits on level {level}, and only its own key will open it."
+    - "They say a sealed vault lies on level {level}."
+    - "A vault on level {level} was sealed, and the seal still holds."
+- id: rumour_vault_02
+  needs: vault
+  text:
     - "A drunk miner swore he saw a vault door on level {level}."
-- id: stub_rumour_boss
+    - "Old tales speak of a shut vault on level {level}."
+- id: rumour_vault_03
+  needs: vault
+  text:
+    - "There is a vault on level {level}, and it has stayed sealed a long time."
+    - "Level {level} hides a door that has not been opened in years."
+    - "Level {level} has a vault, sealed and quiet."
+- id: rumour_vault_04
+  needs: vault
+  text:
+    - "Folk speak low of the sealed vault on level {level}."
+    - "Ask about the sealed vault on level {level}, and the room goes quiet."
+- id: rumour_vault_05
+  needs: vault
+  text:
+    - "Level {level} keeps a vault, and the vault keeps its door shut."
+    - "A shut vault waits on level {level}."
+- id: rumour_vault_06
+  needs: vault
+  text:
+    - "A vault on level {level} was sealed, and there was a reason."
+    - "A sealed vault stands on level {level}, and few care to speak of it."
+- id: rumour_vault_07
+  needs: vault
+  style: dry
+  text:
+    - "On level {level} there is a sealed vault. The previous owner is not available to comment."
+    - "A vault on level {level} is sealed. Delvers consider this a challenge."
+- id: rumour_vault_08
+  needs: vault
+  text:
+    - "A sealed vault lies on level {level}, and most have forgotten it."
+    - "A delver's map marks a sealed vault on level {level}."
+- id: rumour_vault_09
+  needs: vault
+  text:
+    - "Somewhere on level {level} a vault stands sealed."
+    - "A sealed vault stands on level {level}, or so the story goes."
+- id: rumour_vault_10
+  needs: vault
+  text:
+    - "Level {level} has a vault, and it is sealed."
+    - "Folk say a vault on level {level} is sealed fast."
+- id: rumour_boss_01
   needs: boss
   text:
-    - "{Boss} holds level {level}."
+    - "Something holds level {level}, and it does not share."
     - "Something on level {level} guards {artifact}."
-- id: stub_rumour_teleporter
+- id: rumour_boss_02
+  needs: boss
+  text:
+    - "Nobody who went to meet the master of level {level} has come back."
+    - "They say the thing on level {level} will not leave, and {artifact} will not leave it."
+- id: rumour_boss_03
+  needs: boss
+  text:
+    - "Level {level} has a master."
+    - "A thing sits on level {level} and keeps {artifact}."
+- id: rumour_boss_04
+  needs: boss
+  style: grim
+  text:
+    - "Level {level} has a master, and few meet it twice."
+    - "The master of level {level} still has {artifact}."
+- id: rumour_boss_05
+  needs: boss
+  text:
+    - "A hard thing rules level {level}."
+    - "Whatever holds level {level} holds {artifact} too."
+- id: rumour_boss_06
+  needs: boss
+  text:
+    - "A ruler waits on level {level}."
+    - "On level {level} a ruler sits on {artifact}."
+- id: rumour_boss_07
+  needs: boss
+  style: dry
+  text:
+    - "Level {level} has a master. Callers are not encouraged."
+    - "The master of level {level} is attached to {artifact}."
+- id: rumour_boss_08
+  needs: boss
+  text:
+    - "Something has claimed level {level} as its own."
+    - "They say level {level} has an owner now, and a prize it will not give up."
+- id: rumour_boss_09
+  needs: boss
+  text:
+    - "Level {level} is held, and the holder does not give way."
+    - "Whoever holds level {level} also holds {artifact}."
+- id: rumour_boss_10
+  needs: boss
+  text:
+    - "A hard guard stands on level {level}."
+    - "The thing on level {level} keeps {artifact} close."
+- id: rumour_teleporter_01
   needs: teleporter
   text:
     - "There is a teleporter on level {level}."
-- id: stub_rumour_rival_stash
+    - "A delver vanished from level {level} and was seen again on another."
+- id: rumour_teleporter_02
+  needs: teleporter
+  text:
+    - "Level {level} has a way that leads to some other level."
+    - "They say a teleporter on level {level} carries you elsewhere in the dungeon."
+- id: rumour_teleporter_03
+  needs: teleporter
+  text:
+    - "Someone used a teleporter on level {level} and came out on a different level."
+    - "The old maps show a teleporter on level {level} that leads to another level."
+- id: rumour_teleporter_04
+  needs: teleporter
+  text:
+    - "A teleporter lies on level {level}, if you can find it."
+    - "Level {level} has a teleporter to another level."
+- id: rumour_teleporter_05
+  needs: teleporter
+  style: dry
+  text:
+    - "There is a teleporter on level {level}. It will take you somewhere, which is more than most things here promise."
+    - "A teleporter on level {level} goes to another level. Whether you want that level is your affair."
+- id: rumour_teleporter_06
+  needs: teleporter
+  text:
+    - "A teleporter on level {level} joins it to another level."
+    - "A delver on level {level} used a teleporter and turned up on another level."
+- id: rumour_teleporter_07
+  needs: teleporter
+  text:
+    - "A teleporter on level {level} links it to another level."
+    - "There is a teleporter on level {level} that leads off the level."
+- id: rumour_teleporter_08
+  needs: teleporter
+  text:
+    - "A delver left level {level} by a teleporter."
+    - "Level {level} has a teleporter, and it still works."
+- id: rumour_teleporter_09
+  needs: teleporter
+  text:
+    - "Not every way off level {level} is a stair."
+    - "A teleporter on level {level} reaches another level, or so it is said."
+- id: rumour_teleporter_10
+  needs: teleporter
+  text:
+    - "Level {level} holds a teleporter that opens on another level."
+    - "A map-maker swore a teleporter on level {level} linked it to another level."
+- id: rumour_rival_stash_01
   needs: rival_stash
   text:
-    - "{Rival} hid a stash on level {level}."
-- id: stub_rumour_trap_level
+    - "A rival hid a stash on level {level}."
+    - "Another delver came back from level {level} with lighter pockets than they left with."
+- id: rumour_rival_stash_02
+  needs: rival_stash
+  text:
+    - "A delver hid a stash on level {level} and told no one."
+    - "Someone hid a stash on level {level}."
+- id: rumour_rival_stash_03
+  needs: rival_stash
+  text:
+    - "A rival stashed something on level {level}."
+    - "Another delver left a stash on level {level}."
+- id: rumour_rival_stash_04
+  needs: rival_stash
+  style: dry
+  text:
+    - "A delver says the stash on level {level} is safe. Delvers say many things."
+    - "A rival has a stash on level {level}, and a good deal of faith in hiding places."
+- id: rumour_rival_stash_05
+  needs: rival_stash
+  text:
+    - "Level {level} holds a stash left by another delver."
+    - "A rival went down to level {level} to hide something."
+- id: rumour_rival_stash_06
+  needs: rival_stash
+  text:
+    - "A delver tucked a stash away on level {level}."
+    - "There is a hidden stash on level {level}, and a rival knows where."
+- id: rumour_rival_stash_07
+  needs: rival_stash
+  style: grim
+  text:
+    - "A rival hid a stash on level {level}, and the stash is still there."
+    - "A delver hid a stash on level {level}, and the dungeon keeps the secret."
+- id: rumour_rival_stash_08
+  needs: rival_stash
+  text:
+    - "Another delver cached a stash on level {level}."
+    - "They say a rival has been stashing on level {level}."
+- id: rumour_rival_stash_09
+  needs: rival_stash
+  text:
+    - "Another delver has put a stash away on level {level}."
+    - "A delver's stash waits on level {level}, hidden and unclaimed."
+- id: rumour_rival_stash_10
+  needs: rival_stash
+  text:
+    - "A rival made a stash on level {level} and kept quiet about it."
+    - "Level {level} has a stash that belongs to another delver."
+- id: rumour_trap_level_01
   needs: trap_level
   text:
     - "Level {level} is thick with traps."
-- id: stub_rumour_fountain
+    - "Walk slowly on level {level}. The floor is not honest."
+- id: rumour_trap_level_02
+  needs: trap_level
+  text:
+    - "Level {level} is trapped worse than the levels around it."
+    - "The levels near level {level} are bad. Level {level} is worse for traps."
+- id: rumour_trap_level_03
+  needs: trap_level
+  style: grim
+  text:
+    - "Level {level} is thick with traps, and delvers have paid for it."
+    - "Many a delver learned about the traps on level {level} the hard way."
+- id: rumour_trap_level_04
+  needs: trap_level
+  text:
+    - "Traps lie all over level {level}."
+    - "They say every other step on level {level} is a trap."
+- id: rumour_trap_level_05
+  needs: trap_level
+  text:
+    - "Look before you step on level {level}."
+    - "Level {level} is crowded with traps, more than is natural."
+- id: rumour_trap_level_06
+  needs: trap_level
+  style: dry
+  text:
+    - "Level {level} has a great many traps. The builders were thorough."
+    - "Level {level} is full of traps. You may think of it as a puzzle."
+- id: rumour_trap_level_07
+  needs: trap_level
+  text:
+    - "Level {level} is full of traps."
+    - "Level {level} is trapped everywhere you turn."
+- id: rumour_trap_level_08
+  needs: trap_level
+  text:
+    - "Tread softly on level {level}, where the traps are thick."
+    - "A delver swore that level {level} was more trap than floor."
+- id: rumour_trap_level_09
+  needs: trap_level
+  text:
+    - "More traps wait on level {level} than on the levels near it."
+    - "A delver from level {level} still tests every stone he walks on."
+- id: rumour_trap_level_10
+  needs: trap_level
+  text:
+    - "Level {level} is where the traps are."
+    - "A trap-ridden place, level {level}."
+- id: rumour_fountain_01
   needs: fountain
   text:
     - "There is a fountain on level {level}."
+    - "A fountain runs on level {level}, and not everyone who drank from it was glad."
+- id: rumour_fountain_02
+  needs: fountain
+  text:
+    - "Level {level} has a fountain."
+    - "Water runs on level {level}, in a fountain."
+- id: rumour_fountain_03
+  needs: fountain
+  text:
+    - "A delver found a fountain on level {level}."
+    - "Somewhere on level {level} a fountain still plays."
+- id: rumour_fountain_04
+  needs: fountain
+  text:
+    - "Level {level} keeps a fountain, and the old maps mark it."
+    - "They say a fountain stands on level {level}."
+- id: rumour_fountain_05
+  needs: fountain
+  style: dry
+  text:
+    - "There is a fountain on level {level}. Opinions about it differ."
+    - "A fountain on level {level} is still running."
+- id: rumour_fountain_06
+  needs: fountain
+  text:
+    - "A fountain waits on level {level}."
+    - "A delver spoke of the fountain on level {level} and little else."
+- id: rumour_fountain_07
+  needs: fountain
+  text:
+    - "Level {level} has a fountain, if you can find it in the dark."
+    - "The sound of water carries on level {level}, from a fountain."
+- id: rumour_fountain_08
+  needs: fountain
+  text:
+    - "A fountain was built on level {level}."
+    - "A fountain on level {level} has been talked about in the tavern."
+- id: rumour_fountain_09
+  needs: fountain
+  text:
+    - "A fountain stands on level {level}."
+    - "Delvers who have seen the fountain on level {level} say little about it."
+- id: rumour_fountain_10
+  needs: fountain
+  text:
+    - "Level {level} has a fountain, and water to go with it."
+    - "A fountain lies on level {level}, for those who look."

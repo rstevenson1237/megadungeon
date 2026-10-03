@@ -1,19 +1,62 @@
-# Stub entries for task 2.4 (Spec 02, "Quest goals"). The launch table of 60 is written in Phase 3 (task 4.9).
-- id: quest_item_stub_belonging_01
-  name: a tarnished locket
-  needs: belonging
-- id: quest_item_stub_belonging_02
-  name: a worn signet ring
-  needs: belonging
-- id: quest_item_stub_belonging_03
-  name: a child's wooden horse
-  needs: belonging
-- id: quest_item_stub_magic_01
-  name: the Ember Rod
-  needs: magic_item
-- id: quest_item_stub_magic_02
-  name: the Veil Cloak
-  needs: magic_item
-- id: quest_item_stub_magic_03
-  name: the Hollow Crown
-  needs: magic_item
+# Named quest items (Spec 02, "Quest goals"): the launch table of 60 written in task 4.9, 30 belongings and 30 magic items.
+# Belonging names are plain lowercase and take their article from the template; magic item names are proper names without one.
+- { id: quest_item_belonging_01, name: tarnished locket, needs: belonging }
+- { id: quest_item_belonging_02, name: silver ring, needs: belonging }
+- { id: quest_item_belonging_03, name: "child's toy", needs: belonging }
+- { id: quest_item_belonging_04, name: brass lute, needs: belonging }
+- { id: quest_item_belonging_05, name: water-stained ledger, needs: belonging }
+- { id: quest_item_belonging_06, name: wedding band, needs: belonging }
+- { id: quest_item_belonging_07, name: iron key, needs: belonging }
+- { id: quest_item_belonging_08, name: bone flute, needs: belonging }
+- { id: quest_item_belonging_09, name: cracked spectacles, needs: belonging }
+- { id: quest_item_belonging_10, name: pewter flask, needs: belonging }
+- { id: quest_item_belonging_11, name: wooden horse, needs: belonging }
+- { id: quest_item_belonging_12, name: family seal, needs: belonging }
+- { id: quest_item_belonging_13, name: pocket watch, needs: belonging }
+- { id: quest_item_belonging_14, name: "mother's brooch", needs: belonging }
+- { id: quest_item_belonging_15, name: copper whistle, needs: belonging }
+- { id: quest_item_belonging_16, name: leather satchel, needs: belonging }
+- { id: quest_item_belonging_17, name: folded map, needs: belonging }
+- { id: quest_item_belonging_18, name: glass bead necklace, needs: belonging }
+- { id: quest_item_belonging_19, name: dented helm, needs: belonging }
+- { id: quest_item_belonging_20, name: prayer beads, needs: belonging }
+- { id: quest_item_belonging_21, name: bronze compass, needs: belonging }
+- { id: quest_item_belonging_22, name: tin soldier, needs: belonging }
+- { id: quest_item_belonging_23, name: silk scarf, needs: belonging }
+- { id: quest_item_belonging_24, name: hunting horn, needs: belonging }
+- { id: quest_item_belonging_25, name: ink-stained journal, needs: belonging }
+- { id: quest_item_belonging_26, name: small harp, needs: belonging }
+- { id: quest_item_belonging_27, name: signet ring, needs: belonging }
+- { id: quest_item_belonging_28, name: music box, needs: belonging }
+- { id: quest_item_belonging_29, name: lucky coin, needs: belonging }
+- { id: quest_item_belonging_30, name: carved pipe, needs: belonging }
+- { id: quest_item_magic_01, name: Ember Rod, needs: magic_item }
+- { id: quest_item_magic_02, name: Veil Cloak, needs: magic_item }
+- { id: quest_item_magic_03, name: Hollow Crown, needs: magic_item }
+- { id: quest_item_magic_04, name: Marrow Lamp, needs: magic_item }
+- { id: quest_item_magic_05, name: "Saint Orrin's Bell", needs: magic_item }
+- { id: quest_item_magic_06, name: Greywater Ring, needs: magic_item }
+- { id: quest_item_magic_07, name: Thistle Wand, needs: magic_item }
+- { id: quest_item_magic_08, name: Candle Reliquary, needs: magic_item }
+- { id: quest_item_magic_09, name: "Wren's Mirror", needs: magic_item }
+- { id: quest_item_magic_10, name: Oxbow Key, needs: magic_item }
+- { id: quest_item_magic_11, name: Ashen Horn, needs: magic_item }
+- { id: quest_item_magic_12, name: "Maiden's Thimble", needs: magic_item }
+- { id: quest_item_magic_13, name: Tallow Torch, needs: magic_item }
+- { id: quest_item_magic_14, name: Sable Gloves, needs: magic_item }
+- { id: quest_item_magic_15, name: Brindle Staff, needs: magic_item }
+- { id: quest_item_magic_16, name: Ninth Bell, needs: magic_item }
+- { id: quest_item_magic_17, name: "Pilgrim's Lantern", needs: magic_item }
+- { id: quest_item_magic_18, name: Salt Crown, needs: magic_item }
+- { id: quest_item_magic_19, name: Vesper Locket, needs: magic_item }
+- { id: quest_item_magic_20, name: Harrow Blade, needs: magic_item }
+- { id: quest_item_magic_21, name: Silent Spindle, needs: magic_item }
+- { id: quest_item_magic_22, name: Cinder Cup, needs: magic_item }
+- { id: quest_item_magic_23, name: "Lark's Whistle", needs: magic_item }
+- { id: quest_item_magic_24, name: Wicker Shield, needs: magic_item }
+- { id: quest_item_magic_25, name: Dunmere Chain, needs: magic_item }
+- { id: quest_item_magic_26, name: Stormglass Orb, needs: magic_item }
+- { id: quest_item_magic_27, name: Gallows Coin, needs: magic_item }
+- { id: quest_item_magic_28, name: Orchard Knife, needs: magic_item }
+- { id: quest_item_magic_29, name: Moth Cloak, needs: magic_item }
+- { id: quest_item_magic_30, name: Quiet Bell, needs: magic_item }

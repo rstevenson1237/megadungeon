@@ -1,32 +1,151 @@
-# Character names (Spec 03, "Character creation"; Spec 08, Addendum A): Tab on the creation screen draws one.
-# Stub entries for task 3.4 (Spec 08, "Stub content in Phases 1 and 2"); the launch table of 150 is written in Phase 4.
-- id: name_stub_aldric
-  name: Aldric
-  tags: [stub]
-- id: name_stub_berra
-  name: Berra
-  tags: [stub]
-- id: name_stub_corwin
-  name: Corwin
-  tags: [stub]
-- id: name_stub_dunya
-  name: Dunya
-  tags: [stub]
-- id: name_stub_edric
-  name: Edric
-  tags: [stub]
-- id: name_stub_fenna
-  name: Fenna
-  tags: [stub]
-- id: name_stub_garrick
-  name: Garrick
-  tags: [stub]
-- id: name_stub_hesper
-  name: Hesper
-  tags: [stub]
-- id: name_stub_ivo
-  name: Ivo
-  tags: [stub]
-- id: name_stub_jolene
-  name: Jolene
-  tags: [stub]
+# Character names (Spec 03, "Character creation"; Spec 08, Addendum A): Tab on the creation screen draws one. The launch table of 150 written in task 4.9.
+- { id: name_aldric, name: Aldric }
+- { id: name_berra, name: Berra }
+- { id: name_corwin, name: Corwin }
+- { id: name_dunya, name: Dunya }
+- { id: name_edric, name: Edric }
+- { id: name_fenna, name: Fenna }
+- { id: name_garrick, name: Garrick }
+- { id: name_hesper, name: Hesper }
+- { id: name_ivo, name: Ivo }
+- { id: name_jolene, name: Jolene }
+- { id: name_kestrel, name: Kestrel }
+- { id: name_lysa, name: Lysa }
+- { id: name_maren, name: Maren }
+- { id: name_nils, name: Nils }
+- { id: name_odalys, name: Odalys }
+- { id: name_perrin, name: Perrin }
+- { id: name_quill, name: Quill }
+- { id: name_rowan, name: Rowan }
+- { id: name_sabine, name: Sabine }
+- { id: name_tobren, name: Tobren }
+- { id: name_ulric, name: Ulric }
+- { id: name_vesna, name: Vesna }
+- { id: name_wystan, name: Wystan }
+- { id: name_yara, name: Yara }
+- { id: name_zephra, name: Zephra }
+- { id: name_alder, name: Alder }
+- { id: name_brenna, name: Brenna }
+- { id: name_cadoc, name: Cadoc }
+- { id: name_delwyn, name: Delwyn }
+- { id: name_elspeth, name: Elspeth }
+- { id: name_fargo, name: Fargo }
+- { id: name_gwenna, name: Gwenna }
+- { id: name_halric, name: Halric }
+- { id: name_isolde, name: Isolde }
+- { id: name_jorund, name: Jorund }
+- { id: name_kesla, name: Kesla }
+- { id: name_lorcan, name: Lorcan }
+- { id: name_mirela, name: Mirela }
+- { id: name_naomhe, name: Naomhe }
+- { id: name_orsolo, name: Orsolo }
+- { id: name_pella, name: Pella }
+- { id: name_ragna, name: Ragna }
+- { id: name_silas, name: Silas }
+- { id: name_thessaly, name: Thessaly }
+- { id: name_ursel, name: Ursel }
+- { id: name_varro, name: Varro }
+- { id: name_wenna, name: Wenna }
+- { id: name_xanthe, name: Xanthe }
+- { id: name_yorick, name: Yorick }
+- { id: name_zora, name: Zora }
+- { id: name_anselm, name: Anselm }
+- { id: name_bryn, name: Bryn }
+- { id: name_cassia, name: Cassia }
+- { id: name_dorian, name: Dorian }
+- { id: name_eira, name: Eira }
+- { id: name_falk, name: Falk }
+- { id: name_greta, name: Greta }
+- { id: name_harl, name: Harl }
+- { id: name_ilsabet, name: Ilsabet }
+- { id: name_joss, name: Joss }
+- { id: name_kara, name: Kara }
+- { id: name_leofric, name: Leofric }
+- { id: name_morwen, name: Morwen }
+- { id: name_nessa, name: Nessa }
+- { id: name_oswin, name: Oswin }
+- { id: name_petra, name: Petra }
+- { id: name_radek, name: Radek }
+- { id: name_sunniva, name: Sunniva }
+- { id: name_tamsin, name: Tamsin }
+- { id: name_udo, name: Udo }
+- { id: name_vera, name: Vera }
+- { id: name_wulf, name: Wulf }
+- { id: name_yvain, name: Yvain }
+- { id: name_zeno, name: Zeno }
+- { id: name_ansel, name: Ansel }
+- { id: name_bethan, name: Bethan }
+- { id: name_cormac, name: Cormac }
+- { id: name_dagna, name: Dagna }
+- { id: name_emrys, name: Emrys }
+- { id: name_freya, name: Freya }
+- { id: name_gunnar, name: Gunnar }
+- { id: name_hilde, name: Hilde }
+- { id: name_ingrith, name: Ingrith }
+- { id: name_jorik, name: Jorik }
+- { id: name_katla, name: Katla }
+- { id: name_lucan, name: Lucan }
+- { id: name_marta, name: Marta }
+- { id: name_nolan, name: Nolan }
+- { id: name_orla, name: Orla }
+- { id: name_piers, name: Piers }
+- { id: name_rhosyn, name: Rhosyn }
+- { id: name_sigrun, name: Sigrun }
+- { id: name_torin, name: Torin }
+- { id: name_una, name: Una }
+- { id: name_vigdis, name: Vigdis }
+- { id: name_wren, name: Wren }
+- { id: name_ysolde, name: Ysolde }
+- { id: name_zelda, name: Zelda }
+- { id: name_arvid, name: Arvid }
+- { id: name_brandt, name: Brandt }
+- { id: name_cyra, name: Cyra }
+- { id: name_doran, name: Doran }
+- { id: name_elowen, name: Elowen }
+- { id: name_finnick, name: Finnick }
+- { id: name_gisla, name: Gisla }
+- { id: name_hadrik, name: Hadrik }
+- { id: name_ilona, name: Ilona }
+- { id: name_jarek, name: Jarek }
+- { id: name_kolya, name: Kolya }
+- { id: name_liesl, name: Liesl }
+- { id: name_mattis, name: Mattis }
+- { id: name_nerys, name: Nerys }
+- { id: name_olwen, name: Olwen }
+- { id: name_pavel, name: Pavel }
+- { id: name_reva, name: Reva }
+- { id: name_stellan, name: Stellan }
+- { id: name_tovah, name: Tovah }
+- { id: name_vlad, name: Vlad }
+- { id: name_wynne, name: Wynne }
+- { id: name_brisa, name: Brisa }
+- { id: name_mira_voss, name: Mira Voss }
+- { id: name_tam_reed, name: Tam Reed }
+- { id: name_old_bram, name: Old Bram }
+- { id: name_sela_thorn, name: Sela Thorn }
+- { id: name_jack_ashby, name: Jack Ashby }
+- { id: name_nell_marsh, name: Nell Marsh }
+- { id: name_dag_ironhand, name: Dag Ironhand }
+- { id: name_pip_hollow, name: Pip Hollow }
+- { id: name_rue_calder, name: Rue Calder }
+- { id: name_hob_fenwick, name: Hob Fenwick }
+- { id: name_ana_brightwater, name: Ana Brightwater }
+- { id: name_kit_larkin, name: Kit Larkin }
+- { id: name_mags_dunmore, name: Mags Dunmore }
+- { id: name_tor_greyfell, name: Tor Greyfell }
+- { id: name_ysa_winter, name: Ysa Winter }
+- { id: name_bel_harrow, name: Bel Harrow }
+- { id: name_cob_stonely, name: Cob Stonely }
+- { id: name_dree_ashcroft, name: Dree Ashcroft }
+- { id: name_lil_penhale, name: Lil Penhale }
+- { id: name_garth_coldwell, name: Garth Coldwell }
+- { id: name_ottie_vale, name: Ottie Vale }
+- { id: name_fen_marlow, name: Fen Marlow }
+- { id: name_sid_brackwater, name: Sid Brackwater }
+- { id: name_wil_thistle, name: Wil Thistle }
+- { id: name_ada_quillon, name: Ada Quillon }
+- { id: name_brin_oakes, name: Brin Oakes }
+- { id: name_cass_rook, name: Cass Rook }
+- { id: name_dov_kell, name: Dov Kell }
+- { id: name_edda_ravenscroft, name: Edda Ravenscroft }
+- { id: name_rafe_mourne, name: Rafe Mourne }

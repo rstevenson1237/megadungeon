@@ -1,8 +1,33 @@
-# Stub entries for task 2.4 (Spec 02, "Sealed vaults" and "Shrine sets"). The launch table of 30 is written in
-# Phase 3 (task 4.9).
-- id: vault_name_stub_01
-  name: the Sunken Strongroom
-- id: vault_name_stub_02
-  name: the Miser's Cell
-- id: vault_name_stub_03
-  name: the Last Treasury
+# Vault and shrine names (Spec 02, "Sealed vaults" and "Shrine sets"): the launch table of 30 written in task 4.9. Each
+# starts with a lowercase "the" and a capitalised place name, at most 25 characters; a few carry a style tag
+# (see docs/12-content-style-guide.md).
+- { id: vault_name_sunken_strongroom, name: the Sunken Strongroom }
+- { id: vault_name_miser_s_cell, name: "the Miser's Cell" }
+- { id: vault_name_last_treasury, name: the Last Treasury }
+- { id: vault_name_ember_reliquary, name: the Ember Reliquary }
+- { id: vault_name_widow_s_hoard, name: "the Widow's Hoard" }
+- { id: vault_name_grey_chapel, name: the Grey Chapel }
+- { id: vault_name_king_s_cellar, name: "the King's Cellar" }
+- { id: vault_name_locked_ossuary, name: the Locked Ossuary }
+- { id: vault_name_vault_of_ere, name: the Vault of Ere, style: archaic }
+- { id: vault_name_tax_office, name: the Tax Office, style: dry }
+- { id: vault_name_drowned_crypt, name: the Drowned Crypt }
+- { id: vault_name_beggar_s_shrine, name: "the Beggar's Shrine" }
+- { id: vault_name_bone_treasury, name: the Bone Treasury }
+- { id: vault_name_cinder_vault, name: the Cinder Vault }
+- { id: vault_name_tallow_chapel, name: the Tallow Chapel }
+- { id: vault_name_hollow_reliquary, name: the Hollow Reliquary }
+- { id: vault_name_pauper_s_hoard, name: "the Pauper's Hoard" }
+- { id: vault_name_silent_cellar, name: the Silent Cellar }
+- { id: vault_name_iron_strongroom, name: the Iron Strongroom }
+- { id: vault_name_warden_s_crypt, name: "the Warden's Crypt" }
+- { id: vault_name_gilded_cell, name: the Gilded Cell }
+- { id: vault_name_salt_shrine, name: the Salt Shrine }
+- { id: vault_name_abbot_s_cache, name: "the Abbot's Cache" }
+- { id: vault_name_weeping_chapel, name: the Weeping Chapel }
+- { id: vault_name_thief_s_rest, name: "the Thief's Rest", style: dry }
+- { id: vault_name_old_mint, name: the Old Mint }
+- { id: vault_name_pale_sepulchre, name: the Pale Sepulchre, style: archaic }
+- { id: vault_name_brass_reliquary, name: the Brass Reliquary }
+- { id: vault_name_forgotten_hoard, name: the Forgotten Hoard }
+- { id: vault_name_lamplit_shrine, name: the Lamplit Shrine }
