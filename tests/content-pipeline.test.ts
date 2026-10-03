@@ -255,7 +255,7 @@ describe('coverage report', () => {
     const html = renderCoverageHtml(report);
     for (const t of CATALOG) expect(html).toContain(t.table);
     expect(html).toContain('150 / 150 entries');
-    expect(html).toContain('4 / 40 entries');
+    expect(html).toContain('40 / 40 entries');
     expect(html.startsWith('<!doctype html>')).toBe(true);
   });
 

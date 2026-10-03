@@ -1,14 +1,42 @@
-# Stub entries for task 1.1 (Spec 08, "Stub content in Phases 1 and 2").
-# The launch table of 40 village names is written in Phase 3.
-- id: stub_village_one
-  name: Stubton
-- id: stub_village_two
-  name: Placeholder Cross
-- id: stub_village_three
-  name: Testhollow
-- id: stub_village_four
-  name: Dummy Falls
-- id: stub_village_five
-  name: Mockmoor
-- id: stub_village_six
-  name: Teststead
+# Village names (Spec 07): the launch table of 40 written in task 4.9. English-hamlet flavour, plain ASCII, no articles,
+# at most 25 characters, no style tags (a name is not prose; see docs/12-content-style-guide.md).
+- { id: village_ashby, name: Ashby }
+- { id: village_coldwater, name: Coldwater }
+- { id: village_harrow_cross, name: Harrow Cross }
+- { id: village_millbank, name: Millbank }
+- { id: village_stonewick, name: Stonewick }
+- { id: village_low_ferry, name: Low Ferry }
+- { id: village_thornfield, name: Thornfield }
+- { id: village_gallows_end, name: Gallows End }
+- { id: village_dunmere, name: Dunmere }
+- { id: village_wickham_under_hill, name: Wickham-under-Hill }
+- { id: village_barrowby, name: Barrowby }
+- { id: village_elmstead, name: Elmstead }
+- { id: village_fenwick, name: Fenwick }
+- { id: village_greyhollow, name: Greyhollow }
+- { id: village_hawthorne, name: Hawthorne }
+- { id: village_kettleby, name: Kettleby }
+- { id: village_lambton_green, name: Lambton Green }
+- { id: village_marshgate, name: Marshgate }
+- { id: village_netherby, name: Netherby }
+- { id: village_oakenfold, name: Oakenfold }
+- { id: village_pennywell, name: Pennywell }
+- { id: village_quarrington, name: Quarrington }
+- { id: village_ravensmere, name: Ravensmere }
+- { id: village_saltash, name: Saltash }
+- { id: village_tilling_cross, name: Tilling Cross }
+- { id: village_upper_wend, name: Upper Wend }
+- { id: village_valebridge, name: Valebridge }
+- { id: village_wetherby, name: Wetherby }
+- { id: village_yarrow_mill, name: Yarrow Mill }
+- { id: village_brackenridge, name: Brackenridge }
+- { id: village_crowmarsh, name: Crowmarsh }
+- { id: village_draycott, name: Draycott }
+- { id: village_eastmoor, name: Eastmoor }
+- { id: village_foxholt, name: Foxholt }
+- { id: village_gravesend_row, name: Gravesend Row }
+- { id: village_hollowell, name: Hollowell }
+- { id: village_ivybridge, name: Ivybridge }
+- { id: village_longbarrow, name: Longbarrow }
+- { id: village_mossgate, name: Mossgate }
+- { id: village_nettlecombe, name: Nettlecombe }

@@ -327,9 +327,10 @@ describe('layout facts and rumours', () => {
         expect(bare.match(/\d+/g)).toEqual([String(level)]);
         // the level it names holds a fact of the kind the template needed
         expect(facts.some((f) => f.kind === c.template.needs && f.values.level === level)).toBe(true);
-        if (c.template.needs === 'boss') {
+        // a boss rumour that names its artifact names the right one (some phrasings leave it out)
+        if (c.template.needs === 'boss' && c.fact?.values.artifact) {
           const boss = l.bosses.find((b) => b.level === level)!;
-          expect(c.text).toContain(boss.artifactName!);
+          expect(c.fact.values.artifact).toBe(boss.artifactName);
         }
       }
     }

@@ -1,18 +1,218 @@
-# Stub entries for task 2.1: one template per quest type. The launch table (10 per quest type)
-# is written in Phase 3 (task 4.9).
-- id: stub_quest_captive
+# Quest templates (Spec 02, "Quest goals"; Spec 07, "Quests"): the launch table written in task 4.9, ten for each quest type.
+# Each template needs one quest fact (captive, belonging, magic_item or opponent) and gives two to four phrasings of the notice a village posts.
+# Placeholders: {level} and {village} for all types; {monster} for captive and opponent; {item} for belonging and magic_item.
+# Rewards and other places are never named. Six of the 40 carry a style tag (15%), under the 20% limit of Spec 08.
+- id: quest_captive_01
   needs: captive
   text:
-    - "A captive waits on level {level}, guarded by {monsters}. Bring them to any village."
-- id: stub_quest_belonging
+    - "A prisoner is held on level {level}, guarded by {monsters}. Bring them out alive to any village."
+    - "Someone is held captive on level {level}. {Monsters} stand guard. Bring them home alive."
+- id: quest_captive_02
+  needs: captive
+  text:
+    - "{Village} asks for a rescuer. A captive waits on level {level}, watched by {a:monster}."
+    - "Free the prisoner on level {level}. {Monster} keeps the door. Bring the captive to any village."
+    - "A prisoner on level {level} still lives. Get past the {monster} and bring them out."
+- id: quest_captive_03
+  needs: captive
+  text:
+    - "Taken below and not yet dead: a captive on level {level}, under guard of {monsters}."
+    - "{Village} posts this notice. One captive on level {level}. Return them alive to any village."
+- id: quest_captive_04
+  needs: captive
+  style: grim
+  text:
+    - "A captive waits on level {level}. {Monsters} guard them, and are in no hurry. Be quicker."
+    - "Someone on level {level} is still breathing, for now. {Monsters} hold them. Bring them out alive."
+- id: quest_captive_05
+  needs: captive
+  text:
+    - "Rescue wanted. A prisoner on level {level}, guarded by {a:monster}. Bring them to any village alive."
+    - "Level {level} holds a captive. The guard is {a:monster}. Dead prisoners are not paid for."
+- id: quest_captive_06
+  needs: captive
+  text:
+    - "A captive is chained on level {level}. {Monsters} stand watch. Walk them out to any village."
+    - "There is a prisoner on level {level}. Break the guard, free the captive, bring them up alive."
+- id: quest_captive_07
+  needs: captive
+  text:
+    - "{Village} has lost one of its own to level {level}. A {monster} guards the cell."
+    - "Held on level {level}, guarded by {monsters}: a captive. Bring them up alive."
+    - "Find the cell on level {level}. {Monster} watches it. Lead the captive to any village."
+- id: quest_captive_08
+  needs: captive
+  style: dry
+  text:
+    - "A prisoner on level {level} would like to leave. {Monsters} disagree. Settle it and bring the captive out alive."
+    - "Captive on level {level}, one, guarded by {a:monster}. Polite requests have failed. Bring them out alive."
+- id: quest_captive_09
+  needs: captive
+  text:
+    - "The captive on level {level} cannot walk out alone. {Monsters} stand in the way."
+    - "Get a prisoner out of level {level} alive. {Monster} keeps them. Any village will take them in."
+- id: quest_captive_10
+  needs: captive
+  text:
+    - "A captive lieth bound upon level {level}, and {monsters} keep the watch. Bring them forth alive."
+    - "Hear this: one is held upon level {level} by {a:monster}. Let him who is bold bring the captive to any village."
+- id: quest_belonging_01
   needs: belonging
   text:
-    - "{Item} was lost on level {level}. Hand it in at {village}."
-- id: stub_quest_magic_item
+    - "{Village} lost {a:item} on level {level}. Find it and hand it in at {village}."
+    - "Someone dropped the {item} on level {level}. Bring it to {village}."
+- id: quest_belonging_02
+  needs: belonging
+  text:
+    - "Lost on level {level}: {a:item}. Hand it in at {village}."
+    - "If you pass level {level}, look for the {item}. It belongs in {village}."
+    - "A {item} lies somewhere on level {level}. {Village} wants it back."
+- id: quest_belonging_03
+  needs: belonging
+  text:
+    - "Reward for the {item} lost on level {level}. Hand it in at {village}."
+    - "An old delver left {a:item} on level {level}. Return it to {village}."
+- id: quest_belonging_04
+  needs: belonging
+  text:
+    - "The owner of the {item} will not be back for it. It lies on level {level}. Hand it in at {village}."
+    - "{Village} wants the {item} from level {level}. Its owner went down with it and did not return."
+- id: quest_belonging_05
+  needs: belonging
+  text:
+    - "The {item} was lost on level {level}. Bring it to {village} and ask no questions."
+    - "Find {a:item} on level {level}. {Village} will take it from you."
+- id: quest_belonging_06
+  needs: belonging
+  text:
+    - "Missing: {a:item}, last seen on level {level}. Hand it in at {village}."
+    - "Notice from {village}. The {item} was lost on level {level}. Please bring it back."
+- id: quest_belonging_07
+  needs: belonging
+  text:
+    - "A family in {village} wants the {item} back. It was lost on level {level}."
+    - "Search level {level} for the {item}. Hand it in at {village}."
+    - "Someone left {a:item} on level {level}. {Village} would have it home."
+- id: quest_belonging_08
+  needs: belonging
+  text:
+    - "{Village} has misplaced {a:item}, somewhere on level {level}. It is a large dungeon. Hand it in when found."
+    - "Lost: the {item}, on level {level}. Finders will be thanked, in {village}, at length."
+- id: quest_belonging_09
+  needs: belonging
+  text:
+    - "Bring the {item} up from level {level}. Hand it in at {village}."
+    - "The {item} is on level {level}, where its owner dropped it. {Village} wants it."
+- id: quest_belonging_10
+  needs: belonging
+  style: archaic
+  text:
+    - "Lost upon level {level}: {a:item}. Whoso findeth it, let him render it to {village}."
+    - "Hear this, ye delvers. The {item} lieth somewhere on level {level}. Bring it unto {village}."
+- id: quest_magic_item_01
   needs: magic_item
   text:
-    - "Bring {a:item} from level {level} to {village}."
-- id: stub_quest_opponent
+    - "The {item} lies on level {level}. Bring it to {village}."
+    - "{Village} asks for the {item}. It is on level {level}."
+- id: quest_magic_item_02
+  needs: magic_item
+  text:
+    - "A magic item waits on level {level}: the {item}. Bring it to {village}."
+    - "Find the {item} on level {level} and carry it to {village}."
+    - "The {item} is on level {level}. {Village} will have it."
+- id: quest_magic_item_03
+  needs: magic_item
+  text:
+    - "Hand the {item} to {village}. It lies on level {level}."
+    - "Something of power is hidden on level {level}: the {item}. Bring it to {village}."
+- id: quest_magic_item_04
+  needs: magic_item
+  text:
+    - "The {item} is on level {level}, among the dead who sought it. Bring it to {village}."
+    - "Many went down for the {item} on level {level}. None returned with it. Bring it to {village}."
+- id: quest_magic_item_05
+  needs: magic_item
+  text:
+    - "{Village} seeks the {item}, hidden on level {level}."
+    - "Recover the {item} from level {level} and bring it to {village}."
+- id: quest_magic_item_06
+  needs: magic_item
+  text:
+    - "The old tales put the {item} on level {level}. {Village} wants it."
+    - "Bring {a:item} to {village}. It is known to lie on level {level}."
+- id: quest_magic_item_07
+  needs: magic_item
+  text:
+    - "Notice from {village}. The {item} is on level {level}. Bring it up."
+    - "The {item} still lies on level {level}. Bring it to {village}."
+    - "Seek the {item} on level {level}. Deliver it to {village}."
+- id: quest_magic_item_08
+  needs: magic_item
+  style: dry
+  text:
+    - "The {item} is on level {level}. {Village} would like it, please, preferably intact."
+    - "A famous heirloom, the {item}, is on level {level}. {Village} will take it off your hands."
+- id: quest_magic_item_09
+  needs: magic_item
+  text:
+    - "Fetch the {item} from level {level}. {Village} is waiting."
+    - "On level {level} lies the {item}. Carry it to {village}."
+- id: quest_magic_item_10
+  needs: magic_item
+  text:
+    - "The {item} lieth hid upon level {level}. Bring it unto {village}."
+    - "Seek ye the {item} on level {level}, and render it to {village}."
+- id: quest_opponent_01
   needs: opponent
   text:
-    - "{Monster} lairs on level {level}. Kill it."
+    - "{Monster} lairs on level {level}. Kill it and return to {village}."
+    - "Something is killing travellers on level {level}: {a:monster}. Put it down."
+- id: quest_opponent_02
+  needs: opponent
+  text:
+    - "{Village} wants {a:monster} dead. It lairs on level {level}."
+    - "Kill the {monster} on level {level}. {Village} will thank you."
+    - "A {monster} has made its den on level {level}. Clear it out."
+- id: quest_opponent_03
+  needs: opponent
+  text:
+    - "Bounty: the {monster} of level {level}. Kill it and return to {village}."
+    - "{Monster} holds a lair on level {level}. End it."
+- id: quest_opponent_04
+  needs: opponent
+  style: grim
+  text:
+    - "The {monster} on level {level} has killed before and will again. Kill it first."
+    - "{Monster} lairs on level {level}. Those sent before you are still there. Kill it."
+- id: quest_opponent_05
+  needs: opponent
+  text:
+    - "Hunt wanted. {Monster} lairs on level {level}. Return to {village} when it is dead."
+    - "The lair of {a:monster} is on level {level}. Kill it."
+- id: quest_opponent_06
+  needs: opponent
+  text:
+    - "Level {level} has a {monster} that must die. {Village} posts this notice."
+    - "Slay the {monster} on level {level} and tell {village} it is done."
+- id: quest_opponent_07
+  needs: opponent
+  text:
+    - "A {monster} lairs on level {level}. Kill it and return to {village}."
+    - "{Village} has had enough of the {monster} on level {level}. Kill it."
+    - "Find {a:monster} on level {level}. It lairs there. Put an end to it."
+- id: quest_opponent_08
+  needs: opponent
+  style: dry
+  text:
+    - "There is {a:monster} on level {level}. {Village} would prefer there were not. Kill it."
+    - "Wanted dead: {a:monster}, level {level}. No other qualifications required."
+- id: quest_opponent_09
+  needs: opponent
+  text:
+    - "The {monster} on level {level} has gone unchallenged too long. Kill it."
+    - "Kill {a:monster}. It lairs on level {level}. Return to {village}."
+- id: quest_opponent_10
+  needs: opponent
+  text:
+    - "{Monster} lairs on level {level} and guards its den. {Village} wants it killed."
+    - "Go down to level {level} and kill the {monster} there. Come back to {village}."
