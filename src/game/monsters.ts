@@ -75,7 +75,19 @@ export interface Monster {
 }
 
 /** Colour names used by the monster tables (Spec 08), as 24-bit colours; any other name draws light grey. */
-export const MONSTER_COLOURS: Readonly<Record<string, number>> = { moss: 0x7fc75a };
+export const MONSTER_COLOURS: Readonly<Record<string, number>> = {
+  moss: 0x7fc75a,
+  rust: 0xc0703c,
+  bone: 0xe0d8b8,
+  ochre: 0xd0a030,
+  slate: 0x8a98b0,
+  azure: 0x58a8e8,
+  violet: 0xb870e0,
+  ember: 0xf08030,
+  ivory: 0xf4f0e0,
+  blood: 0xe04848,
+  ash: 0xa8a0a0,
+};
 export const DEFAULT_MONSTER_COLOUR = 0xc8c8c8;
 /** Bandits and rivals have no table row; they draw as B and R. */
 export const BANDIT = { glyph: 'B', colour: 0xd06a5a } as const;

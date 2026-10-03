@@ -1,55 +1,1567 @@
-# Stub entries (Spec 08, "Stub content in Phases 1 and 2"): enough that every level from 1 to 100
-# has something to place. Real monsters are written in Phase 3 (task 4.3). Ratings keep inside the
-# depth ceiling of Spec 02 (1 + depth / 5 dice), so each row's dice never exceed it where it appears.
-- id: stub_monster_weak
-  name: stub rat
-  glyph: r
-  colour: moss
-  rating: 1d4+0
-  behaviour: stub
+# The launch monster table (Spec 08, task 4.3): 150 rows, at least 5 for every rating from 1 to 20. A row's
+# dice give the first level it can appear on (Spec 02, Depth scaling: ceiling = 1 + depth / 5) and `depth` its window, so
+# most monsters of a level roll between half the ceiling and the ceiling. A few shallow rows (vermin, aquatic, undead)
+# span every depth because features summon by those tags (Spec 06). Voice and naming follow docs/12-content-style-guide.md.
+- id: cave_rat
+  name: cave rat
+  glyph: "r"
+  colour: rust
+  rating: 1d6+3
+  behaviour: pack
   speed: fast
-  depth: [1, 5]
-  tags: [stub, pack, vermin]
-- id: stub_monster_strong
-  name: stub ogre
-  glyph: O
+  weight: 8
+  depth: [1, 100]
+  themes: { flooded_sewers: 3, old_mine: 1.5, cellars_and_crypts: 1.5 }
+  tags: [vermin, pack]
+- id: giant_roach
+  name: giant roach
+  glyph: "a"
+  colour: ochre
+  rating: 1d6+2
+  behaviour: coward
+  speed: fast
+  weight: 8
+  depth: [1, 100]
+  themes: { cellars_and_crypts: 2, flooded_sewers: 2 }
+  tags: [vermin]
+- id: sewer_snake
+  name: sewer snake
+  glyph: "S"
   colour: moss
-  rating: 1d8+2
-  behaviour: stub
+  rating: 1d6+4
+  behaviour: ambusher
+  weight: 8
+  depth: [1, 100]
+  themes: { flooded_sewers: 3 }
+  tags: [aquatic, reptile]
+- id: pit_eel
+  name: pit eel
+  glyph: "e"
+  colour: azure
+  rating: 1d6+2
+  behaviour: ambusher
+  weight: 8
+  depth: [1, 100]
+  themes: { flooded_sewers: 2, underdark_lake: 3 }
+  tags: [aquatic]
+- id: kobold_scrapper
+  name: kobold scrapper
+  glyph: "k"
+  colour: rust
+  rating: 1d6+0
+  behaviour: brute
+  weight: 12
+  depth: [1, 8]
+  themes: { goblin_warrens: 2, old_mine: 2 }
+  tags: [kobold]
+- id: goblin_slinger
+  name: goblin slinger
+  glyph: "g"
+  colour: moss
+  rating: 1d6+1
+  behaviour: skirmisher
+  weight: 12
+  depth: [1, 13]
+  themes: { goblin_warrens: 3 }
+  tags: [goblinoid, ranged]
+- id: crypt_skeleton
+  name: crypt skeleton
+  glyph: "s"
+  colour: bone
+  rating: 1d6+3
+  behaviour: brute
   speed: slow
-  depth: [3, 10]
-  tags: [stub]
-- id: stub_monster_mid
-  name: stub goblin
-  glyph: g
+  weight: 8
+  depth: [1, 100]
+  themes: { cellars_and_crypts: 3, catacomb_labyrinth: 3 }
+  tags: [undead]
+- id: cave_bat
+  name: cave bat
+  glyph: "b"
+  colour: slate
+  rating: 1d6+2
+  behaviour: coward
+  speed: fast
+  weight: 6
+  depth: [1, 13]
+  themes: { old_mine: 2, fungal_caverns: 2 }
+  tags: [flying]
+- id: giant_centipede
+  name: giant centipede
+  glyph: "c"
+  colour: ochre
+  rating: 2d6+2
+  behaviour: ambusher
+  weight: 12
+  depth: [5, 18]
+  themes: { old_mine: 2, fungal_caverns: 2 }
+  tags: [vermin]
+- id: goblin_archer
+  name: goblin archer
+  glyph: "g"
+  colour: moss
+  rating: 2d6-2
+  behaviour: skirmisher
+  weight: 12
+  depth: [5, 23]
+  themes: { goblin_warrens: 3, old_mine: 1.5 }
+  tags: [goblinoid, ranged]
+- id: kobold_shaman
+  name: kobold shaman
+  glyph: "k"
+  colour: violet
+  rating: 2d6+1
+  behaviour: caster
+  weight: 8
+  depth: [8, 18]
+  themes: { goblin_warrens: 2 }
+  tags: [kobold, caster]
+- id: wolf
+  name: wolf
+  glyph: "q"
+  colour: ash
+  rating: 2d6+0
+  behaviour: pack
+  speed: fast
+  weight: 6
+  depth: [5, 23]
+  themes: { goblin_warrens: 1.5 }
+  tags: [beast, pack]
+- id: plague_rat_swarm
+  name: plague rat swarm
+  glyph: "r"
+  colour: rust
+  rating: 2d6-1
+  behaviour: pack
+  speed: fast
+  weight: 12
+  depth: [5, 18]
+  themes: { flooded_sewers: 3 }
+  tags: [vermin, pack, swarm]
+- id: cave_lizard
+  name: cave lizard
+  glyph: "l"
+  colour: moss
+  rating: 2d6+2
+  behaviour: brute
+  weight: 12
+  depth: [8, 23]
+  themes: { fungal_caverns: 2, old_mine: 1.5 }
+  tags: [reptile]
+- id: grave_rat
+  name: grave rat
+  glyph: "r"
+  colour: bone
+  rating: 2d6-1
+  behaviour: coward
+  weight: 6
+  depth: [5, 18]
+  themes: { cellars_and_crypts: 3 }
+  tags: [vermin, undead]
+- id: mud_crawler
+  name: mud crawler
+  glyph: "w"
+  colour: ochre
+  rating: 2d6+3
+  behaviour: ambusher
+  speed: slow
+  weight: 6
+  depth: [5, 99]
+  themes: { flooded_sewers: 3, underdark_lake: 2 }
+  tags: [aquatic]
+- id: hobgoblin
+  name: hobgoblin
+  glyph: "h"
+  colour: ember
+  rating: 3d6+1
+  behaviour: brute
+  weight: 10
+  depth: [10, 28]
+  themes: { goblin_warrens: 3 }
+  tags: [goblinoid]
+- id: giant_spider
+  name: giant spider
+  glyph: "S"
+  colour: slate
+  rating: 3d6+2
+  behaviour: ambusher
+  weight: 10
+  depth: [10, 33]
+  themes: { fungal_caverns: 2, goblin_warrens: 1.5 }
+  tags: [spider]
+- id: ghoul
+  name: ghoul
+  glyph: "z"
+  colour: bone
+  rating: 3d6+1
+  behaviour: brute
+  weight: 10
+  depth: [13, 28]
+  themes: { cellars_and_crypts: 3, catacomb_labyrinth: 3 }
+  tags: [undead]
+- id: bog_frog
+  name: bog frog
+  glyph: "l"
+  colour: moss
+  rating: 3d6+5
+  behaviour: ambusher
+  weight: 8
+  depth: [10, 99]
+  themes: { flooded_sewers: 3, underdark_lake: 2 }
+  tags: [aquatic, amphibian]
+- id: orc_raider
+  name: orc raider
+  glyph: "o"
+  colour: ember
+  rating: 3d6-1
+  behaviour: brute
+  weight: 10
+  depth: [10, 28]
+  themes: { goblin_warrens: 2 }
+  tags: [orc]
+- id: dire_boar
+  name: dire boar
+  glyph: "q"
+  colour: rust
+  rating: 3d6+2
+  behaviour: brute
+  speed: fast
+  weight: 10
+  depth: [13, 33]
+  themes: { old_mine: 1.5 }
+  tags: [beast]
+- id: rot_zombie
+  name: rot zombie
+  glyph: "z"
   colour: moss
   rating: 3d6+1
-  behaviour: stub
-  depth: [11, 40]
-  tags: [stub]
-- id: stub_monster_deep
-  name: stub troll
-  glyph: T
+  behaviour: brute
+  speed: slow
+  weight: 10
+  depth: [10, 28]
+  themes: { cellars_and_crypts: 2 }
+  tags: [undead]
+- id: cave_stalker
+  name: cave stalker
+  glyph: "F"
+  colour: ash
+  rating: 3d6+0
+  behaviour: ambusher
+  weight: 6
+  depth: [10, 33]
+  themes: { fungal_caverns: 2, old_mine: 2 }
+  tags: [beast]
+- id: orc_archer
+  name: orc archer
+  glyph: "o"
+  colour: ember
+  rating: 4d6+0
+  behaviour: skirmisher
+  weight: 10
+  depth: [15, 38]
+  themes: { goblin_warrens: 2 }
+  tags: [orc, ranged]
+- id: bone_archer
+  name: bone archer
+  glyph: "s"
+  colour: bone
+  rating: 4d6+2
+  behaviour: skirmisher
+  weight: 10
+  depth: [15, 43]
+  themes: { cellars_and_crypts: 2, catacomb_labyrinth: 3 }
+  tags: [undead, ranged]
+- id: goblin_warchanter
+  name: goblin warchanter
+  glyph: "g"
+  colour: violet
+  rating: 4d6+0
+  behaviour: caster
+  weight: 8
+  depth: [18, 38]
+  themes: { goblin_warrens: 3 }
+  tags: [goblinoid, caster]
+- id: gelatinous_cube
+  name: gelatinous cube
+  glyph: "j"
+  colour: azure
+  rating: 4d6+1
+  behaviour: ambusher
+  speed: slow
+  weight: 6
+  depth: [15, 43]
+  themes: { flooded_sewers: 2, old_mine: 1.5 }
+  tags: [ooze, construct]
+- id: giant_scorpion
+  name: giant scorpion
+  glyph: "a"
+  colour: ochre
+  rating: 4d6+2
+  behaviour: ambusher
+  weight: 10
+  depth: [15, 38]
+  themes: { old_mine: 2, fungal_caverns: 1.5 }
+  tags: [vermin]
+- id: shade
+  name: shade
+  glyph: "W"
+  colour: slate
+  rating: 4d6+2
+  behaviour: ambusher
+  weight: 10
+  depth: [18, 43]
+  themes: { cellars_and_crypts: 2, catacomb_labyrinth: 3 }
+  tags: [undead, ghost]
+- id: cave_bear
+  name: cave bear
+  glyph: "Y"
+  colour: ash
+  rating: 4d6+3
+  behaviour: brute
+  weight: 10
+  depth: [15, 38]
+  themes: { old_mine: 2, fungal_caverns: 1.5 }
+  tags: [beast]
+- id: sewer_lurker
+  name: sewer lurker
+  glyph: "e"
   colour: moss
+  rating: 4d6+1
+  behaviour: ambusher
+  weight: 8
+  depth: [15, 99]
+  themes: { flooded_sewers: 3, underdark_lake: 2 }
+  tags: [aquatic]
+- id: ogre
+  name: ogre
+  glyph: "O"
+  colour: ochre
+  rating: 5d6+0
+  behaviour: brute
+  speed: slow
+  weight: 10
+  depth: [20, 48]
+  themes: { old_mine: 2, goblin_warrens: 1.5 }
+  tags: [giant]
+- id: wight
+  name: wight
+  glyph: "W"
+  colour: bone
+  rating: 5d6+3
+  behaviour: brute
+  weight: 10
+  depth: [20, 53]
+  themes: { catacomb_labyrinth: 3, cellars_and_crypts: 2 }
+  tags: [undead]
+- id: dark_acolyte
+  name: dark acolyte
+  glyph: "h"
+  colour: violet
+  rating: 5d6+2
+  behaviour: caster
+  weight: 10
+  depth: [23, 48]
+  themes: { ruined_temple: 3, wizards_sanctum: 1.5 }
+  tags: [human, caster]
+- id: gargoyle
+  name: gargoyle
+  glyph: "G"
+  colour: slate
+  rating: 5d6+1
+  behaviour: ambusher
+  weight: 6
+  depth: [20, 53]
+  themes: { ruined_temple: 3, dwarven_hold: 1.5 }
+  tags: [construct, flying]
+- id: lizardman_spearman
+  name: lizardman spearman
+  glyph: "l"
+  colour: moss
+  rating: 5d6+3
+  behaviour: skirmisher
+  weight: 10
+  depth: [20, 48]
+  themes: { underdark_lake: 2, fungal_caverns: 2 }
+  tags: [reptile, ranged]
+- id: fungus_horror
+  name: fungus horror
+  glyph: "f"
+  colour: ember
+  rating: 5d6+1
+  behaviour: brute
+  speed: slow
+  weight: 10
+  depth: [23, 53]
+  themes: { fungal_caverns: 4 }
+  tags: [fungus]
+- id: giant_leech
+  name: giant leech
+  glyph: "w"
+  colour: blood
+  rating: 5d6+2
+  behaviour: ambusher
+  speed: slow
+  weight: 10
+  depth: [20, 48]
+  themes: { flooded_sewers: 3, underdark_lake: 3 }
+  tags: [aquatic, vermin]
+- id: wild_boar_herd
+  name: wild boar herd
+  glyph: "q"
+  colour: rust
+  rating: 5d6+3
+  behaviour: pack
+  speed: fast
+  weight: 6
+  depth: [20, 53]
+  themes: { fungal_caverns: 1.5 }
+  tags: [beast, pack]
+- id: troll
+  name: troll
+  glyph: "T"
+  colour: moss
+  rating: 6d6+3
+  behaviour: brute
+  weight: 10
+  depth: [25, 58]
+  themes: { goblin_warrens: 2, old_mine: 2 }
+  tags: [giant]
+- id: mummy
+  name: mummy
+  glyph: "M"
+  colour: ivory
+  rating: 6d6+2
+  behaviour: brute
+  speed: slow
+  weight: 10
+  depth: [25, 63]
+  themes: { catacomb_labyrinth: 4, cellars_and_crypts: 2 }
+  tags: [undead]
+- id: dwarf_crossbowman
+  name: dwarf crossbowman
+  glyph: "h"
+  colour: ochre
+  rating: 6d6+4
+  behaviour: skirmisher
+  weight: 10
+  depth: [28, 58]
+  themes: { dwarven_hold: 4 }
+  tags: [dwarf, ranged]
+- id: hill_giant
+  name: hill giant
+  glyph: "G"
+  colour: rust
+  rating: 6d6+0
+  behaviour: brute
+  speed: slow
+  weight: 6
+  depth: [25, 63]
+  themes: { old_mine: 1.5 }
+  tags: [giant]
+- id: dark_mage
+  name: dark mage
+  glyph: "h"
+  colour: violet
+  rating: 6d6+3
+  behaviour: caster
+  weight: 10
+  depth: [25, 58]
+  themes: { wizards_sanctum: 4, ruined_temple: 1.5 }
+  tags: [human, caster]
+- id: stone_golem
+  name: stone golem
+  glyph: "C"
+  colour: slate
+  rating: 6d6+3
+  behaviour: brute
+  speed: slow
+  weight: 10
+  depth: [28, 63]
+  themes: { dwarven_hold: 3, wizards_sanctum: 2 }
+  tags: [construct]
+- id: giant_crayfish
+  name: giant crayfish
+  glyph: "c"
+  colour: ember
+  rating: 6d6+1
+  behaviour: brute
+  weight: 10
+  depth: [25, 58]
+  themes: { underdark_lake: 3, flooded_sewers: 2 }
+  tags: [aquatic]
+- id: bone_wolf_pack
+  name: bone wolf pack
+  glyph: "s"
+  colour: bone
+  rating: 6d6+3
+  behaviour: pack
+  speed: fast
+  weight: 6
+  depth: [25, 63]
+  themes: { catacomb_labyrinth: 3, cellars_and_crypts: 2 }
+  tags: [undead, pack]
+- id: wraith
+  name: wraith
+  glyph: "W"
+  colour: ash
+  rating: 7d6+4
+  behaviour: brute
+  speed: fast
+  weight: 10
+  depth: [30, 68]
+  themes: { catacomb_labyrinth: 3, ruined_temple: 2 }
+  tags: [undead, ghost]
+- id: ogre_mage
+  name: ogre mage
+  glyph: "O"
+  colour: violet
+  rating: 7d6+2
+  behaviour: caster
+  weight: 10
+  depth: [30, 73]
+  themes: { goblin_warrens: 2, wizards_sanctum: 2 }
+  tags: [giant, caster]
+- id: giant_wasp_swarm
+  name: giant wasp swarm
+  glyph: "I"
+  colour: ochre
+  rating: 7d6+3
+  behaviour: pack
+  speed: fast
+  weight: 10
+  depth: [33, 68]
+  themes: { fungal_caverns: 3 }
+  tags: [vermin, pack, flying]
+- id: cave_troll
+  name: cave troll
+  glyph: "T"
+  colour: slate
+  rating: 7d6+4
+  behaviour: brute
+  weight: 6
+  depth: [30, 73]
+  themes: { old_mine: 3 }
+  tags: [giant]
+- id: orc_warlord
+  name: orc warlord
+  glyph: "o"
+  colour: blood
+  rating: 7d6+3
+  behaviour: brute
+  weight: 8
+  depth: [30, 68]
+  themes: { goblin_warrens: 3 }
+  tags: [orc]
+- id: mirror_shade
+  name: mirror shade
+  glyph: "W"
+  colour: azure
+  rating: 7d6+5
+  behaviour: ambusher
+  weight: 10
+  depth: [33, 73]
+  themes: { wizards_sanctum: 3, void_halls: 2 }
+  tags: [undead]
+- id: lake_serpent
+  name: lake serpent
+  glyph: "S"
+  colour: azure
+  rating: 7d6+1
+  behaviour: ambusher
+  weight: 10
+  depth: [30, 68]
+  themes: { underdark_lake: 4, flooded_sewers: 2 }
+  tags: [aquatic, reptile]
+- id: iron_sentinel
+  name: iron sentinel
+  glyph: "C"
+  colour: slate
+  rating: 7d6+4
+  behaviour: brute
+  speed: slow
+  weight: 6
+  depth: [30, 73]
+  themes: { dwarven_hold: 3, ruined_temple: 2 }
+  tags: [construct]
+- id: vampire_spawn
+  name: vampire spawn
+  glyph: "V"
+  colour: blood
+  rating: 8d6+4
+  behaviour: brute
+  weight: 10
+  depth: [35, 78]
+  themes: { catacomb_labyrinth: 3, ruined_temple: 2 }
+  tags: [undead]
+- id: stone_giant
+  name: stone giant
+  glyph: "G"
+  colour: ash
   rating: 8d6+3
-  behaviour: stub
-  depth: [41, 100]
-  tags: [stub]
-# Stub rows the features draw on (Spec 06): an aquatic creature for fountains and an undead for sarcophagi. Low weights keep
-# them rare in ordinary levels; ratings of 1d4 fit every depth.
-- id: stub_monster_eel
-  name: stub eel
-  glyph: e
+  behaviour: brute
+  speed: slow
+  weight: 10
+  depth: [35, 83]
+  themes: { dwarven_hold: 2, old_mine: 2 }
+  tags: [giant]
+- id: spore_mother
+  name: spore mother
+  glyph: "f"
+  colour: violet
+  rating: 8d6+2
+  behaviour: caster
+  speed: slow
+  weight: 10
+  depth: [38, 78]
+  themes: { fungal_caverns: 4 }
+  tags: [fungus, caster]
+- id: death_knight
+  name: death knight
+  glyph: "K"
+  colour: slate
+  rating: 8d6+4
+  behaviour: brute
+  weight: 6
+  depth: [35, 83]
+  themes: { ruined_temple: 3, catacomb_labyrinth: 3 }
+  tags: [undead]
+- id: chimera
+  name: chimera
+  glyph: "H"
+  colour: ember
+  rating: 8d6+2
+  behaviour: skirmisher
+  weight: 10
+  depth: [35, 78]
+  themes: { old_mine: 1.5 }
+  tags: [beast, flying]
+- id: dark_priest
+  name: dark priest
+  glyph: "h"
+  colour: violet
+  rating: 8d6+4
+  behaviour: caster
+  weight: 10
+  depth: [38, 83]
+  themes: { ruined_temple: 4, wizards_sanctum: 2 }
+  tags: [human, caster]
+- id: cave_drake
+  name: cave drake
+  glyph: "D"
+  colour: ember
+  rating: 8d6+4
+  behaviour: ambusher
+  weight: 10
+  depth: [35, 78]
+  themes: { old_mine: 2, fungal_caverns: 2 }
+  tags: [dragon]
+- id: bone_naga
+  name: bone naga
+  glyph: "n"
+  colour: ivory
+  rating: 8d6+3
+  behaviour: caster
+  weight: 6
+  depth: [35, 83]
+  themes: { catacomb_labyrinth: 3, underdark_lake: 1.5 }
+  tags: [undead, reptile, caster]
+- id: shadow_assassin
+  name: shadow assassin
+  glyph: "W"
+  colour: slate
+  rating: 9d6+4
+  behaviour: ambusher
+  speed: fast
+  weight: 10
+  depth: [40, 88]
+  themes: { void_halls: 3, catacomb_labyrinth: 2 }
+  tags: [undead, ghost]
+- id: frost_giant
+  name: frost giant
+  glyph: "G"
+  colour: azure
+  rating: 9d6+6
+  behaviour: brute
+  speed: slow
+  weight: 10
+  depth: [40, 93]
+  themes: { underdark_lake: 2, ruined_temple: 1.5 }
+  tags: [giant]
+- id: dwarven_ironclad
+  name: dwarven ironclad
+  glyph: "h"
+  colour: slate
+  rating: 9d6+2
+  behaviour: brute
+  speed: slow
+  weight: 10
+  depth: [43, 88]
+  themes: { dwarven_hold: 5 }
+  tags: [dwarf]
+- id: basilisk
+  name: basilisk
+  glyph: "l"
+  colour: ochre
+  rating: 9d6+5
+  behaviour: ambusher
+  speed: slow
+  weight: 6
+  depth: [40, 93]
+  themes: { fungal_caverns: 2, old_mine: 2 }
+  tags: [reptile]
+- id: mind_weaver
+  name: mind weaver
+  glyph: "h"
+  colour: violet
+  rating: 9d6+4
+  behaviour: caster
+  weight: 10
+  depth: [40, 88]
+  themes: { wizards_sanctum: 4 }
+  tags: [human, caster]
+- id: carrion_crawler
+  name: carrion crawler
+  glyph: "w"
   colour: moss
-  rating: 1d4+0
-  behaviour: stub
-  weight: 2
-  tags: [stub, aquatic]
-- id: stub_monster_skeleton
-  name: stub skeleton
-  glyph: s
+  rating: 9d6+3
+  behaviour: ambusher
+  weight: 10
+  depth: [43, 93]
+  themes: { catacomb_labyrinth: 3, fungal_caverns: 2 }
+  tags: [vermin]
+- id: flame_guardian
+  name: flame guardian
+  glyph: "E"
+  colour: ember
+  rating: 9d6+5
+  behaviour: brute
+  weight: 10
+  depth: [40, 88]
+  themes: { lava_forges: 3, wizards_sanctum: 1.5 }
+  tags: [construct, fire]
+- id: giant_eel
+  name: giant eel
+  glyph: "e"
+  colour: azure
+  rating: 9d6+3
+  behaviour: ambusher
+  speed: fast
+  weight: 6
+  depth: [40, 93]
+  themes: { underdark_lake: 4, flooded_sewers: 3 }
+  tags: [aquatic]
+- id: fire_giant
+  name: fire giant
+  glyph: "G"
+  colour: ember
+  rating: 10d6+3
+  behaviour: brute
+  speed: slow
+  weight: 10
+  depth: [45, 98]
+  themes: { lava_forges: 4, dwarven_hold: 2 }
+  tags: [giant, fire]
+- id: banshee
+  name: banshee
+  glyph: "W"
+  colour: ivory
+  rating: 10d6+4
+  behaviour: caster
+  speed: fast
+  weight: 10
+  depth: [45, 100]
+  themes: { catacomb_labyrinth: 3, ruined_temple: 2 }
+  tags: [undead, ghost, caster]
+- id: wyvern
+  name: wyvern
+  glyph: "D"
   colour: moss
-  rating: 1d4+0
-  behaviour: stub
-  weight: 2
-  tags: [stub, undead]
+  rating: 10d6+5
+  behaviour: skirmisher
+  speed: fast
+  weight: 10
+  depth: [48, 98]
+  themes: { old_mine: 2, fungal_caverns: 2 }
+  tags: [dragon, flying]
+- id: lich_acolyte
+  name: lich acolyte
+  glyph: "L"
+  colour: violet
+  rating: 10d6+4
+  behaviour: caster
+  weight: 6
+  depth: [45, 100]
+  themes: { wizards_sanctum: 3, catacomb_labyrinth: 3 }
+  tags: [undead, caster]
+- id: rust_drake
+  name: rust drake
+  glyph: "D"
+  colour: rust
+  rating: 10d6+6
+  behaviour: brute
+  weight: 10
+  depth: [45, 98]
+  themes: { dwarven_hold: 4, old_mine: 2 }
+  tags: [dragon]
+- id: mushroom_lord
+  name: mushroom lord
+  glyph: "f"
+  colour: moss
+  rating: 10d6+2
+  behaviour: brute
+  speed: slow
+  weight: 10
+  depth: [48, 100]
+  themes: { fungal_caverns: 4 }
+  tags: [fungus]
+- id: war_troll
+  name: war troll
+  glyph: "T"
+  colour: blood
+  rating: 10d6+5
+  behaviour: brute
+  speed: fast
+  weight: 10
+  depth: [45, 98]
+  themes: { goblin_warrens: 2, old_mine: 1.5 }
+  tags: [giant]
+- id: lake_horror
+  name: lake horror
+  glyph: "e"
+  colour: slate
+  rating: 10d6+4
+  behaviour: ambusher
+  weight: 6
+  depth: [45, 100]
+  themes: { underdark_lake: 5 }
+  tags: [aquatic]
+- id: vampire
+  name: vampire
+  glyph: "V"
+  colour: blood
+  rating: 11d6+4
+  behaviour: brute
+  speed: fast
+  weight: 10
+  depth: [50, 100]
+  themes: { catacomb_labyrinth: 3, ruined_temple: 3 }
+  tags: [undead]
+- id: cave_dragon
+  name: cave dragon
+  glyph: "D"
+  colour: ochre
+  rating: 11d6+3
+  behaviour: brute
+  weight: 10
+  depth: [50, 100]
+  themes: { old_mine: 3, fungal_caverns: 2 }
+  tags: [dragon]
+- id: spirit_lord
+  name: spirit lord
+  glyph: "W"
+  colour: azure
+  rating: 11d6+6
+  behaviour: caster
+  weight: 10
+  depth: [53, 100]
+  themes: { ruined_temple: 3, catacomb_labyrinth: 3 }
+  tags: [undead, ghost, caster]
+- id: iron_colossus
+  name: iron colossus
+  glyph: "C"
+  colour: slate
+  rating: 11d6+3
+  behaviour: brute
+  speed: slow
+  weight: 6
+  depth: [50, 100]
+  themes: { dwarven_hold: 4, wizards_sanctum: 2 }
+  tags: [construct]
+- id: storm_giant
+  name: storm giant
+  glyph: "G"
+  colour: azure
+  rating: 11d6+4
+  behaviour: skirmisher
+  weight: 10
+  depth: [50, 100]
+  themes: { underdark_lake: 3, ruined_temple: 2 }
+  tags: [giant, ranged]
+- id: void_stalker
+  name: void stalker
+  glyph: "F"
+  colour: slate
+  rating: 11d6+6
+  behaviour: ambusher
+  speed: fast
+  weight: 10
+  depth: [53, 100]
+  themes: { void_halls: 4 }
+  tags: [aberration]
+- id: magma_worm
+  name: magma worm
+  glyph: "w"
+  colour: ember
+  rating: 11d6+4
+  behaviour: ambusher
+  speed: slow
+  weight: 10
+  depth: [50, 100]
+  themes: { lava_forges: 4 }
+  tags: [fire]
+- id: lich
+  name: lich
+  glyph: "L"
+  colour: ivory
+  rating: 12d6+6
+  behaviour: caster
+  weight: 10
+  depth: [55, 100]
+  themes: { wizards_sanctum: 4, catacomb_labyrinth: 2 }
+  tags: [undead, caster]
+- id: bone_dragon
+  name: bone dragon
+  glyph: "D"
+  colour: bone
+  rating: 12d6+3
+  behaviour: brute
+  weight: 10
+  depth: [55, 100]
+  themes: { catacomb_labyrinth: 3, ruined_temple: 2 }
+  tags: [undead, dragon]
+- id: pit_fiend
+  name: pit fiend
+  glyph: "P"
+  colour: blood
+  rating: 12d6+6
+  behaviour: brute
+  weight: 10
+  depth: [58, 100]
+  themes: { lava_forges: 3, void_halls: 2 }
+  tags: [demon, fire]
+- id: archmage
+  name: archmage
+  glyph: "h"
+  colour: violet
+  rating: 12d6+5
+  behaviour: caster
+  weight: 6
+  depth: [55, 100]
+  themes: { wizards_sanctum: 5 }
+  tags: [human, caster]
+- id: ancient_troll
+  name: ancient troll
+  glyph: "T"
+  colour: moss
+  rating: 12d6+4
+  behaviour: brute
+  weight: 10
+  depth: [55, 100]
+  themes: { old_mine: 2, goblin_warrens: 2 }
+  tags: [giant]
+- id: abyssal_eel
+  name: abyssal eel
+  glyph: "e"
+  colour: azure
+  rating: 12d6+6
+  behaviour: ambusher
+  speed: fast
+  weight: 10
+  depth: [58, 100]
+  themes: { underdark_lake: 5 }
+  tags: [aquatic]
+- id: crystal_elemental
+  name: crystal elemental
+  glyph: "E"
+  colour: azure
+  rating: 12d6+4
+  behaviour: brute
+  speed: slow
+  weight: 10
+  depth: [55, 100]
+  themes: { fungal_caverns: 2, wizards_sanctum: 2 }
+  tags: [elemental]
+- id: flame_wraith
+  name: flame wraith
+  glyph: "W"
+  colour: ember
+  rating: 13d6+5
+  behaviour: caster
+  speed: fast
+  weight: 10
+  depth: [60, 100]
+  themes: { lava_forges: 3, catacomb_labyrinth: 2 }
+  tags: [undead, fire, caster]
+- id: dread_knight
+  name: dread knight
+  glyph: "K"
+  colour: slate
+  rating: 13d6+6
+  behaviour: brute
+  weight: 10
+  depth: [60, 100]
+  themes: { ruined_temple: 3, catacomb_labyrinth: 3 }
+  tags: [undead]
+- id: hydra
+  name: hydra
+  glyph: "H"
+  colour: moss
+  rating: 13d6+5
+  behaviour: brute
+  weight: 10
+  depth: [63, 100]
+  themes: { underdark_lake: 3, fungal_caverns: 2 }
+  tags: [beast]
+- id: shadow_dragon
+  name: shadow dragon
+  glyph: "D"
+  colour: slate
+  rating: 13d6+6
+  behaviour: ambusher
+  speed: fast
+  weight: 6
+  depth: [60, 100]
+  themes: { void_halls: 3, catacomb_labyrinth: 2 }
+  tags: [dragon, ghost]
+- id: doom_priest
+  name: doom priest
+  glyph: "h"
+  colour: blood
+  rating: 13d6+3
+  behaviour: caster
+  weight: 10
+  depth: [60, 100]
+  themes: { ruined_temple: 4 }
+  tags: [human, caster]
+- id: granite_titan
+  name: granite titan
+  glyph: "G"
+  colour: ash
+  rating: 13d6+6
+  behaviour: brute
+  speed: slow
+  weight: 10
+  depth: [63, 100]
+  themes: { dwarven_hold: 4, old_mine: 2 }
+  tags: [giant]
+- id: spore_tyrant
+  name: spore tyrant
+  glyph: "f"
+  colour: violet
+  rating: 13d6+5
+  behaviour: caster
+  speed: slow
+  weight: 10
+  depth: [60, 100]
+  themes: { fungal_caverns: 5 }
+  tags: [fungus, caster]
+- id: elder_vampire
+  name: elder vampire
+  glyph: "V"
+  colour: blood
+  rating: 14d6+4
+  behaviour: caster
+  speed: fast
+  weight: 10
+  depth: [65, 100]
+  themes: { catacomb_labyrinth: 3, ruined_temple: 3 }
+  tags: [undead, caster]
+- id: lava_drake
+  name: lava drake
+  glyph: "D"
+  colour: ember
+  rating: 14d6+6
+  behaviour: skirmisher
+  weight: 10
+  depth: [65, 100]
+  themes: { lava_forges: 5 }
+  tags: [dragon, fire]
+- id: mind_reaver
+  name: mind reaver
+  glyph: "A"
+  colour: violet
+  rating: 14d6+4
+  behaviour: caster
+  weight: 10
+  depth: [68, 100]
+  themes: { void_halls: 3, wizards_sanctum: 3 }
+  tags: [aberration, caster]
+- id: adamant_guardian
+  name: adamant guardian
+  glyph: "C"
+  colour: slate
+  rating: 14d6+5
+  behaviour: brute
+  speed: slow
+  weight: 6
+  depth: [65, 100]
+  themes: { dwarven_hold: 4, wizards_sanctum: 3 }
+  tags: [construct]
+- id: ghost_king
+  name: ghost king
+  glyph: "W"
+  colour: ivory
+  rating: 14d6+6
+  behaviour: brute
+  weight: 10
+  depth: [65, 100]
+  themes: { catacomb_labyrinth: 4 }
+  tags: [undead, ghost]
+- id: tide_lord
+  name: tide lord
+  glyph: "e"
+  colour: azure
+  rating: 14d6+5
+  behaviour: brute
+  weight: 10
+  depth: [68, 100]
+  themes: { underdark_lake: 5 }
+  tags: [aquatic]
+- id: chaos_hound_pack
+  name: chaos hound pack
+  glyph: "q"
+  colour: blood
+  rating: 14d6+6
+  behaviour: pack
+  speed: fast
+  weight: 10
+  depth: [65, 100]
+  themes: { void_halls: 3, lava_forges: 2 }
+  tags: [demon, pack]
+- id: arch_lich
+  name: arch lich
+  glyph: "L"
+  colour: ivory
+  rating: 15d6+3
+  behaviour: caster
+  weight: 10
+  depth: [70, 100]
+  themes: { wizards_sanctum: 4, void_halls: 2 }
+  tags: [undead, caster]
+- id: ancient_dragon
+  name: ancient dragon
+  glyph: "D"
+  colour: ember
+  rating: 15d6+6
+  behaviour: brute
+  weight: 10
+  depth: [70, 100]
+  themes: { old_mine: 2, lava_forges: 3 }
+  tags: [dragon]
+- id: horror_of_the_deep
+  name: horror of the deep
+  glyph: "e"
+  colour: slate
+  rating: 15d6+5
+  behaviour: ambusher
+  weight: 10
+  depth: [73, 100]
+  themes: { underdark_lake: 5, void_halls: 2 }
+  tags: [aberration, aquatic]
+- id: fire_lord
+  name: fire lord
+  glyph: "P"
+  colour: ember
+  rating: 15d6+4
+  behaviour: caster
+  weight: 6
+  depth: [70, 100]
+  themes: { lava_forges: 5 }
+  tags: [demon, fire, caster]
+- id: bone_colossus
+  name: bone colossus
+  glyph: "s"
+  colour: bone
+  rating: 15d6+6
+  behaviour: brute
+  speed: slow
+  weight: 10
+  depth: [70, 100]
+  themes: { catacomb_labyrinth: 5 }
+  tags: [undead, construct]
+- id: star_eater
+  name: star-eater
+  glyph: "A"
+  colour: violet
+  rating: 15d6+4
+  behaviour: caster
+  speed: fast
+  weight: 10
+  depth: [73, 100]
+  themes: { void_halls: 5 }
+  tags: [aberration]
+- id: frost_wyrm
+  name: frost wyrm
+  glyph: "D"
+  colour: azure
+  rating: 15d6+5
+  behaviour: brute
+  weight: 10
+  depth: [70, 100]
+  themes: { underdark_lake: 3, ruined_temple: 2 }
+  tags: [dragon]
+- id: death_lord
+  name: death lord
+  glyph: "K"
+  colour: slate
+  rating: 16d6+6
+  behaviour: brute
+  weight: 10
+  depth: [75, 100]
+  themes: { catacomb_labyrinth: 4, ruined_temple: 3 }
+  tags: [undead]
+- id: void_dragon
+  name: void dragon
+  glyph: "D"
+  colour: violet
+  rating: 16d6+5
+  behaviour: caster
+  weight: 10
+  depth: [75, 100]
+  themes: { void_halls: 5 }
+  tags: [dragon, caster]
+- id: iron_titan
+  name: iron titan
+  glyph: "C"
+  colour: slate
+  rating: 16d6+6
+  behaviour: brute
+  speed: slow
+  weight: 10
+  depth: [78, 100]
+  themes: { dwarven_hold: 5, lava_forges: 2 }
+  tags: [construct]
+- id: nightmare
+  name: nightmare
+  glyph: "q"
+  colour: blood
+  rating: 16d6+3
+  behaviour: brute
+  speed: fast
+  weight: 6
+  depth: [75, 100]
+  themes: { void_halls: 3, catacomb_labyrinth: 2 }
+  tags: [demon]
+- id: sea_of_eyes
+  name: sea of eyes
+  glyph: "A"
+  colour: ochre
+  rating: 16d6+6
+  behaviour: caster
+  speed: slow
+  weight: 10
+  depth: [75, 100]
+  themes: { void_halls: 4 }
+  tags: [aberration, caster]
+- id: grave_titan
+  name: grave titan
+  glyph: "G"
+  colour: bone
+  rating: 16d6+5
+  behaviour: brute
+  speed: slow
+  weight: 10
+  depth: [78, 100]
+  themes: { catacomb_labyrinth: 4 }
+  tags: [giant, undead]
+- id: molten_colossus
+  name: molten colossus
+  glyph: "C"
+  colour: ember
+  rating: 16d6+4
+  behaviour: brute
+  speed: slow
+  weight: 10
+  depth: [75, 100]
+  themes: { lava_forges: 5 }
+  tags: [construct, fire]
+- id: demon_prince
+  name: demon prince
+  glyph: "P"
+  colour: blood
+  rating: 17d6+6
+  behaviour: caster
+  weight: 10
+  depth: [80, 100]
+  themes: { lava_forges: 3, void_halls: 3 }
+  tags: [demon, caster]
+- id: dread_wyrm
+  name: dread wyrm
+  glyph: "D"
+  colour: slate
+  rating: 17d6+4
+  behaviour: brute
+  weight: 10
+  depth: [80, 100]
+  themes: { catacomb_labyrinth: 3, void_halls: 3 }
+  tags: [dragon, undead]
+- id: mind_tyrant
+  name: mind tyrant
+  glyph: "A"
+  colour: violet
+  rating: 17d6+6
+  behaviour: caster
+  weight: 10
+  depth: [83, 100]
+  themes: { void_halls: 4, wizards_sanctum: 3 }
+  tags: [aberration, caster]
+- id: doomsinger
+  name: doomsinger
+  glyph: "W"
+  colour: ivory
+  rating: 17d6+6
+  behaviour: caster
+  speed: fast
+  weight: 6
+  depth: [80, 100]
+  themes: { ruined_temple: 4, catacomb_labyrinth: 3 }
+  tags: [undead, ghost, caster]
+- id: abyssal_leviathan
+  name: abyssal leviathan
+  glyph: "e"
+  colour: azure
+  rating: 17d6+5
+  behaviour: brute
+  speed: slow
+  weight: 10
+  depth: [80, 100]
+  themes: { underdark_lake: 5 }
+  tags: [aquatic, aberration]
+- id: obsidian_giant
+  name: obsidian giant
+  glyph: "G"
+  colour: slate
+  rating: 17d6+6
+  behaviour: brute
+  weight: 10
+  depth: [83, 100]
+  themes: { lava_forges: 5 }
+  tags: [giant, fire]
+- id: shadow_lord
+  name: shadow lord
+  glyph: "W"
+  colour: slate
+  rating: 17d6+3
+  behaviour: ambusher
+  speed: fast
+  weight: 10
+  depth: [80, 100]
+  themes: { void_halls: 5 }
+  tags: [undead, ghost]
+- id: elder_lich
+  name: elder lich
+  glyph: "L"
+  colour: violet
+  rating: 18d6+6
+  behaviour: caster
+  weight: 10
+  depth: [85, 100]
+  themes: { wizards_sanctum: 5, void_halls: 3 }
+  tags: [undead, caster]
+- id: inferno_dragon
+  name: inferno dragon
+  glyph: "D"
+  colour: ember
+  rating: 18d6+6
+  behaviour: brute
+  speed: fast
+  weight: 10
+  depth: [85, 100]
+  themes: { lava_forges: 6 }
+  tags: [dragon, fire]
+- id: reaper
+  name: reaper
+  glyph: "K"
+  colour: bone
+  rating: 18d6+5
+  behaviour: brute
+  speed: fast
+  weight: 10
+  depth: [88, 100]
+  themes: { catacomb_labyrinth: 4, void_halls: 3 }
+  tags: [undead]
+- id: void_colossus
+  name: void colossus
+  glyph: "C"
+  colour: violet
+  rating: 18d6+6
+  behaviour: brute
+  speed: slow
+  weight: 6
+  depth: [85, 100]
+  themes: { void_halls: 5 }
+  tags: [construct, aberration]
+- id: storm_titan
+  name: storm titan
+  glyph: "G"
+  colour: azure
+  rating: 18d6+5
+  behaviour: skirmisher
+  weight: 10
+  depth: [85, 100]
+  themes: { underdark_lake: 4, ruined_temple: 3 }
+  tags: [giant, ranged]
+- id: archdevil
+  name: archdevil
+  glyph: "P"
+  colour: blood
+  rating: 18d6+6
+  behaviour: caster
+  weight: 10
+  depth: [88, 100]
+  themes: { lava_forges: 4, void_halls: 3 }
+  tags: [demon, caster]
+- id: ancient_horror
+  name: ancient horror
+  glyph: "A"
+  colour: slate
+  rating: 18d6+6
+  behaviour: brute
+  weight: 10
+  depth: [85, 100]
+  themes: { void_halls: 5, catacomb_labyrinth: 2 }
+  tags: [aberration]
+- id: dread_emperor
+  name: dread emperor
+  glyph: "K"
+  colour: slate
+  rating: 19d6+6
+  behaviour: brute
+  weight: 10
+  depth: [90, 100]
+  themes: { catacomb_labyrinth: 5, void_halls: 3 }
+  tags: [undead]
+- id: abyssal_dragon
+  name: abyssal dragon
+  glyph: "D"
+  colour: blood
+  rating: 19d6+6
+  behaviour: caster
+  weight: 10
+  depth: [90, 100]
+  themes: { void_halls: 6, lava_forges: 3 }
+  tags: [dragon, demon, caster]
+- id: eternal_lich
+  name: eternal lich
+  glyph: "L"
+  colour: ivory
+  rating: 19d6+4
+  behaviour: caster
+  weight: 10
+  depth: [93, 100]
+  themes: { wizards_sanctum: 6 }
+  tags: [undead, caster]
+- id: world_eater
+  name: world-eater
+  glyph: "A"
+  colour: ochre
+  rating: 19d6+6
+  behaviour: brute
+  speed: slow
+  weight: 6
+  depth: [90, 100]
+  themes: { void_halls: 6 }
+  tags: [aberration]
+- id: thunder_titan
+  name: thunder titan
+  glyph: "G"
+  colour: azure
+  rating: 19d6+6
+  behaviour: brute
+  weight: 10
+  depth: [90, 100]
+  themes: { ruined_temple: 3, dwarven_hold: 3 }
+  tags: [giant]
+- id: hellfire_lord
+  name: hellfire lord
+  glyph: "P"
+  colour: ember
+  rating: 19d6+5
+  behaviour: brute
+  speed: fast
+  weight: 10
+  depth: [93, 100]
+  themes: { lava_forges: 6 }
+  tags: [demon, fire]
+- id: bone_sovereign
+  name: bone sovereign
+  glyph: "s"
+  colour: bone
+  rating: 19d6+6
+  behaviour: brute
+  weight: 10
+  depth: [90, 100]
+  themes: { catacomb_labyrinth: 6 }
+  tags: [undead]
+- id: void_sovereign
+  name: void sovereign
+  glyph: "A"
+  colour: violet
+  rating: 20d6+5
+  behaviour: caster
+  weight: 10
+  depth: [95, 100]
+  themes: { void_halls: 6 }
+  tags: [aberration, caster]
+- id: primal_wyrm
+  name: primal wyrm
+  glyph: "D"
+  colour: moss
+  rating: 20d6+6
+  behaviour: brute
+  weight: 10
+  depth: [95, 100]
+  themes: { fungal_caverns: 3, old_mine: 3 }
+  tags: [dragon]
+- id: lord_of_ashes
+  name: lord of ashes
+  glyph: "P"
+  colour: ash
+  rating: 20d6+6
+  behaviour: caster
+  weight: 10
+  depth: [98, 100]
+  themes: { lava_forges: 6 }
+  tags: [demon, fire, caster]
+- id: death_incarnate
+  name: death incarnate
+  glyph: "K"
+  colour: slate
+  rating: 20d6+6
+  behaviour: brute
+  speed: fast
+  weight: 6
+  depth: [95, 100]
+  themes: { catacomb_labyrinth: 5, void_halls: 4 }
+  tags: [undead]
+- id: mountain_king
+  name: mountain king
+  glyph: "G"
+  colour: rust
+  rating: 20d6+6
+  behaviour: brute
+  weight: 10
+  depth: [95, 100]
+  themes: { dwarven_hold: 6 }
+  tags: [giant]
+- id: abyss_walker
+  name: abyss walker
+  glyph: "W"
+  colour: violet
+  rating: 20d6+4
+  behaviour: ambusher
+  speed: fast
+  weight: 10
+  depth: [98, 100]
+  themes: { void_halls: 6 }
+  tags: [aberration, ghost]
+- id: final_guardian
+  name: final guardian
+  glyph: "C"
+  colour: slate
+  rating: 20d6+6
+  behaviour: brute
+  weight: 10
+  depth: [95, 100]
+  themes: { wizards_sanctum: 4, ruined_temple: 4 }
+  tags: [construct]

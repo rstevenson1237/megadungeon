@@ -8,7 +8,7 @@ import { isIdentified } from '../src/rules/items/magic.ts';
 import type { MapFragmentItem, WornItem } from '../src/rules/items/types.ts';
 import { hasStatus, statusOf } from '../src/rules/magic/status.ts';
 import type { Feature, Level, LoreMark } from '../src/rules/world/level.ts';
-import { CONTENT, ITEMS, SPELLS, cell, gameAt, levelFrom, gameOn, magic, monsterAt, rig, room, testPlayer, withThings } from './helpers.ts';
+import { CONTENT, ITEMS, appears, SPELLS, cell, gameAt, levelFrom, gameOn, magic, monsterAt, rig, room, testPlayer, withThings } from './helpers.ts';
 
 const bare = { pack: [], equipment: {}, coins: 0, combatDice: 3, combatMax: 4, skill: { step: 6 as const, dice: 2, max: 2 }, magic: { step: 6 as const, dice: 2, max: 2 } };
 const fixture = (kind: 'fountain' | 'altar' | 'sarcophagus' | 'rune', extra: Partial<Extract<Feature, { type: 'fixture' }>> = {}): Feature => ({ type: 'fixture', kind, x: 3, y: 3, ...extra });
@@ -83,7 +83,7 @@ describe('Spec 06: fountains', () => {
 
   it('a water creature is an aquatic creature of the depth table, beside the fountain', () => {
     const game = gameAt(level(fixture('fountain')), 2, 3, bare, { content: only('fountain_creature') });
-    expect(said(interact(game))).toContain('A stub eel appears!');
+    expect(appears(said(interact(game)), 'aquatic')).toBe(true);
     expect(game.state.monsters).toHaveLength(1);
     expect(game.state.monsters[0]!.awareness).toBe('alert');
   });
@@ -263,7 +263,7 @@ describe('Spec 06: sarcophagi', () => {
     const n = 600;
     for (let seed = 0; seed < n; seed++) {
       const { result } = lift(seed, 6);
-      if (said(result).includes('A stub skeleton appears!')) rose++;
+      if (appears(said(result), 'undead')) rose++;
     }
     expect(rose / n).toBeCloseTo(1 / 3, 1);
   });

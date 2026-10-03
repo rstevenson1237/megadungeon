@@ -17,6 +17,9 @@ import { BUNDLE, CONTENT_ERRORS, checkPlacement, checkPlan, lootOf, treasureValu
 
 vi.setConfig({ testTimeout: 300_000 });
 
+/** Monster rows tagged `pack`: they come in groups of 3 to 6. */
+const BUNDLE_PACKS = new Set((BUNDLE.tables['monsters'] as { id: string; tags?: string[] }[]).filter((m) => m.tags?.includes('pack')).map((m) => m.id));
+
 interface Made {
   seed: number;
   depth: number;
@@ -331,7 +334,7 @@ describe('monsters (Spec 02, step 8)', () => {
       const groups = new Map<number, typeof m.level.monsters>();
       for (const mon of m.level.monsters.filter((x) => x.role === 'normal')) groups.set(mon.group, [...(groups.get(mon.group) ?? []), mon]);
       for (const members of groups.values()) {
-        const pack = members[0]!.id === 'stub_monster_weak';
+        const pack = BUNDLE_PACKS.has(members[0]!.id);
         expect(members.length).toBeLessThanOrEqual(pack ? 6 : 4);
         const inOneRoom = m.level.rooms.some((r) => members.every((x) => x.x >= r.x && x.y >= r.y && x.x < r.x + r.w && x.y < r.y + r.h));
         if (members.length > 1 && inOneRoom) {
