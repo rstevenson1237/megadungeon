@@ -1,25 +1,31 @@
 # The 13 level themes of Spec 02 and the intake. `depth` starts at the unlock level.
 # `stamp`, `liquid` and `pillared` are layout variants (Spec 02, task 2.3). `doors` and `features` are the
 # placement variants of task 2.4: door weights, and the intake's feature bias (the first kind listed x3, the others
-# x2). Palettes and tile sets are added with task 4.2.
+# x2). `palette` (the eight tokens, #rrggbb) and `tiles` (wall glyph 35, 219 or 178; floor glyph) are the look of task 4.2.
 - id: cellars_and_crypts
   name: Cellars and Crypts
   depth: [1, 99]
   layout: rooms_and_corridors
   size: small
   features: { sarcophagus: 3, pottery: 2, debris: 2 }
+  palette: { wall: "#8a8a96", floor: "#4e4e5c", door: "#b08040", stairs: "#e8e4d0", shallow_water: "#4a7ab0", deep_water: "#2a4a88", lava: "#e05a20", accent: "#b0a0d8" }
+  tiles: { wall: 178, floor: 250 }
 - id: goblin_warrens
   name: Goblin Warrens
   depth: [1, 99]
   layout: warren_tunnels
   size: small
   features: { sack: 3, graffiti: 2 }
+  palette: { wall: "#7a8a3a", floor: "#4a5428", door: "#a06a30", stairs: "#e8e4b8", shallow_water: "#4a8a78", deep_water: "#2a5a50", lava: "#e05a20", accent: "#d8c040" }
+  tiles: { wall: 178, floor: 249 }
 - id: flooded_sewers
   name: Flooded Sewers
   depth: [1, 99]
   layout: channel_grid
   size: medium
   features: { sack: 3 }
+  palette: { wall: "#6a8a7a", floor: "#3a5448", door: "#a07a3a", stairs: "#d8e4d0", shallow_water: "#5a9a8a", deep_water: "#2a6a64", lava: "#e05a20", accent: "#a8d848" }
+  tiles: { wall: 35, floor: 250 }
 - id: old_mine
   name: Old Mine
   depth: [1, 99]
@@ -27,12 +33,16 @@
   size: medium
   stamp: shafts
   features: { debris: 3, rack: 2 }
+  palette: { wall: "#a07a44", floor: "#6b5638", door: "#d0963c", stairs: "#f0e6c8", shallow_water: "#4a8fd0", deep_water: "#2a5aa8", lava: "#e05a20", accent: "#e8b848" }
+  tiles: { wall: 35, floor: 250 }
 - id: ruined_temple
   name: Ruined Temple
   depth: [20, 99]
   layout: mirrored_halls
   size: medium
   features: { altar: 3, fountain: 2, rune: 2, book: 2 }
+  palette: { wall: "#b8a890", floor: "#6e6454", door: "#c89850", stairs: "#f4ecd8", shallow_water: "#5a98c8", deep_water: "#2e5c98", lava: "#e05a20", accent: "#e8d870" }
+  tiles: { wall: 219, floor: 250 }
 - id: fungal_caverns
   name: Fungal Caverns
   depth: [20, 99]
@@ -40,6 +50,8 @@
   size: large
   stamp: river
   features: { debris: 3, pottery: 2 }
+  palette: { wall: "#5aa05a", floor: "#2e5a3a", door: "#a08a50", stairs: "#e0f0c8", shallow_water: "#4a98a8", deep_water: "#28606e", lava: "#e05a20", accent: "#e078d8" }
+  tiles: { wall: 178, floor: 249 }
 - id: dwarven_hold
   name: Dwarven Hold
   depth: [40, 99]
@@ -48,6 +60,8 @@
   pillared: true
   doors: { locked: 25 }
   features: { rack: 3, chest: 2, sign: 2 }
+  palette: { wall: "#8890a0", floor: "#545a68", door: "#c08838", stairs: "#f0ecd8", shallow_water: "#4a88c0", deep_water: "#2a5498", lava: "#f06a20", accent: "#e8a030" }
+  tiles: { wall: 219, floor: 250 }
 - id: catacomb_labyrinth
   name: Catacomb Labyrinth
   depth: [40, 99]
@@ -55,12 +69,16 @@
   size: medium
   doors: { secret: 25 }
   features: { sarcophagus: 3 }
+  palette: { wall: "#a89878", floor: "#5a5040", door: "#9a7038", stairs: "#e8e0c8", shallow_water: "#4a78a0", deep_water: "#2a4a74", lava: "#e05a20", accent: "#c8c8b0" }
+  tiles: { wall: 178, floor: 250 }
 - id: wizards_sanctum
   name: Wizard's Sanctum
   depth: [60, 99]
   layout: freeform_chambers
   size: medium
   features: { rune: 3, book: 2, altar: 2 }
+  palette: { wall: "#8a78d0", floor: "#4e4478", door: "#c8a050", stairs: "#f0e8ff", shallow_water: "#58a0e0", deep_water: "#3060c0", lava: "#e05a20", accent: "#f080f0" }
+  tiles: { wall: 219, floor: 46 }
 - id: underdark_lake
   name: Underdark Lake
   depth: [60, 99]
@@ -68,6 +86,8 @@
   size: large
   stamp: lake
   features: { fountain: 3, sign: 2, containers: 0.5 }
+  palette: { wall: "#6a78a0", floor: "#38405c", door: "#a08850", stairs: "#d8e0f4", shallow_water: "#48a0d8", deep_water: "#1e50a0", lava: "#e05a20", accent: "#60e0d0" }
+  tiles: { wall: 178, floor: 249 }
 - id: lava_forges
   name: Lava Forges
   depth: [80, 99]
@@ -76,6 +96,8 @@
   stamp: river
   liquid: lava
   features: { rack: 3, altar: 2, rune: 2 }
+  palette: { wall: "#c06038", floor: "#6a3420", door: "#d08838", stairs: "#f8e0b8", shallow_water: "#4a8ac0", deep_water: "#2a58a0", lava: "#ff7a18", accent: "#ffc040" }
+  tiles: { wall: 219, floor: 250 }
 - id: void_halls
   name: Void Halls
   depth: [80, 99]
@@ -83,8 +105,12 @@
   size: medium
   doors: { secret: 40 }
   features: { rune: 3 }
+  palette: { wall: "#7a60a8", floor: "#3c2c58", door: "#a870d0", stairs: "#e8d8ff", shallow_water: "#4868c0", deep_water: "#28388a", lava: "#c04898", accent: "#ff60e0" }
+  tiles: { wall: 178, floor: 46 }
 - id: abyssal_throne
   name: The Abyssal Throne
   depth: [100, 100]
   layout: set_piece
   size: large
+  palette: { wall: "#a83838", floor: "#582424", door: "#c87040", stairs: "#f8d8c8", shallow_water: "#5878b8", deep_water: "#2c3c80", lava: "#ff4818", accent: "#ffd030" }
+  tiles: { wall: 219, floor: 250 }

@@ -19,12 +19,21 @@ async function choose(page: Page, label: string): Promise<boolean> {
   }
   return false;
 }
-/** The row of the screen the player's @ is on, and its column: the map is the only place an @ is drawn. */
+/**
+ * Where every @ on the map is, as "column,row" pairs. The player is an @, and so are the NPCs (traders, hermits and
+ * captives), so the text alone cannot say which is the player; the set of positions is the same after a step and back.
+ */
 const at = async (page: Page): Promise<string> => {
-  const rows = (await screen(page)).split('\n');
-  const y = rows.findIndex((r) => r.slice(0, 72).includes('@'));
-  return `${rows[y]!.slice(0, 72).indexOf('@')},${y}`;
+  const found: string[] = [];
+  (await screen(page)).split('\n').forEach((row, y) => {
+    const map = row.slice(0, 72);
+    for (let x = map.indexOf('@'); x >= 0; x = map.indexOf('@', x + 1)) found.push(`${x},${y}`);
+  });
+  return found.join(';');
 };
+/** The map as drawn. The camera follows the player, so a step in open ground leaves every @ where it was and moves the map. */
+const mapText = async (page: Page): Promise<string> =>
+  (await screen(page)).split('\n').slice(0, 30).map((r) => r.slice(0, 72)).join('\n');
 /** What the character pane shows of a level 1 Priest called Smoke: the class's real dice and ability. */
 async function expectPriestPane(page: Page): Promise<void> {
   const pane = (await screen(page)).split('\n').map((r) => r.slice(72)).join('\n');
@@ -55,10 +64,11 @@ test('create a Priest, step, cast Heal, rest, reload', async ({ page }) => {
   while ((await screen(page)).includes('Go down')) expect(await choose(page, 'Go down')).toBe(true);
   await expect.poll(() => screen(page)).toMatch(/You descend to level \d+\./);
   const start = await at(page);
+  const startMap = await mapText(page);
   let back = '';
   for (const [key, undo] of [['d', 'a'], ['a', 'd'], ['s', 'w'], ['w', 's']] as const) {
     await press(page, key);
-    if ((await at(page)) !== start) {
+    if ((await mapText(page)) !== startMap) {
       back = undo;
       break;
     }
