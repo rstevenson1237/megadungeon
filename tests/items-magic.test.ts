@@ -51,7 +51,7 @@ describe('Spec 05: making magic items from their rows', () => {
     for (const id of ['ring_might', 'cloak_shadows', 'sword_keen', 'chain_elven', 'staff_magus']) expect(rate(id), id).toBeCloseTo(0.1, 1);
     for (const id of ['potion_healing', 'wand_sleep', 'rod_fireball']) expect(rate(id), id).toBe(0);
     for (let seed = 0; seed < 200; seed++) {
-      expect(makeArtifact(ITEMS.artifacts.get('stub_artifact_01')!, seed).cursed).toBe(false);
+      expect(makeArtifact(ITEMS.artifacts.get('art_pale_lantern')!, seed).cursed).toBe(false);
     }
   });
 
@@ -64,7 +64,7 @@ describe('Spec 05: making magic items from their rows', () => {
   });
 
   it('an artifact never breaks and is always known', () => {
-    const a = makeArtifact(ITEMS.artifacts.get('stub_artifact_02')!, 1);
+    const a = makeArtifact(ITEMS.artifacts.get('art_tallow_ring')!, 1);
     expect(a).toMatchObject({ kind: 'artifact', cursed: false, identified: true, slot: 'ring' });
     expect(isIdentified(a, [])).toBe(true);
   });
@@ -478,15 +478,15 @@ describe('Spec 05: loot becomes items when picked up', () => {
 
   it('a boss carries its artifact and drops it where it dies', () => {
     const game = gameOn(room(8, 3, 1, 2), { combatDice: 6, combatMax: 6, equipment: { main: gear('great_axe') }, pack: [] });
-    const boss = monsterAt(2, 2, { alert: true, dice: 1, maxDice: 1, modifier: -6, carried: [{ kind: 'artifact', id: 'stub_artifact_03', name: 'Stub Relic 03' }] });
+    const boss = monsterAt(2, 2, { alert: true, dice: 1, maxDice: 1, modifier: -6, carried: [{ kind: 'artifact', id: 'art_goblin_purse', name: "Goblin King's Purse" }] });
     game.state.monsters.push(boss);
     rig(game, 6, 1);
     game.act({ type: 'move', dx: 1, dy: 0 });
     expect(game.state.monsters).not.toContain(boss);
-    expect(game.state.drops).toEqual([{ x: 2, y: 2, contents: [{ kind: 'artifact', id: 'stub_artifact_03', name: 'Stub Relic 03' }] }]);
+    expect(game.state.drops).toEqual([{ x: 2, y: 2, contents: [{ kind: 'artifact', id: 'art_goblin_purse', name: "Goblin King's Purse" }] }]);
     game.state.map.player = { x: 2, y: 2 };
     game.act({ type: 'pickup' });
-    expect(game.state.player.pack[0]).toMatchObject({ kind: 'artifact', name: 'Stub Relic 03', cursed: false });
+    expect(game.state.player.pack[0]).toMatchObject({ kind: 'artifact', name: "Goblin King's Purse", cursed: false });
   });
 });
 

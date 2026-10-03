@@ -22,7 +22,7 @@ import { ITEMS, SPELLS, CONTENT, content, createAs, gameAt, levelFrom, rig, room
 // level 100, and the artifact seals.
 
 const bundle = content().bundle;
-const artifact = (n: number): Item => makeArtifact(ITEMS.artifacts.get(`stub_artifact_0${n}`)!, 7000 + n);
+const artifact = (n: number): Item => makeArtifact(ITEMS.artifacts.get(['art_pale_lantern', 'art_tallow_ring', 'art_goblin_purse', 'art_hollow_abbot_ring', 'art_stone_mothers_band'][n - 1]!)!, 7000 + n);
 const said = (messages: { text: string }[]): string => messages.map((m) => m.text).join(' | ');
 
 /** Level 100 of a seed, built from the real content as a run builds it. */

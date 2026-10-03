@@ -1,37 +1,252 @@
-# Stub entries for task 2.4 (Spec 05, "Treasure and appraisal"): gems and jewelry tiered by depth, with base
-# values in gp. The launch table of 50 is written in Phase 3 (task 4.5).
-- id: gem_stub_quartz
+# Gems and jewelry (Spec 05, "Treasure and appraisal"): the launch table of 50 written in task 4.5, tiered by depth, with
+# base values in gp.
+- id: gem_quartz
   name: quartz
   kind: gem
   value: 25
   depth: [1, 40]
-- id: gem_stub_garnet
+- id: gem_agate
+  name: agate
+  kind: gem
+  value: 40
+  depth: [1, 45]
+- id: gem_carnelian
+  name: carnelian
+  kind: gem
+  value: 70
+  depth: [1, 45]
+- id: gem_turquoise
+  name: turquoise
+  kind: gem
+  value: 60
+  depth: [1, 50]
+- id: gem_jasper
+  name: jasper
+  kind: gem
+  value: 80
+  depth: [3, 50]
+- id: gem_moonstone
+  name: moonstone
+  kind: gem
+  value: 120
+  depth: [8, 55]
+- id: gem_bloodstone
+  name: bloodstone
+  kind: gem
+  value: 130
+  depth: [8, 55]
+- id: gem_garnet
   name: garnet
   kind: gem
-  value: 100
-  depth: [10, 70]
-- id: gem_stub_ruby
+  value: 150
+  depth: [10, 65]
+- id: gem_amethyst
+  name: amethyst
+  kind: gem
+  value: 200
+  depth: [12, 60]
+- id: gem_topaz
+  name: topaz
+  kind: gem
+  value: 260
+  depth: [15, 65]
+- id: gem_pearl
+  name: pearl
+  kind: gem
+  value: 350
+  depth: [20, 75]
+- id: gem_opal
+  name: opal
+  kind: gem
+  value: 450
+  depth: [22, 75]
+- id: gem_aquamarine
+  name: aquamarine
+  kind: gem
+  value: 600
+  depth: [25, 80]
+- id: gem_peridot
+  name: peridot
+  kind: gem
+  value: 700
+  depth: [28, 80]
+- id: gem_jade
+  name: jade
+  kind: gem
+  value: 800
+  depth: [30, 85]
+- id: gem_emerald
+  name: emerald
+  kind: gem
+  value: 1000
+  depth: [40, 100]
+- id: gem_ruby
   name: ruby
   kind: gem
-  value: 500
+  value: 1200
   depth: [40, 100]
-- id: gem_stub_diamond
-  name: diamond
+- id: gem_sapphire
+  name: sapphire
   kind: gem
   value: 1500
+  depth: [45, 100]
+- id: gem_black_opal
+  name: black opal
+  kind: gem
+  value: 1800
+  depth: [50, 100]
+- id: gem_star_sapphire
+  name: star sapphire
+  kind: gem
+  value: 2400
+  depth: [60, 100]
+- id: gem_alexandrite
+  name: alexandrite
+  kind: gem
+  value: 3000
+  depth: [65, 100]
+- id: gem_diamond
+  name: diamond
+  kind: gem
+  value: 3800
   depth: [70, 100]
-- id: jewelry_stub_brooch
+- id: gem_blue_diamond
+  name: blue diamond
+  kind: gem
+  value: 5000
+  depth: [75, 100]
+- id: gem_red_diamond
+  name: red diamond
+  kind: gem
+  value: 6500
+  depth: [85, 100]
+- id: gem_black_pearl
+  name: black pearl
+  kind: gem
+  value: 8000
+  depth: [90, 100]
+- id: gem_dragon_s_eye
+  name: dragon's eye
+  kind: gem
+  value: 10000
+  depth: [90, 100]
+- id: jewelry_silver_ring
+  name: silver ring
+  kind: jewelry
+  value: 180
+  depth: [3, 50]
+- id: jewelry_silver_chain
+  name: silver chain
+  kind: jewelry
+  value: 250
+  depth: [10, 60]
+- id: jewelry_copper_bracelet
+  name: copper bracelet
+  kind: jewelry
+  value: 30
+  depth: [1, 35]
+- id: jewelry_bronze_ring
+  name: bronze ring
+  kind: jewelry
+  value: 45
+  depth: [1, 40]
+- id: jewelry_pewter_locket
+  name: pewter locket
+  kind: jewelry
+  value: 90
+  depth: [1, 45]
+- id: jewelry_silver_brooch
   name: silver brooch
   kind: jewelry
   value: 150
   depth: [1, 45]
-- id: jewelry_stub_circlet
+- id: jewelry_ivory_comb
+  name: ivory comb
+  kind: jewelry
+  value: 220
+  depth: [8, 55]
+- id: jewelry_gold_ring
+  name: gold ring
+  kind: jewelry
+  value: 300
+  depth: [10, 65]
+- id: jewelry_amber_necklace
+  name: amber necklace
+  kind: jewelry
+  value: 400
+  depth: [15, 70]
+- id: jewelry_gold_circlet
   name: gold circlet
   kind: jewelry
   value: 600
   depth: [20, 100]
-- id: jewelry_stub_chalice
+- id: jewelry_pearl_necklace
+  name: pearl necklace
+  kind: jewelry
+  value: 750
+  depth: [25, 80]
+- id: jewelry_jade_pendant
+  name: jade pendant
+  kind: jewelry
+  value: 900
+  depth: [30, 85]
+- id: jewelry_gold_bracelet
+  name: gold bracelet
+  kind: jewelry
+  value: 1100
+  depth: [35, 90]
+- id: jewelry_jewelled_goblet
+  name: jewelled goblet
+  kind: jewelry
+  value: 1400
+  depth: [40, 100]
+- id: jewelry_jewelled_chalice
   name: jewelled chalice
   kind: jewelry
   value: 2000
   depth: [50, 100]
+- id: jewelry_silver_tiara
+  name: silver tiara
+  kind: jewelry
+  value: 2600
+  depth: [55, 100]
+- id: jewelry_gold_crown
+  name: gold crown
+  kind: jewelry
+  value: 3400
+  depth: [60, 100]
+- id: jewelry_ruby_necklace
+  name: ruby necklace
+  kind: jewelry
+  value: 4200
+  depth: [65, 100]
+- id: jewelry_emerald_tiara
+  name: emerald tiara
+  kind: jewelry
+  value: 5200
+  depth: [75, 100]
+- id: jewelry_sapphire_diadem
+  name: sapphire diadem
+  kind: jewelry
+  value: 6000
+  depth: [80, 100]
+- id: jewelry_diamond_necklace
+  name: diamond necklace
+  kind: jewelry
+  value: 7500
+  depth: [85, 100]
+- id: jewelry_royal_sceptre
+  name: royal sceptre
+  kind: jewelry
+  value: 9000
+  depth: [90, 100]
+- id: jewelry_jewelled_crown
+  name: jewelled crown
+  kind: jewelry
+  value: 11000
+  depth: [90, 100]
+- id: jewelry_dragon_scale_torc
+  name: dragon-scale torc
+  kind: jewelry
+  value: 13000
+  depth: [95, 100]
