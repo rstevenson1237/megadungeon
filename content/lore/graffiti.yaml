@@ -1,9 +1,305 @@
-# Stub entries for task 2.4 (Spec 02, step 10). The launch table of 300 is written in Phase 3 (task 4.8).
-- id: graffiti_stub_01
-  text: "Turn back."
-- id: graffiti_stub_02
-  text: "Dunn was here, and then he was not."
-- id: graffiti_stub_03
-  text: "Mind the floor."
-- id: graffiti_stub_04
-  text: "The wall remembers a door."
+# Graffiti (Spec 06, "Lore"): the launch table of 300 written in task 4.8.
+# Words scratched or painted on dungeon walls by earlier delvers, prisoners, miners, cultists and goblins.
+# Voice and length follow docs/12-content-style-guide.md: 2 to 12 words, at most 70 characters, ASCII only.
+# Texts are true or merely vague, never a false hint. Tagged styles (grim, dry) stay under 20% of the table.
+# A themes entry is a favour multiplier for that level theme (Spec 08); ids never change once released.
+- { id: graffiti_001, text: "Turn back." }
+- { id: graffiti_002, text: "Mind the floor." }
+- { id: graffiti_003, text: "The wall remembers a door." }
+- { id: graffiti_004, text: "Left at the broken lamp. Not right." }
+- { id: graffiti_005, text: "Brom was first down this stair." }
+- { id: graffiti_006, text: "Something breathes behind this wall." }
+- { id: graffiti_007, text: "Rest here. It is safe. It was safe." }
+- { id: graffiti_008, text: "I took the gold and I regret it." }
+- { id: graffiti_009, text: "Dunn was here, and then he was not.", style: grim }
+- { id: graffiti_010, text: "Was here. Still here. Send help.", style: dry }
+- { id: graffiti_011, text: "Kessa and I came down together." }
+- { id: graffiti_012, text: "I counted the steps and lost count." }
+- { id: graffiti_013, text: "Light your lamp before you read this." }
+- { id: graffiti_014, text: "Hunger is a worse guide than hope." }
+- { id: graffiti_015, text: "My torch died here. I kept going." }
+- { id: graffiti_016, text: "Ask the water what it wants.", themes: { flooded_sewers: 3 } }
+- { id: graffiti_017, text: "Ten men came for the silver. Few left." }
+- { id: graffiti_018, text: "We dug until the song stopped.", themes: { old_mine: 3 } }
+- { id: graffiti_019, text: "Salt the doorway and say nothing.", themes: { cellars_and_crypts: 2 } }
+- { id: graffiti_020, text: "Marta, I am sorry about the boots." }
+- { id: graffiti_021, text: "Do not trust a quiet room." }
+- { id: graffiti_022, text: "Whoever finds this, tell Ilsa I tried." }
+- { id: graffiti_023, text: "The tallow ran out before the hall did." }
+- { id: graffiti_024, text: "Gnaw Clan holds this road.", themes: { goblin_warrens: 3 } }
+- { id: graffiti_025, text: "Mine. All mine. Get out.", themes: { goblin_warrens: 2 } }
+- { id: graffiti_026, text: "Krag was brave and now he is stew.", style: grim, themes: { goblin_warrens: 3 } }
+- { id: graffiti_027, text: "Lost a boot here. Take it, if you want.", style: dry }
+- { id: graffiti_028, text: "This is not the way to the surface." }
+- { id: graffiti_029, text: "I scratched this with my last nail.", style: grim }
+- { id: graffiti_030, text: "Three of us sat here and waited." }
+- { id: graffiti_031, text: "Pray quietly. They listen.", themes: { ruined_temple: 3 } }
+- { id: graffiti_032, text: "The god of this place has left.", themes: { ruined_temple: 3 } }
+- { id: graffiti_033, text: "Forgive us the broken altar.", themes: { ruined_temple: 3 } }
+- { id: graffiti_034, text: "Bring a spare rope and a better plan." }
+- { id: graffiti_035, text: "Whatever is singing, do not answer." }
+- { id: graffiti_036, text: "My name is Odo and I was here." }
+- { id: graffiti_037, text: "The mushrooms are kind until they are not.", themes: { fungal_caverns: 3 } }
+- { id: graffiti_038, text: "Do not eat what glows.", themes: { fungal_caverns: 3 } }
+- { id: graffiti_039, text: "Spores in my lungs. Tell my mother.", style: grim, themes: { fungal_caverns: 2 } }
+- { id: graffiti_040, text: "The ale was better upstairs.", style: dry }
+- { id: graffiti_041, text: "Thirsty. The lake is right there.", themes: { underdark_lake: 3 } }
+- { id: graffiti_042, text: "Black water, black fish, black thoughts.", themes: { underdark_lake: 3 } }
+- { id: graffiti_043, text: "Count the doors. Then count them again.", themes: { catacomb_labyrinth: 3 } }
+- { id: graffiti_044, text: "Every turn looks like the last turn.", themes: { catacomb_labyrinth: 3 } }
+- { id: graffiti_045, text: "I have walked these halls for days.", themes: { catacomb_labyrinth: 2 } }
+- { id: graffiti_046, text: "Chalk is cheap. Use it often.", themes: { catacomb_labyrinth: 2 } }
+- { id: graffiti_047, text: "The stonework here is older than the stairs.", themes: { dwarven_hold: 2 } }
+- { id: graffiti_048, text: "Hammer-and-tongs wrote this. Respect the craft.", themes: { dwarven_hold: 3 } }
+- { id: graffiti_049, text: "Dwarves made this hall to last.", themes: { dwarven_hold: 3 } }
+- { id: graffiti_050, text: "Hot underfoot. Hotter ahead.", themes: { lava_forges: 3 } }
+- { id: graffiti_051, text: "The forge still burns. Nobody feeds it.", themes: { lava_forges: 3 } }
+- { id: graffiti_052, text: "My boots melted before I did.", style: dry, themes: { lava_forges: 2 } }
+- { id: graffiti_053, text: "Magic left a stain on this wall.", themes: { wizards_sanctum: 3 } }
+- { id: graffiti_054, text: "The wizard never answered the door.", themes: { wizards_sanctum: 3 } }
+- { id: graffiti_055, text: "Do not read the runes aloud.", themes: { wizards_sanctum: 3 } }
+- { id: graffiti_056, text: "Nothing here. Not even dark.", themes: { void_halls: 3 } }
+- { id: graffiti_057, text: "My shadow left an hour ago.", themes: { void_halls: 3 } }
+- { id: graffiti_058, text: "The echo came back wrong.", themes: { void_halls: 2 } }
+- { id: graffiti_059, text: "All who kneel here are remembered.", themes: { abyssal_throne: 3 } }
+- { id: graffiti_060, text: "The throne has no master. Not yet.", themes: { abyssal_throne: 2 } }
+- { id: graffiti_061, text: "We were warned and we came anyway." }
+- { id: graffiti_062, text: "Good soup at the Ashen Lantern.", style: dry }
+- { id: graffiti_063, text: "Two nights here, no trouble. Mostly.", style: dry }
+- { id: graffiti_064, text: "Rested well. Woke without my purse.", style: dry }
+- { id: graffiti_065, text: "I found a coin. It was cursed. I kept it.", style: dry }
+- { id: graffiti_066, text: "Rats ate my map. I ate the rats." }
+- { id: graffiti_067, text: "Left my sword here. Wrong wall." }
+- { id: graffiti_068, text: "Not lost. Exploring with great vigor.", style: dry }
+- { id: graffiti_069, text: "If you can read this, you are alive." }
+- { id: graffiti_070, text: "Whoever you are, I envy you." }
+- { id: graffiti_071, text: "No gold past this point. I checked.", style: dry }
+- { id: graffiti_072, text: "The floor had opinions about my ankle.", style: dry }
+- { id: graffiti_073, text: "Delvers pay up front, as ever." }
+- { id: graffiti_074, text: "Fed the thing. It remains unfed." }
+- { id: graffiti_075, text: "Marked this wall so I could find it again." }
+- { id: graffiti_076, text: "Hopeless. Cheerful about it, though.", style: dry }
+- { id: graffiti_077, text: "Here lies the lamp, and then the man.", style: grim }
+- { id: graffiti_078, text: "Nobody came back for Tove.", style: grim }
+- { id: graffiti_079, text: "My brother is three doors down. Quiet now.", style: grim }
+- { id: graffiti_080, text: "We dragged him this far. No further.", style: grim }
+- { id: graffiti_081, text: "I will not be leaving this hall.", style: grim }
+- { id: graffiti_082, text: "Drank the last of the water. Slept.", style: grim }
+- { id: graffiti_083, text: "Mara bled out here, and bravely.", style: grim }
+- { id: graffiti_084, text: "The cold took Edric before the teeth did.", style: grim }
+- { id: graffiti_085, text: "Bones in the corner. Mine, soon.", style: grim }
+- { id: graffiti_086, text: "All dead. Only I remain, and not long.", style: grim }
+- { id: graffiti_087, text: "Pick a path and pray." }
+- { id: graffiti_088, text: "Praise the lamp that did not fail." }
+- { id: graffiti_089, text: "May the dark be kind to you." }
+- { id: graffiti_090, text: "Mother, keep my light burning." }
+- { id: graffiti_091, text: "Saints, hold the roof a little longer." }
+- { id: graffiti_092, text: "Gods of the road, bring me home." }
+- { id: graffiti_093, text: "Bless this hole and all who leave it." }
+- { id: graffiti_094, text: "Thank you, whoever left the water." }
+- { id: graffiti_095, text: "Thank you for the rope." }
+- { id: graffiti_096, text: "Cut the rope. Do not climb back." }
+- { id: graffiti_097, text: "We drew straws. I lost." }
+- { id: graffiti_098, text: "Footsteps in the dust, all going in." }
+- { id: graffiti_099, text: "Counted forty bats. One counted me." }
+- { id: graffiti_100, text: "Whisper. Walls carry." }
+- { id: graffiti_101, text: "Wipe your boots. Manners matter." }
+- { id: graffiti_102, text: "Never split the group. Never." }
+- { id: graffiti_103, text: "Keep a hand on the wall." }
+- { id: graffiti_104, text: "Do not whistle in the dark." }
+- { id: graffiti_105, text: "Bar the door behind you." }
+- { id: graffiti_106, text: "Draw first, ask later." }
+- { id: graffiti_107, text: "Lantern oil is worth more than gold." }
+- { id: graffiti_108, text: "Eat before you rest, not after." }
+- { id: graffiti_109, text: "Sleep sitting up with your boots on." }
+- { id: graffiti_110, text: "Share your bread with strangers." }
+- { id: graffiti_111, text: "Count your arrows twice." }
+- { id: graffiti_112, text: "Light two lamps and trust neither." }
+- { id: graffiti_113, text: "Hope is heavier than a pack." }
+- { id: graffiti_114, text: "Pick and shovel, same as always.", themes: { old_mine: 3 } }
+- { id: graffiti_115, text: "Timber groaned all night. We left.", themes: { old_mine: 3 } }
+- { id: graffiti_116, text: "The seam ran dry in autumn.", themes: { old_mine: 3 } }
+- { id: graffiti_117, text: "Foreman Pike owes me three weeks wages.", themes: { old_mine: 2 } }
+- { id: graffiti_118, text: "Shift ended. Nobody told the dark.", themes: { old_mine: 3 } }
+- { id: graffiti_119, text: "Cart tracks lead somewhere. We never found out.", themes: { old_mine: 2 } }
+- { id: graffiti_120, text: "Carried ore for the king. Carried it still.", themes: { old_mine: 2 } }
+- { id: graffiti_121, text: "Gnawers sleep in the shaft.", themes: { goblin_warrens: 2 } }
+- { id: graffiti_122, text: "Smash the human! Smash! Smash!", themes: { goblin_warrens: 3 } }
+- { id: graffiti_123, text: "Big Nub is our king and he smells.", style: dry, themes: { goblin_warrens: 3 } }
+- { id: graffiti_124, text: "Green Knife tribe was here.", themes: { goblin_warrens: 3 } }
+- { id: graffiti_125, text: "Grub good. Man bad.", themes: { goblin_warrens: 3 } }
+- { id: graffiti_126, text: "Gruk loves Snag. Snag does not know.", themes: { goblin_warrens: 2 } }
+- { id: graffiti_127, text: "Shiny things go in the pile.", themes: { goblin_warrens: 3 } }
+- { id: graffiti_128, text: "No stealing from Boss Rot.", themes: { goblin_warrens: 2 } }
+- { id: graffiti_129, text: "Hid the loot. Hid it from me too.", style: dry, themes: { goblin_warrens: 2 } }
+- { id: graffiti_130, text: "Sewer rats rule the lower drain.", themes: { flooded_sewers: 3 } }
+- { id: graffiti_131, text: "Every ditch drains to the same dark.", themes: { flooded_sewers: 2 } }
+- { id: graffiti_132, text: "Wet to the knees and cursing.", themes: { flooded_sewers: 3 } }
+- { id: graffiti_133, text: "The stink is how you know you are close.", themes: { flooded_sewers: 2 } }
+- { id: graffiti_134, text: "Do not drink from the grates.", themes: { flooded_sewers: 3 } }
+- { id: graffiti_135, text: "A grate sang at midnight.", themes: { flooded_sewers: 2 } }
+- { id: graffiti_136, text: "Rowed across. Row back if you can.", themes: { underdark_lake: 3 } }
+- { id: graffiti_137, text: "The lake has no far shore.", themes: { underdark_lake: 3 } }
+- { id: graffiti_138, text: "Pale fish watched me all night.", themes: { underdark_lake: 2 } }
+- { id: graffiti_139, text: "Dropped my torch in the water. It kept shining.", themes: { underdark_lake: 2 } }
+- { id: graffiti_140, text: "Tide came in through the floor.", themes: { flooded_sewers: 2 } }
+- { id: graffiti_141, text: "Frog men wrote this. Not me.", themes: { underdark_lake: 2 } }
+- { id: graffiti_142, text: "The dead here do not rest quietly.", themes: { cellars_and_crypts: 3 } }
+- { id: graffiti_143, text: "This tomb was robbed before I came.", themes: { cellars_and_crypts: 3 } }
+- { id: graffiti_144, text: "Coffin lids are only suggestions.", style: dry, themes: { cellars_and_crypts: 3 } }
+- { id: graffiti_145, text: "Do not lift the lid to see.", themes: { cellars_and_crypts: 3 } }
+- { id: graffiti_146, text: "Bring flowers. Leave quickly.", themes: { cellars_and_crypts: 3 } }
+- { id: graffiti_147, text: "Sacked a crypt. Sacked my luck.", style: dry, themes: { cellars_and_crypts: 2 } }
+- { id: graffiti_148, text: "Fourth niche on the left. Empty now.", themes: { catacomb_labyrinth: 2 } }
+- { id: graffiti_149, text: "Bones stacked tidy by someone neat.", themes: { catacomb_labyrinth: 3 } }
+- { id: graffiti_150, text: "Skull on the wall. Skull on the floor. Enough.", themes: { catacomb_labyrinth: 2 } }
+- { id: graffiti_151, text: "The lost keep walking, round and round.", style: grim, themes: { catacomb_labyrinth: 3 } }
+- { id: graffiti_152, text: "The stone is warm. Please do not touch.", themes: { lava_forges: 2 } }
+- { id: graffiti_153, text: "Forge-lord forgive me for leaving.", themes: { lava_forges: 2 } }
+- { id: graffiti_154, text: "Slag and ash and my best friend.", style: grim, themes: { lava_forges: 2 } }
+- { id: graffiti_155, text: "Anvils rang here once.", themes: { dwarven_hold: 3 } }
+- { id: graffiti_156, text: "Under the mountain, under the hammer.", themes: { dwarven_hold: 3 } }
+- { id: graffiti_157, text: "Kings of the deep sleep poorly.", themes: { dwarven_hold: 2 } }
+- { id: graffiti_158, text: "The gates held until they did not.", themes: { dwarven_hold: 3 } }
+- { id: graffiti_159, text: "Stoneshield clan stood here and fell here.", themes: { dwarven_hold: 3 } }
+- { id: graffiti_160, text: "Runes on the door. I cannot read them.", themes: { dwarven_hold: 2 } }
+- { id: graffiti_161, text: "Dwarf-work, flawless and hostile.", style: dry, themes: { dwarven_hold: 2 } }
+- { id: graffiti_162, text: "They sealed the vault and then sealed the sealers.", themes: { dwarven_hold: 2 } }
+- { id: graffiti_163, text: "Sacrifice made. Nothing answered.", themes: { ruined_temple: 3 } }
+- { id: graffiti_164, text: "The altar is still wet.", themes: { ruined_temple: 3 } }
+- { id: graffiti_165, text: "Bell cracked. Prayers stopped.", themes: { ruined_temple: 2 } }
+- { id: graffiti_166, text: "We sang here before the roof fell.", themes: { ruined_temple: 3 } }
+- { id: graffiti_167, text: "Abbot Hale led us in. Hale lies here.", style: grim, themes: { ruined_temple: 2 } }
+- { id: graffiti_168, text: "God of the hollow, hear your people.", themes: { ruined_temple: 2 } }
+- { id: graffiti_169, text: "Cultists painted this. They were wrong about everything.", themes: { ruined_temple: 2 } }
+- { id: graffiti_170, text: "Whose god is this? Not mine.", themes: { ruined_temple: 2 } }
+- { id: graffiti_171, text: "Candles lit. Candles gone.", themes: { ruined_temple: 2 } }
+- { id: graffiti_172, text: "I kissed the idol and felt nothing.", style: dry, themes: { ruined_temple: 2 } }
+- { id: graffiti_173, text: "Apprentice here. Please come get me.", themes: { wizards_sanctum: 2 } }
+- { id: graffiti_174, text: "Spells fail near this wall.", themes: { wizards_sanctum: 2 } }
+- { id: graffiti_175, text: "Ink never dries in this room.", themes: { wizards_sanctum: 3 } }
+- { id: graffiti_176, text: "Tower fell downward, I think.", themes: { wizards_sanctum: 2 } }
+- { id: graffiti_177, text: "Do not borrow the master's books.", themes: { wizards_sanctum: 3 } }
+- { id: graffiti_178, text: "Wards were fine until I touched them.", style: dry, themes: { wizards_sanctum: 3 } }
+- { id: graffiti_179, text: "Glass shelf, glass floor, glass eyes.", themes: { wizards_sanctum: 2 } }
+- { id: graffiti_180, text: "Magic is only study with worse manners.", style: dry, themes: { wizards_sanctum: 2 } }
+- { id: graffiti_181, text: "Chalk circle. Salt circle. Still nothing.", themes: { wizards_sanctum: 2 } }
+- { id: graffiti_182, text: "Something old looked at me here.", themes: { void_halls: 3 } }
+- { id: graffiti_183, text: "No floor, no ceiling, no echo.", themes: { void_halls: 3 } }
+- { id: graffiti_184, text: "Stars where the stones should be.", themes: { void_halls: 3 } }
+- { id: graffiti_185, text: "I forgot my own name, then this.", themes: { void_halls: 2 } }
+- { id: graffiti_186, text: "Silence. Then more silence.", themes: { void_halls: 2 } }
+- { id: graffiti_187, text: "Left behind my shadow. It was useless.", style: dry, themes: { void_halls: 2 } }
+- { id: graffiti_188, text: "Walk without looking down.", themes: { void_halls: 2 } }
+- { id: graffiti_189, text: "Kneel or fall. I chose.", themes: { abyssal_throne: 3 } }
+- { id: graffiti_190, text: "Praise the one who waits below.", themes: { abyssal_throne: 3 } }
+- { id: graffiti_191, text: "Flames know your name here.", themes: { abyssal_throne: 2 } }
+- { id: graffiti_192, text: "It was already too late when I read this.", style: grim, themes: { abyssal_throne: 3 } }
+- { id: graffiti_193, text: "The throne remembers every knee.", themes: { abyssal_throne: 3 } }
+- { id: graffiti_194, text: "Where the roads end, a seat stands empty.", themes: { abyssal_throne: 2 } }
+- { id: graffiti_195, text: "Nobody bargains with the dark and wins.", themes: { abyssal_throne: 2 } }
+- { id: graffiti_196, text: "Here the worms spoke first.", themes: { fungal_caverns: 2 } }
+- { id: graffiti_197, text: "Soft ground, softer thoughts.", themes: { fungal_caverns: 3 } }
+- { id: graffiti_198, text: "Fungus on my boots, fungus in my head.", themes: { fungal_caverns: 3 } }
+- { id: graffiti_199, text: "Caps nodded as I passed.", themes: { fungal_caverns: 2 } }
+- { id: graffiti_200, text: "Cave moss glows. Moss is not friendly.", themes: { fungal_caverns: 2 } }
+- { id: graffiti_201, text: "Mold grows where my friend sat.", style: grim, themes: { fungal_caverns: 2 } }
+- { id: graffiti_202, text: "Spore-fever took the rest of us.", themes: { fungal_caverns: 2 } }
+- { id: graffiti_203, text: "Strong smell. Stronger memory.", themes: { fungal_caverns: 2 } }
+- { id: graffiti_204, text: "Whatever sleeps here, let it sleep." }
+- { id: graffiti_205, text: "Slept badly. Slept anyway." }
+- { id: graffiti_206, text: "I was alive when I wrote this." }
+- { id: graffiti_207, text: "No heroes passed through here." }
+- { id: graffiti_208, text: "Died hungry. Do not follow my path.", style: grim }
+- { id: graffiti_209, text: "The dead are patient. I am not.", style: grim }
+- { id: graffiti_210, text: "We were five. Then four. Then two.", style: grim }
+- { id: graffiti_211, text: "Write your name so someone knows." }
+- { id: graffiti_212, text: "Heard crying. Did not look." }
+- { id: graffiti_213, text: "Left a coin for whoever needs it." }
+- { id: graffiti_214, text: "Left a lamp for whoever needs it." }
+- { id: graffiti_215, text: "Taken from a friend. Returned too late." }
+- { id: graffiti_216, text: "Never again. Said that before." }
+- { id: graffiti_217, text: "I promised my wife I would come home." }
+- { id: graffiti_218, text: "Someone loved the man who wrote this." }
+- { id: graffiti_219, text: "My daughter is called Wren. Remember her." }
+- { id: graffiti_220, text: "Cold, but I have my pipe." }
+- { id: graffiti_221, text: "Saw a ghost. Chatted. Pleasant fellow.", style: dry }
+- { id: graffiti_222, text: "Tripped over my own scream." }
+- { id: graffiti_223, text: "Do not look at the eyes on the ceiling." }
+- { id: graffiti_224, text: "The dust here is thick and untouched." }
+- { id: graffiti_225, text: "Echo is a liar. Believe the silence." }
+- { id: graffiti_226, text: "Four sets of boots went in. One came out.", style: grim }
+- { id: graffiti_227, text: "No sleep, no water, no help." }
+- { id: graffiti_228, text: "Gave up the sword. Kept the spoon.", style: dry }
+- { id: graffiti_229, text: "Stone does not forgive." }
+- { id: graffiti_230, text: "Home is a long way up." }
+- { id: graffiti_231, text: "I can hear the village bells from here." }
+- { id: graffiti_232, text: "The smell of bread, down here. I dreamed it." }
+- { id: graffiti_233, text: "Tell the tavern keeper I owe her." }
+- { id: graffiti_234, text: "Brother, I took the left. Come find me." }
+- { id: graffiti_235, text: "Say my name once when you pass." }
+- { id: graffiti_236, text: "Mercy to whoever reads this." }
+- { id: graffiti_237, text: "Rubble here, and my best rope." }
+- { id: graffiti_238, text: "We tried to bury him. The floor refused.", style: grim }
+- { id: graffiti_239, text: "It watched us eat, then we ran." }
+- { id: graffiti_240, text: "Every door has a price." }
+- { id: graffiti_241, text: "Sold my soul for a lantern. Good lantern.", style: dry }
+- { id: graffiti_242, text: "Gold keeps. Delvers do not." }
+- { id: graffiti_243, text: "Greed brought me. Fear holds me." }
+- { id: graffiti_244, text: "Cursed be the man who dug this." }
+- { id: graffiti_245, text: "May the man who filled it rot." }
+- { id: graffiti_246, text: "Rich by morning, they said." }
+- { id: graffiti_247, text: "Not worth it. None of it." }
+- { id: graffiti_248, text: "Poor, free, and finally above ground. Almost." }
+- { id: graffiti_249, text: "Worth every scar. Mostly.", style: dry }
+- { id: graffiti_250, text: "Bad luck follows those who count coins here." }
+- { id: graffiti_251, text: "I never found the thing I came for." }
+- { id: graffiti_252, text: "Take what you can. Leave what you must." }
+- { id: graffiti_253, text: "Rope, rations, rope, rations." }
+- { id: graffiti_254, text: "Trust the road, doubt the shortcut." }
+- { id: graffiti_255, text: "We climbed higher than we dared." }
+- { id: graffiti_256, text: "Do not wake the sleeper." }
+- { id: graffiti_257, text: "The sleeper is already awake." }
+- { id: graffiti_258, text: "Hush now. Hush." }
+- { id: graffiti_259, text: "Do not light the torch yet." }
+- { id: graffiti_260, text: "Dark is not empty. Dark is full." }
+- { id: graffiti_261, text: "Someone has been following us. Not a friend." }
+- { id: graffiti_262, text: "Footprints stop here. Mine do not." }
+- { id: graffiti_263, text: "A hand reached through the wall." }
+- { id: graffiti_264, text: "A face in the stone. It nodded." }
+- { id: graffiti_265, text: "A bell rang once, below." }
+- { id: graffiti_266, text: "A voice asked me to stay. I stayed." }
+- { id: graffiti_267, text: "A stranger shared his bread. I never learned his name." }
+- { id: graffiti_268, text: "Fought here. Lost here. Lived, somehow." }
+- { id: graffiti_269, text: "We held this corridor all night." }
+- { id: graffiti_270, text: "Ambushed here by shapes in the dark." }
+- { id: graffiti_271, text: "My axe broke on this very stone." }
+- { id: graffiti_272, text: "Sharpened my knife on the lintel." }
+- { id: graffiti_273, text: "Scratched this with a broken blade." }
+- { id: graffiti_274, text: "Wrote in my own blood. Do not judge me." }
+- { id: graffiti_275, text: "Burned my map for warmth." }
+- { id: graffiti_276, text: "Ate my boots. Not recommended." }
+- { id: graffiti_277, text: "Found a stairway. Wish I had not." }
+- { id: graffiti_278, text: "Found a friend. Lost him later." }
+- { id: graffiti_279, text: "Found my own bones. Strange." }
+- { id: graffiti_280, text: "Found a treasure. Lost it too." }
+- { id: graffiti_281, text: "Seven doors, and not one friendly." }
+- { id: graffiti_282, text: "The lamp went out. We were still singing." }
+- { id: graffiti_283, text: "The long road is longer coming back." }
+- { id: graffiti_284, text: "We chose this life. Mostly." }
+- { id: graffiti_285, text: "Loved it down here, once." }
+- { id: graffiti_286, text: "Hell is just a poor choice of hallway.", style: dry }
+- { id: graffiti_287, text: "Edges are where the wall remembers." }
+- { id: graffiti_288, text: "Sleep on stone and wake up older." }
+- { id: graffiti_289, text: "Nothing grows here but regret." }
+- { id: graffiti_290, text: "The deeper I go, the quieter it gets." }
+- { id: graffiti_291, text: "There is always one more room." }
+- { id: graffiti_292, text: "Come closer. I cannot write louder." }
+- { id: graffiti_293, text: "Here the road forks and so did we." }
+- { id: graffiti_294, text: "The ceiling dripped all night. I wrote anyway." }
+- { id: graffiti_295, text: "Joss carried me this far." }
+- { id: graffiti_296, text: "Whoever lit these lamps, thank you." }
+- { id: graffiti_297, text: "Marrow and mortar, same as ever." }
+- { id: graffiti_298, text: "I was the cook. I was not asked." }
+- { id: graffiti_299, text: "The children of this place sing at dusk." }
+- { id: graffiti_300, text: "Scratched by candlelight, then no candle." }

@@ -1,7 +1,122 @@
-# Stub entries for task 2.4 (Spec 02, step 10). The launch table of 120 is written in Phase 3 (task 4.8).
-- id: sign_stub_01
-  text: "Stairs down. Mind the dark."
-- id: sign_stub_02
-  text: "Authorised delvers only."
-- id: sign_stub_03
-  text: "Deep hall, this way."
+# Signs (Spec 06, "Lore"): the launch table of 120 written in task 4.8. Notices left by the dungeon's old builders and keepers: places, directions, rules and warnings, in present tense, 1 to 6 words, at most 40 characters, true or merely vague.
+# Optional: style (archaic or dry, 14% to 19% of the table) and themes (favour multiplier 2 to 4 for the level themes a sign suits).
+- { id: sign_001, text: "Stairs down. Mind the dark." }
+- { id: sign_002, text: "Deep hall, this way." }
+- { id: sign_003, text: "Authorised delvers only." }
+- { id: sign_004, text: "Storeroom. Locked." }
+- { id: sign_005, text: "Water unsafe past this point.", themes: { flooded_sewers: 3 } }
+- { id: sign_006, text: "Guard post. Abandoned." }
+- { id: sign_007, text: "Vault, three doors on." }
+- { id: sign_008, text: "No lamps beyond the gate.", themes: { old_mine: 3 } }
+- { id: sign_009, text: "Hither the dead are borne.", style: archaic, themes: { cellars_and_crypts: 3, catacomb_labyrinth: 3 } }
+- { id: sign_010, text: "Please do not feed the thing.", style: dry }
+- { id: sign_011, text: "Cellar. Wine and bones.", themes: { cellars_and_crypts: 3 } }
+- { id: sign_012, text: "Crypt. Keep the lid shut.", themes: { cellars_and_crypts: 3 } }
+- { id: sign_013, text: "Mind your head.", themes: { old_mine: 3 } }
+- { id: sign_014, text: "Ore carts stop here.", themes: { old_mine: 3 } }
+- { id: sign_015, text: "Pump room. Do not enter.", themes: { flooded_sewers: 3 } }
+- { id: sign_016, text: "Sluice gate. Closed.", themes: { flooded_sewers: 3 } }
+- { id: sign_017, text: "Chapel of the Quiet Hour.", themes: { ruined_temple: 3 } }
+- { id: sign_018, text: "Wash hands before the altar.", themes: { ruined_temple: 3 } }
+- { id: sign_019, text: "Smithy. Hot iron.", themes: { lava_forges: 3 } }
+- { id: sign_020, text: "Quench trough. Do not drink.", themes: { lava_forges: 3 } }
+- { id: sign_021, text: "Mushrooms are not food.", themes: { fungal_caverns: 3 } }
+- { id: sign_022, text: "Barracks. Beds unmade." }
+- { id: sign_023, text: "Armoury. Empty now." }
+- { id: sign_024, text: "Kitchen, this way." }
+- { id: sign_025, text: "Latrine." }
+- { id: sign_026, text: "Well. Keep the cover shut." }
+- { id: sign_027, text: "Library. Silence kept." }
+- { id: sign_028, text: "Closed for the season." }
+- { id: sign_029, text: "No entry without a lamp." }
+- { id: sign_030, text: "Wipe your boots." }
+- { id: sign_031, text: "Ore weighed here.", themes: { old_mine: 3 } }
+- { id: sign_032, text: "Tolls paid at the gate." }
+- { id: sign_033, text: "Beware loose stone.", themes: { old_mine: 3 } }
+- { id: sign_034, text: "Danger. Floor unsound." }
+- { id: sign_035, text: "Mind the step." }
+- { id: sign_036, text: "Door sticks. Lift and push." }
+- { id: sign_037, text: "Keep to the left." }
+- { id: sign_038, text: "Single file only." }
+- { id: sign_039, text: "Watch the ceiling." }
+- { id: sign_040, text: "Guards change at dusk." }
+- { id: sign_041, text: "Do not feed the prisoners." }
+- { id: sign_042, text: "Cells, this way." }
+- { id: sign_043, text: "Gaoler's office." }
+- { id: sign_044, text: "Ossuary. Bones kept in order.", themes: { catacomb_labyrinth: 3 } }
+- { id: sign_045, text: "Count your turnings.", themes: { catacomb_labyrinth: 3 } }
+- { id: sign_046, text: "The dead lie feet first.", themes: { cellars_and_crypts: 2 } }
+- { id: sign_047, text: "Do not wake the sleepers.", themes: { cellars_and_crypts: 3, catacomb_labyrinth: 2 } }
+- { id: sign_048, text: "Mourners wait here." }
+- { id: sign_049, text: "Embalming room." }
+- { id: sign_050, text: "Assay office. Gold weighed here." }
+- { id: sign_051, text: "Treasury, this way." }
+- { id: sign_052, text: "Mint. Dies kept under lock." }
+- { id: sign_053, text: "Counting house." }
+- { id: sign_054, text: "Merchants' stair." }
+- { id: sign_055, text: "Trespassers are eaten here.", style: dry, themes: { goblin_warrens: 3 } }
+- { id: sign_056, text: "Warren. Stoop low.", themes: { goblin_warrens: 3 } }
+- { id: sign_057, text: "Chief's hall, this way.", themes: { goblin_warrens: 3 } }
+- { id: sign_058, text: "Forge hall. Stand clear.", themes: { lava_forges: 3 } }
+- { id: sign_059, text: "Gate of the Deep Hold.", themes: { dwarven_hold: 3 } }
+- { id: sign_060, text: "Strangers state their business.", themes: { dwarven_hold: 3 } }
+- { id: sign_061, text: "Rune-keepers only.", themes: { dwarven_hold: 3 } }
+- { id: sign_062, text: "Hall of Kings.", themes: { dwarven_hold: 3 } }
+- { id: sign_063, text: "Wards hold. Do not test them.", themes: { wizards_sanctum: 3 } }
+- { id: sign_064, text: "Apprentices wait below.", themes: { wizards_sanctum: 3 } }
+- { id: sign_065, text: "Study. Do not disturb.", themes: { wizards_sanctum: 3 } }
+- { id: sign_066, text: "Spell circle. Stay outside.", themes: { wizards_sanctum: 3 } }
+- { id: sign_067, text: "Reagents. Labelled, mostly.", style: dry, themes: { wizards_sanctum: 3 } }
+- { id: sign_068, text: "Lake landing.", themes: { underdark_lake: 3 } }
+- { id: sign_069, text: "Ferry waits for payment.", themes: { underdark_lake: 3 } }
+- { id: sign_070, text: "Black water. No swimming.", themes: { underdark_lake: 3 } }
+- { id: sign_071, text: "Moor boats here.", themes: { underdark_lake: 3 } }
+- { id: sign_072, text: "The void is not a door.", themes: { void_halls: 3 } }
+- { id: sign_073, text: "Edge ahead. No rail.", themes: { void_halls: 3 } }
+- { id: sign_074, text: "Light ends here.", themes: { void_halls: 3 } }
+- { id: sign_075, text: "Throne room, this way.", themes: { abyssal_throne: 3 } }
+- { id: sign_076, text: "Kneel, or be borne hence.", style: archaic, themes: { abyssal_throne: 3 } }
+- { id: sign_077, text: "Audience by summons only.", themes: { abyssal_throne: 3 } }
+- { id: sign_078, text: "Hot floor. Tread lightly.", themes: { lava_forges: 3 } }
+- { id: sign_079, text: "Slag pit. Keep back.", themes: { lava_forges: 3 } }
+- { id: sign_080, text: "Bellows room." }
+- { id: sign_081, text: "Spore beds. Harvest masked.", themes: { fungal_caverns: 3 } }
+- { id: sign_082, text: "Cellar steps. Mind the damp.", themes: { cellars_and_crypts: 2 } }
+- { id: sign_083, text: "Bread ovens. Cold." }
+- { id: sign_084, text: "Do not lean on the walls." }
+- { id: sign_085, text: "Portcullis. Stand clear." }
+- { id: sign_086, text: "Trapped floor. Follow the chalk." }
+- { id: sign_087, text: "Ghosts must queue.", style: dry }
+- { id: sign_088, text: "Lost property: all of it.", style: dry }
+- { id: sign_089, text: "Closed for renovation. Ongoing.", style: dry }
+- { id: sign_090, text: "Staff only. Staff gone.", style: dry }
+- { id: sign_091, text: "No refunds for the dead.", style: dry }
+- { id: sign_092, text: "Complaints go to the wall.", style: dry }
+- { id: sign_093, text: "Reserved for management.", style: dry }
+- { id: sign_094, text: "Ere thou enter, wash.", style: archaic, themes: { ruined_temple: 3 } }
+- { id: sign_095, text: "Pass not without leave.", style: archaic }
+- { id: sign_096, text: "Hold thy lamp low.", style: archaic }
+- { id: sign_097, text: "Whoso enters, beware.", style: archaic }
+- { id: sign_098, text: "Here rest the faithful.", style: archaic, themes: { ruined_temple: 2, catacomb_labyrinth: 2 } }
+- { id: sign_099, text: "Cross not unbidden.", style: archaic }
+- { id: sign_100, text: "Here justice was done.", style: archaic }
+- { id: sign_101, text: "Thy toll is due.", style: archaic }
+- { id: sign_102, text: "Brewhouse. Casks sealed." }
+- { id: sign_103, text: "Tanner's yard." }
+- { id: sign_104, text: "Masons' lodge." }
+- { id: sign_105, text: "Bell. Do not ring.", themes: { ruined_temple: 2 } }
+- { id: sign_106, text: "Fire damp. No flame.", themes: { old_mine: 3 } }
+- { id: sign_107, text: "Open shaft ahead.", themes: { old_mine: 2 } }
+- { id: sign_108, text: "Lift cage. Out of use." }
+- { id: sign_109, text: "Overflow channel.", themes: { flooded_sewers: 3 } }
+- { id: sign_110, text: "Drain below. Mind the grate.", themes: { flooded_sewers: 2 } }
+- { id: sign_111, text: "Shrine. Leave a coin." }
+- { id: sign_112, text: "Quarantine. Keep out." }
+- { id: sign_113, text: "Keys kept by the warden." }
+- { id: sign_114, text: "Do not trust old maps." }
+- { id: sign_115, text: "Condemned by order." }
+- { id: sign_116, text: "Stable. Empty." }
+- { id: sign_117, text: "Records office." }
+- { id: sign_118, text: "Chandler's row." }
+- { id: sign_119, text: "Muster point." }
+- { id: sign_120, text: "Smokehouse." }

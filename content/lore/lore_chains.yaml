@@ -1,27 +1,219 @@
-# Stub entries for task 2.4 (Spec 02, "Lore chains"): each row holds the six entries of one chain, found in
-# order, one per level. A chain of four or five entries uses the first of them. The launch table of 25 is
-# written in Phase 3 (task 4.8).
-- id: lore_chain_stub_01
+# Lore chains (Spec 02, "Lore chains"; Spec 06, "Lore"): the launch table of 25 written in task 4.8.
+# Each chain holds six entries, found in order, one per level; a chain of four or five entries uses the first of them,
+# so every prefix reads as a growing story. The later entries point to a hidden thing kept in the deep, true whether
+# the chain ends at a cache or at a boss weakness. Optional: themes (favour multiplier) and style (grim, archaic, dry).
+- id: lore_chain_001
   entries:
-    - "The old crew dug here first."
-    - "They found something that hummed."
-    - "They sealed it behind iron."
-    - "The foreman took the key down."
-    - "He left it with the dead."
-    - "Look where the dead are many."
-- id: lore_chain_stub_02
+    - "The survey crew marked this stair."
+    - "They marked each level with a nail."
+    - "The nails stop where the stone turns warm."
+    - "The chief surveyor went on alone."
+    - "She carried one thing she would not name."
+    - "What she carried is kept below, and so is its keeper."
+- id: lore_chain_002
+  themes: { underdark_lake: 3 }
   entries:
-    - "A toll was paid here once."
-    - "The toll was paid in names."
-    - "Each name is cut in a stair."
-    - "The last name is not cut."
-    - "It waits to be spoken."
-    - "Speak it at the seventh door."
-- id: lore_chain_stub_03
+    - "A ferryman took coin at the black water."
+    - "He took a coin from each, and a word."
+    - "The words went into a ledger."
+    - "The ledger is not where the ferryman left it."
+    - "Whoever holds the ledger holds the debt."
+    - "It is kept below, and it is guarded."
+- id: lore_chain_003
   entries:
-    - "The well is older than the hold."
-    - "Its water is not for drinking."
-    - "A thing sleeps beneath it."
-    - "It wakes when the water is taken."
-    - "The old kings knew how to feed it."
-    - "Leave it a gift."
+    - "A bell hung here before the roof fell."
+    - "It rang once for each death in the hold."
+    - "It stopped ringing in a single night."
+    - "The ringer was found with his hands bound."
+    - "The bell was not broken. It was taken down."
+    - "What took it keeps it still."
+- id: lore_chain_004
+  entries:
+    - "Ossa drew maps for any who paid."
+    - "Her maps agreed with one another, which is rare."
+    - "One map showed a room no one had cut."
+    - "She drew it again and again, and slept badly."
+    - "She hid the true map where no one would look."
+    - "It lies below, with whatever she drew it for."
+- id: lore_chain_005
+  themes: { flooded_sewers: 3 }
+  entries:
+    - "The water rose in a single night."
+    - "The gates were shut against it."
+    - "The gates held. The water did not care."
+    - "Those inside learned to breathe slowly."
+    - "Something came up from the water, and was fed."
+    - "It keeps the low places, and what lies in them."
+- id: lore_chain_006
+  entries:
+    - "A child's boots lie by the wall."
+    - "She followed the lamp-man down."
+    - "She asked him where the light went."
+    - "He said it went to the one below."
+    - "She was not afraid, and that was the trouble."
+    - "Something below still holds what she was given."
+- id: lore_chain_007
+  entries:
+    - "The lord gave a feast for the founding."
+    - "Forty sat down. The doors were barred."
+    - "The wine was not for the guests."
+    - "The last course was never carried out."
+    - "The hall was sealed with the table laid."
+    - "Something still sits at that table, guarding its plate."
+- id: lore_chain_008
+  themes: { ruined_temple: 3 }
+  style: archaic
+  entries:
+    - "The abbot taught that the dark was holy."
+    - "The brothers burned their lamps in the yard."
+    - "Those who kept a lamp were put out."
+    - "The abbot took a relic to the lowest vault."
+    - "He said it would not be found, and it hath not been."
+    - "It is hidden below, and he is not far from it."
+- id: lore_chain_009
+  style: dry
+  entries:
+    - "Marn owed the guild forty crowns."
+    - "He paid with a day's digging, then a year's."
+    - "The guild kept the tally on a bone."
+    - "The bone was never given back."
+    - "He was buried owing, and still is."
+    - "His tally is kept below, with what he dug for."
+- id: lore_chain_010
+  themes: { fungal_caverns: 3 }
+  entries:
+    - "The spores came in with the grain."
+    - "The grain was good. The sacks were not."
+    - "By the third week the cooks were quiet."
+    - "By the fourth they were singing."
+    - "The mother of it grows where the sacks were stored."
+    - "It tends one thing, and holds it closely."
+- id: lore_chain_011
+  themes: { dwarven_hold: 3 }
+  entries:
+    - "The hold took nine years to cut."
+    - "Its doors were cut to open only inward."
+    - "The deep forges were lit for a single purpose."
+    - "The smiths made one thing and then no more."
+    - "They hid the thing from their own king."
+    - "It is kept below, and the king is not done looking."
+- id: lore_chain_012
+  themes: { wizards_sanctum: 3 }
+  entries:
+    - "The wizard kept a ledger of his errors."
+    - "The ledger had eleven pages. Then it had more."
+    - "The last error was larger than the tower."
+    - "He buried it rather than mend it."
+    - "He hid the key to it in his own name."
+    - "What he buried is kept below, and it is not at rest."
+- id: lore_chain_013
+  themes: { lava_forges: 3 }
+  entries:
+    - "The fires here were never banked."
+    - "The smiths worked in shifts and slept in the ash."
+    - "The master swore the blade was nearly done."
+    - "The blade was done. The master was not."
+    - "It was quenched in something that was not water."
+    - "It is kept in the deep heat, and it is guarded."
+- id: lore_chain_014
+  themes: { void_halls: 3 }
+  entries:
+    - "The stars here are painted, and wrong."
+    - "A surveyor counted them and got a different sum."
+    - "The sum changed when she looked away."
+    - "She wrote that the ceiling is not a ceiling."
+    - "She wrote that something below is holding it up."
+    - "Whatever is kept below is the reason the rest stands."
+- id: lore_chain_015
+  themes: { abyssal_throne: 3 }
+  entries:
+    - "The throne was carved before the stair."
+    - "No hand cut it. The marks say so."
+    - "Kings sat in it and were not kings after."
+    - "The last king left it empty on purpose."
+    - "He hid his crown rather than be seen in it."
+    - "The crown is kept below, and the throne still wants it."
+- id: lore_chain_016
+  themes: { cellars_and_crypts: 3 }
+  style: grim
+  entries:
+    - "The rat-catcher was paid by the tail."
+    - "He grew rich, and then the rats grew fewer."
+    - "Then they grew bold, and he grew thin."
+    - "He went down to find where they came from."
+    - "He found it, and he did not come up."
+    - "What he found is kept below, and it is not empty."
+- id: lore_chain_017
+  entries:
+    - "The lamplighter lit every stair but one."
+    - "He said the last stair lit itself."
+    - "He stopped climbing it after the third night."
+    - "He wrote that the light below is not for us."
+    - "He wrote that it burns over something kept."
+    - "What it burns over is hidden, and it is watched."
+- id: lore_chain_018
+  themes: { old_mine: 3 }
+  style: grim
+  entries:
+    - "Two brothers worked this seam."
+    - "One struck a vein, and the other struck him."
+    - "The survivor sealed the seam with timber."
+    - "He dug a second shaft to be sure."
+    - "He never spoke of what the vein held."
+    - "It is still down there, sealed and watched."
+- id: lore_chain_019
+  entries:
+    - "The locksmith made a lock with no key."
+    - "The lord paid double and asked for no key."
+    - "The lock was fitted to a door that opens down."
+    - "The locksmith was paid, and then he was not seen."
+    - "The lock holds, and he made it to hold."
+    - "What it keeps is patient."
+- id: lore_chain_020
+  entries:
+    - "The choir sang in the lower hall."
+    - "They sang one hymn, always the same."
+    - "A hymn that long wears a hole in things."
+    - "The choirmaster learned what answered."
+    - "He stopped the hymn and sealed the hall."
+    - "What answered is quiet now, and keeps what it was given."
+- id: lore_chain_021
+  entries:
+    - "The wagons went down full and came up empty."
+    - "The carters were paid in silence."
+    - "One carter counted the loads and quit."
+    - "Forty loads, he said, and none were stone."
+    - "They were set down in the dark, and something took them."
+    - "What they were set down for is kept, and guarded."
+- id: lore_chain_022
+  entries:
+    - "Salt was hauled out of this dark by the ton."
+    - "The salt-men said the dead keep better in it."
+    - "They salted what they could not bury."
+    - "The salt ran short in the third year."
+    - "The last crate went down unopened."
+    - "It is kept below, and what guards it is well preserved."
+- id: lore_chain_023
+  entries:
+    - "The mirror-maker hung one glass in every hall."
+    - "He said they let the watchers see out."
+    - "A glass cracked, and the watcher stepped through."
+    - "He broke the rest and buried the pieces."
+    - "One piece he kept back, to look at it again."
+    - "It is kept below, and what looks out of it is waiting."
+- id: lore_chain_024
+  entries:
+    - "The hunt rode down on a bright morning."
+    - "They sought a beast that had taken the harvest."
+    - "The hounds went in first, and quiet."
+    - "The horns were heard for three days."
+    - "Only the master's cloak came back."
+    - "The master's horn lies below, and so does what he sought."
+- id: lore_chain_025
+  entries:
+    - "A saint's bone was carried down in a box."
+    - "The bearers were told never to open it."
+    - "One of them opened it."
+    - "He wrote that it was empty, and that he was glad."
+    - "He wrote that the box was heavier after."
+    - "Whatever it holds is kept below, and is guarded still."
