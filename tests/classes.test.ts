@@ -162,18 +162,17 @@ describe('Spec 03: every class is created and played to level 10', () => {
 describe('Spec 03: minor abilities from the content tables', () => {
   it('gives the four core classes the spec examples, with Pack Mule stackable', () => {
     const pool = (id: string) => classById(built.bundle, id).minorAbilities.map((a) => a.id);
-    expect(pool('warrior')).toEqual(['hardy', 'weapon_master', 'pack_mule', 'second_wind']);
-    expect(pool('mage')).toEqual(['focus', 'scholar', 'widen', 'mana_well']);
-    expect(pool('thief')).toEqual(['keen_eye', 'light_step', 'fence', 'quick_hands']);
-    expect(pool('priest')).toEqual(['hallowed', 'sanctuary', 'tithe', 'purify']); // Blessed renamed (Spec 03, Addendum A)
+    expect(pool('warrior')).toEqual(expect.arrayContaining(['hardy', 'weapon_master', 'pack_mule', 'second_wind']));
+    expect(pool('mage')).toEqual(expect.arrayContaining(['focus', 'scholar', 'widen', 'mana_well']));
+    expect(pool('thief')).toEqual(expect.arrayContaining(['keen_eye', 'light_step', 'fence', 'quick_hands']));
+    expect(pool('priest')).toEqual(expect.arrayContaining(['hallowed', 'sanctuary', 'tithe', 'purify'])); // Blessed renamed (Spec 03, Addendum A)
     expect(classById(built.bundle, 'warrior').minorAbilities.find((a) => a.id === 'pack_mule')?.stackable).toBe(true);
   });
 
-  it('reports every class short of its 12 until task 4.4, and counts slots per class', () => {
+  it('gives every class its 12 (240 slots), counting a shared entry in each pool it sits in', () => {
     const report = buildCoverage(built.bundle).tables.find((t) => t.table === 'minor_abilities')!;
-    expect(report).toMatchObject({ count: 16, minimum: 240, unit: 'slots', ok: false });
+    expect(report).toMatchObject({ count: 240, minimum: 240, unit: 'slots', ok: true });
     expect(report.groups).toHaveLength(20);
-    expect(report.groups.find((g) => g.label === 'class warrior')).toEqual({ label: 'class warrior', count: 4, minimum: 12 });
-    expect(report.groups.find((g) => g.label === 'class bard')).toEqual({ label: 'class bard', count: 0, minimum: 12 });
+    for (const g of report.groups) expect(g, g.label).toMatchObject({ count: 12, minimum: 12 });
   });
 });
