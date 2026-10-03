@@ -1,84 +1,87 @@
-# Minor abilities (Spec 03, "Minor abilities", and its Addendum A). These are the examples the spec gives for the
-# four core classes; the full pools of 12 for all 20 classes are written in task 4.4. Each names its effect from the
-# vocabulary in code (Spec 08, Addendum A; src/core/catalog.ts, ABILITY_EFFECTS) with the fields that effect needs.
+# Minor abilities (Spec 03, "Minor abilities", and its Addendum A): the launch pools of task 4.4, 12 entries for each of
+# the 20 classes (240 slots), a shared entry sitting in every pool it names. Each names its effect from the vocabulary in
+# code (Spec 08, Addendum A; src/core/catalog.ts, ABILITY_EFFECTS) with the fields that effect needs; no new effect was
+# needed. The first 16 are the spec's examples for the Warrior, Mage, Thief and Priest. Only entries whose effect adds up
+# are stackable (pack slots, sell bonus, melee, defence, spell reach).
+
 - id: hardy
   name: Hardy
   text: Waiting restores a Combat die in 8 rounds
-  classes: [warrior]
+  classes: [warrior, ranger, druid, necromancer, warlock, shaman, beastmaster]
   effect: wait_rounds
   amount: 8
 - id: weapon_master
   name: Weapon Master
   text: +1 on melee with the weapon wielded when drawn
-  classes: [warrior]
+  classes: [warrior, knight, ranger, assassin, witch_hunter]
   effect: weapon_melee
   amount: 1
 - id: pack_mule
   name: Pack Mule
   text: +2 inventory slots
-  classes: [warrior]
+  classes: [warrior, mage, thief, priest, barbarian, knight, paladin, ranger, monk, bard, druid, necromancer, sorcerer, illusionist, assassin, alchemist, shaman, witch_hunter, beastmaster]
   stackable: true
   effect: pack_slots
   amount: 2
 - id: second_wind
   name: Second Wind
   text: Once per level, regain a Combat die when down to one
-  classes: [warrior]
+  classes: [warrior, barbarian, knight, paladin, monk, beastmaster]
   effect: rally
 - id: focus
   name: Focus
   text: Advantage on spell rolls while no foe is adjacent
-  classes: [mage]
+  classes: [mage, sorcerer, illusionist]
   effect: spell_focus
 - id: scholar
   name: Scholar
   text: Know books before reading; learn spells more easily
-  classes: [mage]
+  classes: [mage, bard, necromancer, sorcerer, illusionist, warlock, alchemist]
   effect: book_lore
 - id: widen
   name: Widen
   text: Area spells reach one cell further
-  classes: [mage]
+  classes: [mage, sorcerer]
   effect: spell_widen
   amount: 1
 - id: mana_well
   name: Mana Well
   text: Potions that restore Magic dice restore one extra
-  classes: [mage]
+  classes: [mage, priest, necromancer, sorcerer, warlock, alchemist]
   effect: potion_magic
   amount: 1
 - id: keen_eye
   name: Keen Eye
   text: Advantage on search checks and passive notice
-  classes: [thief]
+  classes: [thief, ranger, bard, illusionist]
   effect: advantage
   rolls: [search, notice]
 - id: light_step
   name: Light Step
   text: Hidden floor traps are easier to jump clear of
-  classes: [thief]
+  classes: [thief, ranger, monk, assassin, beastmaster]
   effect: sure_footing
 - id: fence
   name: Fence
   text: +20% when selling
-  classes: [thief]
+  classes: [thief, assassin]
   effect: sell_bonus
   amount: 20
 - id: quick_hands
   name: Quick Hands
   text: Container traps trigger only on a 1
-  classes: [thief]
+  classes: [thief, ranger, bard, illusionist, assassin, alchemist]
   effect: careful_opening
 - id: hallowed
   name: Hallowed
   text: Advantage in melee against the undead
-  classes: [priest]
+  classes: [priest, paladin, shaman, witch_hunter]
   effect: against_tag
   tag: undead
 - id: sanctuary
   name: Sanctuary
   text: Monsters take -2 on melee rolls against you for 3 rounds
-  classes: [priest]
+  classes: [priest, paladin, druid, shaman]
   effect: sanctuary
   amount: 2
   rounds: 3
@@ -91,5 +94,174 @@
 - id: purify
   name: Purify
   text: Lift one worn curse, or else end poison, as a skill use
-  classes: [priest]
+  classes: [priest, paladin, druid, alchemist, shaman, witch_hunter]
   effect: purify
+- id: sharp_ears
+  name: Sharp Ears
+  text: Advantage on passive notice
+  classes: [warrior, barbarian, knight, monk, druid, assassin, witch_hunter, beastmaster]
+  effect: advantage
+  rolls: notice
+- id: delver_sense
+  name: Delver's Sense
+  text: Advantage on search checks
+  classes: [mage, priest, necromancer, sorcerer, warlock, alchemist, witch_hunter]
+  effect: advantage
+  rolls: search
+- id: picklock
+  name: Picklock
+  text: Advantage on lockpicking
+  classes: [thief, bard, assassin]
+  effect: advantage
+  rolls: lockpick
+- id: steady_hands
+  name: Steady Hands
+  text: Advantage on disarming traps
+  classes: [mage, thief, assassin]
+  effect: advantage
+  rolls: disarm
+- id: nimble
+  name: Nimble
+  text: Advantage on the avoid check for a hidden floor trap
+  classes: [warrior, thief, barbarian, monk, druid, assassin, beastmaster]
+  effect: advantage
+  rolls: avoid_trap
+- id: trap_sense
+  name: Trap Sense
+  text: Advantage on disarming traps and on avoiding them
+  classes: [ranger, alchemist, witch_hunter]
+  effect: advantage
+  rolls: [disarm, avoid_trap]
+- id: bolt_caster
+  name: Bolt Caster
+  text: Advantage on spell rolls at a single target
+  classes: [mage, priest, necromancer, illusionist, warlock, witch_hunter]
+  effect: advantage
+  rolls: spell
+  shape: target
+- id: sweeping_caster
+  name: Sweeping Caster
+  text: Advantage on area spell rolls
+  classes: [mage, druid, necromancer, warlock, shaman]
+  effect: advantage
+  rolls: spell
+  shape: area
+- id: self_caster
+  name: Inner Calm
+  text: Advantage on spell rolls cast on yourself
+  classes: [mage, priest, paladin, monk, bard, druid, illusionist, shaman]
+  effect: advantage
+  rolls: spell
+  shape: self
+- id: spell_savant
+  name: Spell Savant
+  text: Advantage on every spell roll
+  classes: [sorcerer]
+  effect: advantage
+  rolls: spell
+- id: brawler
+  name: Brawler
+  text: +1 on melee rolls
+  classes: [warrior, barbarian, knight, paladin, monk, warlock, beastmaster]
+  stackable: true
+  effect: melee
+  amount: 1
+- id: dirty_fighter
+  name: Dirty Fighter
+  text: +1 on melee rolls
+  classes: [warrior, barbarian, knight, assassin, witch_hunter]
+  effect: melee
+  amount: 1
+- id: shieldwise
+  name: Shieldwise
+  text: +1 on the Combat die when defending against melee
+  classes: [warrior, barbarian, knight, paladin, monk, sorcerer]
+  stackable: true
+  effect: defence
+  amount: 1
+- id: warded
+  name: Warded
+  text: +1 on the Combat die when defending against melee
+  classes: [mage, priest, knight, paladin, bard, illusionist, warlock, shaman, witch_hunter]
+  effect: defence
+  amount: 1
+- id: evasive
+  name: Evasive
+  text: +1 on the Combat die when defending against melee
+  classes: [thief, barbarian, ranger, monk, bard, necromancer, sorcerer, illusionist, assassin, beastmaster]
+  effect: defence
+  amount: 1
+- id: silent_tread
+  name: Silent Tread
+  text: Monsters roll to notice you with disadvantage
+  classes: [thief, ranger, monk, assassin, beastmaster]
+  effect: stealth
+- id: shadow_veil
+  name: Shadow Veil
+  text: Monsters roll to notice you with disadvantage
+  classes: [druid, necromancer, illusionist, warlock]
+  effect: stealth
+- id: far_reach
+  name: Far Reach
+  text: Area spells reach one cell further
+  classes: [necromancer, sorcerer, warlock, shaman]
+  stackable: true
+  effect: spell_widen
+  amount: 1
+- id: stoic
+  name: Stoic
+  text: Waiting restores a Combat die in 9 rounds
+  classes: [priest, knight, paladin, monk, witch_hunter]
+  effect: wait_rounds
+  amount: 9
+- id: tireless
+  name: Tireless
+  text: Waiting restores a Combat die in 6 rounds
+  classes: [barbarian]
+  effect: wait_rounds
+  amount: 6
+- id: deep_pockets
+  name: Deep Pockets
+  text: +1 inventory slot
+  classes: [warrior, thief, priest, barbarian, knight, paladin, ranger, bard, druid, necromancer, sorcerer, illusionist, warlock, alchemist, shaman, beastmaster]
+  stackable: true
+  effect: pack_slots
+  amount: 1
+- id: haggler
+  name: Haggler
+  text: +10% when selling
+  classes: [warrior, thief, barbarian, knight, ranger, bard, illusionist, alchemist, beastmaster]
+  stackable: true
+  effect: sell_bonus
+  amount: 10
+- id: silver_tongue
+  name: Silver Tongue
+  text: +15% when selling
+  classes: [bard]
+  effect: sell_bonus
+  amount: 15
+- id: frugal
+  name: Frugal
+  text: Village rest costs half
+  classes: [warrior, mage, barbarian, knight, paladin, ranger, monk, druid, necromancer, sorcerer, warlock, alchemist, shaman, witch_hunter, beastmaster]
+  effect: rest_cost
+  amount: 50
+- id: hospitality
+  name: Hospitality
+  text: Village rest costs a quarter
+  classes: [bard]
+  effect: rest_cost
+  amount: 25
+- id: distiller
+  name: Distiller
+  text: Potions that restore Magic dice restore one extra
+  classes: [alchemist]
+  stackable: true
+  effect: potion_magic
+  amount: 1
+- id: herbalist
+  name: Herbalist
+  text: Potions that restore Magic dice restore one extra
+  classes: [druid, alchemist, shaman]
+  effect: potion_magic
+  amount: 1

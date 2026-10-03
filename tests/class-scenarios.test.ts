@@ -343,10 +343,8 @@ describe('Task 3.11: every class created, its ability used in an arena, and play
     // Every level-up die arrived; the pool table caps at 6 dice each.
     const total = run.character.pools.combat.max + run.character.pools.skill.max + run.character.pools.magic.max;
     expect(total).toBe(12);
-    // The draws: one per level 2 to 10 while the pool lasts (the full pools of 12 come with task 4.4), each in effect.
-    const pool = cls.minorAbilities;
-    const stackable = pool.some((a) => a.stackable);
-    expect(run.character.minorAbilities.length).toBe(stackable ? 9 : Math.min(9, pool.length));
+    // The draws: one per level 2 to 10, nine from a pool of 12, each in effect.
+    expect(run.character.minorAbilities.length).toBe(9);
     drawsInEffect(run.player);
     // The pane lists the major ability first and then the draws by name.
     const shown = screen(app);

@@ -51,14 +51,15 @@ describe('Spec 08, Addendum A: one effect vocabulary in code', () => {
       ...(tables.artifacts as { effect: string }[]),
       ...(tables.altar_gods as { buff: { effect: string } }[]).map((g) => g.buff),
     ];
-    expect(named.length).toBe(16 + 20 + 3);
+    expect(named.length).toBe(43 + 20 + 3);
     for (const row of named) expect(ABILITY_EFFECT_IDS).toContain(row.effect);
     // Every effect on the list says what it does and of what kind it is.
     for (const id of ABILITY_EFFECT_IDS) expect(ABILITY_EFFECTS[id].text.length).toBeGreaterThan(0);
   });
 
   it('the 16 examples map to their effects, with Blessed renamed Hallowed', () => {
-    expect(Object.fromEntries([...minors].map(([id, spec]) => [id, spec.effect]))).toEqual({
+    const SPEC_EXAMPLES = ['hardy', 'weapon_master', 'pack_mule', 'second_wind', 'focus', 'scholar', 'widen', 'mana_well', 'keen_eye', 'light_step', 'fence', 'quick_hands', 'hallowed', 'sanctuary', 'tithe', 'purify'];
+    expect(Object.fromEntries([...minors].filter(([id]) => SPEC_EXAMPLES.includes(id)).map(([id, spec]) => [id, spec.effect]))).toEqual({
       hardy: 'wait_rounds',
       weapon_master: 'weapon_melee',
       pack_mule: 'pack_slots',
