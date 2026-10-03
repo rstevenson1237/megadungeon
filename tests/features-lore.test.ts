@@ -39,12 +39,12 @@ describe('Spec 06: signs, graffiti and the journal', () => {
   });
 
   it('a book in the pack is read for a round, kept in the journal, and stays in the pack', () => {
-    const book: BookItem = { kind: 'book', uid: 900, id: 'book_stub_01', name: 'old book', value: 5 };
+    const book: BookItem = { kind: 'book', uid: 900, id: 'book_001', name: 'old book', value: 5 };
     const game = gameAt(level(mark('sign', 'x', { x: 9, y: 3 })), 2, 3, { ...bare, pack: [book] });
-    const text = CONTENT.books.get('book_stub_01')!.text;
+    const text = CONTENT.books.get('book_001')!.text;
     const result = game.use(book);
     expect(result).toMatchObject({ spent: true, read: { title: 'Book' } });
-    expect(game.state.player.journal).toEqual([expect.objectContaining({ depth: 4, kind: 'book', id: 'book_stub_01', text })]);
+    expect(game.state.player.journal).toEqual([expect.objectContaining({ depth: 4, kind: 'book', id: 'book_001', text })]);
     expect(game.state.player.pack).toContain(book);
     game.use(book);
     expect(game.state.player.journal).toHaveLength(1);

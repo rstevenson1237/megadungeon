@@ -1,7 +1,203 @@
-# Stub entries for task 2.4 (Spec 02, step 10). The launch table of 200 is written in Phase 3 (task 4.8).
-- id: book_stub_01
-  text: "A water-stained ledger of coal weights and the names of the men who carried them."
-- id: book_stub_02
-  text: "A prayer book. Every page ends with the same word, written smaller each time."
-- id: book_stub_03
-  text: "A delver's diary. The last entry says only that the stairs were farther than they looked."
+# Books (Spec 06, "Lore"): the launch table of 200 written in task 4.8. Books are found in containers and on shelves; they recount in the past tense.
+# Voice follows docs/12-content-style-guide.md: terse, classic, ASCII only, one to three sentences, at most 220 characters.
+# Tagged entries (style: grim or archaic) stay under 20% of the table; themes is a favour multiplier for the place the book is about.
+- { id: book_001, text: "A water-stained ledger of coal weights and the names of the men who carried them." }
+- { id: book_002, text: "A prayer book. Every page ends with the same word, written smaller each time." }
+- { id: book_003, text: "A delver's diary. The last entry says only that the stairs were farther than they looked." }
+- { id: book_004, text: "A tally of lamp oil, bought and burned. The burned column grows long and the bought column stops." }
+- { id: book_005, text: "A mason's book of measures, with a hall drawn in it that does not match the hall it was found in." }
+- { id: book_006, text: "A child's primer. Someone has crossed out every word for light." }
+- { id: book_007, text: "A rule of the old watch. The last rule is torn away, and the page beneath is blank." }
+- { id: book_008, text: "A cookbook. Nothing in it is meant for people." }
+- { id: book_009, text: "A funeral roll, long and unfinished. The last name written is in a different hand.", style: grim }
+- { id: book_010, text: "Here be set down the names of such lords as held this deep, and how they fell.", style: archaic }
+- { id: book_011, text: "A cooper's account book. Every cask is entered as full, and none as sold.", themes: { cellars_and_crypts: 3 } }
+- { id: book_012, text: "A sexton's register of burials, each line ruled neatly. The last forty lines hold no names, only dates.", themes: { cellars_and_crypts: 3 } }
+- { id: book_013, text: "A vintner's cellar book. One bin is marked in red, with a note to leave it alone for a hundred years." }
+- { id: book_014, text: "A housekeeper's key list. Every key is crossed out except the one to the lowest door." }
+- { id: book_015, text: "A book of epitaphs, drafted ahead of need. Several have been fitted with names since.", themes: { cellars_and_crypts: 3 } }
+- { id: book_016, text: "The steward's inventory of the cold store: salt, cheese, candles, and one item smudged out.", themes: { cellars_and_crypts: 2 } }
+- { id: book_017, text: "A pocket psalter, its margins full of counted days. The count stops where a page is stained." }
+- { id: book_018, text: "A crypt-keeper's lantern log. Lit at dusk, snuffed at dawn, and one night noted: it would not stay lit.", themes: { cellars_and_crypts: 3 } }
+- { id: book_019, text: "A tally-book scratched on scraped hide, rows of notches in fives and a crude drawing of a stair.", themes: { goblin_warrens: 3 } }
+- { id: book_020, text: "A chieftain's counting board, copied in charcoal. Every debt on it is owed to the same mark.", themes: { goblin_warrens: 3 } }
+- { id: book_021, text: "A hide-bound feast ledger. Pots, pigs and prisoners are counted together on one line.", style: grim, themes: { goblin_warrens: 3 } }
+- { id: book_022, text: "A child's scrawled map of the warren, with one path marked home and leading nowhere." }
+- { id: book_023, text: "A drover's notes on raids. They came at the new moon, took the lamps first, and left the grain.", themes: { goblin_warrens: 3 } }
+- { id: book_024, text: "A torn pamphlet in poor print, warning farmers to bar their doors and never to follow small footprints." }
+- { id: book_025, text: "A ratcatcher's fee book. The last page is a refusal to continue the contract, with no reason given.", themes: { goblin_warrens: 2 } }
+- { id: book_026, text: "A sewer warden's log of water marks. Each week the line climbs higher, until the last are written above the door.", themes: { flooded_sewers: 3 } }
+- { id: book_027, text: "A toshers' notebook of finds: rings, spoons, a child's boot, a second child's boot.", themes: { flooded_sewers: 3 } }
+- { id: book_028, text: "A plumber's book of pipe routes, with one channel drawn in a hand that does not match the others." }
+- { id: book_029, text: "A pamphlet on the Great Drain, printed to praise its builders. The chapter on upkeep is missing.", themes: { flooded_sewers: 3 } }
+- { id: book_030, text: "A bargeman's wet journal. He wrote that the current ran against the flow, and wrote it again the next day.", themes: { flooded_sewers: 3 } }
+- { id: book_031, text: "A sodden hymnal with every page swollen shut but one, which reads: Do not drink." }
+- { id: book_032, text: "A shift book from the old workings. Eleven names went down. The tally of those who came up is blank.", themes: { old_mine: 3 } }
+- { id: book_033, text: "A surveyor's field book, full of bearings, ending in one that points up through solid rock.", themes: { old_mine: 2 } }
+- { id: book_034, text: "A pay ledger of the old mine. Wages were docked for lamps, picks and bread, and last for a coffin.", style: grim, themes: { old_mine: 3 } }
+- { id: book_035, text: "A miner's letter bundle, tied with wire. Each letter asks when the seam will be done. None has an answer.", themes: { old_mine: 3 } }
+- { id: book_036, text: "A timberman's book of props and braces. Each page notes the sound the roof made that day.", themes: { old_mine: 3 } }
+- { id: book_037, text: "A tallyman's slate-book of ore carts. The carts are counted full on the day the tunnel was sealed." }
+- { id: book_038, text: "A bird-keeper's account of the mine's canaries, each named and each struck out in turn. The last line is left open." }
+- { id: book_039, text: "A book of hours with every office torn out but the last.", themes: { ruined_temple: 3 } }
+- { id: book_040, text: "A sacristan's inventory of plate, vestments and relics. The relics column is blank, in a different ink.", themes: { ruined_temple: 2 } }
+- { id: book_041, text: "A pilgrim's journal of the road to the shrine. He arrived. The pages after that are in another hand." }
+- { id: book_042, text: "A hymnal whose final hymn has no words, only a rest marked again and again.", themes: { ruined_temple: 3 } }
+- { id: book_043, text: "A homily on patience, copied forty times by a novice, each copy a little less careful." }
+- { id: book_044, text: "A calendar of feast days. The last feast is marked in black and has no name.", themes: { ruined_temple: 3 } }
+- { id: book_045, text: "A herbalist's notebook with pressed spores between the leaves. Every page grows fainter.", themes: { fungal_caverns: 3 } }
+- { id: book_046, text: "A forager's guide to cave mushrooms, with the edible ones marked in a hand that shook.", themes: { fungal_caverns: 3 } }
+- { id: book_047, text: "A collector's catalogue of fungi. Every specimen after the fortieth carries the same note: still growing.", themes: { fungal_caverns: 3 } }
+- { id: book_048, text: "A physician's case book. Patients came in coughing. The later notes describe what grew.", style: grim, themes: { fungal_caverns: 3 } }
+- { id: book_049, text: "A brewer's book of cave ales, with a margin note: do not use the grey cap, it answers.", themes: { fungal_caverns: 2 } }
+- { id: book_050, text: "A runecutter's pattern book, each rune drawn three times, the third always flawed on purpose.", themes: { dwarven_hold: 3 } }
+- { id: book_051, text: "A hold-keeper's roll of kin, in columns by clan. The last column holds no names, only hammers.", themes: { dwarven_hold: 3 } }
+- { id: book_052, text: "A smith's order book for the great gate: hinges, bolts, bars, and a lock with no key listed.", themes: { dwarven_hold: 3 } }
+- { id: book_053, text: "A book of oaths sworn in the deep halls. The final oath is to hold the door, and it is unsigned." }
+- { id: book_054, text: "A stonewright's tally of stairs. Each flight is drawn with its count of steps, and the lowest is left to be counted." }
+- { id: book_055, text: "A brewmaster's recipe in the old hold script, with a note that the strongest cask was sealed away and never tapped.", themes: { dwarven_hold: 2 } }
+- { id: book_056, text: "A hold chronicle of the year the deep forges went quiet, and the year they were no longer spoken of.", themes: { dwarven_hold: 2, lava_forges: 2 } }
+- { id: book_057, text: "A guide to the catacombs, printed for visitors. Bring thread, it says, and twice as much as you think.", themes: { catacomb_labyrinth: 3 } }
+- { id: book_058, text: "A bone-counter's census of the niches, row by row. The totals do not match from one page to the next.", themes: { catacomb_labyrinth: 3 } }
+- { id: book_059, text: "A mourner's order of service with the procession route drawn in, ending at a wall.", themes: { catacomb_labyrinth: 3 } }
+- { id: book_060, text: "A lost man's list of turnings, left, left, right, left, repeated down the page until the pencil gave out." }
+- { id: book_061, text: "A tomb-builder's contract, with a clause forbidding any passage to be drawn on a plan.", themes: { catacomb_labyrinth: 3 } }
+- { id: book_062, text: "A spell-less grimoire, ruled for incantations and left empty, with a stain where the last page should be.", themes: { wizards_sanctum: 3 } }
+- { id: book_063, text: "An apprentice's copybook. The hand improves page by page until it matches the master's, then the pages stop.", themes: { wizards_sanctum: 3 } }
+- { id: book_064, text: "A catalogue of a wizard's library, with a note that three shelves were not to be catalogued.", themes: { wizards_sanctum: 3 } }
+- { id: book_065, text: "A bundle of letters between two mages, polite for years, then one line: I have changed my mind about the door." }
+- { id: book_066, text: "A bestiary with wide margins, where the margins hold what the creatures said back.", themes: { wizards_sanctum: 2 } }
+- { id: book_067, text: "A book of experiments with every result recorded as a success, and the experimenter's name missing from the later entries.", themes: { wizards_sanctum: 3 } }
+- { id: book_068, text: "A star chart showing a sky with one constellation too many.", themes: { wizards_sanctum: 2, void_halls: 2 } }
+- { id: book_069, text: "A ferryman's logbook. Fares were paid in lamp oil, then in secrets, then not recorded.", themes: { underdark_lake: 3 } }
+- { id: book_070, text: "A fisher's journal of the black water: what was caught, what was thrown back, and what came up after the net.", themes: { underdark_lake: 3 } }
+- { id: book_071, text: "A chart of the lake's shore, with depth soundings that end in a line of question marks.", themes: { underdark_lake: 3 } }
+- { id: book_072, text: "A boatwright's plan for a vessel with no oars. The note says only: it will be towed." }
+- { id: book_073, text: "A tide table for water that has no tide, kept faithfully by someone for years.", themes: { underdark_lake: 3 } }
+- { id: book_074, text: "A forge-master's heat book. The colours of the iron are recorded by name, down to one that was given none.", themes: { lava_forges: 3 } }
+- { id: book_075, text: "A bellows-boy's tally of hours. The numbers climb until the page itself is scorched through.", themes: { lava_forges: 3 } }
+- { id: book_076, text: "A slagman's note on the rivers of fire and the signs that one is about to move.", themes: { lava_forges: 3 } }
+- { id: book_077, text: "A quenching book. The oil was warm, the water was cold, and the third bath is not named." }
+- { id: book_078, text: "A catalogue of blades from the forges, each entry ending with the name of the hand it was made for.", themes: { lava_forges: 3 } }
+- { id: book_079, text: "A navigator's book kept by someone who never left the halls, listing stars that were not there.", themes: { void_halls: 3 } }
+- { id: book_080, text: "A book of measures in which every length is given from an edge that is not drawn.", themes: { void_halls: 3 } }
+- { id: book_081, text: "A rule for a silent order. Every page forbids sound, and the margins are crowded with answers.", themes: { void_halls: 3 } }
+- { id: book_082, text: "A record of a vigil. The watchers counted nothing, and wrote that nothing counted back.", themes: { void_halls: 2 } }
+- { id: book_083, text: "A journal ending mid-word, the ink dry in a long unbroken line.", themes: { void_halls: 3 } }
+- { id: book_084, text: "A coronation order for a ruler no one remembers crowning, with the seating plan drawn in full.", themes: { abyssal_throne: 3 } }
+- { id: book_085, text: "A book of tributes. Gold, years and names, in the order the throne asked for them.", style: grim, themes: { abyssal_throne: 3 } }
+- { id: book_086, text: "A herald's list of titles, each longer than the last, ending in a title that is only a sound.", themes: { abyssal_throne: 3 } }
+- { id: book_087, text: "A treatise on obedience, bound in something that was not leather.", style: grim }
+- { id: book_088, text: "A petitioner's diary. The audience was granted, and the pages after it were cut out with great care.", themes: { abyssal_throne: 3 } }
+- { id: book_089, text: "A guild handbook for new delvers. The first rule is to carry more rope than seems wise." }
+- { id: book_090, text: "A merchant's order book, every item double-underlined and paid in advance, none marked delivered." }
+- { id: book_091, text: "A bundle of letters home. The early ones are long and cheerful. The later ones are a line each." }
+- { id: book_092, text: "A wedding register with a single entry, and the groom's name written over three times." }
+- { id: book_093, text: "A birth register for a village that no longer stands, the last page blotted with something dark.", style: grim }
+- { id: book_094, text: "An almanac for a year that was never finished. It forecasts the weather for each week, then forecasts nothing." }
+- { id: book_095, text: "A book of riddles. Each answer has been cut from the page with a knife." }
+- { id: book_096, text: "A songbook of marching songs. The verses about coming home are the ones worn thin from use." }
+- { id: book_097, text: "A book of fairy tales with each wolf scraped from the pictures and the shape left behind." }
+- { id: book_098, text: "A sketchbook of landscapes, every one drawn from below." }
+- { id: book_099, text: "A physician's pocket book of remedies. For the cough, wait. For the fever, wait. For the rest, pray.", style: grim }
+- { id: book_100, text: "A soldier's pay book with twelve years of entries and a last line that reads simply: discharged." }
+- { id: book_101, text: "A laundry list: shirts, stockings, one apron with a stain that would not shift." }
+- { id: book_102, text: "A tax roll of a lost town, every household listed as owing and none as paid." }
+- { id: book_103, text: "A shepherd's tally of a flock, every sheep named down to the last, who is only called the quiet one." }
+- { id: book_104, text: "A brief history of the old kingdom, printed with a gilt border. The last chapter breaks off in a siege." }
+- { id: book_105, text: "A book of salt: where it was bought, how it was weighed, and how much was left for the road." }
+- { id: book_106, text: "A sailor's logbook, kept far from any sea, noting winds that never blew.", themes: { underdark_lake: 2 } }
+- { id: book_107, text: "A chandler's receipts for candles, hundreds upon hundreds, all delivered to the same address." }
+- { id: book_108, text: "A hunting journal. The deer were plentiful, then fewer, then the hunter wrote that the hunt had changed sides." }
+- { id: book_109, text: "A shoemaker's measure book. Every foot is entered, and every entry is small." }
+- { id: book_110, text: "A gambler's account. He won on the first day and lost on every day after, and wrote down what he owed in years." }
+- { id: book_111, text: "A scholar's index, thorough, to a book that is not here." }
+- { id: book_112, text: "A schoolmaster's register of pupils, with a column for absences and a column after it for reasons, all the same." }
+- { id: book_113, text: "A bundle of love letters. The replies are missing, and the writer does not seem to have noticed." }
+- { id: book_114, text: "A mapmaker's notes on the first descent, optimistic and neatly numbered, ending in a list of what to forget." }
+- { id: book_115, text: "A stable-master's book. Eight mules went down and none were entered as returned." }
+- { id: book_116, text: "A treatise on locks, with a diagram of one that opens from the inside." }
+- { id: book_117, text: "A widow's household account, kept in a steady hand, begun the day after the funeral and ended the week she followed him.", style: grim }
+- { id: book_118, text: "A thin volume of drinking songs, the last page torn out and used, by the look of it, to light a fire." }
+- { id: book_119, text: "A herbal in which each plant is paired with the sickness it cures and the sickness it causes." }
+- { id: book_120, text: "A priest's sermon notes, crossed out line by line until only the blessing is left." }
+- { id: book_121, text: "A starving man's list of what he had eaten, in order, with his boots among the last.", style: grim }
+- { id: book_122, text: "A baker's order book, bread by the hundred loaves, and no word of who was fed." }
+- { id: book_123, text: "A treaty bound in red wax, signed by two kings and sealed by a third party who is not named." }
+- { id: book_124, text: "A pilgrim's passport stamped at every station, and the last stamp a blank square." }
+- { id: book_125, text: "A book of knots, each one drawn and each labelled by what it was tied around." }
+- { id: book_126, text: "A book of days, one line each. The days were bad, then worse, and then the lines grow short." }
+- { id: book_127, text: "A prisoner's calendar, scratched on a wall and then copied into a book when the wall ran out.", style: grim }
+- { id: book_128, text: "An innkeeper's guest book. Names, dates, rooms, and a column for the one thing guests asked after." }
+- { id: book_129, text: "A lamplighter's route book, every street numbered, and the lamps counted lit, out, lit, out." }
+- { id: book_130, text: "A record of a trial. The accused was heard, the witnesses were heard, and the verdict is given as the judge's silence." }
+- { id: book_131, text: "A bard's notebook of half-finished verses, each stopping one line before the rhyme would land." }
+- { id: book_132, text: "A butcher's tally, in hooks and weights, for an animal no one names.", themes: { goblin_warrens: 2 } }
+- { id: book_133, text: "A rent book from a tenement now beneath the ground, with every tenant paid up to the day they left." }
+- { id: book_134, text: "A tutor's arithmetic lessons, set in problems of ever-larger armies and ever-smaller rations." }
+- { id: book_135, text: "A travelling player's prompt book, the last scene scratched out and rewritten as one direction: all exit." }
+- { id: book_136, text: "A packet of sketches of one doorway, drawn at dawn, noon and dusk, each time a little more open." }
+- { id: book_137, text: "A veteran's memoir. Brave in the first chapter, honest in the second, silent in the third." }
+- { id: book_138, text: "A guard's night log: all quiet, all quiet, all quiet, and then a line in a new hand: all quiet." }
+- { id: book_139, text: "A spice merchant's book of weights, with a recipe in the back for something to mask a smell." }
+- { id: book_140, text: "A glossary of local words. The word for door has three meanings, and the third is a warning." }
+- { id: book_141, text: "A pressed-flower album from the surface. Every flower is dated, and the dates are far apart." }
+- { id: book_142, text: "An embroiderer's pattern book with a border of eyes." }
+- { id: book_143, text: "A rope-maker's contract, for a length never specified, to be paid for by the fathom.", themes: { old_mine: 2 } }
+- { id: book_144, text: "A child's diary about a dog. It was a good dog. Then it was a quiet one.", style: grim }
+- { id: book_145, text: "A gravedigger's wage book. Hired for six graves, he dug on past the pay." }
+- { id: book_146, text: "A fisher-wife's ledger of the days the boats did not come back, written in blue ink." }
+- { id: book_147, text: "A courier's receipt book, each parcel signed for in a hand that grows steadier and fainter." }
+- { id: book_148, text: "A treasurer's audit, which concludes that the vault holds exactly what the books say, and the books say nothing.", themes: { dwarven_hold: 2 } }
+- { id: book_149, text: "A hermit's book of sayings, mostly about doors." }
+- { id: book_150, text: "A bundle of recipes for broth, each calling for more bones than the last." }
+- { id: book_151, text: "A mapmaker's legend with symbols for stairs, doors and water, and one for a place not to go, drawn like a hand." }
+- { id: book_152, text: "A geometrician's proofs, in which a hall of four walls is shown to have five." }
+- { id: book_153, text: "A clerk's copy of a will. The estate was divided with care, and every bequest is a key." }
+- { id: book_154, text: "An alchemist's recipe for turning lead to gold, with a footnote that the gold was lead again by dawn.", themes: { wizards_sanctum: 2 } }
+- { id: book_155, text: "A tract on the proper care of the dead, with a last page on what to do when the dead object." }
+- { id: book_156, text: "A teamster's journal: forty days of road to reach a gate, and one line for the days beneath it." }
+- { id: book_157, text: "A naturalist's notebook of calls heard underground, with a margin note on one: not a bird." }
+- { id: book_158, text: "A tinker's inventory of pots and keys, with one page given over to doors he was paid not to open." }
+- { id: book_159, text: "A midwife's book, with births in one column and names in another, and the second shorter than the first.", style: grim }
+- { id: book_160, text: "A coffin-maker's order book, with measurements, and in the last pages the measurements are all the same.", style: grim, themes: { cellars_and_crypts: 2 } }
+- { id: book_161, text: "A priest's letter to his bishop, asking for more candles, and then for no more questions." }
+- { id: book_162, text: "A magistrate's docket of petty crimes, each ending with the same sentence: taken below." }
+- { id: book_163, text: "Hearken, ye that come after: the stair is long, the lamp is short, and the door is not as ye left it.", style: archaic }
+- { id: book_164, text: "Herein is writ the reckoning of the tithes, which the lord did take and the people did pay.", style: archaic }
+- { id: book_165, text: "Here lieth the rule of the house, that none shall sup ere the bell hath tolled.", style: archaic }
+- { id: book_166, text: "A true account of a voyage beneath the earth, set down by one who hath not yet seen the sun again.", style: archaic }
+- { id: book_167, text: "Of the virtues of herbs, and how each may heal or harm, as taught by the old physicians.", style: archaic }
+- { id: book_168, text: "Thus did the brethren pray: Lord, keep the dark from us, or keep us from the dark.", style: archaic }
+- { id: book_169, text: "These be the laws of the hold, graven in stone that none might plead ignorance.", style: archaic, themes: { dwarven_hold: 3 } }
+- { id: book_170, text: "Here be the names of the dead of this house, that they be not wholly forgot.", style: archaic, themes: { cellars_and_crypts: 3 } }
+- { id: book_171, text: "Here began the reign of the last king beneath, and here the chronicler ceased to write of him.", style: archaic, themes: { abyssal_throne: 2 } }
+- { id: book_172, text: "Whoso readeth this: I was a fool, and I went down. Be wiser, or at the least be quicker.", style: archaic }
+- { id: book_173, text: "Item: one lamp, one rope, one blade, one prayer. All spent ere the third night.", style: archaic }
+- { id: book_174, text: "Wherefore the ferryman asked no coin, for he had it already, being the sum of all who crossed.", style: archaic, themes: { underdark_lake: 3 } }
+- { id: book_175, text: "A book of condolences, every line the same lie in a different hand.", style: grim }
+- { id: book_176, text: "A survivor's diary. On day one he counted heads. On day nine he counted rations. On day twelve he counted fewer of both.", style: grim }
+- { id: book_177, text: "A killer's confession in neat copperplate, with a list of the dead added after, for the sake of tidiness.", style: grim }
+- { id: book_178, text: "A record of executions, one to a page, each with the hour and the weather and nothing of the guilt.", style: grim }
+- { id: book_179, text: "A surveyor's note on a spring that ran uphill, and the instrument he blamed." }
+- { id: book_180, text: "A pocket scripture, each page folded at the corner, as if someone meant to return to all of them." }
+- { id: book_181, text: "A glassblower's receipts for a hundred small mirrors, delivered to a house with no windows." }
+- { id: book_182, text: "A list headed Things to Remember. The first item is the way back, and the rest are blank." }
+- { id: book_183, text: "A mendicant's begging book, listing the houses that gave and the houses that did not open." }
+- { id: book_184, text: "A book of curses, copied for study, each crossed through by a careful, tired hand." }
+- { id: book_185, text: "A drover's price book for oxen, mules and carts, none of which would fit down the stairs." }
+- { id: book_186, text: "A collection of weather omens from the surface: red sky, ring round the moon, birds flying low." }
+- { id: book_187, text: "A trader's manifest of goods bound for the village, signed and sealed and never opened." }
+- { id: book_188, text: "A butler's household book, with the house's rules on silver, doors and the hour to stop answering the bell." }
+- { id: book_189, text: "A thieves' primer on the picking of locks, with a warning that some locks pick back." }
+- { id: book_190, text: "A cartulary of land grants, deeding the hills and the earth beneath them to the same family." }
+- { id: book_191, text: "A choirmaster's notes for a hymn in too many parts, with a margin remark: someone is singing the extra one." }
+- { id: book_192, text: "A chart of the stars as they stood on the night the first stair was begun." }
+- { id: book_193, text: "A cheap romance, much thumbed, in which the hero descends a stair and the page is torn." }
+- { id: book_194, text: "A lighthouse keeper's book, carried underground by an owner who could not bear to leave it behind." }
+- { id: book_195, text: "A ledger of favours owed, in one hand, to every name but one." }
+- { id: book_196, text: "A guide to polite speech for addressing nobles, with a note on how to address something that is not noble." }
+- { id: book_197, text: "A drill manual for pikemen, each formation ending in the same position: at the door.", themes: { goblin_warrens: 2 } }
+- { id: book_198, text: "A map of the village in its early days, with the first stair drawn small and shaded in, like a smudge." }
+- { id: book_199, text: "A bell-ringer's peal book, with each change rung and checked, and a last peal entered that no one could have heard." }
+- { id: book_200, text: "A cooper's apprentice's copybook of letters, A to Z, with the last letter left for another day." }
