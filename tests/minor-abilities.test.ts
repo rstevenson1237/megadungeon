@@ -51,7 +51,7 @@ describe('Spec 08, Addendum A: one effect vocabulary in code', () => {
       ...(tables.artifacts as { effect: string }[]),
       ...(tables.altar_gods as { buff: { effect: string } }[]).map((g) => g.buff),
     ];
-    expect(named.length).toBe(43 + 20 + 3);
+    expect(named.length).toBe(43 + 40 + 3);
     for (const row of named) expect(ABILITY_EFFECT_IDS).toContain(row.effect);
     // Every effect on the list says what it does and of what kind it is.
     for (const id of ABILITY_EFFECT_IDS) expect(ABILITY_EFFECTS[id].text.length).toBeGreaterThan(0);
@@ -90,7 +90,7 @@ describe('Spec 08, Addendum A: one effect vocabulary in code', () => {
   });
 
   it('an artifact carries its effect from its row, and wearing it gives that effect', () => {
-    const row = ITEMS.artifacts.get('stub_artifact_02')!;
+    const row = ITEMS.artifacts.get('art_tallow_ring')!;
     expect(row).toMatchObject({ effect: 'melee', amount: 1 });
     const game = gameOn(room(5, 5, 2, 2), bare);
     const before = derivedOf(game.state.player).melee;

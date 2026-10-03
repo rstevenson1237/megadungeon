@@ -1,7 +1,6 @@
-# Stub entries (Spec 08, "Stub content in Phases 1 and 2"): a few magic items of each kind of Spec 05, enough that
-# every system can be built and tested, with the effect fields the code reads. Values are in gp and placeholders,
-# except the three potion prices the spec sets (Healing 50, Clarity 60, Cure 40). The launch table of 130 is
-# written in Phase 3 (task 4.5).
+# Magic items (Spec 05, "Magic items"): the launch table of 130 written in task 4.5, with the effect fields the code reads
+# (Spec 08, Addendum A). Values are in gp. A row with no depth range turns up at every depth; the deeper tiers of each
+# family carry a range and a lower weight, so the stronger potions, wands and weapons come later and more rarely.
 - id: potion_healing
   name: Potion of Healing
   kind: potion
@@ -9,7 +8,7 @@
   effect: restore_dice
   pool: combat
   dice: 1
-  tags: [stub]
+  weight: 14
 - id: potion_vigour
   name: Potion of Vigour
   kind: potion
@@ -18,7 +17,24 @@
   pool: combat
   dice: 2
   depth: [5, 100]
-  tags: [stub]
+- id: potion_greater_vigour
+  name: Potion of Greater Vigour
+  kind: potion
+  value: 300
+  effect: restore_dice
+  pool: combat
+  dice: 3
+  weight: 6
+  depth: [25, 100]
+- id: potion_renewal
+  name: Potion of Renewal
+  kind: potion
+  value: 450
+  effect: restore_dice
+  pool: combat
+  dice: 4
+  weight: 4
+  depth: [50, 100]
 - id: potion_focus
   name: Potion of Focus
   kind: potion
@@ -26,7 +42,23 @@
   effect: restore_dice
   pool: skill
   dice: 1
-  tags: [stub]
+- id: potion_deep_focus
+  name: Potion of Deep Focus
+  kind: potion
+  value: 140
+  effect: restore_dice
+  pool: skill
+  dice: 2
+  depth: [10, 100]
+- id: potion_mastery
+  name: Potion of Mastery
+  kind: potion
+  value: 350
+  effect: restore_dice
+  pool: skill
+  dice: 3
+  weight: 5
+  depth: [35, 100]
 - id: potion_clarity
   name: Potion of Clarity
   kind: potion
@@ -34,7 +66,32 @@
   effect: restore_dice
   pool: magic
   dice: 1
-  tags: [stub]
+- id: potion_lucidity
+  name: Potion of Lucidity
+  kind: potion
+  value: 140
+  effect: restore_dice
+  pool: magic
+  dice: 2
+  depth: [10, 100]
+- id: potion_brilliance
+  name: Potion of Brilliance
+  kind: potion
+  value: 320
+  effect: restore_dice
+  pool: magic
+  dice: 3
+  weight: 6
+  depth: [30, 100]
+- id: potion_insight
+  name: Potion of Insight
+  kind: potion
+  value: 650
+  effect: restore_dice
+  pool: magic
+  dice: 4
+  weight: 4
+  depth: [60, 100]
 - id: potion_haste
   name: Potion of Haste
   kind: potion
@@ -43,13 +100,21 @@
   status: hasted
   rounds: 5
   depth: [3, 100]
-  tags: [stub]
+- id: potion_swiftness
+  name: Potion of Swiftness
+  kind: potion
+  value: 160
+  effect: grant_status
+  status: hasted
+  rounds: 8
+  weight: 6
+  depth: [20, 100]
 - id: potion_cure
   name: Potion of Cure
   kind: potion
   value: 40
   effect: cure_poison
-  tags: [stub]
+  weight: 14
 - id: potion_invisibility
   name: Potion of Invisibility
   kind: potion
@@ -57,53 +122,147 @@
   effect: invisibility
   rounds: 10
   depth: [5, 100]
-  tags: [stub]
+- id: potion_vanishing
+  name: Potion of Vanishing
+  kind: potion
+  value: 220
+  effect: invisibility
+  rounds: 20
+  weight: 5
+  depth: [30, 100]
 - id: potion_remove_curse
   name: Potion of Remove Curse
   kind: potion
   value: 150
   effect: remove_curse
-  tags: [stub]
+  weight: 8
+- id: potion_blessing
+  name: Potion of Blessing
+  kind: potion
+  value: 90
+  effect: grant_status
+  status: blessed
+  rounds: 10
+  depth: [3, 100]
+- id: potion_sanctity
+  name: Potion of Sanctity
+  kind: potion
+  value: 200
+  effect: grant_status
+  status: blessed
+  rounds: 25
+  weight: 6
+  depth: [25, 100]
+- id: potion_valour
+  name: Potion of Valour
+  kind: potion
+  value: 400
+  effect: grant_status
+  status: blessed
+  rounds: 60
+  weight: 4
+  depth: [50, 100]
 - id: ring_searching
   name: Ring of Searching
   kind: ring
   value: 200
   passive: search
-  tags: [stub]
 - id: ring_stealth
   name: Ring of Stealth
   kind: ring
   value: 250
   passive: stealth
-  tags: [stub]
+- id: ring_lockpicking
+  name: Ring of Lockpicking
+  kind: ring
+  value: 220
+  passive: lockpick
+  depth: [3, 100]
 - id: ring_might
   name: Ring of Might
   kind: ring
   value: 300
   passive: melee
   amount: 1
-  tags: [stub]
+- id: ring_great_might
+  name: Ring of Great Might
+  kind: ring
+  value: 700
+  passive: melee
+  amount: 2
+  weight: 6
+  depth: [30, 100]
+- id: ring_titan_might
+  name: Ring of Titan Might
+  kind: ring
+  value: 1200
+  passive: melee
+  amount: 3
+  weight: 4
+  depth: [60, 100]
 - id: ring_rest
   name: Ring of Rest
   kind: ring
   value: 200
   passive: wait
   amount: 7
-  tags: [stub]
+- id: ring_swift_recovery
+  name: Ring of Swift Recovery
+  kind: ring
+  value: 500
+  passive: wait
+  amount: 5
+  weight: 6
+  depth: [30, 100]
+- id: ring_endless_vigour
+  name: Ring of Endless Vigour
+  kind: ring
+  value: 1000
+  passive: wait
+  amount: 3
+  weight: 4
+  depth: [60, 100]
 - id: wand_arcane_bolt
   name: Wand of Arcane Bolt
   kind: wand
   value: 250
   spell: arcane_bolt
   charges: [3, 8]
-  tags: [stub]
 - id: wand_sleep
   name: Wand of Sleep
   kind: wand
   value: 250
   spell: sleep
   charges: [3, 8]
-  tags: [stub]
+- id: wand_fear
+  name: Wand of Fear
+  kind: wand
+  value: 300
+  spell: fear
+  charges: [3, 8]
+  depth: [5, 100]
+- id: wand_hold
+  name: Wand of Holding
+  kind: wand
+  value: 300
+  spell: hold
+  charges: [3, 8]
+  depth: [8, 100]
+- id: wand_drain
+  name: Wand of Draining
+  kind: wand
+  value: 400
+  spell: drain
+  charges: [3, 8]
+  weight: 7
+  depth: [15, 100]
+- id: rod_turn_undead
+  name: Rod of Turning
+  kind: rod
+  value: 300
+  spell: turn_undead
+  charges: [2, 5]
+  depth: [5, 100]
 - id: rod_fireball
   name: Rod of Fireball
   kind: rod
@@ -111,7 +270,6 @@
   spell: fireball
   charges: [2, 5]
   depth: [10, 100]
-  tags: [stub]
 - id: rod_thunderclap
   name: Rod of Thunderclap
   kind: rod
@@ -119,7 +277,14 @@
   spell: thunderclap
   charges: [2, 5]
   depth: [10, 100]
-  tags: [stub]
+- id: rod_blizzard
+  name: Rod of Blizzard
+  kind: rod
+  value: 500
+  spell: blizzard
+  charges: [2, 5]
+  weight: 8
+  depth: [20, 100]
 - id: staff_magus
   name: Staff of the Magus
   kind: staff
@@ -128,7 +293,90 @@
   charges: [3, 6]
   shape: target
   depth: [20, 100]
-  tags: [stub]
+- id: staff_slumber
+  name: Staff of Slumber
+  kind: staff
+  value: 600
+  spell: sleep
+  charges: [3, 6]
+  shape: target
+  depth: [20, 100]
+- id: staff_binding
+  name: Staff of Binding
+  kind: staff
+  value: 700
+  spell: hold
+  charges: [3, 6]
+  shape: target
+  depth: [25, 100]
+- id: staff_withering
+  name: Staff of Withering
+  kind: staff
+  value: 800
+  spell: drain
+  charges: [3, 6]
+  shape: target
+  weight: 7
+  depth: [30, 100]
+- id: staff_dread
+  name: Staff of Dread
+  kind: staff
+  value: 650
+  spell: fear
+  charges: [3, 6]
+  shape: target
+  depth: [25, 100]
+- id: staff_archmage
+  name: Staff of the Archmage
+  kind: staff
+  value: 1400
+  spell: arcane_bolt
+  charges: [3, 6]
+  shape: target
+  weight: 4
+  depth: [55, 100]
+- id: staff_flames
+  name: Staff of Flames
+  kind: staff
+  value: 800
+  spell: fireball
+  charges: [3, 6]
+  shape: area
+  weight: 7
+  depth: [30, 100]
+- id: staff_winter
+  name: Staff of Winter
+  kind: staff
+  value: 900
+  spell: blizzard
+  charges: [3, 6]
+  shape: area
+  weight: 7
+  depth: [35, 100]
+- id: staff_thunder
+  name: Staff of Thunder
+  kind: staff
+  value: 750
+  spell: thunderclap
+  charges: [3, 6]
+  shape: area
+  depth: [30, 100]
+- id: staff_sanctity
+  name: Staff of Sanctity
+  kind: staff
+  value: 700
+  spell: turn_undead
+  charges: [3, 6]
+  shape: area
+  depth: [25, 100]
+- id: staff_mending
+  name: Staff of Mending
+  kind: staff
+  value: 600
+  spell: heal
+  charges: [3, 6]
+  shape: self
+  depth: [20, 100]
 - id: staff_warding
   name: Staff of Warding
   kind: staff
@@ -137,31 +385,251 @@
   charges: [3, 6]
   shape: self
   depth: [20, 100]
-  tags: [stub]
+- id: staff_swiftness
+  name: Staff of Swiftness
+  kind: staff
+  value: 700
+  spell: haste
+  charges: [3, 6]
+  shape: self
+  depth: [25, 100]
+- id: staff_dawn
+  name: Staff of Dawn
+  kind: staff
+  value: 500
+  spell: light
+  charges: [3, 6]
+  shape: self
+  depth: [15, 100]
+- id: staff_seeking
+  name: Staff of Seeking
+  kind: staff
+  value: 550
+  spell: detect
+  charges: [3, 6]
+  shape: self
+  depth: [15, 100]
+- id: staff_passage
+  name: Staff of Passage
+  kind: staff
+  value: 700
+  spell: blink
+  charges: [3, 6]
+  shape: self
+  weight: 7
+  depth: [25, 100]
 - id: cloak_shadows
   name: Cloak of Shadows
   kind: clothing
   value: 300
-  slot: cloak
   passive: stealth
-  tags: [stub]
+  slot: cloak
+- id: cloak_night
+  name: Cloak of Night
+  kind: clothing
+  value: 350
+  passive: stealth
+  slot: cloak
+  depth: [25, 100]
+- id: cloak_vigil
+  name: Cloak of Vigil
+  kind: clothing
+  value: 280
+  passive: search
+  slot: cloak
+  depth: [5, 100]
+- id: cloak_hermit
+  name: Hermit's Cloak
+  kind: clothing
+  value: 250
+  passive: wait
+  amount: 8
+  slot: cloak
+- id: cloak_stalker
+  name: Stalker's Cloak
+  kind: clothing
+  value: 350
+  passive: melee
+  amount: 1
+  slot: cloak
+  depth: [10, 100]
+- id: cloak_grace
+  name: Cloak of Grace
+  kind: clothing
+  value: 500
+  effect: grant_status
+  status: blessed
+  rounds: 10
+  slot: cloak
+  oncePerLevel: true
+  weight: 6
+  depth: [20, 100]
+- id: cloak_vanishing
+  name: Cloak of Vanishing
+  kind: clothing
+  value: 600
+  effect: invisibility
+  rounds: 8
+  slot: cloak
+  oncePerLevel: true
+  weight: 5
+  depth: [30, 100]
 - id: boots_speed
   name: Boots of Speed
   kind: clothing
   value: 400
-  slot: boots
   effect: grant_status
   status: hasted
   rounds: 3
+  slot: boots
   oncePerLevel: true
-  tags: [stub]
+- id: boots_silence
+  name: Boots of Silence
+  kind: clothing
+  value: 300
+  passive: stealth
+  slot: boots
+- id: boots_seeker
+  name: Boots of the Seeker
+  kind: clothing
+  value: 280
+  passive: search
+  slot: boots
+  depth: [10, 100]
+- id: boots_rest
+  name: Boots of Rest
+  kind: clothing
+  value: 250
+  passive: wait
+  amount: 8
+  slot: boots
+- id: boots_marching
+  name: Boots of Long Marching
+  kind: clothing
+  value: 500
+  passive: wait
+  amount: 6
+  slot: boots
+  weight: 6
+  depth: [30, 100]
+- id: boots_gale
+  name: Boots of the Gale
+  kind: clothing
+  value: 650
+  effect: grant_status
+  status: hasted
+  rounds: 5
+  slot: boots
+  oncePerLevel: true
+  weight: 5
+  depth: [40, 100]
+- id: boots_charge
+  name: Boots of the Charge
+  kind: clothing
+  value: 300
+  passive: melee
+  amount: 1
+  slot: boots
+  depth: [10, 100]
 - id: gloves_finesse
   name: Gloves of Finesse
   kind: clothing
   value: 250
-  slot: gloves
   passive: lockpick
-  tags: [stub]
+  slot: gloves
+- id: gloves_locksmith
+  name: Locksmith's Gloves
+  kind: clothing
+  value: 350
+  passive: lockpick
+  slot: gloves
+  depth: [20, 100]
+- id: gloves_seeking
+  name: Gloves of Seeking
+  kind: clothing
+  value: 260
+  passive: search
+  slot: gloves
+  depth: [5, 100]
+- id: gloves_might
+  name: Gloves of Might
+  kind: clothing
+  value: 300
+  passive: melee
+  amount: 1
+  slot: gloves
+  depth: [10, 100]
+- id: gloves_great_might
+  name: Gloves of Great Might
+  kind: clothing
+  value: 800
+  passive: melee
+  amount: 2
+  slot: gloves
+  weight: 5
+  depth: [40, 100]
+- id: gloves_blessing
+  name: Gloves of Blessing
+  kind: clothing
+  value: 450
+  effect: grant_status
+  status: blessed
+  rounds: 10
+  slot: gloves
+  oncePerLevel: true
+  weight: 6
+  depth: [25, 100]
+- id: hat_clarity
+  name: Hat of Clarity
+  kind: clothing
+  value: 300
+  passive: search
+  slot: hat
+  depth: [5, 100]
+- id: hat_shadows
+  name: Hood of Shadows
+  kind: clothing
+  value: 320
+  passive: stealth
+  slot: hat
+  depth: [10, 100]
+- id: hat_calm
+  name: Cap of Calm
+  kind: clothing
+  value: 240
+  passive: wait
+  amount: 8
+  slot: hat
+- id: hat_valour
+  name: Helm of Valour
+  kind: clothing
+  value: 350
+  passive: melee
+  amount: 1
+  slot: hat
+  depth: [10, 100]
+- id: hat_haste
+  name: Cap of Haste
+  kind: clothing
+  value: 500
+  effect: grant_status
+  status: hasted
+  rounds: 3
+  slot: hat
+  oncePerLevel: true
+  weight: 6
+  depth: [20, 100]
+- id: hat_grace
+  name: Circlet of Grace
+  kind: clothing
+  value: 450
+  effect: grant_status
+  status: blessed
+  rounds: 10
+  slot: hat
+  oncePerLevel: true
+  weight: 6
+  depth: [15, 100]
 - id: sword_keen
   name: Keen Sword
   kind: weapon
@@ -169,7 +637,148 @@
   base: short_sword
   bonus: 1
   depth: [5, 100]
-  tags: [stub]
+- id: dagger_needle
+  name: Needle Dagger
+  kind: weapon
+  value: 300
+  base: dagger
+  bonus: 1
+  depth: [5, 100]
+- id: mace_striking
+  name: Mace of Striking
+  kind: weapon
+  value: 350
+  base: mace
+  bonus: 1
+  depth: [5, 100]
+- id: sword_edges
+  name: Sword of Edges
+  kind: weapon
+  value: 400
+  base: long_sword
+  bonus: 1
+  depth: [5, 100]
+- id: staff_road
+  name: Wayfarer's Quarterstaff
+  kind: weapon
+  value: 300
+  base: quarterstaff
+  bonus: 1
+  depth: [5, 100]
+- id: spear_hunter
+  name: Hunter's Spear
+  kind: weapon
+  value: 330
+  base: spear
+  bonus: 1
+  depth: [5, 100]
+- id: axe_cleaver
+  name: Cleaver
+  kind: weapon
+  value: 450
+  base: great_axe
+  bonus: 1
+  depth: [8, 100]
+- id: dagger_sting
+  name: Sting
+  kind: weapon
+  value: 320
+  base: dagger
+  bonus: 1
+  depth: [10, 100]
+- id: sword_warden
+  name: Warden's Blade
+  kind: weapon
+  value: 380
+  base: short_sword
+  bonus: 1
+  depth: [10, 100]
+- id: mace_pilgrim
+  name: Pilgrim's Mace
+  kind: weapon
+  value: 360
+  base: mace
+  bonus: 1
+  depth: [10, 100]
+- id: sword_oathkeeper
+  name: Oathkeeper
+  kind: weapon
+  value: 420
+  base: long_sword
+  bonus: 1
+  depth: [10, 100]
+- id: dagger_fang
+  name: Fang
+  kind: weapon
+  value: 900
+  base: dagger
+  bonus: 2
+  weight: 6
+  depth: [30, 100]
+- id: sword_swiftblade
+  name: Swiftblade
+  kind: weapon
+  value: 950
+  base: short_sword
+  bonus: 2
+  weight: 6
+  depth: [30, 100]
+- id: mace_judgement
+  name: Hammer of Judgement
+  kind: weapon
+  value: 1000
+  base: mace
+  bonus: 2
+  weight: 6
+  depth: [30, 100]
+- id: sword_valour
+  name: Sword of Valour
+  kind: weapon
+  value: 1200
+  base: long_sword
+  bonus: 2
+  weight: 6
+  depth: [30, 100]
+- id: staff_oak
+  name: Staff of the Old Oak
+  kind: weapon
+  value: 900
+  base: quarterstaff
+  bonus: 2
+  weight: 6
+  depth: [30, 100]
+- id: spear_wyrmbane
+  name: Wyrmbane
+  kind: weapon
+  value: 1000
+  base: spear
+  bonus: 2
+  weight: 6
+  depth: [35, 100]
+- id: axe_headsman
+  name: Headsman's Axe
+  kind: weapon
+  value: 1400
+  base: great_axe
+  bonus: 2
+  weight: 6
+  depth: [35, 100]
+- id: sword_dawn
+  name: Dawnbringer
+  kind: weapon
+  value: 1600
+  base: long_sword
+  bonus: 2
+  weight: 4
+  depth: [55, 100]
+- id: dagger_silent_end
+  name: Silent End
+  kind: weapon
+  value: 1300
+  base: dagger
+  bonus: 2
+  weight: 4
+  depth: [50, 100]
 - id: blade_flame
   name: Flame Blade
   kind: weapon
@@ -177,7 +786,113 @@
   base: long_sword
   trait: flame
   depth: [15, 100]
-  tags: [stub]
+- id: dagger_flame
+  name: Flame Dagger
+  kind: weapon
+  value: 450
+  base: dagger
+  trait: flame
+  depth: [15, 100]
+- id: sword_cinder
+  name: Cinder Sword
+  kind: weapon
+  value: 480
+  base: short_sword
+  trait: flame
+  depth: [15, 100]
+- id: mace_ember
+  name: Ember Mace
+  kind: weapon
+  value: 480
+  base: mace
+  trait: flame
+  depth: [15, 100]
+- id: spear_pyre
+  name: Pyre Spear
+  kind: weapon
+  value: 500
+  base: spear
+  trait: flame
+  depth: [15, 100]
+- id: axe_forge
+  name: Forge Axe
+  kind: weapon
+  value: 600
+  base: great_axe
+  trait: flame
+  depth: [20, 100]
+- id: blade_inferno
+  name: Inferno Blade
+  kind: weapon
+  value: 1500
+  base: long_sword
+  bonus: 1
+  trait: flame
+  weight: 4
+  depth: [50, 100]
+- id: axe_hellfire
+  name: Hellfire Axe
+  kind: weapon
+  value: 1700
+  base: great_axe
+  bonus: 1
+  trait: flame
+  weight: 4
+  depth: [55, 100]
+- id: mace_pyre_lord
+  name: Pyre Lord's Mace
+  kind: weapon
+  value: 1500
+  base: mace
+  bonus: 1
+  trait: flame
+  weight: 4
+  depth: [50, 100]
+- id: spear_sunspear
+  name: Sunspear
+  kind: weapon
+  value: 1500
+  base: spear
+  bonus: 1
+  trait: flame
+  weight: 4
+  depth: [50, 100]
+- id: leather_supple
+  name: Supple Leather
+  kind: armour
+  value: 350
+  base: leather
+  bonus: 1
+  depth: [5, 100]
+- id: leather_ranger
+  name: Ranger's Leather
+  kind: armour
+  value: 400
+  base: leather
+  bonus: 1
+  depth: [10, 100]
+- id: leather_drake
+  name: Drakehide Leather
+  kind: armour
+  value: 1000
+  base: leather
+  bonus: 2
+  weight: 6
+  depth: [30, 100]
+- id: chain_fine
+  name: Fine Mail
+  kind: armour
+  value: 600
+  base: chain
+  bonus: 1
+  depth: [10, 100]
+- id: chain_warden
+  name: Warden's Mail
+  kind: armour
+  value: 650
+  base: chain
+  bonus: 1
+  depth: [15, 100]
 - id: chain_elven
   name: Elven Chain
   kind: armour
@@ -185,8 +900,55 @@
   base: chain
   bonus: 1
   unburdened: true
+  weight: 6
   depth: [25, 100]
-  tags: [stub]
+- id: chain_dwarven
+  name: Dwarven Hauberk
+  kind: armour
+  value: 1400
+  base: chain
+  bonus: 2
+  weight: 6
+  depth: [35, 100]
+- id: chain_mithral
+  name: Mithral Chain
+  kind: armour
+  value: 1800
+  base: chain
+  bonus: 2
+  unburdened: true
+  weight: 4
+  depth: [50, 100]
+- id: plate_fine
+  name: Fine Plate
+  kind: armour
+  value: 800
+  base: plate
+  bonus: 1
+  depth: [15, 100]
+- id: plate_knight
+  name: Knight's Plate
+  kind: armour
+  value: 900
+  base: plate
+  bonus: 1
+  depth: [20, 100]
+- id: plate_giantbane
+  name: Giantbane Plate
+  kind: armour
+  value: 1800
+  base: plate
+  bonus: 2
+  weight: 5
+  depth: [40, 100]
+- id: plate_dragon
+  name: Dragonscale Plate
+  kind: armour
+  value: 2200
+  base: plate
+  bonus: 2
+  weight: 4
+  depth: [60, 100]
 - id: shield_guardian
   name: Guardian Shield
   kind: armour
@@ -195,4 +957,63 @@
   bonus: 1
   off: true
   depth: [10, 100]
-  tags: [stub]
+- id: shield_buckler_true
+  name: Shield of the True
+  kind: armour
+  value: 450
+  base: round_shield
+  bonus: 1
+  off: true
+  depth: [10, 100]
+- id: shield_aegis
+  name: Aegis
+  kind: armour
+  value: 1200
+  base: round_shield
+  bonus: 2
+  off: true
+  weight: 6
+  depth: [35, 100]
+- id: shield_bulwark
+  name: Bulwark
+  kind: armour
+  value: 1300
+  base: round_shield
+  bonus: 2
+  off: true
+  weight: 6
+  depth: [40, 100]
+- id: tower_rampart
+  name: Rampart
+  kind: armour
+  value: 500
+  base: tower_shield
+  bonus: 1
+  off: true
+  depth: [10, 100]
+- id: tower_citadel
+  name: Citadel Shield
+  kind: armour
+  value: 550
+  base: tower_shield
+  bonus: 1
+  off: true
+  depth: [15, 100]
+- id: tower_fortress
+  name: Fortress
+  kind: armour
+  value: 1500
+  base: tower_shield
+  bonus: 2
+  off: true
+  weight: 5
+  depth: [40, 100]
+- id: tower_last_wall
+  name: The Last Wall
+  kind: armour
+  value: 1700
+  base: tower_shield
+  bonus: 2
+  off: true
+  weight: 4
+  depth: [50, 100]

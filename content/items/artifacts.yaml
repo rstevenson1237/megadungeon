@@ -1,99 +1,235 @@
-# Stub entries for task 2.2 (Spec 08, "Stub content in Phases 1 and 2"): enough that a run never
-# runs out of artifacts. The launch table of 40 is written in task 4.5. From task 3.5 every artifact names an effect
-# from the vocabulary (Spec 08, Addendum A); a stub names one already on the list.
-- id: stub_artifact_01
-  name: Stub Relic 01
-  tags: [stub]
+# Artifacts (Spec 05, "Magic items"; Spec 08, Addendum A): the launch table of 40 written in task 4.5. Each names an effect
+# from the vocabulary in code and the slot it is worn in; the strongest sit in the deepest depth ranges.
+- id: art_pale_lantern
+  name: The Pale Lantern
   effect: advantage
-  rolls: search
-- id: stub_artifact_02
-  name: Stub Relic 02
-  tags: [stub]
+  slot: ring
+  rolls: [search, notice]
+  depth: [1, 45]
+- id: art_tallow_ring
+  name: Ring of the Tallow King
   effect: melee
   amount: 1
-- id: stub_artifact_03
-  name: Stub Relic 03
-  tags: [stub]
+  slot: ring
+  depth: [1, 45]
+- id: art_mawkins_hide
+  name: Mawkin's Hide
   effect: defence
   amount: 1
-- id: stub_artifact_04
-  name: Stub Relic 04
-  tags: [stub]
-  effect: stealth
-- id: stub_artifact_05
-  name: Stub Relic 05
-  tags: [stub]
-  effect: wait_rounds
-  amount: 8
-- id: stub_artifact_06
-  name: Stub Relic 06
-  tags: [stub]
+  slot: cloak
+  depth: [1, 45]
+- id: art_ironmouth_helm
+  name: Ironmouth's Helm
+  effect: defence
+  amount: 1
+  slot: hat
+  depth: [1, 45]
+- id: art_gloves_of_cinder
+  name: Gloves of Cinder
   effect: advantage
-  rolls: search
-- id: stub_artifact_07
-  name: Stub Relic 07
-  tags: [stub]
-  effect: melee
-  amount: 1
-- id: stub_artifact_08
-  name: Stub Relic 08
-  tags: [stub]
-  effect: defence
-  amount: 1
-- id: stub_artifact_09
-  name: Stub Relic 09
-  tags: [stub]
-  effect: stealth
-- id: stub_artifact_10
-  name: Stub Relic 10
-  tags: [stub]
+  slot: gloves
+  rolls: lockpick
+  depth: [1, 45]
+- id: art_wanderers_boots
+  name: Wanderer's Boots
   effect: wait_rounds
-  amount: 8
-- id: stub_artifact_11
-  name: Stub Relic 11
-  tags: [stub]
+  amount: 7
+  slot: boots
+  depth: [1, 45]
+- id: art_goblin_purse
+  name: Goblin King's Purse
+  effect: sell_bonus
+  amount: 25
+  slot: ring
+  depth: [1, 45]
+- id: art_miners_pack
+  name: Miner's Pack Straps
+  effect: pack_slots
+  amount: 3
+  slot: cloak
+  depth: [1, 45]
+- id: art_hollow_abbot_ring
+  name: The Abbot's Seal
+  effect: against_tag
+  slot: ring
+  tag: undead
+  depth: [1, 50]
+- id: art_quiet_cloak
+  name: The Quiet Cloak
+  effect: stealth
+  slot: cloak
+  depth: [1, 50]
+- id: art_crystal_eye
+  name: The Crystal Eye
   effect: advantage
-  rolls: search
-- id: stub_artifact_12
-  name: Stub Relic 12
-  tags: [stub]
-  effect: melee
-  amount: 1
-- id: stub_artifact_13
-  name: Stub Relic 13
-  tags: [stub]
+  slot: hat
+  rolls: [search, disarm]
+  depth: [20, 75]
+- id: art_stone_mothers_band
+  name: Stone Mother's Band
   effect: defence
-  amount: 1
-- id: stub_artifact_14
-  name: Stub Relic 14
-  tags: [stub]
-  effect: stealth
-- id: stub_artifact_15
-  name: Stub Relic 15
-  tags: [stub]
+  amount: 2
+  slot: ring
+  depth: [20, 75]
+- id: art_hammerlords_grip
+  name: Hammerlord's Grip
+  effect: melee
+  amount: 2
+  slot: gloves
+  depth: [20, 75]
+- id: art_gilded_scale
+  name: The Gilded Scale
+  effect: sell_bonus
+  amount: 50
+  slot: ring
+  depth: [20, 75]
+- id: art_deepwardens_pack
+  name: Deepwarden's Satchel
+  effect: pack_slots
+  amount: 5
+  slot: cloak
+  depth: [20, 75]
+- id: art_lake_pearl
+  name: The Lake Pearl
+  effect: potion_magic
+  amount: 2
+  slot: ring
+  depth: [25, 80]
+- id: art_spore_crown
+  name: Crown of Spores
   effect: wait_rounds
-  amount: 8
-- id: stub_artifact_16
-  name: Stub Relic 16
-  tags: [stub]
+  amount: 5
+  slot: hat
+  depth: [25, 80]
+- id: art_weeping_visor
+  name: Weeping Knight's Visor
+  effect: against_tag
+  slot: hat
+  tag: undead
+  depth: [25, 80]
+- id: art_ninefold_lens
+  name: The Ninefold Lens
   effect: advantage
-  rolls: search
-- id: stub_artifact_17
-  name: Stub Relic 17
-  tags: [stub]
-  effect: melee
+  slot: ring
+  rolls: spell
+  depth: [30, 85]
+- id: art_magisters_signet
+  name: Magister Voss's Signet
+  effect: spell_widen
   amount: 1
-- id: stub_artifact_18
-  name: Stub Relic 18
-  tags: [stub]
-  effect: defence
-  amount: 1
-- id: stub_artifact_19
-  name: Stub Relic 19
-  tags: [stub]
+  slot: ring
+  depth: [30, 85]
+- id: art_lantern_mans_hood
+  name: The Lantern Man's Hood
   effect: stealth
-- id: stub_artifact_20
-  name: Stub Relic 20
-  tags: [stub]
+  slot: hat
+  depth: [30, 85]
+- id: art_iron_choir_gauntlets
+  name: Gauntlets of the Choir
+  effect: melee
+  amount: 2
+  slot: gloves
+  depth: [30, 85]
+- id: art_ember_heart
+  name: The Ember Heart
   effect: wait_rounds
-  amount: 8
+  amount: 4
+  slot: ring
+  depth: [35, 90]
+- id: art_black_abbess_veil
+  name: Black Abbess's Veil
+  effect: spell_focus
+  slot: hat
+  depth: [35, 90]
+- id: art_sure_step_greaves
+  name: Greaves of Sure Step
+  effect: sure_footing
+  slot: boots
+  depth: [35, 90]
+- id: art_locksmiths_bane
+  name: Locksmith's Bane
+  effect: careful_opening
+  slot: gloves
+  depth: [35, 90]
+- id: art_scribes_codex_band
+  name: The Scribe's Band
+  effect: book_lore
+  slot: ring
+  depth: [35, 90]
+- id: art_inn_of_endless_rest
+  name: The Innkeeper's Key
+  effect: rest_cost
+  amount: 0
+  slot: ring
+  depth: [35, 90]
+- id: art_throne_warden_mantle
+  name: Throne Warden's Mantle
+  effect: defence
+  amount: 3
+  slot: cloak
+  depth: [55, 100]
+- id: art_crown_deep_king
+  name: Crown of the Deep King
+  effect: advantage
+  slot: hat
+  rolls: [search, notice, disarm, avoid_trap]
+  depth: [55, 100]
+- id: art_leviathan_scale
+  name: The Leviathan Scale
+  effect: defence
+  amount: 3
+  slot: cloak
+  depth: [55, 100]
+- id: art_magma_sovereigns_ring
+  name: Magma Sovereign's Ring
+  effect: melee
+  amount: 3
+  slot: ring
+  depth: [55, 100]
+- id: art_last_delvers_boots
+  name: The Last Delver's Boots
+  effect: advantage
+  slot: boots
+  rolls: [avoid_trap, search]
+  depth: [55, 100]
+- id: art_hollow_emperor_crown
+  name: Hollow Emperor's Crown
+  effect: against_tag
+  slot: hat
+  tag: undead
+  depth: [60, 100]
+- id: art_void_shroud
+  name: The Void Shroud
+  effect: stealth
+  slot: cloak
+  depth: [60, 100]
+- id: art_unmakers_fang
+  name: Unmaker's Fang
+  effect: melee
+  amount: 3
+  slot: ring
+  depth: [60, 100]
+- id: art_hunger_glove
+  name: The Hungering Glove
+  effect: rally
+  slot: gloves
+  depth: [60, 100]
+- id: art_eternal_candle
+  name: The Eternal Candle
+  effect: wait_rounds
+  amount: 3
+  slot: ring
+  depth: [65, 100]
+- id: art_pale_crown_of_spells
+  name: The Spellbinder's Crown
+  effect: spell_widen
+  amount: 2
+  slot: hat
+  depth: [65, 100]
+- id: art_sovereigns_signet
+  name: Sovereign Aurelian's Seal
+  effect: advantage
+  shape: target
+  slot: ring
+  rolls: spell
+  depth: [65, 100]

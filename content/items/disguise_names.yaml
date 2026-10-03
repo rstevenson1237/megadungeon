@@ -1,29 +1,302 @@
-# Stub entries (Spec 08): the unidentified look of a potion, ring, wand, rod or staff (Spec 05). "cloudy blue" is
-# shown as "a cloudy blue potion". Every kind needs at least as many names as it has magic items. The launch table
-# of 100 is written in Phase 3 (task 4.5).
-- { id: potion_look_cloudy_blue, name: cloudy blue, kind: potion, tags: [stub] }
-- { id: potion_look_fizzing_red, name: fizzing red, kind: potion, tags: [stub] }
-- { id: potion_look_murky_green, name: murky green, kind: potion, tags: [stub] }
-- { id: potion_look_thick_black, name: thick black, kind: potion, tags: [stub] }
-- { id: potion_look_pale_yellow, name: pale yellow, kind: potion, tags: [stub] }
-- { id: potion_look_bubbling_amber, name: bubbling amber, kind: potion, tags: [stub] }
-- { id: potion_look_milky_white, name: milky white, kind: potion, tags: [stub] }
-- { id: potion_look_silver_swirled, name: silver swirled, kind: potion, tags: [stub] }
-- { id: potion_look_dark_violet, name: dark violet, kind: potion, tags: [stub] }
-- { id: potion_look_oily_brown, name: oily brown, kind: potion, tags: [stub] }
-- { id: ring_look_copper, name: copper, kind: ring, tags: [stub] }
-- { id: ring_look_jade, name: jade, kind: ring, tags: [stub] }
-- { id: ring_look_bone, name: bone, kind: ring, tags: [stub] }
-- { id: ring_look_tin, name: tin, kind: ring, tags: [stub] }
-- { id: ring_look_onyx, name: onyx, kind: ring, tags: [stub] }
-- { id: ring_look_braided_wire, name: braided wire, kind: ring, tags: [stub] }
-- { id: wand_look_ash, name: ash, kind: wand, tags: [stub] }
-- { id: wand_look_yew, name: yew, kind: wand, tags: [stub] }
-- { id: wand_look_pale_birch, name: pale birch, kind: wand, tags: [stub] }
-- { id: wand_look_blackthorn, name: blackthorn, kind: wand, tags: [stub] }
-- { id: rod_look_iron, name: iron, kind: rod, tags: [stub] }
-- { id: rod_look_brass, name: brass, kind: rod, tags: [stub] }
-- { id: rod_look_dull_steel, name: dull steel, kind: rod, tags: [stub] }
-- { id: staff_look_oak, name: oak, kind: staff, tags: [stub] }
-- { id: staff_look_gnarled_elm, name: gnarled elm, kind: staff, tags: [stub] }
-- { id: staff_look_ebony, name: ebony, kind: staff, tags: [stub] }
+# Disguise names (Spec 05): the unidentified look of a potion, ring, wand, rod or staff. "cloudy blue" is shown as "a cloudy
+# blue potion". Every kind has at least as many names as it has magic items. The launch table of 100 written in task 4.5.
+- id: potion_look_cloudy_blue
+  name: cloudy blue
+  kind: potion
+- id: potion_look_fizzing_red
+  name: fizzing red
+  kind: potion
+- id: potion_look_murky_green
+  name: murky green
+  kind: potion
+- id: potion_look_thick_black
+  name: thick black
+  kind: potion
+- id: potion_look_pale_yellow
+  name: pale yellow
+  kind: potion
+- id: potion_look_bubbling_amber
+  name: bubbling amber
+  kind: potion
+- id: potion_look_milky_white
+  name: milky white
+  kind: potion
+- id: potion_look_silver_swirled
+  name: silver swirled
+  kind: potion
+- id: potion_look_dark_violet
+  name: dark violet
+  kind: potion
+- id: potion_look_oily_brown
+  name: oily brown
+  kind: potion
+- id: potion_look_clear_pink
+  name: clear pink
+  kind: potion
+- id: potion_look_smoky_grey
+  name: smoky grey
+  kind: potion
+- id: potion_look_glittering_gold
+  name: glittering gold
+  kind: potion
+- id: potion_look_sour_orange
+  name: sour orange
+  kind: potion
+- id: potion_look_ruddy_purple
+  name: ruddy purple
+  kind: potion
+- id: potion_look_frothy_teal
+  name: frothy teal
+  kind: potion
+- id: potion_look_ashen_white
+  name: ashen white
+  kind: potion
+- id: potion_look_rusty_red
+  name: rusty red
+  kind: potion
+- id: potion_look_sea_green
+  name: sea green
+  kind: potion
+- id: potion_look_inky_blue
+  name: inky blue
+  kind: potion
+- id: potion_look_honey_gold
+  name: honey gold
+  kind: potion
+- id: potion_look_bone_white
+  name: bone white
+  kind: potion
+- id: potion_look_ember_red
+  name: ember red
+  kind: potion
+- id: potion_look_frosted_clear
+  name: frosted clear
+  kind: potion
+- id: potion_look_mossy_green
+  name: mossy green
+  kind: potion
+- id: potion_look_dusty_rose
+  name: dusty rose
+  kind: potion
+- id: potion_look_coal_black
+  name: coal black
+  kind: potion
+- id: potion_look_saffron_yellow
+  name: saffron yellow
+  kind: potion
+- id: potion_look_violet_mist
+  name: violet mist
+  kind: potion
+- id: potion_look_copper_bright
+  name: copper bright
+  kind: potion
+- id: ring_look_plain_iron
+  name: plain iron
+  kind: ring
+- id: ring_look_twisted_copper
+  name: twisted copper
+  kind: ring
+- id: ring_look_jade_green
+  name: jade green
+  kind: ring
+- id: ring_look_bone_carved
+  name: bone carved
+  kind: ring
+- id: ring_look_silver_band
+  name: silver band
+  kind: ring
+- id: ring_look_rune_etched
+  name: rune etched
+  kind: ring
+- id: ring_look_braided_gold
+  name: braided gold
+  kind: ring
+- id: ring_look_dull_lead
+  name: dull lead
+  kind: ring
+- id: ring_look_bright_brass
+  name: bright brass
+  kind: ring
+- id: ring_look_knotwork
+  name: knotwork
+  kind: ring
+- id: ring_look_onyx_set
+  name: onyx set
+  kind: ring
+- id: ring_look_pearl_set
+  name: pearl set
+  kind: ring
+- id: ring_look_hammered_tin
+  name: hammered tin
+  kind: ring
+- id: ring_look_ivory_inlaid
+  name: ivory inlaid
+  kind: ring
+- id: ring_look_serpent_shaped
+  name: serpent shaped
+  kind: ring
+- id: ring_look_thin_wire
+  name: thin wire
+  kind: ring
+- id: ring_look_wide_silver
+  name: wide silver
+  kind: ring
+- id: ring_look_blackened_steel
+  name: blackened steel
+  kind: ring
+- id: ring_look_amber_set
+  name: amber set
+  kind: ring
+- id: ring_look_glass_set
+  name: glass set
+  kind: ring
+- id: wand_look_oak
+  name: oak
+  kind: wand
+- id: wand_look_ash
+  name: ash
+  kind: wand
+- id: wand_look_yew
+  name: yew
+  kind: wand
+- id: wand_look_ebony
+  name: ebony
+  kind: wand
+- id: wand_look_bone
+  name: bone
+  kind: wand
+- id: wand_look_ivory
+  name: ivory
+  kind: wand
+- id: wand_look_willow
+  name: willow
+  kind: wand
+- id: wand_look_birch
+  name: birch
+  kind: wand
+- id: wand_look_crystal
+  name: crystal
+  kind: wand
+- id: wand_look_copper
+  name: copper
+  kind: wand
+- id: wand_look_silver_tipped
+  name: silver tipped
+  kind: wand
+- id: wand_look_twisted_thorn
+  name: twisted thorn
+  kind: wand
+- id: rod_look_iron
+  name: iron
+  kind: rod
+- id: rod_look_brass
+  name: brass
+  kind: rod
+- id: rod_look_bronze
+  name: bronze
+  kind: rod
+- id: rod_look_lead
+  name: lead
+  kind: rod
+- id: rod_look_steel
+  name: steel
+  kind: rod
+- id: rod_look_copper
+  name: copper
+  kind: rod
+- id: rod_look_tin
+  name: tin
+  kind: rod
+- id: rod_look_pewter
+  name: pewter
+  kind: rod
+- id: rod_look_silver
+  name: silver
+  kind: rod
+- id: rod_look_gilt
+  name: gilt
+  kind: rod
+- id: rod_look_black_iron
+  name: black iron
+  kind: rod
+- id: rod_look_fluted
+  name: fluted
+  kind: rod
+- id: staff_look_knotted_oak
+  name: knotted oak
+  kind: staff
+- id: staff_look_ash
+  name: ash
+  kind: staff
+- id: staff_look_yew
+  name: yew
+  kind: staff
+- id: staff_look_ebony
+  name: ebony
+  kind: staff
+- id: staff_look_blackthorn
+  name: blackthorn
+  kind: staff
+- id: staff_look_hazel
+  name: hazel
+  kind: staff
+- id: staff_look_rowan
+  name: rowan
+  kind: staff
+- id: staff_look_elder
+  name: elder
+  kind: staff
+- id: staff_look_cedar
+  name: cedar
+  kind: staff
+- id: staff_look_pine
+  name: pine
+  kind: staff
+- id: staff_look_iron_shod
+  name: iron shod
+  kind: staff
+- id: staff_look_silver_capped
+  name: silver capped
+  kind: staff
+- id: staff_look_crooked
+  name: crooked
+  kind: staff
+- id: staff_look_spiral_carved
+  name: spiral carved
+  kind: staff
+- id: staff_look_bone_topped
+  name: bone topped
+  kind: staff
+- id: staff_look_crystal_headed
+  name: crystal headed
+  kind: staff
+- id: staff_look_raven_carved
+  name: raven carved
+  kind: staff
+- id: staff_look_twisted_willow
+  name: twisted willow
+  kind: staff
+- id: staff_look_pale_birch
+  name: pale birch
+  kind: staff
+- id: staff_look_gnarled_root
+  name: gnarled root
+  kind: staff
+- id: staff_look_brass_bound
+  name: brass bound
+  kind: staff
+- id: staff_look_serpent_coiled
+  name: serpent coiled
+  kind: staff
+- id: staff_look_rune_cut
+  name: rune cut
+  kind: staff
+- id: staff_look_plain_walnut
+  name: plain walnut
+  kind: staff
+- id: staff_look_horn_handled
+  name: horn handled
+  kind: staff
+- id: staff_look_star_topped
+  name: star topped
+  kind: staff
