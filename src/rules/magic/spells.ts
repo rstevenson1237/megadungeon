@@ -44,7 +44,7 @@ export const startingSpellsRng = (runSeed: number, character: Pick<Character, 'n
   createRng(hash32('spells', runSeed >>> 0, character.name, character.classId));
 
 /**
- * The spells a new character of the class knows: its guaranteed spell, then random ones from the whole
+ * The spells a new character of the class knows: its guaranteed spell, then random ones from the starting
  * list with no repeats, up to the class's count. Classes with no `spells` entry start with none.
  */
 export function startingSpells(runSeed: number, character: Pick<Character, 'name' | 'classId'>, cls: Pick<ClassDef, 'spells'>, all: readonly Spell[]): string[] {
@@ -53,7 +53,9 @@ export function startingSpells(runSeed: number, character: Pick<Character, 'name
   const always = cls.spells.always;
   if (always) known.push(always);
   const rng = startingSpellsRng(runSeed, character);
-  const rest = rng.shuffle(all.map((s) => s.id).filter((id) => id !== always));
+  // The draw is from the starting list (Spec 04); a table with none tagged draws from every row.
+  const listed = all.filter((s) => s.tags?.includes('starting'));
+  const rest = rng.shuffle((listed.length > 0 ? listed : all).map((s) => s.id).filter((id) => id !== always));
   while (known.length < cls.spells.count && rest.length > 0) known.push(rest.shift()!);
   return known;
 }
