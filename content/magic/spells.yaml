@@ -1,16 +1,20 @@
-# The 15 starting spells (Spec 04, "Starting spell list"). Each row names an effect defined in code and
-# carries its numbers: shape, reach in cells, footprint and duration. More spells come in task 4.6.
+# The spells (Spec 04, "Starting spell list"). Each row names an effect defined in code and carries its numbers: shape,
+# reach in cells, footprint and duration. The first 15, tagged `starting`, are the list a new character's spells are drawn
+# from (Spec 04); the 15 added in task 4.6 bring the table to its target of 30 and are learned from spellbooks, bought, or
+# found in wands, rods and staves. Every one is built on an effect already in code.
 - id: heal
   name: Heal
   shape: self
   effect: restore_die
   text: Restore one Combat die.
+  tags: [starting]
 - id: shield
   name: Shield
   shape: self
   effect: shield
   rounds: 10
   text: Ignore the next hit taken within 10 rounds.
+  tags: [starting]
 - id: haste
   name: Haste
   shape: self
@@ -18,30 +22,35 @@
   status: hasted
   rounds: 3
   text: Act twice per round for 3 rounds.
+  tags: [starting]
 - id: light
   name: Light
   shape: self
   effect: light
   reach: 8
   text: Light the current room or 8 cells around you, revealing it.
+  tags: [starting]
 - id: detect
   name: Detect
   shape: self
   effect: detect
   reach: 8
   text: Reveal traps and secret doors within 8 cells.
+  tags: [starting]
 - id: blink
   name: Blink
   shape: self
   effect: blink
   reach: 5
   text: Move instantly to a visible cell within 5 cells.
+  tags: [starting]
 - id: arcane_bolt
   name: Arcane Bolt
   shape: target
   effect: remove_die
   reach: 8
   text: Remove one die from the target.
+  tags: [starting]
 - id: sleep
   name: Sleep
   shape: target
@@ -50,6 +59,7 @@
   rounds: d6
   reach: 6
   text: An unaware or alert target falls asleep for d6 rounds.
+  tags: [starting]
 - id: hold
   name: Hold
   shape: target
@@ -58,12 +68,14 @@
   rounds: 3
   reach: 6
   text: The target cannot act for 3 rounds.
+  tags: [starting]
 - id: drain
   name: Drain
   shape: target
   effect: drain
   reach: 4
   text: Remove one die from the target and restore one Combat die to you.
+  tags: [starting]
 - id: fear
   name: Fear
   shape: target
@@ -72,6 +84,7 @@
   rounds: 5
   reach: 6
   text: The target flees for 5 rounds.
+  tags: [starting]
 - id: fireball
   name: Fireball
   shape: area
@@ -79,6 +92,7 @@
   size: 3
   reach: 8
   text: Remove one die from every creature in a 3 x 3 area.
+  tags: [starting]
 - id: blizzard
   name: Blizzard
   shape: area
@@ -88,6 +102,7 @@
   size: 5
   reach: 8
   text: Every creature in a 5 x 5 area is slowed for 5 rounds.
+  tags: [starting]
 - id: thunderclap
   name: Thunderclap
   shape: area
@@ -96,6 +111,7 @@
   distance: 2
   reach: 1
   text: Push every adjacent creature 2 cells away.
+  tags: [starting]
 - id: turn_undead
   name: Turn Undead
   shape: area
@@ -106,3 +122,111 @@
   reach: 6
   affects: [undead]
   text: Undead within range flee for 10 rounds.
+  tags: [starting]
+- id: stoneskin
+  name: Stoneskin
+  shape: self
+  effect: shield
+  rounds: 25
+  text: Ignore the next hit taken within 25 rounds.
+- id: bless
+  name: Bless
+  shape: self
+  effect: status
+  status: blessed
+  rounds: 10
+  text: Gain advantage on checks for 10 rounds.
+- id: quicken
+  name: Quicken
+  shape: self
+  effect: status
+  status: hasted
+  rounds: 6
+  text: Act twice per round for 6 rounds.
+- id: daylight
+  name: Daylight
+  shape: self
+  effect: light
+  reach: 14
+  text: Light the current room or 14 cells around you, revealing it.
+- id: farsight
+  name: Farsight
+  shape: self
+  effect: detect
+  reach: 16
+  text: Reveal traps and secret doors within 16 cells.
+- id: shadow_step
+  name: Shadow Step
+  shape: self
+  effect: blink
+  reach: 9
+  text: Move instantly to a visible cell within 9 cells.
+- id: slow
+  name: Slow
+  shape: target
+  effect: status
+  status: slowed
+  rounds: 6
+  reach: 6
+  text: The target is slowed for 6 rounds.
+- id: lightning_bolt
+  name: Lightning Bolt
+  shape: target
+  effect: remove_die
+  reach: 10
+  text: Remove one die from the target.
+- id: life_tap
+  name: Life Tap
+  shape: target
+  effect: drain
+  reach: 6
+  text: Remove one die from the target and restore one Combat die to you.
+- id: stasis
+  name: Stasis
+  shape: target
+  effect: status
+  status: held
+  rounds: 5
+  reach: 4
+  text: The target cannot act for 5 rounds.
+- id: dread
+  name: Dread
+  shape: target
+  effect: status
+  status: frightened
+  rounds: 8
+  reach: 4
+  text: The target flees for 8 rounds.
+- id: firestorm
+  name: Firestorm
+  shape: area
+  effect: remove_die
+  size: 5
+  reach: 6
+  text: Remove one die from every creature in a 5 x 5 area.
+- id: frost_nova
+  name: Frost Nova
+  shape: area
+  effect: status
+  status: slowed
+  rounds: 6
+  centred: true
+  reach: 3
+  text: Every creature within 3 cells of you is slowed for 6 rounds.
+- id: slumber
+  name: Slumber
+  shape: area
+  effect: status
+  status: asleep
+  rounds: d6
+  size: 3
+  reach: 6
+  text: Every creature in a 3 x 3 area falls asleep for d6 rounds.
+- id: banish
+  name: Banish
+  shape: area
+  effect: remove_die
+  centred: true
+  reach: 6
+  affects: [undead]
+  text: Remove one die from every undead creature within 6 cells.

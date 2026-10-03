@@ -154,9 +154,11 @@ describe('Spec 04: starting spells', () => {
     expect(names.size).toBeGreaterThan(2);
   });
 
-  it('can reach every spell on the list across seeds', () => {
+  it('can reach every spell on the starting list across seeds, and none of the others', () => {
     const reached = new Set<string>();
     for (let seed = 0; seed < 300; seed++) for (const id of draw('mage', seed)) reached.add(id);
-    expect(reached.size).toBe(SPELLS.length);
+    const starting = SPELLS.filter((s) => s.tags?.includes('starting')).map((s) => s.id);
+    expect(starting).toHaveLength(15);
+    expect([...reached].sort()).toEqual([...starting].sort());
   });
 });

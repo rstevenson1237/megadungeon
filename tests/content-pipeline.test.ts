@@ -150,7 +150,7 @@ describe('coverage report', () => {
     expect(report.tables.map((t) => t.table)).toEqual(CATALOG.map((c) => c.table));
     expect(report.tables).toHaveLength(28);
     expect(byTable('monsters')).toMatchObject({ count: 150, minimum: 150, present: true, ok: true });
-    expect(byTable('spells')).toMatchObject({ count: 15, minimum: 15, present: true, ok: true });
+    expect(byTable('spells')).toMatchObject({ count: 30, minimum: 15, present: true, ok: true });
     expect(byTable('minor_abilities')).toMatchObject({ minimum: 240, unit: 'slots' });
     expect(byTable('rumours').minimum).toBe(60);
     expect(byTable('quest_templates').minimum).toBe(40);

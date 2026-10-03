@@ -32,12 +32,12 @@ describe('Spec 04: the 15 starting spells are table rows with the shapes and rea
   ];
 
   it('lists exactly the spec spells, in the spec shapes and reach', () => {
-    expect(SPELLS.map((s) => [s.id, s.shape, s.reach])).toEqual(rows);
+    expect(SPELLS.filter((s) => s.tags?.includes('starting')).map((s) => [s.id, s.shape, s.reach])).toEqual(rows);
   });
 
   it('knows which spells resolve on choosing and which need a creature or a cell', () => {
-    expect(SPELLS.filter(resolvesAtOnce).map((s) => s.id)).toEqual(['heal', 'shield', 'haste', 'light', 'detect', 'thunderclap', 'turn_undead']);
-    expect(SPELLS.filter(needsCell).map((s) => s.id)).toEqual(['blink']);
+    expect(SPELLS.filter((s) => s.tags?.includes('starting')).filter(resolvesAtOnce).map((s) => s.id)).toEqual(['heal', 'shield', 'haste', 'light', 'detect', 'thunderclap', 'turn_undead']);
+    expect(SPELLS.filter((s) => s.tags?.includes('starting')).filter(needsCell).map((s) => s.id)).toEqual(['blink']);
     expect(reachOf(spell('heal'))).toBe(0);
   });
 });
