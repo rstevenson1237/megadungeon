@@ -51,7 +51,7 @@ describe('Spec 08, Addendum A: one effect vocabulary in code', () => {
       ...(tables.artifacts as { effect: string }[]),
       ...(tables.altar_gods as { buff: { effect: string } }[]).map((g) => g.buff),
     ];
-    expect(named.length).toBe(43 + 40 + 3);
+    expect(named.length).toBe(43 + 40 + 8);
     for (const row of named) expect(ABILITY_EFFECT_IDS).toContain(row.effect);
     // Every effect on the list says what it does and of what kind it is.
     for (const id of ABILITY_EFFECT_IDS) expect(ABILITY_EFFECTS[id].text.length).toBeGreaterThan(0);

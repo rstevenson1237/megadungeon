@@ -1,9 +1,23 @@
-# Stub entries (Spec 08): what searching debris can turn up (Spec 06, "Searching and hidden things"): a few coins
-# (the range is multiplied by the level's depth) or a minor item by id. The launch table of 20 is written in
-# Phase 3 (task 4.7).
-- { id: debris_coins_few, name: a few coins, find: coins, amount: [1, 4], weight: 20, tags: [stub] }
-- { id: debris_coins_purse, name: a lost purse, find: coins, amount: [3, 8], weight: 8, tags: [stub] }
-- { id: debris_stones, name: sling stones, find: item, item: sling_stones, count: 10, weight: 6, tags: [stub] }
-- { id: debris_arrows, name: a few arrows, find: item, item: arrows, count: 6, weight: 6, tags: [stub] }
-- { id: debris_lockpicks, name: a bent set of picks, find: item, item: lockpicks, count: 3, weight: 8, tags: [stub] }
-- { id: debris_potion, name: a dusty flask, find: item, item: potion_healing, weight: 3, tags: [stub] }
+# Debris finds (Spec 08): what searching debris can turn up (Spec 06, "Searching and hidden things"): a few coins
+# (the range is multiplied by the level's depth) or a minor item by id. The launch table of 20 was written in
+# task 4.7: coins in six sizes, ammunition, picks, a few small potions and a spare dagger. Items are minor ones only.
+- { id: debris_coins_few, name: a few coins, find: coins, amount: [1, 4], weight: 20 }
+- { id: debris_coins_purse, name: a lost purse, find: coins, amount: [3, 8], weight: 8 }
+- { id: debris_stones, name: sling stones, find: item, item: sling_stones, count: 10, weight: 6 }
+- { id: debris_arrows, name: a few arrows, find: item, item: arrows, count: 6, weight: 6 }
+- { id: debris_lockpicks, name: a bent set of picks, find: item, item: lockpicks, count: 3, weight: 8 }
+- { id: debris_potion, name: a dusty flask, find: item, item: potion_healing, weight: 3 }
+- { id: debris_coppers, name: scattered coppers, find: coins, amount: [1, 3], weight: 14 }
+- { id: debris_dust_coin, name: a coin in the dust, find: coins, amount: [2, 5], weight: 10 }
+- { id: debris_rotted_pouch, name: a rotted pouch, find: coins, amount: [4, 10], weight: 6 }
+- { id: debris_tithe, name: a dropped tithe, find: coins, amount: [6, 14], depth: [5, 100], weight: 4 }
+- { id: debris_hoard, name: a hidden hoard, find: coins, amount: [10, 24], depth: [15, 100], weight: 2 }
+- { id: debris_bolts, name: a few crossbow bolts, find: item, item: bolts, count: 6, weight: 6 }
+- { id: debris_more_stones, name: a pouch of smooth stones, find: item, item: sling_stones, count: 15, weight: 4 }
+- { id: debris_quiver, name: a snapped quiver, find: item, item: arrows, count: 10, weight: 4 }
+- { id: debris_spare_picks, name: a spare set of picks, find: item, item: lockpicks, count: 5, weight: 4 }
+- { id: debris_cure, name: a stoppered vial, find: item, item: potion_cure, weight: 3 }
+- { id: debris_focus, name: a cracked phial, find: item, item: potion_focus, weight: 2 }
+- { id: debris_clarity, name: a clouded bottle, find: item, item: potion_clarity, weight: 2 }
+- { id: debris_dagger, name: a rusted dagger, find: item, item: dagger, weight: 3 }
+- { id: debris_healing_deep, name: a sealed flask, find: item, item: potion_healing, depth: [10, 100], weight: 2 }

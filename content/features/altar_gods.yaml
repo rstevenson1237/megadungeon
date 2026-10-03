@@ -1,18 +1,35 @@
-# Stub entries (Spec 08): each god gives a blessing for a good offering (Blessed for the level, a curse lifted, or one
+# Altar gods (Spec 08): each god gives a blessing for a good offering (Blessed for the level, a curse lifted, or one
 # item identified) and a lasting buff when all three altars of its shrine set are won (Spec 02, "Shrine sets";
-# Spec 06, "Fixtures"), an effect from the vocabulary (Spec 08, Addendum A). The launch table of 8 is written in task 4.7.
+# Spec 06, "Fixtures"), an effect from the vocabulary (Spec 08, Addendum A). The launch table of 8 was written in task 4.7.
 - id: god_stub_01
   name: the Pale Lantern
   blessing: bless
   buff: { effect: advantage, rolls: search }
-  tags: [stub]
 - id: god_stub_02
   name: the Iron Mother
   blessing: lift_curse
   buff: { effect: melee, amount: 1 }
-  tags: [stub]
 - id: god_stub_03
   name: the Quiet Tide
   blessing: identify
   buff: { effect: wait_rounds, amount: 8 }
-  tags: [stub]
+- id: god_ember_saint
+  name: the Ember Saint
+  blessing: lift_curse
+  buff: { effect: defence, amount: 1 }
+- id: god_green_warden
+  name: the Green Warden
+  blessing: bless
+  buff: { effect: stealth }
+- id: god_last_witness
+  name: the Last Witness
+  blessing: bless
+  buff: { effect: against_tag, tag: undead }
+- id: god_hearth_keeper
+  name: the Hearth Keeper
+  blessing: identify
+  buff: { effect: rest_cost, amount: 50 }
+- id: god_salt_bishop
+  name: the Salt Bishop
+  blessing: identify
+  buff: { effect: spell_focus }
