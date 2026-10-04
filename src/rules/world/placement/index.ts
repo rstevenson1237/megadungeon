@@ -22,6 +22,8 @@ import { placeSpecials, solidPieces, takesParcel, type Built } from './specials.
 export type { LevelContents, LevelPlan, PlacementContent, PlacementTheme } from './plan.ts';
 export { planLevel } from './plan.ts';
 
+const centreOfRoom = (r: Rect): Point => ({ x: r.x + (r.w >> 1), y: r.y + (r.h >> 1) });
+
 export interface PlacementInput {
   /** The working cells, mutated: doors are written into them. */
   cells: Uint8Array;
@@ -34,6 +36,8 @@ export interface PlacementInput {
   depth: number;
   /** False for layouts whose rooms are clearings in caves: they get no doors (Spec 02, task 2.4). */
   literalRooms: boolean;
+  /** The set piece fixes the boss's room (an index into `rooms`) instead of leaving it to the farthest-room rule. */
+  bossRoom?: number;
   contents: LevelContents;
   /** The stream for each placement step, by step number 4 to 11 (Spec 02, Addendum A). */
   steps: (step: number) => Rng;
@@ -49,6 +53,7 @@ export function placeContents(input: PlacementInput): { placements: Placements; 
   const { cells, width, height, steps, strict } = input;
   const { content, plan } = input.contents;
   const b = new Board(cells, width, height, input.rooms, input.up, input.down);
+  if (input.bossRoom !== undefined) b.goal = centreOfRoom(b.rooms[input.bossRoom]!);
   const base = { b, plan, content, size: input.size, depth: input.depth };
   const at = (step: number): Ctx => ({ ...base, rng: steps(step) });
   const placements = emptyPlacements();
@@ -61,7 +66,7 @@ export function placeContents(input: PlacementInput): { placements: Placements; 
   }
 
   // The two rooms the generic steps leave alone. The vault is a special, so it draws from step 11's stream.
-  const bossRoom = plan.boss ? pickBossRoom(b) : undefined;
+  const bossRoom = plan.boss ? (input.bossRoom ?? pickBossRoom(b)) : undefined;
   if (bossRoom !== undefined) b.reserved.add(bossRoom);
   let vaultRoom: number | undefined;
   if (plan.pieces.some((p) => p.kind === 'vault')) {

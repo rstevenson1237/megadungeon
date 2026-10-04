@@ -17,7 +17,8 @@ import { failQuest } from './town-state.ts';
 import { breakSeals, rivalDies, weakMode } from './connective.ts';
 
 /** How a creature is named in the log: "the goblin", but "Corvin the Bold" for a named one. */
-export const nameOf = (m: Monster): string => (m.kind === 'monster' ? `the ${m.name}` : m.name);
+/** A boss has a proper name (style guide), so it takes no "the": "You hit Grask the Pale." */
+export const nameOf = (m: Monster): string => (m.kind === 'monster' && m.role !== 'boss' ? `the ${m.name}` : m.name);
 // An ally's name is kept as it reads in the log: "the raised goblin", "your companion", "the phantom".
 export const Name = (m: Monster): string => nameOf(m).replace(/^./, (c) => c.toUpperCase());
 

@@ -1,5 +1,5 @@
 # The launch boss table (Spec 08, task 4.3): 40 bosses whose windows cover levels 1 to 99, rated at the ceiling plus 3 dice
-# (Spec 02, Depth scaling). The stub final boss stays until task 4.10 replaces it with the real final bosses tagged `final`.
+# (Spec 02, Depth scaling), then the three final bosses of level 100 (task 4.10), the pool the set piece draws from.
 - id: grask_the_pale
   name: Grask the Pale
   glyph: "O"
@@ -415,11 +415,34 @@
   depth: [93, 99]
   themes: { catacomb_labyrinth: 5 }
   tags: [undead]
-- id: stub_final_boss
-  name: stub abyssal king
-  glyph: K
-  colour: moss
+- id: the_king_below
+  name: The King Below
+  glyph: "K"
+  colour: blood
   rating: 20d6+6
-  behaviour: stub
+  behaviour: brute
+  weight: 10
   depth: [100, 100]
-  tags: [stub, final]
+  themes: { abyssal_throne: 6 }
+  tags: [demon, final]
+- id: the_unnamed_regent
+  name: The Unnamed Regent
+  glyph: "K"
+  colour: violet
+  rating: 20d6+6
+  behaviour: caster
+  weight: 10
+  depth: [100, 100]
+  themes: { abyssal_throne: 6 }
+  tags: [aberration, final]
+- id: the_seat_itself
+  name: The Seat Itself
+  glyph: "C"
+  colour: ember
+  rating: 20d6+6
+  behaviour: brute
+  speed: slow
+  weight: 10
+  depth: [100, 100]
+  themes: { abyssal_throne: 6 }
+  tags: [construct, final]

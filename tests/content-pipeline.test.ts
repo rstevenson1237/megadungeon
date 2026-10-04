@@ -161,10 +161,10 @@ describe('coverage report', () => {
     for (const table of Object.keys(tableSchemas)) expect(names.has(table), table).toBe(true);
   });
 
-  it('finds no depth gap in the monsters and bosses (with the stub final boss), which cover every level a run places them on', () => {
+  it('finds no depth gap in the monsters and bosses (with the final bosses), which cover every level a run places them on', () => {
     expect(byTable('monsters').depthGaps).toEqual([]);
     expect(byTable('bosses').depthGaps).toEqual([]);
-    expect(byTable('bosses')).toMatchObject({ count: 41, minimum: 40, present: true, ok: true });
+    expect(byTable('bosses')).toMatchObject({ count: 43, minimum: 40, present: true, ok: true });
   });
 
   it('counts monsters per rating', () => {

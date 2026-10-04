@@ -18,8 +18,8 @@ import type { Link, RunLayout } from '../src/rules/world/run-layout.ts';
 import { App } from '../src/ui/app.ts';
 import { ITEMS, SPELLS, CONTENT, content, createAs, gameAt, levelFrom, rig, room, testPlayer, townRun, withThings } from './helpers.ts';
 
-// Task 3.10 (Spec 02, Addendum A): the named rival arc and its journal, a lore chain's weakness, the stub final boss on
-// level 100, and the artifact seals.
+// Task 3.10 (Spec 02, Addendum A): the named rival arc and its journal, a lore chain's weakness, the final boss on
+// level 100, and the artifact seals. Task 4.10 replaced the stub final boss with the real ones (throne.test.ts).
 
 const bundle = content().bundle;
 const artifact = (n: number): Item => makeArtifact(ITEMS.artifacts.get(['art_pale_lantern', 'art_tallow_ring', 'art_goblin_purse', 'art_hollow_abbot_ring', 'art_stone_mothers_band'][n - 1]!)!, 7000 + n);
@@ -31,12 +31,13 @@ function level100(seed: number, version?: number): Level {
   return generateLevel(seed, MAX_DEPTH, o.sizeFor!(MAX_DEPTH), o.styleFor!(MAX_DEPTH), o.contentsFor!(MAX_DEPTH), version);
 }
 
-describe('Spec 02, Addendum A: the stub final boss on level 100', () => {
-  it('level 100 is a rooms-and-corridors level of The Abyssal Throne theme', () => {
+describe('Spec 02, Addendum A: the final boss on level 100', () => {
+  it('level 100 is The Abyssal Throne set piece from generator 6, and rooms and corridors with generator 5', () => {
     for (const seed of [1, 2, 3, 42, 777]) {
       const o = runOptionsFor(bundle, seed);
       expect(o.layout!.themes[MAX_DEPTH]).toBe('abyssal_throne');
-      expect(level100(seed).layout).toBe('rooms_and_corridors');
+      expect(level100(seed).layout).toBe('set_piece');
+      expect(level100(seed, 5).layout).toBe('rooms_and_corridors');
     }
   });
 
@@ -83,7 +84,7 @@ describe('Spec 02, Addendum A: the stub final boss on level 100', () => {
 function throneRoom(extra: { pack?: Item[]; equipment?: Game['state']['player']['equipment'] } = {}, dice = 20): { game: Game; boss: Monster } {
   const level: Level = { ...room(12, 5, 1, 1), depth: MAX_DEPTH, rooms: [{ x: 1, y: 1, w: 12, h: 5 }] };
   const game = gameAt(level, 2, 2, { pack: extra.pack ?? [], equipment: extra.equipment ?? {}, combatDice: 4, combatMax: 4 });
-  const boss = creature({ id: 50, name: 'stub abyssal king', glyph: 'K', colour: 0, x: 9, y: 3, dice, modifier: 6, role: 'boss', fearless: true, final: true });
+  const boss = creature({ id: 50, name: 'The King Below', glyph: 'K', colour: 0, x: 9, y: 3, dice, modifier: 6, role: 'boss', fearless: true, final: true });
   game.state.monsters.push(boss);
   return { game, boss };
 }
@@ -99,7 +100,7 @@ describe('Spec 02, Addendum A: artifact seals', () => {
     const result = game.act({ type: 'wait' })!; // the player is in its room, so it wakes this round
     expect(boss.awareness).toBe('alert');
     expect(boss.dice).toBe(17);
-    expect(said(result.messages)).toContain('The seals of your 3 artifacts burn against the stub abyssal king: it loses 3 dice.');
+    expect(said(result.messages)).toContain('The seals of your 3 artifacts burn against The King Below: it loses 3 dice.');
   });
 
   it('the count is made once: artifacts gained later, or a second alert, change nothing', () => {
@@ -131,7 +132,7 @@ describe('Spec 02, Addendum A: artifact seals', () => {
   });
 });
 
-describe('Spec 09: defeating the stub final boss records on the leaderboard', () => {
+describe('Spec 09: defeating the final boss records on the leaderboard', () => {
   it('a character created at level 100 who kills the generated final boss gets a final_boss entry', async () => {
     const board = new Leaderboard(new MemoryStorage());
     const app = new App({

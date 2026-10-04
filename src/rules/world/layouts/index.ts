@@ -12,6 +12,7 @@ import { carveDisjoint } from './disjoint.ts';
 import { carveFreeform } from './freeform.ts';
 import { carveMaze } from './maze.ts';
 import { carveMirrored } from './mirrored.ts';
+import { carveThrone } from './throne.ts';
 import { carveWarren } from './warren.ts';
 
 export { DEFAULT_STYLE, type Carved, type LayoutStyle } from './common.ts';
@@ -36,8 +37,8 @@ export function addPillars(cells: Uint8Array, width: number, rooms: readonly Rec
 /**
  * Carve one level's walls and floor with the named layout. `cells` is all wall on entry. Null when this
  * try came out unusable (too few rooms, too little cave), which sends generation to the next sub-seed.
- * The set piece (level 100) is a hand-authored template that arrives with task 4.10; until then it is
- * rooms and corridors.
+ * The set piece (level 100) is the hand-authored throne template; generator versions before 6 ask for rooms
+ * and corridors instead (see `generate.ts`).
  */
 export function carveLayout(
   layout: LayoutAlgorithm,
@@ -62,8 +63,9 @@ export function carveLayout(
       return carveFreeform(cells, width, height, rng);
     case 'disjoint_rooms':
       return carveDisjoint(cells, width, height, rng);
-    case 'rooms_and_corridors':
-    case 'set_piece': {
+    case 'set_piece':
+      return carveThrone(cells, width, height, rng);
+    case 'rooms_and_corridors': {
       const rooms = carveRoomsAndCorridors(cells, width, height, rng);
       if (style.pillared) addPillars(cells, width, rooms);
       return { rooms, looseStairs: false };

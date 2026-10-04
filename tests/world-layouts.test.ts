@@ -75,11 +75,12 @@ describe('the eight layout algorithms (Spec 02, "Level sizes and layouts")', () 
     expect(actual).toEqual(GOLDEN);
   });
 
-  it('uses rooms and corridors for the set piece until task 4.10', () => {
+  it('builds the throne template for the set piece, and rooms and corridors with generator 5 (task 4.10)', () => {
     const level = generateLevel(5, MAX_DEPTH, 'large', { layout: 'set_piece' });
-    expect(level.layout).toBe('rooms_and_corridors');
+    expect(level.layout).toBe('set_piece');
     expect(level.downStair).toBeNull();
     expect(checkLevel(level)).toBeNull();
+    expect(generateLevel(5, MAX_DEPTH, 'large', { layout: 'set_piece' }, undefined, 5).layout).toBe('rooms_and_corridors');
   });
 
   it('gives every default call the rooms-and-corridors layout', () => {

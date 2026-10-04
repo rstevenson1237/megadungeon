@@ -45,6 +45,8 @@ export class Board {
   /** Every entrance, whether or not it got a door: doorways never hold a trap. */
   readonly doorways: Uint8Array;
   entrances: Entrance[] = [];
+  /** A cell no locked or secret door may cut off from the up stair, besides the down stair: the throne room's centre. */
+  goal: Point | null = null;
   /** Rooms the generic steps leave alone: the boss room and the vault. */
   readonly reserved = new Set<number>();
   /** The vault: nothing but its chest is ever placed in it, not even a trap or debris. */
