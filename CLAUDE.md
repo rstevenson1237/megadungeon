@@ -21,6 +21,7 @@ Everything is already designed and approved. The documents in `docs/` are the sp
 | `docs/spec-09-save-load-run.md` | Run lifecycle, saves, death options, leaderboard, versioning |
 | `docs/10-implementation-plan.md` | The 46 tasks in order, with dependencies, gates, testing and risks |
 | `docs/11-closeout-audit.md` | Every acceptance criterion of every spec: built and tested, stubbed, or owned by a Phase 4 task (task 3.11) |
+| `docs/13-balance-report.md` | Task 4.11's balance runs: depth pace, economy and class parity, measured on the real tables |
 | `mockup/ui-mockup.html` | The approved UI mockup (open in a browser) |
 
 ## Rules for every task

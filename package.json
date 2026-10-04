@@ -19,7 +19,8 @@
     "build": "npm run typecheck && vite build",
     "preview": "vite preview",
     "ci": "npm run content:check && npm run typecheck && npm test && npm run build",
-    "smoke": "playwright test"
+    "smoke": "playwright test",
+    "balance": "tsx tools/balance.ts"
   },
   "repository": {
     "type": "git",

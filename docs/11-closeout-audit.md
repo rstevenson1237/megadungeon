@@ -29,7 +29,7 @@ Beyond the criteria, the plan gives Phase 4 the following work, so it is owned a
 
 - Content to launch minimums: tasks 4.2 to 4.9.
 - The level 100 set piece and the real final boss: task 4.10, done (the audit rows that waited on it are updated).
-- Balance: task 4.11.
+- Balance: task 4.11, measured in `docs/13-balance-report.md` and repeated by `tests/balance.test.ts`.
 - Chrome, Firefox and Safari checks: task 4.12.
 - The release policy for saves across content changes: decided at the Content complete gate.
 
