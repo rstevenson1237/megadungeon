@@ -30,7 +30,7 @@ Beyond the criteria, the plan gives Phase 4 the following work, so it is owned a
 - Content to launch minimums: tasks 4.2 to 4.9.
 - The level 100 set piece and the real final boss: task 4.10, done (the audit rows that waited on it are updated).
 - Balance: task 4.11, measured in `docs/13-balance-report.md` and repeated by `tests/balance.test.ts`.
-- Chrome, Firefox and Safari checks: task 4.12.
+- Chrome, Firefox and Safari checks: task 4.12, done (see Notes).
 - The release policy for saves across content changes: decided at the Content complete gate.
 
 ## Spec 01: Rendering and UI shell
@@ -174,4 +174,12 @@ Beyond the criteria, the plan gives Phase 4 the following work, so it is owned a
 
 - **The browser smoke test** runs in CI after the build. It serves the built page as GitHub Pages does and drives it in Chromium: it creates a Priest, steps, casts Heal, rests, reloads, and continues. It checks the pane shows the Priest's real dice, gear and ability, before and after the reload. It reads the screen's text through a read-only `window.megadungeon.screen()` hook, because the canvas holds no text.
 - **Timing criteria** (50 ms per large level, the per-turn budget) are checked on the CI runner. Task 4.12 confirms them in the three browsers.
+- **Browser checks (task 4.12).** CI runs `e2e/` in the engines of Chrome, Firefox and Safari (Playwright's Chromium, Firefox and WebKit). Every rule of every spec is proved by the Node tests above; what a browser can change is its own part, and `e2e/browser-checks.spec.ts` checks that part in each engine:
+  - the grid fills the window with its aspect kept, in whole device pixels and unsmoothed, at six window sizes and at pixel ratios 1 and 2;
+  - the glyph atlas the renderer bakes matches the font glyph for glyph, against masks recorded once in `e2e/glyph-masks.json`;
+  - each overlay opens, takes keys and closes with Esc; the help screen lists the whole key map;
+  - a round repaints only the changed cells;
+  - a large level generates in under 50 ms, and a crowded round stays within the turn budget, run in the browser through `e2e/harness/`.
+  - The smoke test runs its whole loop in each engine too. WebKit is the engine of Safari, not Safari itself; a play in desktop Safari at the Content complete gate is the last check.
+  - Polish found by the checks: the page now keeps unused printable keys from the browser, so a stray / or ' no longer opens Firefox's quick find, which took every key after it away from the game.
 - **Not criteria, but owned:** the theme palettes and tile sets are stubs read by the renderer (task 4.2). The spell list grows from 15 toward 30 in task 4.6.

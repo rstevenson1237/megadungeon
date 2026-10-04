@@ -2,8 +2,8 @@ import { describe, expect, it } from 'vitest';
 import type { CharacterPaneData } from '../src/ui/character-pane.ts';
 import { CP437_TO_UNICODE } from '../src/ui/cp437.ts';
 import { COLS, Grid } from '../src/ui/grid.ts';
-import { KEY_BINDINGS, keyToCommand } from '../src/ui/input.ts';
-import { Menu } from '../src/ui/overlay.ts';
+import { KEY_BINDINGS, claimsKey, keyToCommand } from '../src/ui/input.ts';
+import { FULL_WINDOW, Menu } from '../src/ui/overlay.ts';
 import { Shell } from '../src/ui/shell.ts';
 
 const text = (g: Grid, x: number, y: number, w: number): string =>
@@ -220,5 +220,28 @@ describe('overlays', () => {
     shell.draw(g);
     expect(text(g, 72, 10, 1)).toBe('│');
     expect(text(g, 71, 10, 1)).toBe('│');
+  });
+});
+
+describe('help screen and browser keys (task 4.12)', () => {
+  it('shows every action of the key map in full, inside the help window', () => {
+    const shell = newShell();
+    press(shell, '?');
+    const window = screen(shell)
+      .slice(FULL_WINDOW.y + 1, FULL_WINDOW.y + FULL_WINDOW.h - 1)
+      .map((l) => l.slice(FULL_WINDOW.x + 1, FULL_WINDOW.x + FULL_WINDOW.w - 1));
+    // The wrapped action column, read back as one line per key.
+    const words = window.join(' ').replace(/\s+/g, ' ');
+    for (const b of KEY_BINDINGS) expect(words).toContain(`${b.keys} ${b.action}`.replace(/\s+/g, ' '));
+    expect(words).toContain('In menus, arrows or W/S move the selection and Enter confirms.');
+    expect(words).toContain('Esc close');
+  });
+
+  it('keeps every unmodified printable key from the browser, and leaves shortcuts and named keys alone', () => {
+    for (const key of ['/', "'", '?', 'k', 'W', '1', ' ']) expect(claimsKey({ key }), key).toBe(true);
+    expect(claimsKey({ key: 'r', ctrlKey: true })).toBe(false);
+    expect(claimsKey({ key: 'l', metaKey: true })).toBe(false);
+    expect(claimsKey({ key: 'd', altKey: true })).toBe(false);
+    for (const key of ['F5', 'F12', 'Backspace', 'Tab', 'PageDown']) expect(claimsKey({ key }), key).toBe(false);
   });
 });

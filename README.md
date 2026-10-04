@@ -21,6 +21,7 @@ npm run typecheck
 npm test
 npm run build        # production build into dist/
 npm run ci           # everything CI runs
+npm run smoke        # after a build: the browser smoke test and checks in Chromium, Firefox and WebKit
 ```
 
 CI (`.github/workflows/ci.yml`) runs the content check, typecheck, tests and build on every push and pull request. Every merge to `main` also deploys the build to GitHub Pages at <https://rstevenson1237.github.io/megadungeon/>. Pages must be enabled once in the repository settings (Settings, Pages, Source: GitHub Actions).
