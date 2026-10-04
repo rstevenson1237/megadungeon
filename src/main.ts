@@ -7,6 +7,7 @@ import { SaveSlot, idbStore } from './game/store.ts';
 import { runOptionsFor } from './game/world.ts';
 import { App } from './ui/app.ts';
 import { Grid } from './ui/grid.ts';
+import { claimsKey } from './ui/input.ts';
 import { mountScreen } from './ui/screen.ts';
 
 // The title screen, character creation, then a run from the surface village down through generated levels.
@@ -60,6 +61,8 @@ if (root) {
       if (app.handleKey(e)) {
         e.preventDefault();
         redraw();
+      } else if (claimsKey(e)) {
+        e.preventDefault();
       }
     });
     redraw();

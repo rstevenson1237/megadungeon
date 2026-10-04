@@ -94,3 +94,11 @@ export function keyToCommand(e: KeyInput): Command | undefined {
   }
   return undefined;
 }
+
+/**
+ * Whether the page keeps an unused key from the browser: any printable key pressed without Ctrl, Alt or Meta. Firefox
+ * opens its quick find on / and ', and the find bar then takes every key after it, WASD included, away from the game.
+ */
+export function claimsKey(e: KeyInput): boolean {
+  return !e.ctrlKey && !e.altKey && !e.metaKey && [...e.key].length === 1;
+}

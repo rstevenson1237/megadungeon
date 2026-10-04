@@ -2,27 +2,39 @@
 // large level with every creature it holds plus extra ones, all alert and hunting, so well over the 50 a round
 // that Spec 04 simulates. The player is too tough to die, so every round is a full round of creature turns.
 
+import type { ContentBundle, Spell } from '../src/core/schemas.ts';
+import type { GameContent } from '../src/game/content.ts';
 import { Game, createPlayer } from '../src/game/game.ts';
 import { creature } from '../src/game/monsters.ts';
 import { runOptionsFor } from '../src/game/world.ts';
 import { generateLevel } from '../src/rules/world/generate.ts';
-import { CONTENT, ITEMS, SPELLS } from './helpers.ts';
-import { FROZEN } from './frozen.ts';
+import type { ItemData } from '../src/rules/items/magic.ts';
 
 const BEHAVIOURS = ['brute', 'skirmisher', 'caster', 'pack', 'coward', 'ambusher'] as const;
 
-/** A large level, crowded with `total` alert creatures of every behaviour. */
-export function crowdedGame(total = 80): Game {
+/** What the crowded game is built from: the tables the level is rolled from, and the game's own content. */
+export interface CrowdContent {
+  levels: ContentBundle;
+  spells: Spell[];
+  items: ItemData;
+  content: GameContent;
+}
+
+/**
+ * A large level, crowded with `total` alert creatures of every behaviour. The content is passed in so the browser
+ * checks (task 4.12, `e2e/harness.ts`) can build the same game from the bundled tables.
+ */
+export function crowdedGame(from: CrowdContent, total = 80): Game {
   let seed = 1;
   let depth = 61;
-  let options = runOptionsFor(FROZEN, seed);
+  let options = runOptionsFor(from.levels, seed);
   while (options.sizeFor!(depth) !== 'large' || options.layout!.villages.some((v) => v.level === depth)) {
     depth++;
-    if (depth > 99) [seed, depth, options] = [seed + 1, 61, runOptionsFor(FROZEN, seed + 1)];
+    if (depth > 99) [seed, depth, options] = [seed + 1, 61, runOptionsFor(from.levels, seed + 1)];
   }
   const level = generateLevel(seed, depth, 'large', options.styleFor!(depth), options.contentsFor!(depth));
   const player = createPlayer({ combatStep: 12, combatDice: 6, combatMax: 6 });
-  const game = new Game(seed, level, player, { spells: SPELLS, items: ITEMS, content: CONTENT });
+  const game = new Game(seed, level, player, { spells: from.spells, items: from.items, content: from.content });
   const taken = new Set(game.state.monsters.map((m) => `${m.x},${m.y}`));
   taken.add(`${game.state.map.player.x},${game.state.map.player.y}`);
   let id = 90_000;
