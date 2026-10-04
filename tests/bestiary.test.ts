@@ -17,7 +17,7 @@ interface Row {
 }
 const bundle = contentBundle as unknown as ContentBundle;
 const monsters = (bundle.tables['monsters'] as unknown as Row[]).filter((m) => !m.tags?.includes('stub'));
-const bosses = (bundle.tables['bosses'] as unknown as Row[]).filter((b) => !b.tags?.includes('stub'));
+const bosses = (bundle.tables['bosses'] as unknown as Row[]).filter((b) => !b.tags?.includes('final'));
 const window = (r: Row): [number, number] => r.depth ?? [1, 100];
 
 describe('launch monsters', () => {

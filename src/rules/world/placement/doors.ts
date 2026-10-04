@@ -43,8 +43,8 @@ export function placeDoors(board: Board, theme: PlacementTheme | undefined, rng:
 const isDoorCell = (c: number): boolean => c === DOOR || c === SECRET_DOOR || c === LOCKED_DOOR || c === SEALED_DOOR;
 
 function downReachable(board: Board): boolean {
-  if (!board.down) return true;
-  return board.openDistances()[board.index(board.down)]! >= 0;
+  const open = board.openDistances();
+  return [board.down, board.goal].every((p) => !p || open[board.index(p)]! >= 0);
 }
 
 /** The rooms of the open region with their walking distance from the up stair: the distance to the cell nearest each centre. */

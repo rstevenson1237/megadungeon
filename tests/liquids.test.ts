@@ -112,7 +112,7 @@ describe('themes pick the layout (Spec 02, task 2.3)', () => {
       for (let depth = 1; depth <= 100; depth++) {
         run.travel('down');
         if (run.inVillage) continue;
-        const expected = depth === 100 ? 'rooms_and_corridors' : layoutOf.get(layout.themes[depth]!);
+        const expected = layoutOf.get(layout.themes[depth]!);
         const level = run.game!.state.map.level;
         expect(level.layout, `seed ${seed} level ${depth}`).toBe(expected);
         expect(checkLevel(level), `seed ${seed} level ${depth}`).toBeNull();

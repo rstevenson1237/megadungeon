@@ -15,7 +15,7 @@ Every criterion below has an owner. Test files are in `tests/`; the browser smok
 | Spec | Criteria | Built and tested | Stubbed | Phase 4 |
 | --- | --- | --- | --- | --- |
 | 01 Rendering and UI shell | 14 | 14 | 0 | 0 |
-| 02 Dungeon generation | 14 | 13 | 1 | 0 |
+| 02 Dungeon generation | 14 | 14 | 0 | 0 |
 | 03 Character system | 12 | 11 | 1 | 0 |
 | 04 Combat and magic | 11 | 11 | 0 | 0 |
 | 05 Items, treasure and inventory | 9 | 9 | 0 | 0 |
@@ -23,12 +23,12 @@ Every criterion below has an owner. Test files are in `tests/`; the browser smok
 | 07 Villages and economy | 9 | 9 | 0 | 0 |
 | 08 Content tables | 6 | 5 | 0 | 1 |
 | 09 Save, load and run | 9 | 9 | 0 | 0 |
-| **Total** | **92** | **89** | **2** | **1** |
+| **Total** | **92** | **90** | **1** | **1** |
 
 Beyond the criteria, the plan gives Phase 4 the following work, so it is owned and not left open:
 
 - Content to launch minimums: tasks 4.2 to 4.9.
-- The level 100 set piece and the real final boss: task 4.10.
+- The level 100 set piece and the real final boss: task 4.10, done (the audit rows that waited on it are updated).
 - Balance: task 4.11.
 - Chrome, Firefox and Safari checks: task 4.12.
 - The release policy for saves across content changes: decided at the Content complete gate.
@@ -59,8 +59,8 @@ Beyond the criteria, the plan gives Phase 4 the following work, so it is owned a
 | (A) The generation criteria are checked over 10,000 seeds with one level each, plus every level 1 to 100 of 100 seeds. | Built and tested | `placement-sweep-1.test.ts` to `placement-sweep-4.test.ts`; `placement-every-level-1.test.ts` to `placement-every-level-4.test.ts` |
 | (A) A change to one content table changes only the step that rolls it and the steps after it. | Built and tested | `determinism.test.ts` (monster, gem and graffiti rows) |
 | (A) The named rival carries its loot between appearances and, once killed, drops it with its journal and never appears again. | Built and tested | `connective.test.ts` (task 3.10) |
-| (A) Reading a weakness chain's last entry weakens its boss; each artifact carried removes one die from the final boss when it becomes alert. | Stubbed | `connective.test.ts` (task 3.10) proves both on the stub final boss. Task 4.10 replaces the stub with the level 100 set piece and the real final boss. |
-| The same seed and level number always produce a byte-identical level. | Built and tested | `determinism.test.ts` (stored whole-level hashes, generators 3 to 5); `placement.test.ts` |
+| (A) Reading a weakness chain's last entry weakens its boss; each artifact carried removes one die from the final boss when it becomes alert. | Built and tested | `connective.test.ts` (task 3.10) proves both; `throne.test.ts` (task 4.10) proves the seals against the generated final boss on the real level 100. |
+| The same seed and level number always produce a byte-identical level. | Built and tested | `determinism.test.ts` (stored whole-level hashes, generators 3 to 6); `placement.test.ts` |
 | Generating level N never requires generating any other level. | Built and tested | `placement.test.ts` (determinism and independence) |
 | 100% of levels pass four-direction connectivity from the up stair to every walkable cell. | Built and tested | placement sweeps (`placement-checks.ts`); `world-rooms.test.ts`; `world-layouts.test.ts` |
 | 100% of levels have both stairs (only an up stair on 100) and any teleporter on a path with no secret door, locked door, deep water or lava. | Built and tested | placement sweeps; `placement.test.ts` (validation) |
@@ -166,7 +166,7 @@ Beyond the criteria, the plan gives Phase 4 the following work, so it is owned a
 | Continue after a quit or closed tab resumes at the last rest with nothing since kept. | Built and tested | `app-lifecycle.test.ts` (continue); `e2e/smoke.spec.ts` (a reload in the browser) |
 | A saved and reloaded run is identical: every level delta, quest, identified kind and journal entry matches. | Built and tested | `save.test.ts` (save and reload); `connective.test.ts` (the rival and weaknesses) |
 | Each death option works as its table row says, and the death is on the leaderboard before the choice. | Built and tested | `app-lifecycle.test.ts` (death); `gate-loop.test.ts` |
-| Reaching level 100 and defeating the final boss each record on the leaderboard, and play continues. | Built and tested | `app-lifecycle.test.ts`; `connective.test.ts` (the generated stub final boss killed through the app) |
+| Reaching level 100 and defeating the final boss each record on the leaderboard, and play continues. | Built and tested | `app-lifecycle.test.ts`; `connective.test.ts` (the generated final boss killed through the app) |
 | A save from each earlier format version loads through its migrations; a newer-version save is refused cleanly. | Built and tested | `save.test.ts` (versions and migration, formats 1 to 6) |
 | A full 100-level run's save stays under 1 MB. | Built and tested | `save.test.ts` (size) |
 

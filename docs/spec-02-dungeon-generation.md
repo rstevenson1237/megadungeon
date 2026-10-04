@@ -101,7 +101,7 @@ Each theme picks a size class and one of eight layout algorithms; the theme's pa
   - **Maze with crypts:** a one-cell recursive-backtracker maze on odd cells; crypts of 5 or 7 by 3 or 5 cells are cut into it, aligned to the maze.
   - **Freeform chambers:** one chamber per 330 map cells, each an ellipse with one or two smaller ellipses attached, placed apart; the chambers are joined as a spanning tree of L-shaped corridors, plus a few extra links.
   - **Disjoint rooms:** one room in about 70% of the cells of a sparse grid (22 x 10 cells each), joined as a spanning tree plus extra links, all by long corridors. Doors, and so the secret ones, come with the placement pipeline (task 2.4), which may only make a door secret where another route keeps the critical path open.
-  - **Set piece:** until the level 100 template (task 4.10) it uses rooms and corridors.
+  - **Set piece:** the throne template of generator version 6 (task 4.10, clarification below); generator versions 3 to 5 use rooms and corridors.
 - **Joining regions:** a separate region is joined to the main one by an L-shaped corridor between the nearest pair of cells; where the corridor crosses deep water it is a ford of shallow water, and across lava, plain floor.
 - **Stairs:** both stairs go in the interior of a room (a cell not on the rectangle's edge, and plain floor). In mazes, warrens and caves, where the far end of the level is often a dead end or a tunnel, a stair that finds no room cell far enough goes on any plain floor cell far enough instead.
 - **Fallback:** after 20 failed tries a level tries rooms and corridors with 20 more sub-seeds, and only then two fixed rooms joined by one corridor.
@@ -246,7 +246,7 @@ From Intake Addendum A (findings A6 to A8, C2, C3). All figures are starting val
 
 **The final boss and artifact seals**
 
-- **Stub final boss:** until the level 100 set piece (task 4.10), level 100 is a rooms-and-corridors level of The Abyssal Throne theme. It places one boss drawn from the boss rows tagged `final`, rated 20d6+6, in the room farthest from the up stair. It never flees, is alert once the player is in its room, and holds no artifact.
+- **Stub final boss:** until the level 100 set piece (task 4.10, generator version 6), level 100 is a rooms-and-corridors level of The Abyssal Throne theme. It places one boss drawn from the boss rows tagged `final`, rated 20d6+6, in the room farthest from the up stair. It never flees, is alert once the player is in its room, and holds no artifact.
 - **Artifact seals:** when the final boss first becomes alert, it loses one die for each artifact the player carries or wears, down to a minimum of 1. The log says so. The count is made once.
 
 - **Clarification (task 3.10, proposed and approved October 2, 2026):** where the rules above leave a detail open, the build reads it as follows.
@@ -257,6 +257,15 @@ From Intake Addendum A (findings A6 to A8, C2, C3). All figures are starting val
   - **The rival's loot** is what it carries when the player leaves the level, kept with the run (save format 6) until it next appears to the player, on any of its levels, which takes it up again. On a level already visited it stands where it was left. A rival killed on one level is gone from every level of its appearances, visited or not.
   - **The journal** is a book named "Corvin the Bold's journal". Its text reads: Corvin the Bold's journal. The last page reads: "The rest of the haul is stashed on level 41, where no one will look."
   - **Saves** keep each rival's carried loot, whether it is hostile, and whether it is dead, and the levels whose boss's weakness has been read (save format 6). A format 5 save loads with none of them.
+
+- **Clarification (task 4.10, proposed October 4, 2026, awaiting approval):** where the rules above leave a detail open, the build reads it as follows. All figures are starting values for playtesting.
+  - **Generator version 6:** level 100 becomes the throne set piece, which changes what a seed produces, so it is generator version 6. Versions 3 to 5 are kept, and version 5 still builds level 100 as rooms and corridors, so a save keeps the levels it started with. The stored hashes of versions 3 to 5 do not change; version 6 has its own.
+  - **The template, "The Abyssal Throne" (layout `set_piece`, large):** from west to east, an antechamber holding the up stair, a pillared hall, and the throne room; two to four side chambers open off the hall, each on the north or south side in one of three slots along the hall. Rooms are joined by straight passages one cell wide and three long (the hall to a side chamber, and the three rooms of the main axis, all along the middle row). Doors come from the usual step, so each passage may have one. Level 100 has no down stair.
+  - **Seeded variation:** the antechamber is 9 to 13 by 7 to 9 cells; the hall 52 to 64 long and 7, 9 or 11 high; the throne room 27 to 35 by 15 to 21; each side chamber 9 to 13 by 6 to 8, at a seeded place in its slot; the middle row of the main axis moves up to 3 cells off the level's middle. Pillars are single wall cells every fourth cell on two rows of the hall and four rows of the throne room, never on a room's edge or the middle row, so every floor cell stays four-way connected. Nothing else about the template is random.
+  - **Rooms and stairs:** `Level.rooms` lists the antechamber, the hall, the side chambers by position, and the throne room last. The up stair goes in the antechamber. The throne room is the boss room, set by the template instead of the farthest-room rule; a locked or secret door may not cut it off from the up stair, as the down stair may not be cut off on other levels. Every other placement step runs as on any level (the boss room takes nothing else).
+  - **The final bosses:** the `final` boss rows are three: The King Below (a demon, brute), The Unnamed Regent (an aberration, caster) and The Seat Itself (a slow construct, brute), all for level 100 only and rated 20d6+6 by the rule above. The seed picks one, with the usual weights. None is tagged `undead`, so Turn Undead cannot send the last boss running. The stub row is removed.
+  - **Artifact seals** work as above, on whichever final boss the level holds. The log line names it as any boss is named in the log (below), so it reads "The seals of your 3 artifacts burn against The King Below: it loses 3 dice."
+  - **Boss names in the log:** a boss has a proper name, so the log writes it without "the" ("You hit Grask the Pale."); an ordinary monster keeps "the".
 
 **Acceptance criteria changed and added**
 

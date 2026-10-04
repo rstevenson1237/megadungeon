@@ -25,6 +25,7 @@ import {
   LEVEL_SIZES,
   SUPPORTED_GENERATORS,
   MAX_DEPTH,
+  SET_PIECE_GENERATOR,
   emptyPlacements,
   type Level,
   type Placements,
@@ -145,7 +146,8 @@ function plainFloorCells(cells: Uint8Array, width: number): Point[] {
  * Step 3, "Stairs": the up stair in a random room, then the down stair at least 60% of the
  * longest walkable distance away (none on level 100). Returns null when no cell qualifies,
  * which makes the attempt fail validation. With `loose`, a stair that finds no room cell
- * (or no room cell far enough) goes on any plain floor cell instead.
+ * (or no room cell far enough) goes on any plain floor cell instead. With `upRoom` (the set piece) the
+ * up stair goes in that room.
  */
 export function placeStairs(
   cells: Uint8Array,
@@ -155,11 +157,12 @@ export function placeStairs(
   depth: number,
   rng: Rng,
   loose = false,
+  upRoom?: Rect,
 ): { up: Point; down: Point | null } | null {
   let spots = roomInteriorCells(cells, width, rooms);
   if (spots.length === 0 && loose) spots = plainFloorCells(cells, width);
   if (spots.length === 0) return null;
-  const up = rng.pick(spots);
+  const up = rng.pick(upRoom ? roomInteriorCells(cells, width, [upRoom]) : spots);
   cells[up.y * width + up.x] = STAIRS_UP;
   if (depth >= MAX_DEPTH) return { up, down: null };
 
@@ -232,8 +235,9 @@ function build(
   };
 }
 
-/** The algorithm that really builds a level: the set piece is rooms and corridors until task 4.10. */
-const algorithmFor = (layout: LayoutAlgorithm): LayoutAlgorithm => (layout === 'set_piece' ? 'rooms_and_corridors' : layout);
+/** The algorithm that really builds a level: before generator version 6 the set piece is rooms and corridors. */
+const algorithmFor = (layout: LayoutAlgorithm, version: number): LayoutAlgorithm =>
+  layout === 'set_piece' && version < SET_PIECE_GENERATOR ? 'rooms_and_corridors' : layout;
 
 /**
  * One try with one sub-seed: carve, connect, stairs, then (given contents) steps 4 to 11. Null when the
@@ -260,14 +264,16 @@ function attempt(
     liquid: style.liquid ?? DEFAULT_STYLE.liquid,
     pillared: style.pillared ?? DEFAULT_STYLE.pillared,
   };
-  const carved = carveLayout(style.layout, cells, width, height, layout, variants);
+  const algorithm = algorithmFor(style.layout, version);
+  const carved = carveLayout(algorithm, cells, width, height, layout, variants);
   if (!carved) return null;
   connectRegions(cells, width, height, null, layout);
   const rooms = carved.rooms ?? findClearings(cells, width, height);
   if (rooms.length === 0) return null;
-  const stairs = placeStairs(cells, width, height, rooms, depth, layout, carved.looseStairs);
+  const upRoom = carved.upRoom === undefined ? undefined : rooms[carved.upRoom];
+  const stairs = placeStairs(cells, width, height, rooms, depth, layout, carved.looseStairs, upRoom);
   if (!stairs) return null;
-  if (!contents) return build(version, runSeed, depth, size, algorithmFor(style.layout), attempts, fallback, cells, rooms, stairs);
+  if (!contents) return build(version, runSeed, depth, size, algorithm, attempts, fallback, cells, rooms, stairs);
   const placed = placeContents({
     cells,
     width,
@@ -278,12 +284,13 @@ function attempt(
     size,
     depth,
     literalRooms: carved.rooms !== null,
+    bossRoom: carved.bossRoom,
     contents,
     steps: placementStreams(seed, version),
     strict,
   });
   if (!placed) return null;
-  return build(version, runSeed, depth, size, algorithmFor(style.layout), attempts, fallback, cells, placed.rooms, stairs, placed.placements);
+  return build(version, runSeed, depth, size, algorithm, attempts, fallback, cells, placed.rooms, stairs, placed.placements);
 }
 
 /**

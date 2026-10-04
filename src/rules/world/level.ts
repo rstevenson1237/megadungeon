@@ -20,19 +20,22 @@ export const MAX_DEPTH = 100;
  * Version of the generator. Saved with the run so an older run keeps its old generator
  * (Spec 02). Bump it for any change that alters what a seed produces.
  */
-export const GENERATOR_VERSION = 5;
+export const GENERATOR_VERSION = 6;
 
 /**
  * Every generator version this build can still run, so a save keeps the levels it started with (Spec 02, Spec 09).
  * Version 3 drew placement steps 4 to 11 from one shared contents stream; version 4 gives each step its own; version 5
- * places the stub final boss on level 100 (Spec 02, Addendum A; task 3.10).
+ * places the stub final boss on level 100 (Spec 02, Addendum A; task 3.10); version 6 builds level 100 as the throne
+ * set piece (task 4.10).
  */
-export const SUPPORTED_GENERATORS: readonly number[] = [3, 4, 5];
+export const SUPPORTED_GENERATORS: readonly number[] = [3, 4, 5, 6];
 
 /** The final boss's rating, 20d6+6 (Spec 02, Depth scaling). */
 export const FINAL_BOSS_RATING = { dice: 20, modifier: 6 } as const;
 /** The generator version from which level 100 holds the stub final boss (Spec 02, Addendum A). */
 export const FINAL_BOSS_GENERATOR = 5;
+/** The generator version from which a `set_piece` layout is the throne template, not rooms and corridors (task 4.10). */
+export const SET_PIECE_GENERATOR = 6;
 
 /** One character per map cell in `Level.tiles`. */
 export const TILE = {

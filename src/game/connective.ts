@@ -7,7 +7,7 @@ import type { RollMode } from '../rules/character/dice.ts';
 import type { BookItem } from '../rules/items/types.ts';
 import type { Loot } from '../rules/world/level.ts';
 import type { Link } from '../rules/world/run-layout.ts';
-import { addLoot } from './combat.ts';
+import { addLoot, nameOf } from './combat.ts';
 import type { Game, PlayerState } from './game.ts';
 import type { Monster } from './monsters.ts';
 
@@ -111,7 +111,7 @@ export function breakSeals(game: Game, m: Monster): void {
   const lost = Math.min(count, Math.max(0, m.dice - 1));
   if (count === 0) return;
   m.dice -= lost;
-  const name = m.kind === 'monster' ? `the ${m.name}` : m.name;
+  const name = nameOf(m);
   const things = count === 1 ? 'artifact' : 'artifacts';
   game.queued.push({ kind: 'combat', text: `The seals of your ${count} ${things} burn against ${name}: it loses ${lost} ${lost === 1 ? 'die' : 'dice'}.` });
 }

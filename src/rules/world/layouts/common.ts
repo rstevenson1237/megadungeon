@@ -21,6 +21,9 @@ export interface Carved {
   rooms: Rect[] | null;
   /** True when the down stair may go outside a room if no room cell is far enough (Spec 02, step 3). */
   looseStairs: boolean;
+  /** The set piece fixes two rooms (indexes into `rooms`): the one holding the up stair and the boss's. */
+  upRoom?: number;
+  bossRoom?: number;
 }
 
 /** Cells kept as wall on every side: the edge ring and one more, so walls always draw beside floor. */
