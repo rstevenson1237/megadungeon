@@ -1,9 +1,9 @@
 // The leaderboard screen (Spec 01, "Overlays and screens"; Spec 09): every character that died or won, deepest level
 // first. All runs, or the seed of the day only. A full-grid screen from the title, a window over the main view from the
-// game menu; Enter switches the view and Esc closes.
+// game menu; Enter switches the view, Tab cycles the time filter (Spec 09, Addendum B) and Esc closes.
 
 import type { Command } from '../game/commands.ts';
-import type { BoardEntry, Leaderboard } from '../game/leaderboard.ts';
+import { type BoardEntry, type Leaderboard, type TimeFilter, timeOf } from '../game/leaderboard.ts';
 import { TRUNCATED } from './cp437.ts';
 import { COLS, type Grid, ROWS } from './grid.ts';
 import { type Overlay, type OverlayResult, drawWindow } from './overlay.ts';
@@ -25,9 +25,18 @@ const outcomeText = (e: BoardEntry): string => {
   }
 };
 
+/** Tab's order of the time filter, and how the title names each (Spec 09, Addendum B). */
+const FILTERS: readonly TimeFilter[] = ['all', 'turn', 'real'];
+const FILTER_NAME: Record<TimeFilter, string> = { all: 'All', turn: 'Turn-based', real: 'Real time' };
+
+/** The class column: the class, then "RT" for a real-time run. */
+const classText = (e: BoardEntry): string => (timeOf(e) === 'real' ? `${e.className} RT` : e.className);
+
 export class LeaderboardOverlay implements Overlay {
   /** The seed-of-the-day view when set. */
   daily = false;
+  /** Which time mode's runs show. */
+  time: TimeFilter = 'all';
   scroll = 0;
 
   constructor(
@@ -37,14 +46,15 @@ export class LeaderboardOverlay implements Overlay {
   ) {}
 
   entries(): BoardEntry[] {
-    return this.board.view(this.daily ? { daily: this.today } : 'all');
+    return this.board.view(this.daily ? { daily: this.today } : 'all', this.time);
   }
 
   draw(grid: Grid): void {
-    drawWindow(grid, this.area, this.daily ? `Leaderboard: seed of the day, ${this.today}` : 'Leaderboard: all runs');
+    const which = this.daily ? `seed of the day, ${this.today}` : 'all runs';
+    drawWindow(grid, this.area, `Leaderboard: ${which}, time: ${FILTER_NAME[this.time]}`);
     const r = inner(this.area);
     const wide = r.w >= 90;
-    const cols: [string, number][] = [['#', 3], ['Name', 12], ['Class', 11], ['Lv', 3], ['Deepest', 8], ['Kills', 6], ['Score', 9]];
+    const cols: [string, number][] = [['#', 3], ['Name', 11], ['Class', 14], ['Lv', 3], ['Deepest', 7], ['Kills', 5], ['Score', 9]];
     if (wide) cols.push(['Seed', 9]);
     const used = cols.reduce((n, [, w]) => n + w + 1, 0);
     cols.push(['Outcome', Math.max(10, r.w - used - 1)]);
@@ -54,11 +64,12 @@ export class LeaderboardOverlay implements Overlay {
       x += width + 1;
     }
     const rows = this.entries();
-    if (rows.length === 0) grid.text(r.x + 1, r.y + 2, this.daily ? 'No runs on this seed of the day yet.' : 'Nothing here yet. Every character that dies or wins is recorded.', UI.label, UI.background);
+    const none = this.time !== 'all' ? `No ${FILTER_NAME[this.time].toLowerCase()} runs here yet.` : this.daily ? 'No runs on this seed of the day yet.' : 'Nothing here yet. Every character that dies or wins is recorded.';
+    if (rows.length === 0) grid.text(r.x + 1, r.y + 2, none, UI.label, UI.background);
     const room = r.h - 4;
     const first = Math.max(0, Math.min(this.scroll, rows.length - room));
     rows.slice(first, first + room).forEach((e, i) => {
-      const cells = [String(first + i + 1), e.name, e.className, String(e.level), String(e.deepest), String(e.kills), e.score.toLocaleString('en-US'), ...(wide ? [e.seed.toString(16).toUpperCase().padStart(8, '0')] : []), outcomeText(e)];
+      const cells = [String(first + i + 1), e.name, classText(e), String(e.level), String(e.deepest), String(e.kills), e.score.toLocaleString('en-US'), ...(wide ? [e.seed.toString(16).toUpperCase().padStart(8, '0')] : []), outcomeText(e)];
       let cx = r.x + 1;
       cells.forEach((text, n) => {
         const width = cols[n]![1];
@@ -66,7 +77,7 @@ export class LeaderboardOverlay implements Overlay {
         cx += width + 1;
       });
     });
-    grid.text(r.x + 1, r.y + r.h - 1, 'W/S scroll  Enter all runs / seed of the day  Esc close', OVERLAY.hint, UI.background);
+    grid.text(r.x + 1, r.y + r.h - 1, 'W/S scroll  Enter all runs / seed of the day  Tab time  Esc close', OVERLAY.hint, UI.background);
   }
 
   handle(command: Command): OverlayResult {
@@ -78,6 +89,13 @@ export class LeaderboardOverlay implements Overlay {
         this.daily = !this.daily;
         this.scroll = 0;
         return {};
+      case 'nextTarget':
+      case 'prevTarget': {
+        const step = command.type === 'nextTarget' ? 1 : FILTERS.length - 1;
+        this.time = FILTERS[(FILTERS.indexOf(this.time) + step) % FILTERS.length]!;
+        this.scroll = 0;
+        return {};
+      }
       case 'cancel':
         return { close: true };
       default:

@@ -58,16 +58,16 @@ describe('title screen (Spec 01, Overlays and screens)', () => {
     expect(app.title!.selected).toBe(0);
     press(app, 's');
     expect(app.title!.selected).toBe(1);
-    press(app, 'ArrowDown', 'ArrowDown', 'ArrowDown');
+    press(app, 'ArrowDown', 'ArrowDown', 'ArrowDown', 'ArrowDown');
     expect(app.title!.selected).toBe(0); // wrapped
     press(app, 'w');
-    expect(app.title!.selected).toBe(3);
+    expect(app.title!.selected).toBe(4);
     expect(screen(app).some((l) => l.includes('> Leaderboard'))).toBe(true);
   });
 
   it('with no save slot or leaderboard, Continue and Leaderboard say so and stay on the title', () => {
     const app = make();
-    press(app, 's', 's', 'Enter');
+    press(app, 's', 's', 's', 'Enter');
     expect(app.shell).toBeNull();
     expect(text(app)).toContain('There is no saved game yet');
     press(app, 's', 'Enter');

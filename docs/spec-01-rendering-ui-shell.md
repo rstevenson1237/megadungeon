@@ -272,6 +272,14 @@ Addendum B leaves seven points of the frame loop and pausing open. Approved as b
 - **P in a village of a real-time run** says "There is no clock to pause in a village." and spends nothing, since villages have no clock (Spec 04, Addendum B).
 - **The screen redraws after every frame in which a tick ran,** rather than only after ticks that changed something: the renderer repaints only the cells that changed, so an unchanged tick repaints nothing.
 
+## Clarification (task 5.6, proposed)
+
+Addendum B leaves three points of the time row and `?time=` open. Proposed as built, awaiting approval:
+
+- **The time row is the third row of the title screen,** after both New game rows and before Continue: "Time: Turn-based" or "Time: Real time", with "Enter to switch, for new games" on its right. Enter or E on it switches the mode and starts nothing.
+- **`?time=` presets the row for that page load only and is not remembered:** it outranks the choice kept in local storage, which it leaves as it was. Switching the row by hand, after a preset too, is remembered as usual. So a shared link with `?time=real` does not change the visitor's own setting.
+- **The mode of a new game is the row's when the game is chosen,** for both the random seed and the seed of the day. Quitting to the title and a death's "New seed" show the row as last chosen on this page.
+
 ## Acceptance criteria
 
 The shell is done when all of these pass in current Chrome, Firefox and Safari on desktop.

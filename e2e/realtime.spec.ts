@@ -3,7 +3,7 @@ import { descend, newCharacter, press, screen } from './play.ts';
 
 // The browser check of task 5.5 (Spec 01, Addendum B): in real time the frame loop runs ticks, and P, every overlay, a
 // hidden tab and lost focus stop them, while targeting and look do not; a target that goes leaves its message. The
-// page is the whole game from the check harness, with new runs in real time (task 5.6 brings the title row).
+// page is the whole game from the check harness, with new runs preset to real time as `?time=real` presets them.
 
 const REALTIME = 'http://localhost:5174/megadungeon/e2e/harness/realtime.html';
 

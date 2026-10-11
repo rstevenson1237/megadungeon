@@ -41,7 +41,10 @@ export interface AppDeps extends TitleDeps {
   onChange?: () => void;
   /** A new id for each character, for the leaderboard. */
   characterId?: (seed: number) => string;
-  /** The time mode of new runs: turn-based unless it says real time (Spec 04, Addendum B). Task 5.6 brings the title row and `?time=`. */
+  /**
+   * The time mode the title's time row is preset to, from the page parameter `?time=` (Spec 01, Addendum B). A preset
+   * outranks the choice remembered in `flags`, and is not remembered itself.
+   */
   time?: TimeMode;
 }
 
@@ -70,6 +73,8 @@ const blankPane = (): CharacterPaneData => ({
 });
 
 const WARNED = 'megadungeon.warned';
+/** The time mode of the next new game, as last chosen on the title screen (Spec 01, Addendum B). */
+export const TIME_KEY = 'megadungeon.time';
 const WARNING = 'Your save lives in this browser only: clearing site data deletes it. Export it from the game menu.';
 
 export class App {
@@ -81,7 +86,11 @@ export class App {
   /** The full-grid leaderboard opened from the title screen. */
   leaderboard: LeaderboardOverlay | null = null;
 
+  /** The time mode of the next new game: the preset, else the remembered choice, else turn-based. */
+  private time: TimeMode;
+
   constructor(private readonly deps: AppDeps) {
+    this.time = deps.time ?? (deps.flags?.getItem(TIME_KEY) === 'real' ? 'real' : 'turn');
     this.openTitle();
   }
 
@@ -98,6 +107,11 @@ export class App {
     const warned = this.deps.flags?.getItem(WARNED) === '1';
     this.title = new TitleScreen((choice) => this.openCreation(choice), {
       ...this.deps,
+      time: this.time,
+      onTime: (time) => {
+        this.time = time;
+        this.deps.flags?.setItem(TIME_KEY, time);
+      },
       onContinue: () => void this.continueGame(),
       ...(this.deps.board ? { onLeaderboard: () => (this.leaderboard = new LeaderboardOverlay(this.deps.board!, this.today, FULL_GRID)) } : {}),
       ...(this.deps.saves && !warned ? { warning: WARNING } : {}),
@@ -159,7 +173,7 @@ export class App {
       ...this.deps.runOptions?.(choice.seed),
       classDef: cls,
       characterId,
-      ...(this.deps.time ? { time: this.deps.time } : {}),
+      time: choice.time ?? this.time,
       ...(choice.daily ? { daily: choice.daily } : {}),
     }); // starts in the surface village
     const which = choice.daily ? `seed of the day ${choice.daily}` : 'random seed';
@@ -282,7 +296,8 @@ export class App {
         const bank = nextBank(dead.player.town.bank);
         const kept = choice.item ? describeItem(choice.item, dead.ctx().knowledge) : undefined;
         const label = `From your last character you keep ${bank} gp in the bank${kept ? ` and ${kept}` : ''}.`;
-        this.openCreation({ seed: dead.runSeed, ...(dead.daily ? { daily: dead.daily } : {}) }, { bank, item: choice.item, label });
+        // The new character plays the same time mode (Spec 09, Addendum B).
+        this.openCreation({ seed: dead.runSeed, time: dead.time, ...(dead.daily ? { daily: dead.daily } : {}) }, { bank, item: choice.item, label });
         break;
       }
       case 'save':

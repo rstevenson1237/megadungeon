@@ -1,6 +1,9 @@
 // The leaderboard (Spec 09, "Leaderboard"): every character that dies or wins, kept in local storage, sorted by the
 // deepest level reached and then the score, the best 100 kept. A character who dies after winning updates their entry
-// rather than adding a second one.
+// rather than adding a second one. Each entry carries its run's time mode, and the board filters by it (Spec 09,
+// Addendum B).
+
+import type { TimeMode } from './game.ts';
 
 /** The two methods of the browser's local storage that the board needs. */
 export interface TextStorage {
@@ -41,7 +44,15 @@ export interface BoardEntry {
   diedAtLevel?: number;
   /** When the entry was made. */
   date: string;
+  /** The run's time mode; entries written before save format 7 have none and count as turn-based (Spec 09, Addendum B). */
+  time?: TimeMode;
 }
+
+/** The leaderboard's time filter, which Tab cycles (Spec 09, Addendum B). */
+export type TimeFilter = 'all' | TimeMode;
+
+/** The time mode an entry was played in: turn-based unless it says real time. */
+export const timeOf = (e: BoardEntry): TimeMode => (e.time === 'real' ? 'real' : 'turn');
 
 export const BOARD_KEY = 'megadungeon.leaderboard';
 export const BOARD_SIZE = 100;
@@ -64,10 +75,12 @@ export class Leaderboard {
     }
   }
 
-  /** The entries in rank order: all runs, or only those of the seed of a given day. */
-  view(view: 'all' | { daily: string } = 'all'): BoardEntry[] {
-    const entries = this.all();
-    return (view === 'all' ? entries : entries.filter((e) => e.daily === view.daily)).sort(byRank);
+  /** The entries in rank order: all runs, or only those of the seed of a given day; of either time mode, or only one. */
+  view(view: 'all' | { daily: string } = 'all', time: TimeFilter = 'all'): BoardEntry[] {
+    return this.all()
+      .filter((e) => view === 'all' || e.daily === view.daily)
+      .filter((e) => time === 'all' || timeOf(e) === time)
+      .sort(byRank);
   }
 
   /**

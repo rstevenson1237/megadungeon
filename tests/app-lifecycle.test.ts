@@ -149,7 +149,7 @@ describe('Spec 09: continue', () => {
     await flush();
     expect(r.app.title!.hasSave).toBe(true);
     expect(text(r.app)).toContain('Resume at your last rest');
-    press(r.app, 's', 's', 'Enter'); // Continue
+    press(r.app, 's', 's', 's', 'Enter'); // Continue
     await flush();
     const back = r.app.shell!.run!;
     expect(back.inVillage).toBe(true);
@@ -171,21 +171,21 @@ describe('Spec 09: continue', () => {
     const reopened = new App({ ...r.app['deps'] });
     await flush();
     expect(reopened.title!.hasSave).toBe(true);
-    press(reopened, 's', 's', 'Enter');
+    press(reopened, 's', 's', 's', 'Enter');
     await flush();
     expect(reopened.shell!.run!.player.coins).toBe(40);
   });
 
   it('Continue with no save says so, and an unreadable save says why without crashing', async () => {
     const r = rig();
-    press(r.app, 's', 's', 'Enter');
+    press(r.app, 's', 's', 's', 'Enter');
     await flush();
     expect(text(r.app)).toContain('There is no saved game yet');
     const store = new MemoryStore();
     await new SaveSlot(store).write('{"format": 99}');
     const app = new App({ ...r.app['deps'], saves: new SaveSlot(store) });
     await flush();
-    press(app, 's', 's', 'Enter');
+    press(app, 's', 's', 's', 'Enter');
     await flush();
     expect(text(app)).toContain('newer version of the game');
     expect(app.shell).toBeNull();
