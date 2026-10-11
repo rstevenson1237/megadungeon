@@ -5,7 +5,8 @@ import { descend, newCharacter, openTitle, press, screen } from './play.ts';
 // The browser checks of task 4.12 (plan: "Every spec's criteria pass in Chrome, Firefox and Safari"). Every rule is
 // proved by the unit tests in Node; what can differ between browsers is the browser's own part, and these check it in
 // each engine: the canvas fitting the window, the glyphs the font paints, the repaint, the keyboard, the overlays,
-// and the two timing criteria (Spec 02, Spec 04). The smoke test (smoke.spec.ts) runs a whole loop in each engine too.
+// and the timing criteria (Spec 02, Spec 04, and Spec 04's real-time tick budget). The smoke test (smoke.spec.ts) runs
+// a whole loop in each engine too.
 
 const HARNESS = 'http://localhost:5174/megadungeon/e2e/harness/';
 const GOLDEN = new URL('./glyph-masks.json', import.meta.url);
@@ -181,4 +182,21 @@ test.describe('timing criteria', () => {
     expect(r.mean).toBeLessThan(5);
     expect(r.worst).toBeLessThan(50);
   });
+
+  for (const fighting of [false, true]) {
+    test(`Spec 04, Addendum B: a real-time round ${fighting ? 'with the player fighting' : 'with the player idle'} stays within the budget, and no tick takes over 16 ms`, async ({ page }) => {
+      await openHarness(page);
+      const r = await page.evaluate(
+        (f) =>
+          (window as unknown as { harness: { tickBudget: (f: boolean) => { creatures: number; dead: boolean; mean: number; worst: number; worstTick: number } } }).harness.tickBudget(f),
+        fighting,
+      );
+      note(`real-time round, 80 creatures, player ${fighting ? 'fighting' : 'idle'}`, `mean ${r.mean.toFixed(2)} ms, worst ${r.worst.toFixed(1)} ms, worst tick ${r.worstTick.toFixed(1)} ms`);
+      expect(r.creatures).toBe(80);
+      expect(r.dead).toBe(false);
+      expect(r.mean).toBeLessThan(5);
+      expect(r.worst).toBeLessThan(50);
+      expect(r.worstTick).toBeLessThan(16);
+    });
+  }
 });

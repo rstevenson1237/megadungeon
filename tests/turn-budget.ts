@@ -4,7 +4,7 @@
 
 import type { ContentBundle, Spell } from '../src/core/schemas.ts';
 import type { GameContent } from '../src/game/content.ts';
-import { Game, createPlayer } from '../src/game/game.ts';
+import { Game, TICKS_PER_ROUND, type TimeMode, createPlayer } from '../src/game/game.ts';
 import { creature } from '../src/game/monsters.ts';
 import { runOptionsFor } from '../src/game/world.ts';
 import { generateLevel } from '../src/rules/world/generate.ts';
@@ -21,10 +21,10 @@ export interface CrowdContent {
 }
 
 /**
- * A large level, crowded with `total` alert creatures of every behaviour. The content is passed in so the browser
- * checks (task 4.12, `e2e/harness.ts`) can build the same game from the bundled tables.
+ * A large level, crowded with `total` alert creatures of every behaviour, played in `time` mode. The content is passed
+ * in so the browser checks (task 4.12, `e2e/harness.ts`) can build the same game from the bundled tables.
  */
-export function crowdedGame(from: CrowdContent, total = 80): Game {
+export function crowdedGame(from: CrowdContent, total = 80, time: TimeMode = 'turn'): Game {
   let seed = 1;
   let depth = 61;
   let options = runOptionsFor(from.levels, seed);
@@ -34,7 +34,7 @@ export function crowdedGame(from: CrowdContent, total = 80): Game {
   }
   const level = generateLevel(seed, depth, 'large', options.styleFor!(depth), options.contentsFor!(depth));
   const player = createPlayer({ combatStep: 12, combatDice: 6, combatMax: 6 });
-  const game = new Game(seed, level, player, { spells: from.spells, items: from.items, content: from.content });
+  const game = new Game(seed, level, player, { spells: from.spells, items: from.items, content: from.content, time });
   const taken = new Set(game.state.monsters.map((m) => `${m.x},${m.y}`));
   taken.add(`${game.state.map.player.x},${game.state.map.player.y}`);
   let id = 90_000;
@@ -60,4 +60,68 @@ export function timeRounds(game: Game, rounds: number): { mean: number; worst: n
     worst = Math.max(worst, performance.now() - t);
   }
   return { mean: (performance.now() - start) / rounds, worst };
+}
+
+/** Real time: milliseconds per round and per tick over `rounds` rounds of 10 ticks, one tick at a time as the frame loop runs them. */
+export function timeTicks(game: Game, rounds: number, player: (game: Game) => void = () => undefined): { mean: number; worst: number; worstTick: number } {
+  let total = 0;
+  let worst = 0;
+  let worstTick = 0;
+  for (let r = 0; r < rounds; r++) {
+    const start = performance.now();
+    for (let t = 0; t < TICKS_PER_ROUND; t++) {
+      const s = performance.now();
+      player(game);
+      game.advance(1);
+      worstTick = Math.max(worstTick, performance.now() - s);
+    }
+    const took = performance.now() - start;
+    total += took;
+    worst = Math.max(worst, took);
+    game.state.player.pools.combat.dice = game.state.player.pools.combat.max; // never let the test character die
+  }
+  return { mean: total / rounds, worst, worstTick };
+}
+
+/**
+ * Bring `n` of the crowd to the player: the open floor cells nearest the player, by a walk over the floor, each take
+ * one creature, so the fight starts at once and the rest of the crowd is still simulated far off.
+ */
+export function surround(game: Game, n: number): void {
+  const { level, player } = game.state.map;
+  const w = level.width;
+  const seen = new Set([player.y * w + player.x]);
+  const queue = [player.y * w + player.x];
+  const cells: number[] = [];
+  for (let i = 0; i < queue.length && cells.length < n; i++) {
+    for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]] as const) {
+      const x = (queue[i]! % w) + dx;
+      const y = Math.floor(queue[i]! / w) + dy;
+      if (level.tiles[y]?.[x] !== '.' || seen.has(y * w + x)) continue;
+      seen.add(y * w + x);
+      queue.push(y * w + x);
+      if (!game.monsterAt(x, y)) cells.push(y * w + x);
+    }
+  }
+  const far = [...game.state.monsters].sort((a, b) => Math.abs(b.x - player.x) + Math.abs(b.y - player.y) - Math.abs(a.x - player.x) - Math.abs(a.y - player.y));
+  cells.slice(0, n).forEach((cell, i) => Object.assign(far[i]!, { x: cell % w, y: Math.floor(cell / w) }));
+  game.refreshSight();
+}
+
+/**
+ * Real time: the player fights the crowd, as fast as the cooldown allows: attacks a creature beside them, else steps
+ * toward the nearest. Each command is given in the tick its cooldown ends, so it is carried out at once.
+ */
+export function fightCrowd(game: Game): void {
+  if (!game.ready) return;
+  const { player } = game.state.map;
+  let near = game.state.monsters[0];
+  for (const m of game.state.monsters) {
+    if (Math.abs(m.x - player.x) + Math.abs(m.y - player.y) < Math.abs(near!.x - player.x) + Math.abs(near!.y - player.y)) near = m;
+  }
+  if (!near) return void game.command(() => game.act({ type: 'wait' }));
+  const dx = Math.sign(near.x - player.x);
+  const dy = dx === 0 ? Math.sign(near.y - player.y) : 0;
+  const result = game.command(() => game.act({ type: 'move', dx, dy }));
+  if (!result?.spent) game.command(() => game.act({ type: 'wait' }));
 }
