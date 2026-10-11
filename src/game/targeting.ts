@@ -40,8 +40,20 @@ export class Targeting {
   constructor(
     private readonly game: Game,
     readonly spec: TargetSpec,
-    readonly targets: Monster[],
+    public targets: Monster[],
   ) {}
+
+  /**
+   * Real time (Spec 01, Addendum B): the valid targets rebuilt at a tick. The selected creature stays selected while it
+   * is still valid; otherwise the selection moves to the nearest, the first of the list. False when none is left.
+   */
+  retarget(targets: Monster[]): boolean {
+    if (targets.length === 0) return false;
+    const kept = targets.indexOf(this.selected);
+    this.targets = targets;
+    this.index = kept >= 0 ? kept : 0;
+    return true;
+  }
 
   get selected(): Monster {
     return this.targets[this.index]!;

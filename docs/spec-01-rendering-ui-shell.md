@@ -260,6 +260,18 @@ From Intake Addendum B (requirements R1 to R3, decisions D1 to D3, D5, D6 and D1
 - [ ] In real time a selected target that dies or leaves sight moves the selection to the nearest valid target, or ends targeting with the message.
 - [ ] Z fast-forwards and stops on each Addendum A interruption, and on any key.
 
+## Clarification (task 5.5, proposed and approved October 11, 2026)
+
+Addendum B leaves seven points of the frame loop and pausing open. Approved as built:
+
+- **"Paused" shows whenever a real-time level's clock is stopped:** by P, by a hidden tab or lost focus, and under an overlay. The header reads "Goblin Warrens, Level 7 - Paused". A full-window overlay covers it.
+- **While paused, a movement key resumes and does nothing more,** after P as after lost focus. Every other key works as usual: free actions are free, and an action happens at once if the cooldown has ended (starting it), or is held until time runs again.
+- **The key that stops Z is used up:** it stops the fast-forward and does nothing else. Z pressed while paused by P starts the clock, since it asks time to run. A hidden tab or lost focus stops Z as well as pausing. When Z stops partway through a frame, the rest of that frame's ticks are not run, since they were counted at four times speed.
+- **An action chosen in an overlay during the cooldown** (equip, drop or use from the inventory, an altar's offering, freeing a captive) is held like any other command, and the overlays close, so time runs on to the end of the cooldown and the action happens then. Taking from an opened container stays free.
+- **A held shot or spell whose target is gone** by the tick the cooldown ends (dead, out of sight or out of range) is refused with "Your target is gone." and spends nothing.
+- **P in a village of a real-time run** says "There is no clock to pause in a village." and spends nothing, since villages have no clock (Spec 04, Addendum B).
+- **The screen redraws after every frame in which a tick ran,** rather than only after ticks that changed something: the renderer repaints only the cells that changed, so an unchanged tick repaints nothing.
+
 ## Acceptance criteria
 
 The shell is done when all of these pass in current Chrome, Firefox and Safari on desktop.

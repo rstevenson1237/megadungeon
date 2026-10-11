@@ -769,11 +769,10 @@ export class Game {
    * Poisoned, which stops recovery) it says so and spends no round.
    */
   waitUntilRecovered(): ActResult {
-    const { player, map } = this.state;
-    if (player.dead) return { messages: [{ kind: 'system', text: 'You are dead.' }], spent: false };
-    if (player.pools.combat.dice >= player.pools.combat.max) return { messages: [{ kind: 'system', text: 'You are already at full strength.' }], spent: false };
-    if (hasStatus(player.statuses, 'poisoned')) return { messages: [{ kind: 'system', text: 'The poison stops you recovering by waiting.' }], spent: false };
-    const inView = (): Monster[] => this.state.monsters.filter((m) => !isAlly(m) && map.visible[m.y * map.level.width + m.x] === 1);
+    const { player } = this.state;
+    const problem = this.waitProblem();
+    if (problem) return { messages: [{ kind: 'system', text: problem }], spent: false };
+    const inView = (): Monster[] => this.hostilesInView();
     const seenAtStart = new Set(inView());
     const messages: LogMessage[] = [];
     let spent = false;
@@ -794,6 +793,21 @@ export class Game {
       }
     }
     return { messages, spent };
+  }
+
+  /** Why Z cannot wait now (Spec 01, Addendum A): dead, already at full strength, or Poisoned. Undefined when it can. */
+  waitProblem(): string | undefined {
+    const { player } = this.state;
+    if (player.dead) return 'You are dead.';
+    if (player.pools.combat.dice >= player.pools.combat.max) return 'You are already at full strength.';
+    if (hasStatus(player.statuses, 'poisoned')) return 'The poison stops you recovering by waiting.';
+    return undefined;
+  }
+
+  /** The creatures in view that are not the player's allies: one coming into view stops Z (Spec 01, Addendum A). */
+  hostilesInView(): Monster[] {
+    const { map } = this.state;
+    return this.state.monsters.filter((m) => !isAlly(m) && map.visible[m.y * map.level.width + m.x] === 1);
   }
 
   /** An Asleep or Held player cannot act: the action is lost and the round goes by (Spec 04, Status effects). */

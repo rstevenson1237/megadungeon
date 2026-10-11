@@ -3,7 +3,7 @@
 // when a new run begins; the leaderboard; and the three ways on from a death.
 
 import { formatSeed } from '../core/rng.ts';
-import type { PlayerState } from '../game/game.ts';
+import type { PlayerState, TimeMode } from '../game/game.ts';
 import { Leaderboard, type TextStorage } from '../game/leaderboard.ts';
 import { type CreationContent, boardEntry, levelTenSteps, nextBank, randomName, recoverableItems, startingPlayer } from '../game/lifecycle.ts';
 import { SaveError, restoreRun, toSave } from '../game/save.ts';
@@ -41,6 +41,8 @@ export interface AppDeps extends TitleDeps {
   onChange?: () => void;
   /** A new id for each character, for the leaderboard. */
   characterId?: (seed: number) => string;
+  /** The time mode of new runs: turn-based unless it says real time (Spec 04, Addendum B). Task 5.6 brings the title row and `?time=`. */
+  time?: TimeMode;
 }
 
 /** What a new character on the seed brings from the one who died (Spec 09), and how the creation screen names it. */
@@ -157,6 +159,7 @@ export class App {
       ...this.deps.runOptions?.(choice.seed),
       classDef: cls,
       characterId,
+      ...(this.deps.time ? { time: this.deps.time } : {}),
       ...(choice.daily ? { daily: choice.daily } : {}),
     }); // starts in the surface village
     const which = choice.daily ? `seed of the day ${choice.daily}` : 'random seed';
@@ -290,6 +293,26 @@ export class App {
         break;
     }
     this.deps.onChange?.();
+  }
+
+  /** The shell of the run on screen, with no other screen over it: the frame loop drives its clock (Spec 01, Addendum B). */
+  get clock(): Shell | null {
+    return this.leaderboard || this.death || this.creation ? null : this.shell;
+  }
+
+  /** Whether a real-time run is on screen, where the browser's own key repeat is ignored (Spec 01, Addendum B). */
+  get realTime(): boolean {
+    return this.clock?.realTime ?? false;
+  }
+
+  /** A key comes up: in real time a held movement key stops walking. */
+  handleKeyUp(e: KeyInput): void {
+    this.clock?.keyUp(e);
+  }
+
+  /** The tab is hidden or the window loses focus: real time pauses until a key resumes it. */
+  loseFocus(): void {
+    this.clock?.loseFocus();
   }
 
   /** Handle a key press. Returns true if the key is in the key map, so the caller can stop the browser acting on it. */

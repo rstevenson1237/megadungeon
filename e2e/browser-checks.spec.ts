@@ -122,7 +122,7 @@ test.describe('Spec 01: the screen in play', () => {
   test('the help screen lists the whole key map', async ({ page }) => {
     await press(page, '?');
     const text = await screen(page);
-    for (const key of ['W A S D / arrows', 'Space', 'Tab / Shift+Tab', 'Enter', 'Esc', 'Z', 'E', 'X', 'G', 'F', 'C', 'Q', 'I', 'L', 'M', '?', 'J']) {
+    for (const key of ['W A S D / arrows', 'Space', 'Tab / Shift+Tab', 'Enter', 'Esc', 'Z', 'E', 'X', 'G', 'F', 'C', 'Q', 'I', 'L', 'M', '?', 'J', 'P']) {
       expect(text).toMatch(new RegExp(`│ ${key.replace(/[?/+]/g, '\\$&')} +\\S`));
     }
     expect(text).toContain('In menus, arrows or W/S move the selection and Enter confirms.');

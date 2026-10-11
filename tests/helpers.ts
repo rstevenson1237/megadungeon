@@ -146,9 +146,9 @@ export const testCharacter = (): CharacterPaneData => ({
 });
 
 /** A shell with a game loaded on the given level. */
-export function shellOn(level: Level, monsters: Monster[] = [], player: TestSetup = {}): Shell {
+export function shellOn(level: Level, monsters: Monster[] = [], player: TestSetup = {}, options: RunOptions = {}): Shell {
   const shell = new Shell('Test', testCharacter());
-  shell.setRun(new Run(1, testPlayer(player), { startDepth: 1, levelFor: () => level, spells: SPELLS, items: ITEMS, content: CONTENT }));
+  shell.setRun(new Run(1, testPlayer(player), { startDepth: 1, levelFor: () => level, spells: SPELLS, items: ITEMS, content: CONTENT, ...options }));
   shell.game!.state.monsters.push(...monsters);
   return shell;
 }
