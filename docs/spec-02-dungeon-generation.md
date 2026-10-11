@@ -274,6 +274,20 @@ From Intake Addendum A (findings A6 to A8, C2, C3). All figures are starting val
 - [ ] The named rival carries its loot between appearances and, once killed, drops it with its journal and never appears again.
 - [ ] Reading a weakness chain's last entry weakens its boss; each artifact carried removes one die from the final boss when it becomes alert.
 
+## Addendum B (approved October 11, 2026)
+
+From Intake Addendum B (finding F3). All figures are starting values for playtesting.
+
+- **Generation is untouched:** the time mode and the display never enter a seed, a stream or a level. The same seed, level number and generator version give the same level in every mode and display, and the seed sweeps run once, not per mode.
+- **Turns are rounds in both modes:** "turns away" for restocking and the 1 in 200 wandering chance count rounds, and in real time a round is 10 ticks (Spec 04, Addendum B). The wandering check is made at each round boundary from its own stream, as now.
+- **The runtime streams** are seeded as now, by the level and the arrival round, in both modes.
+- **Reproducibility in real time:** game time is counted in ticks, so a real-time session is fully determined by the seed and its input log: each command with the tick it was carried out on. The same seed and input log always give the same game state. Tests record and replay such logs; the game does not store them.
+
+**Acceptance criteria added**
+
+- [ ] A real-time session replayed from its seed and tick-stamped input log ends in an identical game state.
+- [ ] A level generated in real-time mode is identical to the same level generated in turn mode.
+
 ## Acceptance criteria
 
 The generator is done when an automated test run over 10,000 seeds (every level of each) passes all of these.

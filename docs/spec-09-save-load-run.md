@@ -139,6 +139,20 @@ From Intake Addendum A (findings A1, C2).
 
 - [ ] Before release, a save with a different content fingerprint is refused with the message above and changes nothing.
 
+## Addendum B (approved October 11, 2026)
+
+From Intake Addendum B (findings F4, decisions D3 and D6).
+
+- **Save format 7:** the run gains `time`, either `turn` or `real`. A format 6 save migrates on load as `turn`. Nothing else changes: saves are still made only at a village rest and on finishing creation, villages have no clock, so no tick, cooldown or creature schedule is ever saved. The round counter is saved as now.
+- **The display is not saved:** it is a browser preference (Spec 01, Addendum B).
+- **The leaderboard:** each entry records the run's `time` and shows "RT" after the class for a real-time run. Sorting is unchanged. Tab cycles the time filter, "All", "Turn-based", "Real time", alongside Enter's existing switch between all runs and the seed of the day. Entries written before format 7 count as turn-based.
+- **Death options** keep the run's mode: a new character on the same seed plays the same mode; a new seed returns to the title screen, where the time row chooses again.
+
+**Acceptance criteria added**
+
+- [ ] A format 6 save loads as a turn-based run; a real-time run saves and loads as real time.
+- [ ] Leaderboard entries carry their mode, show "RT" for real time, and the time filter shows the right entries.
+
 ## Acceptance criteria
 
 - [ ] Saving happens only on a village rest and on finishing creation, never anywhere else.

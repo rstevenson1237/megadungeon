@@ -10,7 +10,9 @@ Everything is already designed and approved. The documents in `docs/` are the sp
 | --- | --- |
 | `docs/00-intake.md` | Vision, pillars and every original requirement |
 | `docs/00a-intake-addendum.md` | Addendum A: what Phases 1 and 2 left open, and the new Phase 3 Systems closeout |
+| `docs/00b-intake-addendum.md` | Addendum B (approved October 11, 2026): real-time mode and the isometric display, Phases 5 and 6 |
 | `docs/spec-01-rendering-ui-shell.md` | Screen grid, renderer, CP437 font, panes, key map, targeting, overlays |
+| `docs/spec-01b-isometric-display.md` | Isometric pixel-art display and its artgen art pipeline (Addendum B) |
 | `docs/spec-02-dungeon-generation.md` | Seeds, run layout, level sizes, layout algorithms, pipeline, reachability, depth scaling, restocking, quests, connective elements |
 | `docs/spec-03-character-system.md` | Stats, dice pools, roll resolution, health, XP, the 20 classes, minor abilities |
 | `docs/spec-04-combat-magic.md` | Turns, awareness, attacks, spells, status effects, monster and NPC behaviour |
@@ -31,7 +33,7 @@ Everything is already designed and approved. The documents in `docs/` are the sp
 - **One task at a time,** in the order of `docs/10-implementation-plan.md`, only after the tasks it needs are done.
 - **A task is done when** its spec's acceptance criteria pass, with tests that prove it.
 - **Stop at every gate** (Playable slice, Systems complete, Systems complete replayed, Content complete) and wait for approval before starting the next phase. Phase 3 also stops after its approvals task (3.1), and Phase 4 after the style guide (task 4.1).
-- **Specs carry "Addendum A" sections** from Intake Addendum A; they are part of the spec once approved.
+- **Specs carry "Addendum A" sections** from Intake Addendum A, and "Addendum B" sections from Intake Addendum B; each is part of the spec once approved. Addendum B was approved October 11, 2026.
 - **After each task,** report briefly: what was built, which tests prove it, any departure from the spec, and the next task.
 
 ## Engineering rules
@@ -67,3 +69,5 @@ Everything is already designed and approved. The documents in `docs/` are the sp
 ## Where things stand
 
 Phases 1 and 2 are built. Intake Addendum A (`docs/00a-intake-addendum.md`) adds Phase 3, Systems closeout, and moves content to Phase 4. Task 3.1 is done: on October 2, 2026 the owner approved every pending clarification section and every "Addendum A" section as written, so no built rule changed. Tasks 3.2 to 3.4 are done, with every clarification approved. Task 3.5 is done, with every clarification approved. Tasks 3.6 and 3.7 are done, with every clarification approved. Task 3.8 is done, with every clarification approved. Task 3.9 is done, with every clarification approved. Tasks 3.10 and 3.11 are done, with every clarification approved; the audit is `docs/11-closeout-audit.md`. Phase 3 is complete: next is the gate Systems complete, replayed, which waits for the owner's approval before Phase 4.
+
+Intake Addendum B (`docs/00b-intake-addendum.md`, proposed October 11, 2026) adds a real-time mode and an isometric pixel-art display as runtime flags, in Phases 5 and 6 after the Content complete gate. The owner approved it, with every decision as recommended, on October 11, 2026 (task 5.1). The plan is iterated in later sessions before task 5.2.

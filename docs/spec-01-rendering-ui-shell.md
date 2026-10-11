@@ -226,6 +226,40 @@ From Intake Addendum A (findings A1, A4, A5, B5). All figures are starting value
 - [ ] Z stops on each listed interruption and when a die returns, and refuses with nothing to wait for.
 - [ ] L describes visible, remembered and unseen cells and costs no round.
 
+## Addendum B (approved October 11, 2026)
+
+From Intake Addendum B (requirements R1 to R3, decisions D1 to D3, D5, D6 and D10). All figures are starting values for playtesting.
+
+**Two runtime flags**
+
+- **Time:** turn-based (default) or real time (Spec 04, Addendum B). The title screen gains a row "Time: Turn-based" under New game; Enter on it switches between Turn-based and Real time. The choice applies to the next new game, is remembered in the browser's local storage, and can be preset with the page parameter `?time=real` or `?time=turn`. Continue always plays the save's own mode. A run's mode never changes.
+- **Display:** text (default) or isometric (Spec 01b). The game menu (Esc) gains "Display: Text"; Enter switches it at any moment, in the dungeon or a village, with no round spent. The choice is remembered in local storage and can be preset with `?display=iso` or `?display=text`. It is never saved with the run.
+- **Both flags are independent:** all four pairings are playable. The title, creation, death and leaderboard screens and the village menu are text in both displays.
+
+**Real time in the shell**
+
+- **Frame loop:** in real time the UI runs a frame loop (`requestAnimationFrame`) that turns elapsed time into ticks, 50 ms each, and calls the game's `advance` for them, at most 4 ticks a frame. A slow or stalled frame slows the game rather than jumping it ahead. The screen redraws after any tick that changed state. Turn mode keeps redrawing only after an action.
+- **Held keys:** the input layer tracks key down and key up for W A S D and the arrows. A held movement key moves again each time the player's cooldown ends; the browser's own key repeat is ignored. Any other key acts once per press.
+- **One held command:** a key pressed during the player's cooldown is held and carried out when it ends, a newer one replacing it (Spec 04, Addendum B).
+- **Pausing:** P pauses and resumes. The game also pauses while any overlay is open (inventory, spell list, level up, NPC talk, history, help, journal and the game menu), while the tab is hidden or the window loses focus, and on the death screen. Targeting (F, C) and look (L) do not pause. While paused the header shows "Paused" after the level name; no tick runs and held keys are dropped. Resuming after a hidden tab or lost focus needs a key press: P or any movement key.
+- **Z in real time** runs the game at four times speed (up to 4 ticks a frame at 12.5 ms each) until a Combat die returns or one of Addendum A's interruptions happens, with the same refusals. Any key stops it.
+- **Space** waits one round: it starts a 10-tick cooldown and does nothing else (Spec 03, Addendum B).
+- **Targeting in real time:** the list of valid targets is rebuilt every tick. The selected creature stays selected while it is still valid; if it stops being valid the selection moves to the nearest valid target, and with none left targeting ends and the log says "Your target is gone." Enter resolves against the target where it stands at that tick. An area footprint follows the selected creature.
+- **Look in real time:** the cursor stays on its cell while creatures move, and the description is rebuilt every tick.
+- **Message log:** in real time the turn marker means messages less than 2 rounds old draw bright. Repeats still collapse.
+- **The key map** gains P, "Pause or resume (real time)". In turn mode P says "There is no clock to pause in turn-based play." and spends nothing.
+
+**Isometric display:** the main view can be drawn as an isometric pixel-art view instead of glyphs; Spec 01b sets it out. The screen grid, panes, log, overlays, key map and targeting rules above stay as they are in both displays.
+
+**Acceptance criteria added**
+
+- [ ] The time row on the title screen and `?time=` choose the mode of a new game; Continue plays the save's mode.
+- [ ] The display switches from the game menu and from `?display=` without spending a round or changing the game state.
+- [ ] In real time, holding a movement key walks one cell per cooldown, a key pressed during a cooldown is held, and only the newest is kept.
+- [ ] In real time, P, every listed overlay, a hidden tab and lost focus each stop ticks; targeting and look do not.
+- [ ] In real time a selected target that dies or leaves sight moves the selection to the nearest valid target, or ends targeting with the message.
+- [ ] Z fast-forwards and stops on each Addendum A interruption, and on any key.
+
 ## Acceptance criteria
 
 The shell is done when all of these pass in current Chrome, Firefox and Safari on desktop.
