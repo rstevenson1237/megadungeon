@@ -7,7 +7,7 @@ import { STAGGER_TICKS, Schedule, TICKS_PER_ACTION, staggerOf } from '../src/gam
 import { applyStatus } from '../src/rules/magic/status.ts';
 import { distanceSq } from '../src/rules/world/geometry.ts';
 import { CONTENT, ITEMS, SPELLS, gameAt, gameOn, monsterAt, room } from './helpers.ts';
-import { crowdedGame } from './turn-budget.ts';
+import { crowdedGame, timeTicks } from './turn-budget.ts';
 
 // Task 5.3, creature schedules (Spec 04, Addendum B): each creature's next-act tick from its speed, the stagger,
 // ordering within a tick, the 50-creature cap, notice rolls at the boundary, allies and the phantom. The fake clock
@@ -278,32 +278,12 @@ describe('Spec 04, Addendum B: determinism and the time budget', () => {
   });
 
   it('a round on a crowded large level stays within the turn time budget, and no tick takes over 16 ms', () => {
-    const game = crowdedGame({ levels: FROZEN, spells: SPELLS, items: ITEMS, content: CONTENT }, 80);
+    const game = crowdedGame({ levels: FROZEN, spells: SPELLS, items: ITEMS, content: CONTENT }, 80, 'real');
     expect(game.state.monsters.length).toBe(80);
-    const { player } = game.state;
-    const round = (): { took: number; worstTick: number } => {
-      let worstTick = 0;
-      const start = performance.now();
-      for (let t = 0; t < TICKS_PER_ROUND; t++) {
-        const s = performance.now();
-        game.advance(1);
-        worstTick = Math.max(worstTick, performance.now() - s);
-      }
-      player.pools.combat.dice = player.pools.combat.max; // never let the test character die
-      return { took: performance.now() - start, worstTick };
-    };
-    for (let r = 0; r < 20; r++) round(); // warm up the engine before measuring
-    let total = 0;
-    let worst = 0;
-    let worstTick = 0;
-    for (let r = 0; r < 300; r++) {
-      const m = round();
-      total += m.took;
-      worst = Math.max(worst, m.took);
-      worstTick = Math.max(worstTick, m.worstTick);
-    }
-    expect(player.dead).toBe(false);
-    expect(total / 300).toBeLessThan(5);
+    timeTicks(game, 20); // warm up the engine before measuring
+    const { mean, worst, worstTick } = timeTicks(game, 300);
+    expect(game.state.player.dead).toBe(false);
+    expect(mean).toBeLessThan(5);
     expect(worst).toBeLessThan(50);
     expect(worstTick).toBeLessThan(16);
   });

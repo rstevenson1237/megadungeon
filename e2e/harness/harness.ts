@@ -10,10 +10,12 @@ import { isVillageLevel } from '../../src/rules/world/run-layout.ts';
 import { CanvasAtlas, fontMaskSource } from '../../src/ui/atlas.ts';
 import { CELL_H, CELL_W } from '../../src/ui/grid.ts';
 import { FROZEN } from '../../tests/frozen.ts';
-import { crowdedGame, timeRounds } from '../../tests/turn-budget.ts';
+import { applyStatus } from '../../src/rules/magic/status.ts';
+import { crowdedGame, fightCrowd, surround, timeRounds, timeTicks } from '../../tests/turn-budget.ts';
 
 // The browser checks of task 4.12 that need the game's own modules rather than the built page: the glyph atlas as the
-// renderer bakes it, and the two timing criteria (Spec 02, a large level in under 50 ms; Spec 04, the turn budget).
+// renderer bakes it, and the timing criteria (Spec 02, a large level in under 50 ms; Spec 04, the turn budget, and in
+// real time the tick budget of task 5.7).
 // The Vite dev server serves this page to Playwright (playwright.config.ts); it is not part of the build.
 
 const BUNDLE = bundle as ContentBundle;
@@ -75,4 +77,25 @@ function turnBudget(): { creatures: number; dead: boolean; mean: number; worst: 
   return { creatures: game.state.monsters.length, dead: game.state.player.dead, mean, worst };
 }
 
-Object.assign(window, { harness: { glyphMasks, largeLevelMs, turnBudget } });
+/**
+ * Spec 04, Addendum B, the tick budget: real-time rounds on the same crowded level, a tick at a time as the frame loop
+ * runs them, as `tests/creature-schedules.test.ts` (the player idle) and `tests/turn-budget.test.ts` (the player
+ * fighting 40 of the crowd, Hasted) run them.
+ */
+function tickBudget(fighting: boolean): { creatures: number; dead: boolean; mean: number; worst: number; worstTick: number } {
+  const game = crowdedGame({ levels: FROZEN, spells: spellsFrom(BUNDLE), items: itemDataFrom(BUNDLE), content: gameContentOf(BUNDLE) }, 80, 'real');
+  const creatures = game.state.monsters.length;
+  let player: Parameters<typeof timeTicks>[2];
+  if (fighting) {
+    applyStatus(game.state.player.statuses, 'hasted', 10_000);
+    surround(game, 40);
+    player = (g) => {
+      g.state.player.pools.combat.dice = g.state.player.pools.combat.max; // never let the test character die
+      fightCrowd(g);
+    };
+  }
+  timeTicks(game, 20, player); // warm up the engine before measuring
+  return { creatures, dead: game.state.player.dead, ...timeTicks(game, 300, player) };
+}
+
+Object.assign(window, { harness: { glyphMasks, largeLevelMs, turnBudget, tickBudget } });

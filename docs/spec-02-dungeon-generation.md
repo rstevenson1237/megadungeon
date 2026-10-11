@@ -288,6 +288,12 @@ From Intake Addendum B (finding F3). All figures are starting values for playtes
 - [ ] A real-time session replayed from its seed and tick-stamped input log ends in an identical game state.
 - [ ] A level generated in real-time mode is identical to the same level generated in turn mode.
 
+## Clarification (task 5.7, proposed and approved October 11, 2026)
+
+Addendum B says the input log holds "each command with the tick it was carried out on". The tests built for task 5.7 log it slightly differently. Approved as built:
+
+- **The log holds every input, with the tick it was given on.** An input is a key going down, a key coming up, or the window losing focus. The tick is counted from the start of the session across every level, village and death, because each level's own clock starts again at 0. A command given during a cooldown is logged when it is given; the cooldown rules then decide, the same way every time, the tick on which it is carried out. Logging key-ups and lost focus is what lets a held movement key's repeated steps and a pause replay exactly; the carried-out ticks alone would not record them.
+
 ## Acceptance criteria
 
 The generator is done when an automated test run over 10,000 seeds (every level of each) passes all of these.
