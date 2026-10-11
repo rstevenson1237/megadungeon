@@ -21,6 +21,8 @@ export class HistoryOverlay implements Overlay {
   constructor(
     private readonly log: MessageLog,
     private readonly turn: number,
+    /** Rounds whose messages draw bright: 1, or 2 in real time (Spec 01, Addendum B). */
+    private readonly rounds = 1,
   ) {}
 
   private get rows(): number {
@@ -34,7 +36,7 @@ export class HistoryOverlay implements Overlay {
   draw(grid: Grid): void {
     drawWindow(grid, FULL_WINDOW, 'Message History');
     const area = inner(FULL_WINDOW);
-    const lines = this.log.lines(this.turn);
+    const lines = this.log.lines(this.turn, this.rounds);
     const end = lines.length - Math.min(this.scroll, this.maxScroll(lines.length));
     const shown = lines.slice(Math.max(0, end - this.rows), end);
     shown.forEach((line, i) => {

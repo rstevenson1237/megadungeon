@@ -7,7 +7,9 @@ import { cameraOrigin } from './camera.ts';
 import { MessageLog } from '../game/log.ts';
 import { drawCharacterPane, type CharacterPaneData } from './character-pane.ts';
 import type { Grid } from './grid.ts';
-import { type KeyInput, keyToCommand } from './input.ts';
+import { type KeyInput, keyToCommand, moveOf } from './input.ts';
+import { FAST_TICK_MS, TICK_MS } from './frame-loop.ts';
+import { WaitWatch } from '../game/fast-forward.ts';
 import { drawLog } from './log-pane.ts';
 import { Menu, type Overlay, type OverlayResult } from './overlay.ts';
 import { type GameMenuHost, HelpOverlay, HistoryOverlay, gameMenu } from './overlays.ts';
@@ -20,7 +22,7 @@ import { VillageScreen, type TownHost } from './town.ts';
 import { LevelUpMenu, levelUpMenu, talkMenu, type PeopleHost } from './people.ts';
 import { LEVEL_XP, poolsWithRoom } from '../rules/character/progression.ts';
 import type { LogMessage } from '../core/log.ts';
-import { CellCursor, Targeting, startTargeting } from '../game/targeting.ts';
+import { CellCursor, Targeting, startTargeting, validTargets } from '../game/targeting.ts';
 import { ratingText } from '../game/monsters.ts';
 import { asCast, blinkCells, canBlinkTo, spellTargets, targetSpecOf } from '../game/magic.ts';
 import type { Spell } from '../core/schemas.ts';
@@ -41,6 +43,9 @@ import { resolvesAtOnce, needsCell } from '../rules/magic/spells.ts';
 import { fascinateTargets, markTargets, volleyProblem, volleyTargets, waitRoundsNow } from '../game/actives.ts';
 import { canDecoyAt, decoyCells } from '../game/allies.ts';
 import type { Monster } from '../game/monsters.ts';
+
+/** The map commands that spend an action, which real time carries out at once or holds during the cooldown (Spec 04, Addendum B). */
+const ACTIONS: readonly CommandType[] = ['wait', 'interact', 'pickup', 'search'];
 
 export class Shell {
   readonly log = new MessageLog();
@@ -71,6 +76,15 @@ export class Shell {
   private lookIndex = -1;
   /** The active major ability being aimed (Fascinate, Mark, Volley), with Volley's first target once chosen. */
   aimingAbility: { id: string; first?: Monster } | null = null;
+  /** Real time: the valid targets of what is being aimed, rebuilt every tick (Spec 01, Addendum B). */
+  private retarget: (() => Monster[]) | null = null;
+  /**
+   * Real time: paused by P ('key'), or by the tab being hidden or the window losing focus ('focus'). Either way P or a
+   * movement key resumes (Spec 01, Addendum B). Overlays pause too, without this being set.
+   */
+  paused: 'key' | 'focus' | null = null;
+  /** Real time: Z is fast-forwarding, and this watches for what stops it. */
+  private waiting: WaitWatch | null = null;
 
   constructor(
     public title: string,
@@ -80,6 +94,101 @@ export class Shell {
   /** The level being played; null in a village or with no run. */
   get game(): Game | null {
     return this.run?.game ?? null;
+  }
+
+  /** Whether the run is played in real time (Spec 04, Addendum B). */
+  get realTime(): boolean {
+    return this.run?.time === 'real';
+  }
+
+  /**
+   * Real time: whether ticks run now (Spec 01, Addendum B). They stop in a village, while paused by P or by a hidden tab
+   * or lost focus, while any overlay is open, and once the player is dead. Targeting and look do not stop them.
+   */
+  get ticking(): boolean {
+    const game = this.game;
+    return !!game && game.time === 'real' && this.paused === null && this.overlays.length === 0 && !game.state.player.dead;
+  }
+
+  /** How long a tick lasts now: 50 ms, or 12.5 ms while Z fast-forwards. */
+  get tickMs(): number {
+    return this.waiting ? FAST_TICK_MS : TICK_MS;
+  }
+
+  /** Whether a fast-forward (Z in real time) is running. */
+  get fastForwarding(): boolean {
+    return this.waiting !== null;
+  }
+
+  /** Real time: messages less than 2 rounds old draw bright (Spec 01, Addendum B); in turn mode, this round's. */
+  private get brightRounds(): number {
+    return this.realTime ? 2 : 1;
+  }
+
+  /** The main view's header: the level's name, then "Paused" while a real-time level's clock is stopped. */
+  get header(): string {
+    const game = this.game;
+    return game && game.time === 'real' && !game.state.player.dead && !this.ticking ? `${this.title} - Paused` : this.title;
+  }
+
+  /**
+   * Real time: let `ticks` ticks pass, one at a time (the frame loop calls this). After each the shell shows what
+   * happened: the log, a level change or a list a held command opened, the pane, and the target followed. It stops as
+   * soon as time stops (a pause, an overlay, death, a new level) and at the tick a fast-forward stops.
+   */
+  advance(ticks: number): void {
+    for (let n = 0; n < ticks && this.ticking; n++) {
+      const game = this.game!;
+      const messages = game.advance(1);
+      // When Z stops, the rest of the frame's ticks, counted at four times speed, are not run.
+      const stopped = !!this.waiting?.stops(messages);
+      if (stopped) this.waiting = null;
+      this.say(messages);
+      const carried = game.carried();
+      if (carried) this.applyResult(carried);
+      else this.afterAction();
+      if (this.game !== game) break;
+      this.followTarget();
+      if (stopped) break;
+    }
+    if (!this.ticking) this.waiting = null;
+  }
+
+  /**
+   * Real time: the targets are rebuilt at each tick (Spec 01, Addendum B). The selection stays on its creature while it
+   * is still valid, or moves to the nearest valid target; with none left, targeting ends and the log says so.
+   */
+  private followTarget(): void {
+    const t = this.targeting;
+    if (!t || !this.retarget) return;
+    if (!t.retarget(this.retarget())) {
+      this.stopAiming();
+      this.log.add({ kind: 'system', text: 'Your target is gone.' }, this.turn);
+    }
+    this.showTarget();
+  }
+
+  /**
+   * Real time: a movement key comes up (Spec 01, Addendum B), so a walk in its direction stops. A step already held
+   * still happens.
+   */
+  keyUp(e: KeyInput): void {
+    const game = this.game;
+    const dir = moveOf(e);
+    if (!game?.walking || !dir) return;
+    if (game.walking.dx === dir.dx && game.walking.dy === dir.dy) game.halt();
+  }
+
+  /**
+   * Real time: the tab is hidden or the window loses focus, which pauses the game until P or a movement key resumes it
+   * (Spec 01, Addendum B). Held keys are dropped and a fast-forward stops.
+   */
+  loseFocus(): void {
+    const game = this.game;
+    if (!game || game.time !== 'real' || game.state.player.dead) return;
+    if (this.paused !== 'key') this.paused = 'focus';
+    this.waiting = null;
+    game.halt();
   }
 
   /** Start showing a run: its level or its village, with the header and character pane in step. */
@@ -92,6 +201,9 @@ export class Shell {
     this.aimingAbility = null;
     this.casting = null;
     this.usingItem = null;
+    this.retarget = null;
+    this.paused = null;
+    this.waiting = null;
     this.arrived();
   }
 
@@ -119,7 +231,7 @@ export class Shell {
     return {
       log: (messages) => this.say(messages),
       changed: () => this.refreshed(),
-      free: (index) => this.applyResult(this.game!.free(index)),
+      free: (index) => this.applyResult(this.order(() => this.game!.free(index))),
     };
   }
 
@@ -175,17 +287,78 @@ export class Shell {
   }
 
   private offerHost(): OfferHost {
-    return { offer: (index, what) => this.applyResult(this.game!.offerAt(index, what)) };
+    return { offer: (index, what) => this.applyResult(this.order(() => this.game!.offerAt(index, what))) };
   }
 
   /** Handle a key press. Returns true if the key is in the key map, so the caller can stop the browser acting on it. */
   handleKey(e: KeyInput): boolean {
     const command = keyToCommand(e);
     if (!command) return false;
+    if (this.realTime && this.clockKey(command)) return true;
     const top = this.overlays[this.overlays.length - 1];
     if (top) this.apply(top.handle(command), top);
     else this.play(command);
+    // While the clock is stopped, held keys are dropped (Spec 01, Addendum B).
+    if (this.realTime && !this.ticking) this.game?.halt();
     return true;
+  }
+
+  /**
+   * Real time: the keys about the clock, before anything else (Spec 01, Addendum B). Any key stops a fast-forward and
+   * does nothing more; P pauses and resumes, over an overlay too; while paused, a movement key resumes and does nothing
+   * more. Returns true when the key is used up.
+   */
+  private clockKey(command: Command): boolean {
+    if (this.waiting) {
+      this.waiting = null;
+      return true;
+    }
+    const game = this.game;
+    if (!game) return false; // a village has no clock: P says so in play()
+    if (command.type === 'pause') {
+      this.paused = this.paused ? null : 'key';
+      game.halt();
+      return true;
+    }
+    const modal = this.overlays.length > 0 || this.targeting || this.cursor || this.looking;
+    if (this.paused && command.type === 'move' && !modal) {
+      this.paused = null;
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Carry out something that may spend an action (Spec 04, Addendum B): at once in turn mode, as ever; in real time at
+   * once when the cooldown has ended, or else held until it ends. A command held from an overlay closes the overlays,
+   * so the clock runs on to the end of the cooldown.
+   */
+  private order(run: () => ActResult): ActResult {
+    const result = this.game!.command(run) ?? { messages: [], spent: false };
+    if (result.held) this.overlays.length = 0;
+    return result;
+  }
+
+  /** A map command from the key map: a real-time step starts a walk; the rest are carried out at once or held. */
+  private act(command: Command): ActResult | undefined {
+    const game = this.game;
+    if (!game) return undefined;
+    if (game.time === 'turn') return game.act(command);
+    if (command.type === 'move') return game.walk(command.dx, command.dy);
+    return ACTIONS.includes(command.type) ? game.command(() => game.act(command)) : undefined;
+  }
+
+  /** Z in real time (Spec 01, Addendum B): run at four times speed until a die returns or something interrupts. */
+  private fastForward(): void {
+    const game = this.game!;
+    const watch = WaitWatch.start(game);
+    if (typeof watch === 'string') {
+      this.log.add({ kind: 'system', text: watch }, this.turn);
+      return;
+    }
+    this.waiting = watch;
+    this.paused = null;
+    game.halt();
   }
 
   private apply(result: OverlayResult, from: Overlay): void {
@@ -218,7 +391,12 @@ export class Shell {
         this.overlays.push(gameMenu(this.onQuit ?? undefined, this.menuHost));
         return;
       case 'history':
-        this.overlays.push(new HistoryOverlay(this.log, this.turn));
+        this.overlays.push(new HistoryOverlay(this.log, this.turn, this.brightRounds));
+        return;
+      case 'pause':
+        // A real-time level takes P before this; a village has no clock in either mode (Spec 04, Addendum B).
+        if (!this.run) break;
+        this.log.add({ kind: 'system', text: this.realTime ? 'There is no clock to pause in a village.' : 'There is no clock to pause in turn-based play.' }, this.turn);
         return;
       case 'help':
         this.overlays.push(new HelpOverlay());
@@ -231,7 +409,8 @@ export class Shell {
         break;
       case 'waitLong':
         if (this.game) {
-          this.applyResult(this.game.waitUntilRecovered());
+          if (this.game.time === 'real') this.fastForward();
+          else this.applyResult(this.game.waitUntilRecovered());
           return;
         }
         break;
@@ -259,7 +438,7 @@ export class Shell {
         );
         return;
       default: {
-        const result = this.game?.act(command);
+        const result = this.act(command);
         if (result) {
           this.applyResult(result);
           return;
@@ -424,17 +603,17 @@ export class Shell {
     return {
       equip: (item) => {
         const g = this.game;
-        if (g) this.done(g.equip(item));
+        if (g) this.done(this.order(() => g.equip(item)));
         else this.free((m) => equipItem(this.run!.ctx(), item, m));
       },
       unequip: (slot) => {
         const g = this.game;
-        if (g) this.done(g.unequip(slot));
+        if (g) this.done(this.order(() => g.unequip(slot)));
         else this.free((m) => unequipSlot(this.run!.ctx(), slot, m));
       },
       drop: (item) => {
         const g = this.game;
-        if (g) this.done(g.drop(item));
+        if (g) this.done(this.order(() => g.drop(item)));
         else this.free((m) => m.push({ kind: 'system', text: 'There is nowhere to drop that in a village.' }));
       },
       use: (item) => {
@@ -451,7 +630,7 @@ export class Shell {
           this.beginAim(spell, item);
           return;
         }
-        this.done(g.use(item));
+        this.done(this.order(() => g.use(item)));
       },
     };
   }
@@ -520,7 +699,8 @@ export class Shell {
     }
     if (id === 'volley' || id === 'fascinate' || id === 'mark') return this.aimAbility(id);
     if (id === 'decoy') return this.placeDecoy();
-    this.applyResult(game.useMajor());
+    // Smite is readied or cancelled with no round, so it is never held (Spec 03, Addendum A).
+    this.applyResult(id === 'smite' ? game.useMajor() : this.order(() => game.useMajor()));
   }
 
   /**
@@ -542,6 +722,7 @@ export class Shell {
     }
     const range = id === 'volley' ? game.ranged()!.range : Math.max(game.state.map.level.width, game.state.map.level.height);
     this.aimingAbility = { id };
+    this.retarget = () => (id === 'volley' ? volleyTargets(game) : id === 'fascinate' ? fascinateTargets(game) : markTargets(game));
     this.targeting = new Targeting(game, { range, shape: { kind: 'single' } }, targets);
     this.showTarget();
   }
@@ -561,12 +742,15 @@ export class Shell {
   /** Enter while aiming an ability: Volley's first choice asks for a second when there is one; anything else is used. */
   private confirmAbility(t: Targeting): ActResult | undefined {
     const { id, first } = this.aimingAbility!;
-    if (id !== 'volley') return this.game!.useMajor(t.selected);
-    if (first) return this.game!.useMajor([first, t.selected]);
-    const rest = t.targets.filter((m) => m !== t.selected);
-    if (rest.length === 0) return this.game!.useMajor([t.selected]);
-    this.aimingAbility = { id, first: t.selected };
-    this.targeting = new Targeting(this.game!, t.spec, rest);
+    const game = this.game!;
+    const selected = t.selected;
+    if (id !== 'volley') return this.order(() => game.useMajor(selected));
+    if (first) return this.order(() => game.useMajor([first, selected]));
+    const rest = t.targets.filter((m) => m !== selected);
+    if (rest.length === 0) return this.order(() => game.useMajor([selected]));
+    this.aimingAbility = { id, first: selected };
+    this.retarget = () => volleyTargets(game).filter((m) => m !== selected);
+    this.targeting = new Targeting(game, t.spec, rest);
     this.log.add({ kind: 'system', text: 'Choose a second target.' }, this.turn);
     return undefined;
   }
@@ -578,7 +762,7 @@ export class Shell {
       this.log.add({ kind: 'system', text: `You can use ${this.run!.gameContent.minorNames.get(id) ?? id} only in the dungeon.` }, this.turn);
       return;
     }
-    this.applyResult(game.useAbility(id));
+    this.applyResult(this.order(() => game.useAbility(id)));
   }
 
   /** A spell chosen from the list. */
@@ -604,7 +788,7 @@ export class Shell {
       this.cursor = new CellCursor(game, (at) => canBlinkTo(game, spell, at), cells);
       return;
     }
-    if (resolvesAtOnce(spell)) return this.finishCast(go());
+    if (resolvesAtOnce(spell)) return this.finishCast(this.order(() => go()));
     const targets = spellTargets(game, spell);
     if (targets.length === 0) {
       this.log.add({ kind: 'system', text: 'There is no valid target.' }, this.turn);
@@ -612,6 +796,7 @@ export class Shell {
     }
     this.casting = spell;
     this.usingItem = item;
+    this.retarget = () => spellTargets(game, spell);
     this.targeting = new Targeting(game, targetSpecOf(asCast(game, spell)), targets);
     this.showTarget();
   }
@@ -628,6 +813,7 @@ export class Shell {
     this.cursor = null;
     this.casting = null;
     this.usingItem = null;
+    this.retarget = null;
   }
 
   // Keys while choosing Blink's cell: W A S D move the cursor, Enter confirms, Esc cancels with no turn spent.
@@ -645,14 +831,17 @@ export class Shell {
         }
         if (decoy) {
           const at = { ...cursor.at };
+          const game = this.game!;
           this.stopAiming();
-          this.applyResult(this.game!.useMajor(at));
+          this.applyResult(this.order(() => game.useMajor(at)));
           return;
         }
         const spell = this.casting!;
         const item = this.usingItem;
+        const at = { ...cursor.at };
+        const game = this.game!;
         this.stopAiming();
-        this.finishCast(item ? this.game!.use(item, { ...cursor.at }) : this.game!.cast(spell, { ...cursor.at }));
+        this.finishCast(this.order(() => (item ? game.use(item, at) : game.cast(spell, at))));
         return;
       }
       case 'cancel':
@@ -679,6 +868,8 @@ export class Shell {
       this.log.add({ kind: 'system', text: 'There is no valid target.' }, this.turn);
       return;
     }
+    const range = option.range;
+    this.retarget = () => validTargets(game, range);
     this.targeting = targeting;
     this.showTarget();
   }
@@ -710,7 +901,12 @@ export class Shell {
         }
         const spell = this.casting;
         const item = this.usingItem;
-        const result = item ? this.game!.use(item, t.selected) : spell ? this.game!.cast(spell, t.selected) : this.game!.fire(t.selected);
+        const game = this.game!;
+        const target = t.selected;
+        // Real time resolves against the target where it stands at the tick the action happens, if it is still valid then.
+        const valid = this.realTime ? this.retarget : null;
+        const shoot = (): ActResult => (item ? game.use(item, target) : spell ? game.cast(spell, target) : game.fire(target));
+        const result = this.order(() => (!valid || valid().includes(target) ? shoot() : { messages: [{ kind: 'system', text: 'Your target is gone.' }], spent: false }));
         this.stopAiming();
         this.applyResult(result);
         break;
@@ -726,7 +922,7 @@ export class Shell {
 
   /** Draw the whole screen: panes, character, log, then any overlay on top. */
   draw(grid: Grid): void {
-    drawPanes(grid, this.title);
+    drawPanes(grid, this.header);
     if (this.game) {
       drawMap(grid, this.game.state, this.targeting, this.cursor ?? this.looking, mapLook(this.run?.theme));
       const text = this.lookText();
@@ -738,7 +934,7 @@ export class Shell {
     else if (this.village) this.village.draw(grid);
     else grid.text(inner(MAIN_PANE).x + 2, inner(MAIN_PANE).y + 1, 'No level loaded.', UI.label, UI.background);
     drawCharacterPane(grid, this.character);
-    drawLog(grid, this.log, this.turn);
+    drawLog(grid, this.log, this.turn, this.brightRounds);
     for (const overlay of this.overlays) overlay.draw(grid, this.turn);
   }
 }

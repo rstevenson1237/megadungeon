@@ -9,7 +9,7 @@ export const LOG_HISTORY = 200;
 export interface LogLine {
   text: string;
   kind: LogKind;
-  /** True for messages from the current turn (drawn bright); older ones draw dim. */
+  /** True for messages from the current turn, or in real time the last 2 rounds (drawn bright); older ones draw dim. */
   current: boolean;
 }
 
@@ -73,16 +73,19 @@ export class MessageLog {
     while (this.entries.length > 1 && this.lineCount() > LOG_HISTORY) this.entries.shift();
   }
 
-  /** Every history line, oldest first. */
-  lines(currentTurn: number): LogLine[] {
+  /**
+   * Every history line, oldest first. `rounds` is how many rounds count as current: 1 in turn mode, this turn's only;
+   * 2 in real time, where messages less than 2 rounds old draw bright (Spec 01, Addendum B).
+   */
+  lines(currentTurn: number, rounds = 1): LogLine[] {
     return this.entries.flatMap((e) =>
-      wrapText(label(e), LOG_WIDTH).map((text) => ({ text, kind: e.kind, current: e.turn === currentTurn })),
+      wrapText(label(e), LOG_WIDTH).map((text) => ({ text, kind: e.kind, current: e.turn <= currentTurn && currentTurn - e.turn < rounds })),
     );
   }
 
   /** The newest `count` lines, oldest first. */
-  tail(count: number, currentTurn: number): LogLine[] {
-    return this.lines(currentTurn).slice(-count);
+  tail(count: number, currentTurn: number, rounds = 1): LogLine[] {
+    return this.lines(currentTurn, rounds).slice(-count);
   }
 }
 

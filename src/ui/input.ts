@@ -74,6 +74,7 @@ export const KEY_BINDINGS: readonly Binding[] = [
     action: 'Journal: lore, rumours and quests seen, grouped by level',
     entries: [{ key: 'j', command: { type: 'journal' } }],
   },
+  { keys: 'P', action: 'Pause or resume (real time)', entries: [{ key: 'p', command: { type: 'pause' } }] },
 ];
 
 /**
@@ -93,6 +94,12 @@ export function keyToCommand(e: KeyInput): Command | undefined {
     }
   }
   return undefined;
+}
+
+/** The direction of a movement key (W A S D or an arrow), or undefined for any other key. */
+export function moveOf(e: KeyInput): { dx: number; dy: number } | undefined {
+  const command = keyToCommand(e);
+  return command?.type === 'move' ? { dx: command.dx, dy: command.dy } : undefined;
 }
 
 /**

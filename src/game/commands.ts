@@ -19,7 +19,8 @@ export type Command =
   | { type: 'look' }
   | { type: 'history' }
   | { type: 'help' }
-  | { type: 'journal' };
+  | { type: 'journal' }
+  | { type: 'pause' };
 
 export type CommandType = Command['type'];
 
@@ -43,4 +44,5 @@ export const COMMAND_NAMES: Record<CommandType, string> = {
   history: 'Message history',
   help: 'Help',
   journal: 'Journal',
+  pause: 'Pausing',
 };

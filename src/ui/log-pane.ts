@@ -5,10 +5,10 @@ import type { Grid } from './grid.ts';
 import { LOG_PANE, inner } from './panes.ts';
 import { LOG_COLOURS, UI } from './palette.ts';
 
-/** Show the newest messages, oldest at the top, newest at the bottom; this turn's in bright colour. */
-export function drawLog(grid: Grid, log: MessageLog, currentTurn: number): void {
+/** Show the newest messages, oldest at the top, newest at the bottom; this turn's (in real time, the last 2 rounds') in bright colour. */
+export function drawLog(grid: Grid, log: MessageLog, currentTurn: number, rounds = 1): void {
   const area = inner(LOG_PANE);
-  const lines = log.tail(area.h, currentTurn);
+  const lines = log.tail(area.h, currentTurn, rounds);
   for (let row = 0; row < area.h; row++) grid.fill(area.x, area.y + row, area.w, 1, 32, UI.text, UI.background);
   lines.forEach((line, i) => {
     const colour = LOG_COLOURS[line.kind];

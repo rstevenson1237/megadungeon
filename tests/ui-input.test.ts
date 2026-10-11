@@ -44,7 +44,7 @@ describe('key map (Spec 01)', () => {
     const table: [string, string][] = [
       [' ', 'wait'], ['z', 'waitLong'], ['e', 'interact'], ['x', 'search'], ['g', 'pickup'], ['f', 'ranged'],
       ['c', 'cast'], ['q', 'ability'], ['Tab', 'nextTarget'], ['Enter', 'confirm'], ['Escape', 'cancel'],
-      ['i', 'inventory'], ['l', 'look'], ['m', 'history'], ['?', 'help'], ['j', 'journal'],
+      ['i', 'inventory'], ['l', 'look'], ['m', 'history'], ['?', 'help'], ['j', 'journal'], ['p', 'pause'],
     ];
     for (const [key, type] of table) expect(keyToCommand({ key })?.type).toBe(type);
     expect(keyToCommand({ key: 'Tab', shiftKey: true })?.type).toBe('prevTarget');
@@ -54,9 +54,9 @@ describe('key map (Spec 01)', () => {
 
   it('lists exactly the keys of the spec table, and no other key is mapped', () => {
     expect(KEY_BINDINGS.map((b) => b.keys)).toEqual([
-      'W A S D / arrows', 'Space', 'Z', 'E', 'X', 'G', 'F', 'C', 'Q', 'Tab / Shift+Tab', 'Enter', 'Esc', 'I', 'L', 'M', '?', 'J',
+      'W A S D / arrows', 'Space', 'Z', 'E', 'X', 'G', 'F', 'C', 'Q', 'Tab / Shift+Tab', 'Enter', 'Esc', 'I', 'L', 'M', '?', 'J', 'P',
     ]);
-    for (const key of ['b', 'h', 'k', 'n', 'p', 'r', 't', 'u', 'v', 'y', 'Home', 'F5', '1', 'Shift']) {
+    for (const key of ['b', 'h', 'k', 'n', 'r', 't', 'u', 'v', 'y', 'Home', 'F5', '1', 'Shift']) {
       expect(keyToCommand({ key })).toBeUndefined();
     }
   });
