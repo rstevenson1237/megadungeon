@@ -255,6 +255,18 @@ From Intake Addendum A (findings A2, A3, B3, B4). All figures are starting value
 - [ ] Each example minor ability works as its row says, and a Pack Mule drawn at level up grows the pack at once.
 - [ ] A character created through the creation screen in each class plays to level 10 with its draws in effect.
 
+## Addendum B (proposed October 11, 2026, awaiting approval)
+
+From Intake Addendum B (decision D4).
+
+- **Waiting in real time:** a round in which the player carried out no action counts as a waiting round, as if Space had been pressed in each, so standing still recovers a Combat die in 10 rounds (8 with Hardy, 5 beside a Spirit Totem). A round in which the player acted, or moved, resets the count, as in turn mode. Space is an explicit wait and counts the same way. Poisoned still stops recovery.
+- **Free actions** (inventory, look, targeting until confirmed) do not break a wait, in either mode; in real time the game is paused during overlays anyway (Spec 01, Addendum B).
+- **A fight** (Addendum A) still ends after 10 rounds in a row with no exchange involving the player.
+
+**Acceptance criteria added**
+
+- [ ] In real time, standing idle for 10 rounds restores one Combat die; any action in that time resets the count.
+
 ## Acceptance criteria
 
 - [ ] Each roll type resolves exactly as the Resolving rolls table says, verified by unit tests over every face of every step, with and without advantage and disadvantage.

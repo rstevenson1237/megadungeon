@@ -135,6 +135,20 @@ Goal: every table reaches its Spec 08 launch minimum, the coverage report is cle
 
 **Gate: Content complete.** Levels 1 to 100 are playable, the coverage report is clean, the release policy for saves across content changes is chosen (Spec 09, Addendum A), and you approve release.
 
+## Phases 5 and 6 (proposed October 11, 2026, awaiting approval)
+
+Intake Addendum B (`docs/00b-intake-addendum.md`) proposes two phases after the Content complete gate, each behind a runtime flag so the turn-based text game stays the default:
+
+| Gate / Phase | Contents |
+| --- | --- |
+| Gate: Content complete | Levels 1 to 100 playable |
+| Phase 5 (8 tasks): Real time | Approvals; game clock; creature schedules; player cooldowns; frame loop and pausing; the time-mode flag, save and leaderboard; real-time tests; a real-time balance pass |
+| Gate: Real time playable | A real-time run from creation to a death and back to the village |
+| Phase 6 (10 tasks): Isometric display | Art direction (inner checkpoint); scene model; renderer with no art; display flag and shell; four art batches; animation and events; browser checks |
+| Gate: Isometric complete | Several themes played in the isometric display, in both time modes |
+
+The task tables, with their specs, dependencies and done-when lines, are in the addendum. They join this plan once approved, and are iterated in later sessions before task 5.1.
+
 ## Testing strategy
 
 Five kinds of test cover the specs' acceptance criteria; all but playtests run automatically on every change.
@@ -170,3 +184,4 @@ The content build's schema, reference and coverage checks (Spec 08) run alongsid
 - [x] **Task order:** approved as written.
 - [x] **Additions of October 2, 2026 (approved):** new effects allowed with code in tasks 4.4, 4.5 and 4.7; a browser smoke test and a criteria audit in task 3.11.
 - [x] **Revision of October 1, 2026 (approved October 2):** the Phase 3 Systems closeout and the move of content to Phase 4 (Intake Addendum A).
+- [ ] **Addendum B of October 11, 2026:** Phases 5 (real time) and 6 (isometric display), awaiting approval.

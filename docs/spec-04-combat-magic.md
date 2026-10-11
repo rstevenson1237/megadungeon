@@ -229,6 +229,55 @@ From Intake Addendum A (finding A2: Raise, Decoy and Companion need creatures on
 
 - **Turn time budget:** the plan's risks ask for a per-turn time budget test, and no spec gives the figure. Proposed: on a large level crowded with 80 alert creatures of every behaviour, a round takes under 5 ms on average and never over 50 ms (the same figure as generating a large level). Measured on the build machine: about 0.1 ms on average and 4 ms at worst.
 
+## Addendum B (proposed October 11, 2026, awaiting approval)
+
+From Intake Addendum B (requirements R1 and R2, findings F1 and F2, decisions D1 to D4). All figures are starting values for playtesting.
+
+**Two time modes**
+
+- **Turn mode** is the game as built and the default. Everything above, including "nothing moves until the player acts" and its acceptance criterion, governs turn mode, and turn mode does not change.
+- **Real-time mode** is chosen on the title screen for a new run and kept for the whole run (Spec 01 and Spec 09, Addendum B). The rules of this spec apply unchanged except for when things act, which this section sets out.
+- **Villages have no clock** in either mode: they are menus, and real time stops there.
+
+**Ticks and rounds**
+
+- **Game time is counted in ticks,** whole numbers, never in milliseconds. A tick is 50 ms of play at normal pace; the UI turns elapsed time into ticks (Spec 01, Addendum B), so pausing, a slow frame or a fast-forward never changes what happens, only when it is shown.
+- **A round is 10 ticks.** Every figure in the specs written in rounds (statuses, abilities, potions, poison, waiting, losing track, fights, restocking, the crossbow's reload) keeps its number and means that many rounds of 10 ticks.
+- **The round boundary** comes every 10 ticks. In order it runs: the end of the round just ended, exactly as turn mode does it (effects lose a round and poison bites, timed abilities and allies' lifetimes tick, the reload counts down, the 1 in 200 wandering check, the waiting count, the fight counter, then the round number goes up), and then the notice rolls of every simulated creature for the new round.
+- **Durations still count the round they start.** In real time an effect of N rounds therefore lasts between N - 1 and N rounds of game time, depending on when in the round it was applied. This keeps one end-of-round rule for both modes.
+
+**The player's actions**
+
+- **Every action that costs a round in turn mode** (move, attack, cast, ability, interact, pick up, search, wait, equip and the rest) happens at once and starts a cooldown of 10 ticks. Hasted, the cooldown is 5; Slowed, 20; both together, 10.
+- **Free actions** (inventory, look, opening targeting, menus) start no cooldown.
+- **A command given during a cooldown** is held and carried out when the cooldown ends. Only one is held: a newer command replaces it. A refused action (a wall, no target, nothing to pick up) spends no cooldown, as it spends no round in turn mode.
+- **Holding a movement key** repeats the move each time the cooldown ends (Spec 01, Addendum B).
+
+**Each creature's schedule**
+
+- **Every creature has a next-act tick.** When the game's tick reaches it and the creature is simulated, it takes one action by the same behaviour rules as in turn mode, and its next-act tick moves on by 10 ticks (normal), 5 (fast) or 20 (slow), with Hasted and Slowed changing it as they change the player's.
+- **A creature that cannot act** (asleep, held) or that is not simulated this round still moves its next-act tick on, so it never stores up actions.
+- **Stagger:** a creature's first next-act tick, when the player arrives on a level or the creature appears, is that tick plus 1 to 10, from a hash of the level seed and the creature's id, so creatures do not step in lockstep and the same arrival always staggers the same way.
+- **Order within a tick:** the player's held or new command first, then the creatures due that tick, nearest to the player first, ties by their order in the level's list. A creature whose cell is taken by the time it acts chooses again from where things now stand.
+- **The 50-creature cap:** at each round boundary the 50 creatures nearest the player, allies included, are simulated for the coming round; the others do not act until a later boundary includes them.
+- **Notice rolls** are made once a round, at the boundary, by every simulated asleep or unaware creature, with the same odds and ranges as in turn mode. A creature that becomes alert may act at its next-act tick in that round.
+- **Allies and the phantom** follow the same schedules; the phantom never acts and its 5 rounds count at the boundary.
+
+**Exchanges and events**
+
+- An attack is still one exchange, resolved the moment its action happens. The player's melee and a monster's melee in the same round are two exchanges, as in turn mode.
+- **Combat for awareness and noise** is any exchange, at the tick it happens.
+- **Leaving a level** (stairs, a fall, a teleport) happens at once; nothing else on the old level acts after it.
+
+**Acceptance criteria added**
+
+- [ ] In real-time mode, on a fake clock with the player idle, fast, normal and slow creatures act 2, 1 and 0.5 times per round over 100 rounds.
+- [ ] The player's cooldown is 10, 5 and 20 ticks for normal, Hasted and Slowed; a command during a cooldown is held, a newer one replaces it, and a refused action spends nothing.
+- [ ] Every status effect, timed ability and the poison clock end after the same number of rounds in both modes.
+- [ ] Within a tick the player acts before creatures, and creatures act nearest first; only the 50 nearest act in a round.
+- [ ] Every existing turn-mode test passes unchanged.
+- [ ] A round in real time on a large level crowded with 80 alert creatures stays within the turn time budget (Clarification, task 3.2), and no single tick takes over 16 ms.
+
 ## Acceptance criteria
 
 - [ ] Nothing on the level moves until the player spends an action; free actions (inventory, look, targeting) cost no round.

@@ -164,6 +164,24 @@ From Intake Addendum A (findings A1, A3, A9, A10).
 
 - [ ] A minor ability, artifact or shrine buff naming an effect not on the list, or missing that effect's fields, fails the build.
 
+## Addendum B (proposed October 11, 2026, awaiting approval)
+
+From Intake Addendum B (requirements R3 and R4, finding F9, decision D9). The art itself is not YAML: it lives in `art/`, made with artgen (Spec 01b, Art pipeline). These rules connect the tables to it.
+
+- **An optional `sprite` field** (an artgen asset id) on rows of `monsters`, `bosses`, `rivals`, `equipment_bases`, `magic_items`, `artifacts`, `altar_gods` and `traps`, and an optional `art` block on `level_themes` naming its terrain asset ids. A row without one is drawn by the fallback chain below. Ids, as always, never change once released.
+- **Fallback chain,** used by the isometric display for every thing it draws:
+  1. the row's own `sprite`, if the loaded pack has it;
+  2. the family sprite for its glyph (`family-<name>`, one per letter and per glyph class in the Spec 01 table, for example `family-h` or `family-potion`), recoloured with the row's colour token by an artgen palette swap;
+  3. the glyph itself, drawn in its colour on a small standing card (Spec 01b), so nothing is ever left undrawn.
+- **Themes:** a theme without an `art` block draws the shared terrain set recoloured from its eight `palette` tokens (Addendum A); a theme may name its own terrain assets instead.
+- **Validation** (in the content check, run in CI): every `sprite` and `art` id named in the tables exists in the built art packs and is approved; every family sprite the tables need exists once Phase 6's batches are done (before then, a missing family is a warning, not an error). artgen's own conformance checks (palette, sizes, outline) run in CI on `art/`.
+- **No content id changes** for the art: sprites are looked up by content id, never the reverse.
+
+**Acceptance criteria added**
+
+- [ ] Every row of every table resolves to a sprite or the glyph fallback; the content check lists which rows use which level of the chain.
+- [ ] A `sprite` id that is missing from the packs or not approved fails the content check.
+
 ## Acceptance criteria
 
 - [ ] The build compiles every YAML table into one JSON bundle and fails on any schema, reference, uniqueness or placeholder error.
