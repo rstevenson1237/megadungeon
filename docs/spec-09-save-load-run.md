@@ -153,9 +153,9 @@ From Intake Addendum B (findings F4, decisions D3 and D6).
 - [ ] A format 6 save loads as a turn-based run; a real-time run saves and loads as real time.
 - [ ] Leaderboard entries carry their mode, show "RT" for real time, and the time filter shows the right entries.
 
-## Clarification (task 5.6, proposed)
+## Clarification (task 5.6, proposed and approved October 11, 2026)
 
-Addendum B leaves two points of the leaderboard's time filter open. Proposed as built, awaiting approval:
+Addendum B leaves two points of the leaderboard's time filter open. Approved as built:
 
 - **The filter shows in the leaderboard's title,** for example "Leaderboard: all runs, time: All" or "Leaderboard: seed of the day, 2026-10-11, time: Real time", and the hint line reads "Tab time". Tab steps All, Turn-based, Real time and back to All; Shift+Tab steps the other way. Each step returns the list to the top. Enter's switch and Tab's filter are independent, and the filter applies from the title screen and from the game menu alike. A filter with no runs says "No turn-based runs here yet." or "No real time runs here yet."
 - **"RT" makes room in the class column,** which grows from 11 to 14 characters, so "Necromancer RT" fits; Name narrows from 12 to 11, Deepest from 8 to 7 and Kills from 6 to 5, so the Outcome column keeps its width.
