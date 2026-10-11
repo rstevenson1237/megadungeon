@@ -69,7 +69,7 @@ export interface RunOptions {
   daily?: string;
   /** The generator version the run's levels are built with: the current one for a new run, the saved one on a load (Spec 02). */
   generator?: number;
-  /** Turn-based (the default) or real time, kept for the whole run (Spec 04, Addendum B). Saving it comes with task 5.6. */
+  /** Turn-based (the default) or real time, kept for the whole run (Spec 04, Addendum B). Save format 7 keeps it (Spec 09, Addendum B). */
   time?: TimeMode;
   /** Supplies the level for a depth. Tests pass hand-built levels; the default generates from the seed. */
   levelFor?: (depth: number) => Level;

@@ -32,6 +32,7 @@ export function boardEntry(run: Run, outcome: Outcome, now: Date = new Date()): 
     outcome,
     ...(player.dead ? { cause: player.deathCause ?? 'Died', diedAtLevel: run.depth } : {}),
     date: now.toISOString(),
+    time: run.time,
   };
 }
 

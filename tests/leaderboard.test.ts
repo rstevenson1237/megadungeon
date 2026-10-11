@@ -70,7 +70,7 @@ describe('Spec 09: what goes on the board and what a new character keeps', () =>
     const e = boardEntry(run, 'died', new Date('2026-10-01T10:00:00Z'));
     expect(e).toEqual({
       id: 'mara-1', seed: 99, daily: '2026-10-01', name: 'Mara', className: 'Thief', level: 2, deepest: 7, kills: 12, score: 1234,
-      outcome: 'died', cause: 'The goblin kills you.', diedAtLevel: 0, date: '2026-10-01T10:00:00.000Z',
+      outcome: 'died', cause: 'The goblin kills you.', diedAtLevel: 0, date: '2026-10-01T10:00:00.000Z', time: 'turn',
     });
   });
 

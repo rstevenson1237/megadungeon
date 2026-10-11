@@ -3,8 +3,8 @@ import { isClear } from '../../src/game/map-state.ts';
 import { validTargets } from '../../src/game/targeting.ts';
 import { mountGame } from '../../src/mount.ts';
 
-// The browser check of task 5.5: the whole game, as the page mounts it, with new runs in real time (task 5.6 brings
-// the title row and `?time=`). Helpers clear the level of creatures, and put one in the player's sight and take it away again, so the check can
+// The browser check of task 5.5: the whole game, as the page mounts it, with new runs in real time, as `?time=real` presets
+// them on the page (task 5.6). Helpers clear the level of creatures, and put one in the player's sight and take it away again, so the check can
 // target something on any generated level. The Vite dev server serves this page to Playwright; it is not in the build.
 
 const root = document.getElementById('app')!;

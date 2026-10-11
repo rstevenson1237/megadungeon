@@ -10,6 +10,7 @@ import { FrameLoop } from './ui/frame-loop.ts';
 import { Grid } from './ui/grid.ts';
 import { claimsKey, keyToCommand } from './ui/input.ts';
 import { mountScreen } from './ui/screen.ts';
+import { timeParam } from './ui/title.ts';
 
 // The game in a page: the title screen, character creation, then a run from the surface village down through
 // generated levels. `src/main.ts` mounts it; the browser checks' harness mounts it too, with its own options.
@@ -53,6 +54,7 @@ export function mountGame(root: HTMLElement, options: Partial<AppDeps> = {}): Ap
     onChange: () => redraw(),
     runOptions: (seed) => runOptionsFor(bundle as ContentBundle, seed),
     creation: creationContentOf(bundle as ContentBundle),
+    ...(timeParam(location.search) ? { time: timeParam(location.search) } : {}),
     ...options,
   });
   const grid = new Grid();

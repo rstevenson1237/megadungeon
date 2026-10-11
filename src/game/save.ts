@@ -7,12 +7,12 @@
 
 import type { ClassDef } from '../rules/character/character.ts';
 import { SUPPORTED_GENERATORS } from '../rules/world/level.ts';
-import { type LevelDelta, type PlayerState } from './game.ts';
+import { type LevelDelta, type PlayerState, type TimeMode } from './game.ts';
 import { type Monster, creature } from './monsters.ts';
 import { Run, type RunOptions } from './run.ts';
 
 /** The save format. Bump it with every change to what is stored, and add a migration from the format before. */
-export const SAVE_FORMAT = 6;
+export const SAVE_FORMAT = 7;
 /** The generator versions this build can still build levels with; a save keeps the one it started with (Spec 02, Spec 09). */
 export { SUPPORTED_GENERATORS };
 
@@ -36,6 +36,8 @@ export interface SaveData {
   daily?: string;
   /** Who this is on the leaderboard. */
   characterId: string;
+  /** Turn-based or real time, kept for the whole run (Spec 09, Addendum B; save format 7). No tick or schedule is saved. */
+  time: TimeMode;
   savedAt: string;
   /** The village of the last rest, the only place a save is made. */
   depth: number;
@@ -126,6 +128,7 @@ export function toSave({ run, contentVersion, now = new Date() }: SaveSource): S
     seed: run.runSeed,
     ...(run.daily ? { daily: run.daily } : {}),
     characterId: run.characterId,
+    time: run.time,
     savedAt: now.toISOString(),
     depth: run.depth,
     round: run.round,
@@ -213,7 +216,12 @@ export function migrate5to6(data: Record<string, unknown>): Record<string, unkno
   return { ...data, player: { ...player, rivals: player.rivals ?? {}, weaknesses: player.weaknesses ?? [] } };
 }
 
-export const MIGRATIONS: Readonly<Record<number, Migration>> = { 1: migrate1to2, 2: migrate2to3, 3: migrate3to4, 4: migrate4to5, 5: migrate5to6 };
+/** Format 7 keeps the run's time mode (Spec 09, Addendum B; task 5.6): every run before it was turn-based. */
+export function migrate6to7(data: Record<string, unknown>): Record<string, unknown> {
+  return { ...data, time: data.time ?? 'turn' };
+}
+
+export const MIGRATIONS: Readonly<Record<number, Migration>> = { 1: migrate1to2, 2: migrate2to3, 3: migrate3to4, 4: migrate4to5, 5: migrate5to6, 6: migrate6to7 };
 
 /**
  * Read a save from its text: upgrade an older format step by step, and refuse, with a clear message and nothing
@@ -263,6 +271,7 @@ export function restoreRun(save: SaveData, base: RunOptions, classDef?: ClassDef
     ...(classDef ? { classDef } : {}),
     characterId: save.characterId,
     generator: save.generator,
+    time: save.time === 'real' ? 'real' : 'turn',
     ...(save.daily ? { daily: save.daily } : {}),
   });
 }

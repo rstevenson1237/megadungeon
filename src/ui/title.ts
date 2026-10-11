@@ -1,10 +1,12 @@
 // The title screen (Spec 01, "Overlays and screens"; Spec 09, "Run lifecycle"): full grid.
-// New game with a random seed or the seed of the day, Continue, Leaderboard. The random seed
+// New game with a random seed or the seed of the day, the time mode of the next new game (Spec 01, Addendum B),
+// Continue, Leaderboard. The random seed
 // is drawn when the screen opens and shown (Spec 02). Continue resumes the saved run at the village of
 // its last rest; the app tells the screen whether there is one (task 2.13).
 
 import { formatSeed, randomRunSeed, seedOfTheDay } from '../core/rng.ts';
 import type { Command } from '../game/commands.ts';
+import type { TimeMode } from '../game/game.ts';
 import { COLS, type Grid, ROWS } from './grid.ts';
 import { OVERLAY, UI } from './palette.ts';
 import { toCp437 } from './cp437.ts';
@@ -13,6 +15,8 @@ export interface RunChoice {
   seed: number;
   /** The UTC date, e.g. "2026-10-01", when the seed is the seed of the day. */
   daily?: string;
+  /** Turn-based or real time: the run plays in it throughout (Spec 04, Addendum B). */
+  time?: TimeMode;
 }
 
 export interface TitleDeps {
@@ -26,6 +30,10 @@ export interface TitleDeps {
   onLeaderboard?: () => void;
   /** Shown once, before the first game: where the save lives and what deletes it (Spec 09). */
   warning?: string;
+  /** The time mode the time row starts on: turn-based unless it says real time. */
+  time?: TimeMode;
+  /** The time row was switched: the app remembers the choice. */
+  onTime?: (time: TimeMode) => void;
 }
 
 const BANNER = [
@@ -36,7 +44,15 @@ const BANNER = [
 
 const CREDIT = 'Font: IBM VGA 9x16, The Ultimate Oldschool PC Font Pack by VileR, CC BY-SA 4.0';
 
-type ItemId = 'random' | 'daily' | 'continue' | 'leaderboard';
+type ItemId = 'random' | 'daily' | 'time' | 'continue' | 'leaderboard';
+
+/** The page parameter `?time=real` or `?time=turn` (Spec 01, Addendum B); anything else presets nothing. */
+export function timeParam(search: string): TimeMode | undefined {
+  const time = new URLSearchParams(search).get('time');
+  return time === 'real' || time === 'turn' ? time : undefined;
+}
+
+const TIME_NAME: Record<TimeMode, string> = { turn: 'Turn-based', real: 'Real time' };
 
 export class TitleScreen {
   selected = 0;
@@ -49,6 +65,8 @@ export class TitleScreen {
   notice = '';
   /** Whether a saved run waits: the app finds out asynchronously and sets it. */
   hasSave = false;
+  /** The time mode of the next new game; Enter on the time row switches it. */
+  time: TimeMode;
   private readonly items: { id: ItemId; label: string; detail: string }[];
   private readonly deps: TitleDeps;
 
@@ -64,9 +82,11 @@ export class TitleScreen {
     this.day = now.toISOString().slice(0, 10);
     this.dailySeed = seedOfTheDay(this.day);
     this.deps = deps;
+    this.time = deps.time ?? 'turn';
     this.items = [
       { id: 'random', label: 'New game: random seed', detail: formatSeed(this.randomSeed) },
       { id: 'daily', label: 'New game: seed of the day', detail: `${this.day}  ${formatSeed(this.dailySeed)}` },
+      { id: 'time', label: 'Time', detail: 'Enter to switch, for new games' },
       { id: 'continue', label: 'Continue', detail: '' },
       { id: 'leaderboard', label: 'Leaderboard', detail: '' },
     ];
@@ -89,10 +109,14 @@ export class TitleScreen {
   private choose(id: ItemId): void {
     switch (id) {
       case 'random':
-        this.start({ seed: this.randomSeed });
+        this.start({ seed: this.randomSeed, time: this.time });
         return;
       case 'daily':
-        this.start({ seed: this.dailySeed, daily: this.day });
+        this.start({ seed: this.dailySeed, daily: this.day, time: this.time });
+        return;
+      case 'time':
+        this.time = this.time === 'turn' ? 'real' : 'turn';
+        this.deps.onTime?.(this.time);
         return;
       case 'continue':
         if (this.hasSave && this.deps.onContinue) this.deps.onContinue();
@@ -117,7 +141,8 @@ export class TitleScreen {
       const on = i === this.selected;
       const y = 15 + i * 2;
       grid.fill(left, y, width, 1, toCp437(' '), UI.text, on ? OVERLAY.selectedBg : UI.background);
-      grid.text(left, y, `${on ? '> ' : '  '}${item.label}`, on ? OVERLAY.selectedFg : UI.value, on ? OVERLAY.selectedBg : UI.background);
+      const label = item.id === 'time' ? `Time: ${TIME_NAME[this.time]}` : item.label;
+      grid.text(left, y, `${on ? '> ' : '  '}${label}`, on ? OVERLAY.selectedFg : UI.value, on ? OVERLAY.selectedBg : UI.background);
       const detail = item.id === 'continue' ? (this.hasSave ? 'Resume at your last rest' : 'No saved game') : item.detail;
       grid.text(left + width - [...detail].length, y, detail, on ? OVERLAY.selectedFg : UI.label, on ? OVERLAY.selectedBg : UI.background);
     });
