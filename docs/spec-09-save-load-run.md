@@ -139,7 +139,7 @@ From Intake Addendum A (findings A1, C2).
 
 - [ ] Before release, a save with a different content fingerprint is refused with the message above and changes nothing.
 
-## Addendum B (proposed October 11, 2026, awaiting approval)
+## Addendum B (approved October 11, 2026)
 
 From Intake Addendum B (findings F4, decisions D3 and D6).
 

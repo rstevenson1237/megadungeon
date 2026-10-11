@@ -226,7 +226,7 @@ From Intake Addendum A (findings A1, A4, A5, B5). All figures are starting value
 - [ ] Z stops on each listed interruption and when a die returns, and refuses with nothing to wait for.
 - [ ] L describes visible, remembered and unseen cells and costs no round.
 
-## Addendum B (proposed October 11, 2026, awaiting approval)
+## Addendum B (approved October 11, 2026)
 
 From Intake Addendum B (requirements R1 to R3, decisions D1 to D3, D5, D6 and D10). All figures are starting values for playtesting.
 

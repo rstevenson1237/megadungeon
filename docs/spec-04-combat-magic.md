@@ -229,7 +229,7 @@ From Intake Addendum A (finding A2: Raise, Decoy and Companion need creatures on
 
 - **Turn time budget:** the plan's risks ask for a per-turn time budget test, and no spec gives the figure. Proposed: on a large level crowded with 80 alert creatures of every behaviour, a round takes under 5 ms on average and never over 50 ms (the same figure as generating a large level). Measured on the build machine: about 0.1 ms on average and 4 ms at worst.
 
-## Addendum B (proposed October 11, 2026, awaiting approval)
+## Addendum B (approved October 11, 2026)
 
 From Intake Addendum B (requirements R1 and R2, findings F1 and F2, decisions D1 to D4). All figures are starting values for playtesting.
 

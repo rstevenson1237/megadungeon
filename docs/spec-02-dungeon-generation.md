@@ -274,7 +274,7 @@ From Intake Addendum A (findings A6 to A8, C2, C3). All figures are starting val
 - [ ] The named rival carries its loot between appearances and, once killed, drops it with its journal and never appears again.
 - [ ] Reading a weakness chain's last entry weakens its boss; each artifact carried removes one die from the final boss when it becomes alert.
 
-## Addendum B (proposed October 11, 2026, awaiting approval)
+## Addendum B (approved October 11, 2026)
 
 From Intake Addendum B (finding F3). All figures are starting values for playtesting.
 

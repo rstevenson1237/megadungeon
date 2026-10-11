@@ -255,7 +255,7 @@ From Intake Addendum A (findings A2, A3, B3, B4). All figures are starting value
 - [ ] Each example minor ability works as its row says, and a Pack Mule drawn at level up grows the pack at once.
 - [ ] A character created through the creation screen in each class plays to level 10 with its draws in effect.
 
-## Addendum B (proposed October 11, 2026, awaiting approval)
+## Addendum B (approved October 11, 2026)
 
 From Intake Addendum B (decision D4).
 

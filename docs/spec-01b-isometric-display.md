@@ -2,7 +2,7 @@
 
 Oct 11, 2026 · @Robert Stevenson
 
-This spec adds a second way to draw the main view: an isometric pixel-art picture of the level, made with artgen from `rstevenson1237/image_tools`. It sits beside Spec 01, which still governs the screen, panes, keys and targeting. Proposed October 11, 2026 with Intake Addendum B; **awaiting approval**.
+This spec adds a second way to draw the main view: an isometric pixel-art picture of the level, made with artgen from `rstevenson1237/image_tools`. It sits beside Spec 01, which still governs the screen, panes, keys and targeting. Proposed and approved October 11, 2026, with Intake Addendum B.
 
 ## Scope
 
@@ -140,5 +140,5 @@ About 160 assets, in four batches (decision D9).
 
 ## Open questions
 
-- [ ] **Spec approved,** with decisions D6 to D10 of Intake Addendum B.
-- [ ] **Wall height and lighting** are left to the art direction (task 6.1): proposed 24 px walls and no dynamic light at first.
+- [x] **Spec approved** (October 11, 2026), with decisions D6 to D10 of Intake Addendum B as recommended.
+- [x] **Wall height and lighting** are left to the art direction (task 6.1): 24 px walls and no dynamic light at first, approved as recommended.

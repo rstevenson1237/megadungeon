@@ -2,7 +2,7 @@
 
 Oct 11, 2026 · @Robert Stevenson
 
-This addendum adds two optional ways to play the finished game: a real-time mode beside the turn-based one, and an isometric pixel-art display beside the CP437 text display. Both are runtime flags; the turn-based text game stays exactly as built and remains the default. Proposed October 11, 2026; **awaiting approval**. Nothing here changes a built rule until it is approved, and nothing is built before then.
+This addendum adds two optional ways to play the finished game: a real-time mode beside the turn-based one, and an isometric pixel-art display beside the CP437 text display. Both are runtime flags; the turn-based text game stays exactly as built and remains the default. Proposed and approved in full October 11, 2026, with every decision taken as recommended. Building starts after the Content complete gate.
 
 ## Why
 
@@ -40,7 +40,7 @@ Constraints carried over from the project brief: no runtime dependencies in the 
 
 ## New and changed requirements
 
-Each line is written into the named spec as an "Addendum B" section, proposed October 11, 2026.
+Each line is written into the named spec as an "Addendum B" section, approved October 11, 2026.
 
 - **Spec 01:** the two runtime flags (time mode, display); the real-time frame loop, held keys, a one-command buffer, pausing (P, overlays, a hidden tab); Z fast-forwards in real time; live targeting; pointer to Spec 01b.
 - **Spec 01b (new):** the isometric display: layout, projection, camera, draw order, wall cutaway, visibility, sprites, animation, effects, targeting and look cursors, the art pipeline through artgen, the asset list and its acceptance criteria.
@@ -52,19 +52,19 @@ Each line is written into the named spec as an "Addendum B" section, proposed Oc
 
 ## Decisions for you
 
-Each item has a recommended default; the amendments are written to it.
+Each item had a recommended default; the amendments are written to it. All eleven were approved as recommended on October 11, 2026.
 
-- [ ] **D1 Tick and round length:** a tick is 50 ms and a round is 10 ticks, half a second, so a normal creature steps twice a second (recommended). Alternative: 100 ms ticks, a round per second, closer to the turn-based pace but slow for an action game.
-- [ ] **D2 Pausing:** menus and overlays (inventory, spells, level up, NPC talk, history, help, journal, game menu) pause; targeting and look do not, and P pauses at any time (recommended). Alternatives: targeting pauses too (safer, less real); or nothing pauses but P.
-- [ ] **D3 Mode per run:** chosen on the title screen before a new game, fixed for the run, saved with it, and marked on the leaderboard (recommended), because the two modes balance differently. Alternative: switchable at any village.
-- [ ] **D4 Waiting in real time:** a round in which the player takes no action counts as a waiting round, so standing still recovers as Space does (recommended).
-- [ ] **D5 Z in real time:** fast-forwards at four times speed until a Combat die returns, with the same stop rules as today (recommended).
-- [ ] **D6 Display switching:** the display can be switched at any time from the game menu, and the choice is a browser preference, not part of the save (recommended).
-- [ ] **D7 The artgen runtime:** vendor its core and only its Canvas 2D adapter into `src/ui/art/runtime/`, as in-tree source with no npm dependency, which keeps the "no runtime dependencies" rule (recommended). Alternative: write our own reader for artgen's `pack.json` and atlases. Note: `image_tools` has no licence file; as its owner you may wish to add one before its code is copied in.
-- [ ] **D8 Projection and keys:** a true 2:1 isometric view, with W A S D keeping their map directions (W moves up and to the right on screen) and a small compass drawn in a corner of the view (recommended, as asked). Alternative: a three-quarter oblique view, where map north is screen up and keys stay straight; artgen supports it, but it is not isometric.
-- [ ] **D9 Art scope first:** monsters by glyph family (35 sprites, recoloured per row by colour token), one tile shape set recoloured for the 13 themes from their existing palettes, then unique boss sprites in a later batch (recommended).
-- [ ] **D10 Input:** keyboard only in both displays, as Spec 01 says; no mouse (recommended).
-- [ ] **D11 Order:** after the Content complete gate, Phase 5 (real time) then Phase 6 (isometric), with Phase 6's art direction task allowed to run during Phase 5 because it touches no code (recommended).
+- [x] **D1 Tick and round length:** a tick is 50 ms and a round is 10 ticks, half a second, so a normal creature steps twice a second (recommended). Alternative: 100 ms ticks, a round per second, closer to the turn-based pace but slow for an action game.
+- [x] **D2 Pausing:** menus and overlays (inventory, spells, level up, NPC talk, history, help, journal, game menu) pause; targeting and look do not, and P pauses at any time (recommended). Alternatives: targeting pauses too (safer, less real); or nothing pauses but P.
+- [x] **D3 Mode per run:** chosen on the title screen before a new game, fixed for the run, saved with it, and marked on the leaderboard (recommended), because the two modes balance differently. Alternative: switchable at any village.
+- [x] **D4 Waiting in real time:** a round in which the player takes no action counts as a waiting round, so standing still recovers as Space does (recommended).
+- [x] **D5 Z in real time:** fast-forwards at four times speed until a Combat die returns, with the same stop rules as today (recommended).
+- [x] **D6 Display switching:** the display can be switched at any time from the game menu, and the choice is a browser preference, not part of the save (recommended).
+- [x] **D7 The artgen runtime:** vendor its core and only its Canvas 2D adapter into `src/ui/art/runtime/`, as in-tree source with no npm dependency, which keeps the "no runtime dependencies" rule (recommended). Alternative: write our own reader for artgen's `pack.json` and atlases. Note: `image_tools` has no licence file; as its owner you may wish to add one before its code is copied in.
+- [x] **D8 Projection and keys:** a true 2:1 isometric view, with W A S D keeping their map directions (W moves up and to the right on screen) and a small compass drawn in a corner of the view (recommended, as asked). Alternative: a three-quarter oblique view, where map north is screen up and keys stay straight; artgen supports it, but it is not isometric.
+- [x] **D9 Art scope first:** monsters by glyph family (35 sprites, recoloured per row by colour token), one tile shape set recoloured for the 13 themes from their existing palettes, then unique boss sprites in a later batch (recommended).
+- [x] **D10 Input:** keyboard only in both displays, as Spec 01 says; no mouse (recommended).
+- [x] **D11 Order:** after the Content complete gate, Phase 5 (real time) then Phase 6 (isometric), with Phase 6's art direction task allowed to run during Phase 5 because it touches no code (recommended).
 
 ## Changes to the build phases
 
@@ -74,7 +74,7 @@ Two phases are added after the Content complete gate. Task numbers continue the 
 
 | # | Task | Spec | Needs | Done when |
 | --- | --- | --- | --- | --- |
-| 5.1 | Approvals: the owner approves this addendum and its Addendum B sections, or lists changes | all | Content complete | Every decision above ticked or changed in the specs |
+| 5.1 | Approvals: done October 11, 2026, when the owner approved this addendum, every Addendum B section and every decision as recommended. Before 5.2 starts, the plan is iterated and any clarification it needs is approved | all | Content complete | Every decision above ticked (done) |
 | 5.2 | Game clock: a tick counter and `advance(ticks)` on the Game; end-of-round work moved into one function both modes call; turn mode unchanged | 04 | 5.1 | Every existing test passes unchanged; a round in real time runs the same end-of-round work |
 | 5.3 | Creature schedules: each creature's next-act tick from its speed, the stagger, ordering within a tick, the 50-creature cap, allies and the phantom | 04 | 5.2 | Speed and ordering criteria pass on a fake clock |
 | 5.4 | Player cooldowns: cooldown by action and speed, the one-command buffer, held-key repeat, free actions | 01, 04 | 5.3 | Cooldown and buffer criteria pass |
@@ -112,4 +112,4 @@ Two phases are added after the Content complete gate. Task numbers continue the 
 
 ## Open questions
 
-- [ ] **Addendum approved:** the requirements, decisions D1 to D11, Phases 5 and 6, and the Addendum B sections in Specs 01, 02, 03, 04, 08 and 09 and the new Spec 01b.
+- [x] **Addendum approved (October 11, 2026):** the requirements, decisions D1 to D11, Phases 5 and 6, and the Addendum B sections in Specs 01, 02, 03, 04, 08 and 09 and the new Spec 01b.

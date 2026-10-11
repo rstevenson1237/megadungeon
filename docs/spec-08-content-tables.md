@@ -164,7 +164,7 @@ From Intake Addendum A (findings A1, A3, A9, A10).
 
 - [ ] A minor ability, artifact or shrine buff naming an effect not on the list, or missing that effect's fields, fails the build.
 
-## Addendum B (proposed October 11, 2026, awaiting approval)
+## Addendum B (approved October 11, 2026)
 
 From Intake Addendum B (requirements R3 and R4, finding F9, decision D9). The art itself is not YAML: it lives in `art/`, made with artgen (Spec 01b, Art pipeline). These rules connect the tables to it.
 
