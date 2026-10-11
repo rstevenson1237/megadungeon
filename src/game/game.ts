@@ -58,10 +58,13 @@ import { type Monster, isAlly, spawnAll } from './monsters.ts';
 import type { Fact } from '../core/templates.ts';
 import type { Link } from '../rules/world/run-layout.ts';
 import { type RivalArc, rivalsArrive } from './connective.ts';
-import { Schedule } from './schedule.ts';
+import { Schedule, cooldownTicks } from './schedule.ts';
 import { type TownState, freshTown } from './town-state.ts';
 
 export { MAX_SIMULATED, actionsInRound };
+
+/** Real time: an action's result opens a list or a window for the player, which pauses the game (Spec 01, Addendum B). */
+const opensSomething = (r: ActResult): boolean => r.opened !== undefined || r.offer !== undefined || r.npc !== undefined || r.read !== undefined;
 
 /** Ticks in a round of real time (Spec 04, Addendum B): a tick is 50 ms of play, so a round is half a second. */
 export const TICKS_PER_ROUND = 10;
@@ -333,7 +336,15 @@ export interface ActResult extends PendingEffects {
   spent: boolean;
   /** Set when the player used the stairs they stand on; the run changes the level (Spec 02). */
   stairs?: 'up' | 'down';
+  /** Real time: the command came during the player's cooldown and is held until it ends (Spec 04, Addendum B). */
+  held?: boolean;
 }
+
+/** Turn-based (the default) or real time, chosen for a run and kept for all of it (Spec 01 and Spec 04, Addendum B). */
+export type TimeMode = 'turn' | 'real';
+
+/** A command for the player's cooldown to carry out, now or when it ends: one of the Game's actions, bound to its arguments. */
+export type Order = () => ActResult | undefined;
 
 /** What a revisit replays on top of the regenerated level (Spec 02, Persistence; Spec 09, Level deltas). */
 export interface LevelDelta {
@@ -376,6 +387,8 @@ export interface ArrivalOptions {
   above?: { villagesAbove: number; facts: () => Fact[] };
   /** The run layout's cross-level links: a rival's stash and a lore chain's boss (Spec 02, Addendum A). */
   links?: readonly Link[];
+  /** The run's time mode; turn-based unless it says real time. */
+  time?: TimeMode;
 }
 
 export class Game {
@@ -408,6 +421,19 @@ export class Game {
   actedThisRound = false;
   /** Each creature's next-act tick and the 50 simulated this round, from the first real-time tick on this level. Not saved. */
   schedule: Schedule | null = null;
+  /** Turn-based or real time, for the whole run. */
+  readonly time: TimeMode;
+  /** Real time: the tick at which the player's cooldown ends and the next command can be carried out (Spec 04, Addendum B). Not saved. */
+  readyAt = 0;
+  /** Real time: the one command given during the cooldown, carried out when it ends; a newer one replaces it. Not saved. */
+  held: Order | null = null;
+  /** Real time: the movement key held down, which steps again each time the cooldown ends (Spec 01, Addendum B). Not saved. */
+  walking: { dx: number; dy: number } | null = null;
+  /**
+   * Real time: what the last command carried out during `advance` left for the shell (a level change, a list or a
+   * window to open), its messages already in what `advance` returned. Taken and cleared by `carried()`. Not saved.
+   */
+  private outcome: ActResult | null = null;
 
   constructor(
     readonly runSeed: number,
@@ -427,6 +453,7 @@ export class Game {
     this.content = arrival.content ?? noContent();
     this.above = arrival.above ?? { villagesAbove: 0, facts: () => [] };
     this.links = arrival.links ?? [];
+    this.time = arrival.time ?? 'turn';
     this.disguises = disguisesFor(runSeed, this.items.magic.values(), this.items.disguiseNames);
     const at = arrival.at ?? (arrival.stair === 'down' ? level.downStair ?? level.upStair : level.upStair);
     this.state = {
@@ -879,6 +906,7 @@ export class Game {
   }
 
   private endRoundOnce(messages: LogMessage[], waiting: boolean): ActResult {
+    if (this.time === 'real') return this.coolDown(messages, waiting);
     const { player } = this.state;
     if (!waiting) player.waited = 0;
     const speed = effectiveSpeed('normal', player.statuses);
@@ -901,11 +929,72 @@ export class Game {
   }
 
   /**
-   * Real time (Spec 04, Addendum B): let `ticks` ticks of game time pass. At each tick the creatures due act on their
-   * own schedules; each tick that reaches a multiple of 10 is then a round boundary, which ends the round exactly as
-   * turn mode does (`roundEnds`) and begins the next: the 50 nearest are chosen and make their notice rolls. A round in
+   * Real time (Spec 04, Addendum B): the player has spent an action. It happened at once, and starts the player's
+   * cooldown: 10 ticks, 5 Hasted, 20 Slowed. Nothing else moves until the ticks come. Any action but a wait makes
+   * the round an acting one, so it does not count toward recovery (Spec 03, Addendum B).
+   */
+  private coolDown(messages: LogMessage[], waiting: boolean): ActResult {
+    this.startClock(messages);
+    if (!waiting) this.actedThisRound = true;
+    this.readyAt = this.tick + cooldownTicks(this.state.player.statuses);
+    return { messages, spent: true };
+  }
+
+  /** Real time: whether the player's cooldown has ended, so a command is carried out at once. */
+  get ready(): boolean {
+    return this.tick >= this.readyAt;
+  }
+
+  /**
+   * Give the player's command (Spec 04, Addendum B). In turn mode it is carried out at once, as ever. In real time it
+   * is carried out at once when the cooldown has ended; during the cooldown it is held, replacing any command already
+   * held, and carried out by `advance` at the tick the cooldown ends, before any creature acts in that tick. The
+   * first command on a level starts the clock. Free actions (inventory, look, targeting, menus) never come here.
+   */
+  command(order: Order): ActResult | undefined {
+    if (this.time === 'turn') return order();
+    const messages: LogMessage[] = [];
+    this.startClock(messages);
+    if (!this.ready && !this.state.player.dead) {
+      this.held = order;
+      return { messages, spent: false, held: true };
+    }
+    this.held = null;
+    const result = order();
+    if (result) result.messages.unshift(...messages);
+    return result ?? (messages.length > 0 ? { messages, spent: false } : undefined);
+  }
+
+  /**
+   * Real time: a movement key goes down (Spec 01, Addendum B). The step is given as a command, and while the key stays
+   * down the player steps again each time the cooldown ends. In turn mode it is one move, as the key always was.
+   */
+  walk(dx: number, dy: number): ActResult | undefined {
+    if (this.time === 'real') this.walking = { dx, dy };
+    const result = this.command(() => this.act({ type: 'move', dx, dy }));
+    if (result && !result.spent && !result.held) this.walking = null; // a refused step is not tried again
+    return result;
+  }
+
+  /** Real time: the movement key comes up, or the game pauses, so the player stops walking. A step already held still happens. */
+  halt(): void {
+    this.walking = null;
+  }
+
+  /** What the last command carried out during `advance` left for the shell, once: a level change, or something to open. */
+  carried(): ActResult | null {
+    const outcome = this.outcome;
+    this.outcome = null;
+    return outcome;
+  }
+
+  /**
+   * Real time (Spec 04, Addendum B): let `ticks` ticks of game time pass. At each tick the player's held command (or
+   * a held key's next step) is carried out first if the cooldown has ended, then the creatures due act on their own
+   * schedules; each tick that reaches a multiple of 10 is then a round boundary, which ends the round exactly as turn
+   * mode does (`roundEnds`) and begins the next: the 50 nearest are chosen and make their notice rolls. A round in
    * which the player carried out no action counts as a waiting round (Spec 03, Addendum B). Time stops when the player
-   * dies or leaves the level.
+   * dies or leaves the level, and after the tick in which a held command opened something for the shell to show.
    */
   advance(ticks: number): LogMessage[] {
     if (!Number.isInteger(ticks) || ticks < 0) throw new RangeError(`Ticks are whole numbers, not ${ticks}`);
@@ -914,6 +1003,10 @@ export class Game {
     for (let n = 0; n < ticks && !this.state.player.dead && !this.leaving(); n++) {
       schedule.arrive(); // creatures that appeared since the last tick
       this.tick++;
+      const done = this.playerTurn(messages);
+      // Leaving a level happens at once: nothing else on the old level acts after it.
+      if (done && (done.stairs || done.fall || done.teleport !== undefined)) break;
+      if (this.state.player.dead) break;
       schedule.tick(messages);
       if (this.tick % TICKS_PER_ROUND === 0 && !this.state.player.dead && !this.leaving()) {
         // An action resets the waiting count, as `endRoundOnce` does in turn mode.
@@ -922,9 +1015,28 @@ export class Game {
         this.actedThisRound = false;
         schedule.beginRound(messages);
       }
+      if (done && opensSomething(done)) break;
     }
     messages.push(...this.queued.splice(0));
     return messages;
+  }
+
+  /**
+   * Real time: the player's turn within a tick, first of all. When the cooldown has ended, the held command is
+   * carried out, or with none held, a held movement key steps again. A step the held key cannot take (a wall, a
+   * found trap, fear) stops the walking, so a refused step is not tried again every tick. Returns what was done.
+   */
+  private playerTurn(messages: LogMessage[]): ActResult | undefined {
+    if (!this.ready || this.state.player.dead) return undefined;
+    const order = this.held;
+    this.held = null;
+    const step = this.walking;
+    const result = order ? order() : step ? this.act({ type: 'move', dx: step.dx, dy: step.dy }) : undefined;
+    if (!result) return undefined;
+    if (!order && !result.spent) this.walking = null;
+    messages.push(...result.messages);
+    if (result.stairs || result.fall || result.teleport !== undefined || opensSomething(result)) this.outcome = { ...result, messages: [] };
+    return result;
   }
 
   /**

@@ -12,7 +12,7 @@ import { generateLevel, PLAIN_STYLE, type LevelStyle } from '../rules/world/gene
 import { GENERATOR_VERSION, MAX_DEPTH, type Level, type Point, type SizeClass } from '../rules/world/level.ts';
 import type { LevelContents } from '../rules/world/placement/index.ts';
 import type { RunLayout } from '../rules/world/run-layout.ts';
-import { Game, type LevelDelta, type PlayerState } from './game.ts';
+import { Game, type LevelDelta, type PlayerState, type TimeMode } from './game.ts';
 import { endBound } from '../rules/magic/status.ts';
 import { type Character, type ClassDef } from '../rules/character/character.ts';
 import type { PoolName, Step } from '../rules/character/dice.ts';
@@ -69,6 +69,8 @@ export interface RunOptions {
   daily?: string;
   /** The generator version the run's levels are built with: the current one for a new run, the saved one on a load (Spec 02). */
   generator?: number;
+  /** Turn-based (the default) or real time, kept for the whole run (Spec 04, Addendum B). Saving it comes with task 5.6. */
+  time?: TimeMode;
   /** Supplies the level for a depth. Tests pass hand-built levels; the default generates from the seed. */
   levelFor?: (depth: number) => Level;
 }
@@ -82,6 +84,8 @@ export class Run {
   readonly daily: string | undefined;
   /** The generator version this run's levels are built with, kept for the whole run (Spec 02). */
   readonly generator: number;
+  /** Turn-based or real time, for the whole run; every level is played in it. */
+  readonly time: TimeMode;
   depth: number;
   /** The level being played; null in a village, where there is no map (Spec 01). */
   game: Game | null = null;
@@ -114,6 +118,7 @@ export class Run {
     this.characterId = options.characterId ?? `${runSeed >>> 0}`;
     this.daily = options.daily;
     this.generator = options.generator ?? GENERATOR_VERSION;
+    this.time = options.time ?? 'turn';
     this.layout = options.layout;
     this.contentsFor = options.contentsFor;
     this.themeFor = options.themeFor;
@@ -296,6 +301,7 @@ export class Run {
       ...(this.items ? { items: this.items } : {}),
       ...(this.content ? { content: this.content } : {}),
       links: this.layout?.links ?? [],
+      time: this.time,
       above: { villagesAbove: this.town.number(depth), facts: () => this.town.rumourFacts(Math.max(0, ...this.villages.filter((v) => v < depth))) },
     });
   }
