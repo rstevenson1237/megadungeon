@@ -286,6 +286,15 @@ Addendum B leaves three points of the creature schedules open. Approved as built
 - **Arrival begins the first round.** When real time starts on a level (its first tick), the 50 nearest are chosen and make their checks for round 1, and every creature is staggered from tick 0, so each first acts at tick 1 to 10.
 - **A creature that appears mid-round** (a raised ally, the phantom) is staggered from the tick it appears but is not simulated until the next boundary includes it, as in turn mode, where a round's order is fixed when it begins. A wandering monster arrives at the boundary, before the 50 are chosen, so it can be among them at once.
 
+## Clarification (task 5.4, proposed and approved October 11, 2026)
+
+Addendum B leaves four points of the player's cooldowns open. Approved as built:
+
+- **Space follows speed like every other action.** Spec 01, Addendum B says Space "starts a 10-tick cooldown"; this section lists wait among the actions whose cooldown is 5 Hasted and 20 Slowed. Built as this section says: 10 is the normal-speed figure. Recovery is unaffected either way, since it is counted at the round boundary.
+- **A held movement key stops at a step it cannot take.** When a repeated step is refused (a wall, a found trap, fear), the walk stops until the key is pressed again, so a refused step is not tried, and its message logged, every tick. A step already held still happens when the key comes up.
+- **What a held command leaves for the shell.** A held command that leaves the level (stairs, a fall, a teleport) stops time at once, before any creature acts in that tick. One that opens something (a pick-up list, an altar's offering, a trader or hermit, text to read) finishes its tick, then time stops so the shell can open it, which pauses the game.
+- **The first command on a level starts the clock,** as the first tick would: the arrival round begins (Clarification, task 5.3), then the command is carried out. An Asleep or Held player's command is lost and still starts the cooldown, as in turn mode the round goes by.
+
 ## Acceptance criteria
 
 - [ ] Nothing on the level moves until the player spends an action; free actions (inventory, look, targeting) cost no round.

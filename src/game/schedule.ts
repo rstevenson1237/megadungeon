@@ -5,7 +5,7 @@
 
 import type { LogMessage } from '../core/log.ts';
 import { hash32, levelSeed } from '../core/rng.ts';
-import { effectiveSpeed, type Speed } from '../rules/magic/status.ts';
+import { effectiveSpeed, type Speed, type StatusEffect } from '../rules/magic/status.ts';
 import { distanceSq } from '../rules/world/geometry.ts';
 import { creaturesActOnce, roundChecks, simulatedThisRound } from './ai.ts';
 import type { Game } from './game.ts';
@@ -13,6 +13,12 @@ import type { Monster } from './monsters.ts';
 
 /** Ticks between a creature's actions: 5 fast, 10 normal, 20 slow (Spec 04, Addendum B). */
 export const TICKS_PER_ACTION: Readonly<Record<Speed, number>> = { fast: 5, normal: 10, slow: 20 };
+
+/**
+ * The player's cooldown after an action, in ticks (Spec 04, Addendum B): 10, 5 Hasted, 20 Slowed, and 10 with both,
+ * the same as a creature's time between actions.
+ */
+export const cooldownTicks = (statuses: readonly StatusEffect[]): number => TICKS_PER_ACTION[effectiveSpeed('normal', statuses)];
 
 /** A creature's first next-act tick comes 1 to this many ticks after it arrives. */
 export const STAGGER_TICKS = 10;
