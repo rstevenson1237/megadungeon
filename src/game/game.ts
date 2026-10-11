@@ -1,5 +1,6 @@
-// The turn loop (Spec 04, "Turns and timing"): strictly turn-based. Nothing moves until the player
+// The turn loop (Spec 04, "Turns and timing"): in turn mode, nothing moves until the player
 // spends an action; then every creature acts, nearest first, up to 50 per round (game/ai.ts).
+// Real time (Spec 04, Addendum B) counts game time in ticks with `advance`; both modes end a round the same way.
 // Spells, items and class abilities come with tasks 2.8 to 2.10.
 
 import type { LogMessage } from '../core/log.ts';
@@ -60,6 +61,9 @@ import { type RivalArc, rivalsArrive } from './connective.ts';
 import { type TownState, freshTown } from './town-state.ts';
 
 export { MAX_SIMULATED, actionsInRound };
+
+/** Ticks in a round of real time (Spec 04, Addendum B): a tick is 50 ms of play, so a round is half a second. */
+export const TICKS_PER_ROUND = 10;
 
 /** Z never waits more than this many times in one go: far beyond any wait cycle, so it only guards the loop. */
 const WAIT_LIMIT = 100;
@@ -394,6 +398,13 @@ export class Game {
   readonly links: readonly Link[];
   /** Log lines raised where no message list is at hand (the artifact seals), given out at the end of the action. Not saved. */
   queued: LogMessage[] = [];
+  /**
+   * Real-time game time on this level, in ticks since arrival (Spec 04, Addendum B). Every 10th tick is a round
+   * boundary. Turn mode never moves it. Never saved (Spec 09, Addendum B).
+   */
+  tick = 0;
+  /** The player carried out an action in this real-time round, so it is not a waiting round (Spec 03, Addendum B). Not saved. */
+  actedThisRound = false;
 
   constructor(
     readonly runSeed: number,
@@ -886,10 +897,39 @@ export class Game {
     return result;
   }
 
-  /** One round of the level: every creature acts, effects tick down, waiting counts, and the round number goes up. */
+  /**
+   * Real time (Spec 04, Addendum B): let `ticks` ticks of game time pass. Each tick that reaches a multiple of 10 is a
+   * round boundary, which ends the round exactly as turn mode does (`roundEnds`). A round in which the player carried
+   * out no action counts as a waiting round (Spec 03, Addendum B). Time stops when the player dies.
+   */
+  advance(ticks: number): LogMessage[] {
+    if (!Number.isInteger(ticks) || ticks < 0) throw new RangeError(`Ticks are whole numbers, not ${ticks}`);
+    const messages: LogMessage[] = [];
+    for (let n = 0; n < ticks && !this.state.player.dead; n++) {
+      this.tick++;
+      if (this.tick % TICKS_PER_ROUND === 0) {
+        // An action resets the waiting count, as `endRoundOnce` does in turn mode.
+        if (this.actedThisRound) this.state.player.waited = 0;
+        this.roundEnds(messages, !this.actedThisRound);
+        this.actedThisRound = false;
+      }
+    }
+    messages.push(...this.queued.splice(0));
+    return messages;
+  }
+
+  /** One round of the level in turn mode: every creature acts, then the round ends. */
   private runRound(messages: LogMessage[], waiting: boolean): void {
-    const { player } = this.state;
     creaturesAct(this, messages);
+    this.roundEnds(messages, waiting);
+  }
+
+  /**
+   * The end of a round, the same in both modes (Spec 04, Addendum B): the wandering check, effects tick down and
+   * poison bites, waiting counts, the fight counter, and the round number goes up.
+   */
+  private roundEnds(messages: LogMessage[], waiting: boolean): void {
+    const { player } = this.state;
     if (!player.dead) {
       // A 1 in 200 chance each turn that a wandering monster arrives, out of sight (Spec 02, task 2.12).
       if (this.wandering.oneIn(WANDER_ONE_IN)) wanderer(this, messages);

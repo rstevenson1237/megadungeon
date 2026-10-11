@@ -17,8 +17,8 @@ export const SAVE_FORMAT = 6;
 export { SUPPORTED_GENERATORS };
 
 /**
- * Until the Content complete gate, a save made with other content is refused (Spec 09, Addendum A): the tables shape
- * what a level holds, so its deltas would land on a different level. The policy for after release is chosen at that gate.
+ * A save made with other content is refused, before and after release (Spec 09, Addendum A): the tables shape what a
+ * level holds, so its deltas would land on a different level, and a save is for a pause in play, not for keeping a run.
  */
 export const REFUSE_OTHER_CONTENT = true;
 

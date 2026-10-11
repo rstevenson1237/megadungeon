@@ -107,7 +107,7 @@ All figures are starting values for playtesting. Where the spec above is silent 
 **What a save is**
 
 - **Format:** one JSON text, save format 1. It holds the three versions, the seed, the seed-of-the-day date, a character id, when it was saved, the village of the last rest, the run's round counter, the character, the player (carried and worn items, bank, quests, journal, identified kinds, spells, shop stock and the counts the leaderboard needs) and one delta per visited level. To stay far under 1 MB, a level's explored cells are stored as alternating run lengths and a living monster as only what differs from a fresh one. A full 100-level run with every level explored and every monster alive comes to about 0.3 MB.
-- **Versions:** the game version is the save format number. The generator version is the one the levels were built with; a build that no longer has it refuses the save. The content version is a fingerprint of the content tables made by the content build; it is recorded but never blocks a load, because ids are never removed (Spec 08). Until release, Addendum A below replaces this: a save from other content is refused.
+- **Versions:** the game version is the save format number. The generator version is the one the levels were built with; a build that no longer has it refuses the save. The content version is a fingerprint of the content tables made by the content build; it is recorded but never blocks a load, because ids are never removed (Spec 08). Addendum A below replaces this: a save from other content is refused, before and after release.
 - **Refusals:** a file that is not a save, one with parts missing, one from a newer format and one from a retired generator are each refused with a plain message, and nothing is changed.
 
 **Writing and storing**
@@ -131,13 +131,13 @@ All figures are starting values for playtesting. Where the spec above is silent 
 From Intake Addendum A (findings A1, C2).
 
 - **Saves across content changes before release:** until the Content complete gate, a save whose content fingerprint differs from the running build's is refused: "This save was made with different game content and cannot be loaded by this version." Nothing is changed, and the player starts a new run. This replaces, until then, the rule that the content version never blocks a load.
-- **After release:** the policy is chosen before the Content complete gate. Either the save stores each visited level's generated contents, so a revisit never depends on the tables, or the tables that placement rolls are frozen at release and later updates only add retired-safe rows.
+- **After release (chosen by the owner, October 11, 2026):** the same rule holds after release. A save is for a pause in play, not for keeping a run across releases, so a save made with other content is refused with the same message, and the player starts a new run. The save does not store levels' generated contents, and the tables are not frozen at release.
 - **Save format 2 (task 3.3):** with one record of the character (Spec 03, Addendum A), the character's level, XP, minor abilities, pools and wait count are stored inside the player, and the pack's size is no longer stored. A format 1 save migrates on load, taking the player's live pools.
 - **First save:** a run is saved when character creation finishes (Spec 01, Addendum A), replacing the stand-in that saved at run start. A new character on the same seed goes through creation with the seed fixed.
 
 **Acceptance criteria added**
 
-- [ ] Before release, a save with a different content fingerprint is refused with the message above and changes nothing.
+- [ ] A save with a different content fingerprint is refused with the message above and changes nothing, before and after release.
 
 ## Addendum B (approved October 11, 2026)
 

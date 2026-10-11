@@ -31,7 +31,7 @@ Beyond the criteria, the plan gives Phase 4 the following work, so it is owned a
 - The level 100 set piece and the real final boss: task 4.10, done (the audit rows that waited on it are updated).
 - Balance: task 4.11, measured in `docs/13-balance-report.md` and repeated by `tests/balance.test.ts`.
 - Chrome, Firefox and Safari checks: task 4.12, done (see Notes).
-- The release policy for saves across content changes: decided at the Content complete gate.
+- The release policy for saves across content changes: decided October 11, 2026. A save from other content stays refused after release (Spec 09, Addendum A).
 
 ## Spec 01: Rendering and UI shell
 
@@ -160,7 +160,7 @@ Beyond the criteria, the plan gives Phase 4 the following work, so it is owned a
 
 | Criterion | State | Evidence or owner |
 | --- | --- | --- |
-| (A) Before release, a save with a different content fingerprint is refused with the message above and changes nothing. | Built and tested | `save.test.ts`; `save-slot.test.ts` |
+| (A) A save with a different content fingerprint is refused with the message above and changes nothing, before and after release. | Built and tested | `save.test.ts`; `save-slot.test.ts` |
 | Saving happens only on a village rest and on finishing creation, never anywhere else. | Built and tested | `app-lifecycle.test.ts`; `creation.test.ts` |
 | Killing the browser mid-save leaves the previous save loadable. | Built and tested | `save-slot.test.ts` (crashes at each step of a safe write) |
 | Continue after a quit or closed tab resumes at the last rest with nothing since kept. | Built and tested | `app-lifecycle.test.ts` (continue); `e2e/smoke.spec.ts` (a reload in the browser) |
