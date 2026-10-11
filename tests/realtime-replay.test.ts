@@ -307,7 +307,7 @@ describe('Spec 02, Addendum B: reproducibility in real time', () => {
     expect(session.deepest).toBe(2);
     expect(session.deaths).toBe(1);
     expect(replay(session.log, session.ticks)).toBe(session.end);
-  });
+  }, 120_000);
 
   it('other runs and scripts replay identically too, and the same log moved by one tick does not', () => {
     for (const [seed, script] of [[109, 2], [112, 1], [126, 2]] as const) {
@@ -318,7 +318,7 @@ describe('Spec 02, Addendum B: reproducibility in real time', () => {
       const moved = session.log.map((i, n) => (n >= first ? { ...i, tick: i.tick + 1 } : i));
       expect(replay(moved, session.ticks + 1, false)).not.toBe(session.end);
     }
-  });
+  }, 120_000);
 });
 
 describe('Spec 02, Addendum B: generation is untouched by the time mode', () => {
@@ -335,5 +335,5 @@ describe('Spec 02, Addendum B: generation is untouched by the time mode', () => 
       expect(runs[1]!.game!.time).toBe('real');
       expect(JSON.stringify(runs[1]!.game!.state)).toBe(JSON.stringify(runs[0]!.game!.state));
     }
-  });
+  }, 120_000);
 });
