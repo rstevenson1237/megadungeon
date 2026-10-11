@@ -260,9 +260,9 @@ From Intake Addendum B (requirements R1 to R3, decisions D1 to D3, D5, D6 and D1
 - [ ] In real time a selected target that dies or leaves sight moves the selection to the nearest valid target, or ends targeting with the message.
 - [ ] Z fast-forwards and stops on each Addendum A interruption, and on any key.
 
-## Clarification (task 5.5, proposed October 11, 2026)
+## Clarification (task 5.5, proposed and approved October 11, 2026)
 
-Addendum B leaves seven points of the frame loop and pausing open. Proposed as built, pending approval:
+Addendum B leaves seven points of the frame loop and pausing open. Approved as built:
 
 - **"Paused" shows whenever a real-time level's clock is stopped:** by P, by a hidden tab or lost focus, and under an overlay. The header reads "Goblin Warrens, Level 7 - Paused". A full-window overlay covers it.
 - **While paused, a movement key resumes and does nothing more,** after P as after lost focus. Every other key works as usual: free actions are free, and an action happens at once if the cooldown has ended (starting it), or is held until time runs again.
