@@ -278,6 +278,14 @@ From Intake Addendum B (requirements R1 and R2, findings F1 and F2, decisions D1
 - [ ] Every existing turn-mode test passes unchanged.
 - [ ] A round in real time on a large level crowded with 80 alert creatures stays within the turn time budget (Clarification, task 3.2), and no single tick takes over 16 ms.
 
+## Clarification (task 5.3, proposed October 11, 2026)
+
+Addendum B leaves three points of the creature schedules open. Proposed, as built:
+
+- **The once-a-round checks go with the notice rolls.** Turn mode makes one check per creature per round before it acts: the notice roll, and for an alert creature the losing-track count and the morale roll (with a boss in the player's room and a bandit in sight becoming alert). In real time all of it is made at the round boundary, by the simulated creatures, nearest first, so every count still moves once a round.
+- **Arrival begins the first round.** When real time starts on a level (its first tick), the 50 nearest are chosen and make their checks for round 1, and every creature is staggered from tick 0, so each first acts at tick 1 to 10.
+- **A creature that appears mid-round** (a raised ally, the phantom) is staggered from the tick it appears but is not simulated until the next boundary includes it, as in turn mode, where a round's order is fixed when it begins. A wandering monster arrives at the boundary, before the 50 are chosen, so it can be among them at once.
+
 ## Acceptance criteria
 
 - [ ] Nothing on the level moves until the player spends an action; free actions (inventory, look, targeting) cost no round.

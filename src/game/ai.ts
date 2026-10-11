@@ -1,6 +1,7 @@
 // Creature turns (Spec 04, "Turns and timing", "Awareness and stealth" and "Monster and hostile NPC
 // behaviour"): after the player acts, every creature on the level acts in order of distance to the
-// player, nearest first, at most 50 a round. Rolls come from rules/combat; effects from game/combat.
+// player, nearest first, at most 50 a round; in real time (Spec 04, Addendum B) each acts at its own tick (game/schedule.ts).
+// Rolls come from rules/combat; effects from game/combat.
 
 import type { LogMessage } from '../core/log.ts';
 import { LOSE_TRACK_ROUNDS, NOTICE_RANGE, noticeRoll } from '../rules/combat/awareness.ts';
@@ -538,31 +539,68 @@ export function actionsInRound(speed: Monster['speed'], round: number): number {
   return round % 2 === 0 ? 1 : 0;
 }
 
-/** Every creature acts, nearest first, up to 50 (Spec 04). */
-export function creaturesAct(game: Game, messages: LogMessage[]): void {
-  const { map, monsters, round: number, player } = game.state;
-  const round = new Round(game, messages);
-  const order = monsters
+/** The creatures simulated this round: the 50 nearest the player, allies included, ties by id (Spec 04). */
+export function simulatedThisRound(game: Game): Monster[] {
+  const { map, monsters } = game.state;
+  return monsters
     .slice()
     .sort((a, b) => distanceSq(a, map.player) - distanceSq(b, map.player) || a.id - b.id)
     .slice(0, MAX_SIMULATED);
-  for (const m of order) {
+}
+
+/**
+ * One action by the creature's behaviour (Spec 04). False when it can take no more this round: asleep or held by an
+ * effect, or asleep. A mace's stun spends the action (Spec 05).
+ */
+function actOnce(round: Round, m: Monster): boolean {
+  if (cannotAct(m.statuses)) return false; // Asleep or Held (Spec 04, Status effects)
+  if (m.stunned) {
+    m.stunned = false; // a mace's stun costs its next action (Spec 05)
+    return true;
+  }
+  if (isAlly(m)) allyTurn(round, m);
+  else if (m.kind === 'rival' && !m.hostile) rivalTurn(round, m);
+  else if (m.awareness === 'asleep') return false;
+  else if (m.awareness === 'unaware') wander(round.game, m);
+  else if (m.fleeing || hasStatus(m.statuses, 'frightened')) flee(round, m);
+  else hunt(round, m);
+  return true;
+}
+
+/** Every creature acts, nearest first, up to 50 (Spec 04). */
+export function creaturesAct(game: Game, messages: LogMessage[]): void {
+  const { monsters, round: number, player } = game.state;
+  const round = new Round(game, messages);
+  for (const m of simulatedThisRound(game)) {
     if (player.dead) return;
     if (!monsters.includes(m)) continue;
     checkRound(round, m);
     for (let n = actionsInRound(effectiveSpeed(m.speed, m.statuses), number); n > 0; n--) {
       if (player.dead || !monsters.includes(m)) break;
-      if (cannotAct(m.statuses)) break; // Asleep or Held (Spec 04, Status effects)
-      if (m.stunned) {
-        m.stunned = false; // a mace's stun costs its next action (Spec 05)
-        continue;
-      }
-      if (isAlly(m)) allyTurn(round, m);
-      else if (m.kind === 'rival' && !m.hostile) rivalTurn(round, m);
-      else if (m.awareness === 'asleep') break;
-      else if (m.awareness === 'unaware') wander(game, m);
-      else if (m.fleeing || hasStatus(m.statuses, 'frightened')) flee(round, m);
-      else hunt(round, m);
+      if (!actOnce(round, m)) break;
     }
+  }
+}
+
+// --- Real time (Spec 04, Addendum B): the same rules, at the creature's own tick ---
+
+/**
+ * The once-a-round checks at a real-time round boundary, nearest first: notice rolls, losing track and morale, as
+ * turn mode makes them before each creature acts.
+ */
+export function roundChecks(game: Game, creatures: readonly Monster[], messages: LogMessage[]): void {
+  const round = new Round(game, messages);
+  for (const m of creatures) {
+    if (game.state.player.dead) return;
+    if (game.state.monsters.includes(m)) checkRound(round, m);
+  }
+}
+
+/** Real time: each creature in `due`, in that order, takes one action, if it is still on the level and able. */
+export function creaturesActOnce(game: Game, due: readonly Monster[], messages: LogMessage[]): void {
+  const round = new Round(game, messages);
+  for (const m of due) {
+    if (game.state.player.dead) return;
+    if (game.state.monsters.includes(m)) actOnce(round, m);
   }
 }
