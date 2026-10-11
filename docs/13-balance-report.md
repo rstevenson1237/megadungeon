@@ -51,6 +51,8 @@ The class parity gauntlets above are played again in real time (Spec 04, Addendu
 
 ### Decisions for the owner
 
+Both approved as recommended by the owner on October 11, 2026.
+
 - **The bot's reaction delay:** 5 ticks (250 ms) is proposed as the measuring default for real time. It is a harness setting, not a game rule.
 - **Whether to retune anything for real time:** the recommendation is no. Real time is a separate mode marked on the leaderboard (decision D3), every class passes, and the gap the measure shows (melee classes losing more) is what a reaction game is; your real-time play at the gate "Real time playable" is the better test. If a change is wanted later, the candidates are real-time-only figures, such as a shorter cooldown for melee attacks, which would need a new Addendum B clarification.
 
