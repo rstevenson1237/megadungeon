@@ -58,6 +58,7 @@ import { type Monster, isAlly, spawnAll } from './monsters.ts';
 import type { Fact } from '../core/templates.ts';
 import type { Link } from '../rules/world/run-layout.ts';
 import { type RivalArc, rivalsArrive } from './connective.ts';
+import { Schedule } from './schedule.ts';
 import { type TownState, freshTown } from './town-state.ts';
 
 export { MAX_SIMULATED, actionsInRound };
@@ -405,6 +406,8 @@ export class Game {
   tick = 0;
   /** The player carried out an action in this real-time round, so it is not a waiting round (Spec 03, Addendum B). Not saved. */
   actedThisRound = false;
+  /** Each creature's next-act tick and the 50 simulated this round, from the first real-time tick on this level. Not saved. */
+  schedule: Schedule | null = null;
 
   constructor(
     readonly runSeed: number,
@@ -898,24 +901,47 @@ export class Game {
   }
 
   /**
-   * Real time (Spec 04, Addendum B): let `ticks` ticks of game time pass. Each tick that reaches a multiple of 10 is a
-   * round boundary, which ends the round exactly as turn mode does (`roundEnds`). A round in which the player carried
-   * out no action counts as a waiting round (Spec 03, Addendum B). Time stops when the player dies.
+   * Real time (Spec 04, Addendum B): let `ticks` ticks of game time pass. At each tick the creatures due act on their
+   * own schedules; each tick that reaches a multiple of 10 is then a round boundary, which ends the round exactly as
+   * turn mode does (`roundEnds`) and begins the next: the 50 nearest are chosen and make their notice rolls. A round in
+   * which the player carried out no action counts as a waiting round (Spec 03, Addendum B). Time stops when the player
+   * dies or leaves the level.
    */
   advance(ticks: number): LogMessage[] {
     if (!Number.isInteger(ticks) || ticks < 0) throw new RangeError(`Ticks are whole numbers, not ${ticks}`);
     const messages: LogMessage[] = [];
-    for (let n = 0; n < ticks && !this.state.player.dead; n++) {
+    const schedule = this.startClock(messages);
+    for (let n = 0; n < ticks && !this.state.player.dead && !this.leaving(); n++) {
+      schedule.arrive(); // creatures that appeared since the last tick
       this.tick++;
-      if (this.tick % TICKS_PER_ROUND === 0) {
+      schedule.tick(messages);
+      if (this.tick % TICKS_PER_ROUND === 0 && !this.state.player.dead && !this.leaving()) {
         // An action resets the waiting count, as `endRoundOnce` does in turn mode.
         if (this.actedThisRound) this.state.player.waited = 0;
         this.roundEnds(messages, !this.actedThisRound);
         this.actedThisRound = false;
+        schedule.beginRound(messages);
       }
     }
     messages.push(...this.queued.splice(0));
     return messages;
+  }
+
+  /**
+   * Real time starts on this level: every creature is staggered from the arrival tick, and the first round begins
+   * with its 50 chosen and their notice rolls. Turn mode never calls it, so it draws nothing from turn mode's dice.
+   */
+  private startClock(messages: LogMessage[]): Schedule {
+    if (this.schedule) return this.schedule;
+    const schedule = (this.schedule = new Schedule(this));
+    schedule.arrive();
+    schedule.beginRound(messages);
+    return schedule;
+  }
+
+  /** A fall or a teleport is taking the player off the level: nothing else on it acts (Spec 04, Addendum B). */
+  private leaving(): boolean {
+    return !!this.pending.fall || this.pending.teleport !== undefined;
   }
 
   /** One round of the level in turn mode: every creature acts, then the round ends. */
