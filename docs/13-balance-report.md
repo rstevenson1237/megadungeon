@@ -6,6 +6,8 @@ Task 4.11 measures depth pace, the economy and class parity on the real tables a
 
 No rule or number changed in this task. Everything measured passes the gate as the specs stand.
 
+Task 5.8 (Intake Addendum B, Phase 5) adds a real-time balance pass: the class parity gauntlets played again in real time by a bot with a fixed reaction delay. It is a report only; no game number changed. See "Real time (task 5.8)" below.
+
 ## Summary
 
 | Area | Gate | Result |
@@ -13,6 +15,7 @@ No rule or number changed in this task. Everything measured passes the gate as t
 | Depth pace | Level 10 near depth 50 to 55 | Passes. Median depth 52; all 100 seeds land within 50 to 55. |
 | Economy | Not stated in the plan | Sound. Every subterranean village's trip costs less than one level below it pays. Two notes below. |
 | Class parity | No class far behind | Passes, with "far behind" read as under half the median class (proposed below). The weakest class, the Alchemist, wins 62% of the median. |
+| Real-time parity (task 5.8) | No class far behind (same reading) | Passes at every reaction delay measured. At 250 ms a class wins 85% of its turn-mode fights at the median; the weakest, the Alchemist, wins 68% of the real-time median. |
 
 ## How it is measured
 
@@ -32,6 +35,24 @@ No rule or number changed in this task. Everything measured passes the gate as t
 
 - **The meaning of "far behind":** proposed as a class winning fewer than half the fights of the median class in these runs (`FAR_BEHIND` in `tools/balance.ts`). Once approved, it is recorded in Spec 03.
 - **Whether to trim the Mage and the Knight:** the gate does not ask for it. The recommendation is to leave every number as it is until your own playtest at the gate, since the deep-level wall (finding 5) depends on gear the arena does not model.
+
+## Real time (task 5.8)
+
+### How it is measured
+
+The class parity gauntlets above are played again in real time (Spec 04, Addendum B), on the same characters, foes and seeds, by the same simple policy, now as a bot with a fixed reaction delay: what it sees reaches its keys that many ticks later. It chooses as late as the delay allows, the delay before its cooldown ends, and its command is held and carried out as the cooldown ends, as the one-command buffer lets a player do (Spec 01, Addendum B). It never chooses before it has seen its own last action happen, so a delay longer than the 10-tick cooldown slows it down. The creatures keep their own schedules throughout, and between fights the bot stands still, so each round counts as a waiting round (Spec 03, Addendum B). The full table uses 5 ticks (250 ms), a quick human reaction; the sweep compares 0, 5, 10 and 20 ticks (`REACTION_TICKS` and `REACTION_SWEEP` in `tools/balance.ts`). `tests/balance.test.ts` repeats a smaller run on every change.
+
+### Findings
+
+6. **The real-time rules match turn mode.** With no reaction delay the bot wins exactly as many fights as the turn-mode player at the median (100%). Only the timing of the two modes differs, as Addendum B intends, and this is the check that the harness plays both the same way.
+7. **Hesitation is the cost of real time, and it is steady.** At 250 ms a class wins about 85% of its turn-mode fights at the median; at 500 ms (as slow as the cooldown) 75%; at one second, where the bot acts half as often as the creatures, 53%. A real player sits somewhere in this range, and pausing (P) moves them back toward turn mode, so the depth pace and economy above are unchanged.
+8. **Melee classes lose the most; casters lose almost nothing.** At 250 ms the Warrior keeps 63% of its turn-mode fights, the Paladin 72%, the Assassin 74%, the Barbarian 75%; the Mage, Warlock, Sorcerer and Alchemist keep 92% to 101%. A ranged attack or a spell lands wherever the foe has moved; a step or a blow chosen 250 ms ago meets a foe that has moved, and skirmishers and casters, which keep their distance, gain the most from it. The Mage's lead over the median widens from 380% to 454%.
+9. **No class is far behind at any delay.** The weakest class sits at 60% to 74% of the real-time median across the sweep.
+
+### Decisions for the owner
+
+- **The bot's reaction delay:** 5 ticks (250 ms) is proposed as the measuring default for real time. It is a harness setting, not a game rule.
+- **Whether to retune anything for real time:** the recommendation is no. Real time is a separate mode marked on the leaderboard (decision D3), every class passes, and the gap the measure shows (melee classes losing more) is what a reaction game is; your real-time play at the gate "Real time playable" is the better test. If a change is wanted later, the candidates are real-time-only figures, such as a shorter cooldown for melee attacks, which would need a new Addendum B clarification.
 
 ## Measured results
 
@@ -93,4 +114,43 @@ Fights won in a gauntlet of 20, mean of 100 gauntlets per cell. The level is a t
 | Illusionist | 2.9 | 2.6 | 2.3 | 2.2 | 1.9 | 1.1 | 1.1 | 0.8 | 0.3 | 0.3 | 1.5 | 72% |
 | Bard | 2.1 | 3.0 | 2.5 | 2.0 | 1.8 | 1.1 | 1.3 | 0.6 | 0.2 | 0.3 | 1.5 | 69% |
 | Alchemist | 2.6 | 2.8 | 2.4 | 1.7 | 1.6 | 0.5 | 1.0 | 0.5 | 0.1 | 0.2 | 1.3 | 62% |
+
+## Real-time class parity
+
+The same gauntlets in real time, played by the same policy as a bot with a reaction delay of 5 ticks (250 ms), mean of 100 gauntlets per cell. Median class mean: 1.8, 85% of turn mode's. Far behind (under 50% of the real-time median): none. "Of turn mode" is the class's real-time mean against its own turn-mode mean.
+
+| Class | 3 (L1) | 10 (L2) | 20 (L5) | 30 (L7) | 40 (L8) | 50 (L9) | 60 (L10) | 75 (L10) | 90 (L10) | 99 (L10) | Mean | Of median | Of turn mode |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Mage | 12.4 | 10.0 | 16.1 | 8.5 | 16.8 | 7.0 | 6.8 | 3.2 | 0.7 | 0.9 | 8.2 | 454% | 101% |
+| Knight | 6.7 | 11.4 | 10.8 | 13.4 | 7.8 | 6.7 | 3.4 | 1.6 | 0.8 | 1.1 | 6.4 | 351% | 82% |
+| Warrior | 2.3 | 5.1 | 5.2 | 6.8 | 4.0 | 3.2 | 1.7 | 0.9 | 0.4 | 0.6 | 3.0 | 166% | 63% |
+| Priest | 1.9 | 4.6 | 3.2 | 4.5 | 3.4 | 2.1 | 2.2 | 1.1 | 0.6 | 1.0 | 2.5 | 136% | 84% |
+| Barbarian | 2.4 | 5.5 | 3.0 | 3.6 | 2.7 | 2.3 | 1.6 | 0.8 | 0.3 | 0.5 | 2.3 | 125% | 75% |
+| Paladin | 1.8 | 3.6 | 3.6 | 4.4 | 2.1 | 3.1 | 1.7 | 1.0 | 0.5 | 0.7 | 2.2 | 124% | 72% |
+| Sorcerer | 3.0 | 2.4 | 2.9 | 2.3 | 3.4 | 2.2 | 2.7 | 1.6 | 0.5 | 1.1 | 2.2 | 122% | 97% |
+| Beastmaster | 4.0 | 4.2 | 3.2 | 3.1 | 2.6 | 1.8 | 1.5 | 0.8 | 0.3 | 0.2 | 2.2 | 121% | 87% |
+| Warlock | 3.1 | 2.6 | 2.2 | 2.3 | 3.3 | 2.5 | 2.0 | 1.2 | 0.4 | 1.1 | 2.1 | 114% | 98% |
+| Witch Hunter | 3.3 | 3.1 | 3.7 | 3.4 | 2.5 | 1.3 | 0.9 | 0.4 | 0.1 | 0.2 | 1.9 | 104% | 76% |
+| Monk | 1.3 | 2.6 | 3.6 | 3.5 | 1.4 | 2.4 | 1.1 | 0.8 | 0.3 | 0.4 | 1.7 | 96% | 80% |
+| Ranger | 3.4 | 2.5 | 2.8 | 2.5 | 1.9 | 1.3 | 1.0 | 0.7 | 0.1 | 0.2 | 1.6 | 90% | 91% |
+| Necromancer | 3.0 | 2.4 | 2.3 | 1.5 | 2.0 | 1.0 | 1.6 | 1.0 | 0.4 | 0.8 | 1.6 | 88% | 91% |
+| Thief | 3.4 | 2.7 | 2.8 | 1.9 | 1.8 | 1.2 | 1.2 | 0.6 | 0.1 | 0.1 | 1.6 | 87% | 89% |
+| Illusionist | 3.0 | 2.3 | 2.4 | 1.8 | 1.7 | 1.1 | 1.0 | 0.7 | 0.2 | 0.3 | 1.4 | 80% | 93% |
+| Druid | 2.3 | 3.9 | 2.2 | 1.5 | 1.3 | 0.7 | 0.9 | 0.5 | 0.3 | 0.4 | 1.4 | 78% | 86% |
+| Shaman | 2.7 | 3.6 | 1.7 | 1.4 | 1.2 | 0.8 | 1.0 | 0.5 | 0.3 | 0.5 | 1.4 | 75% | 81% |
+| Bard | 2.1 | 2.3 | 1.9 | 1.7 | 1.5 | 1.0 | 1.0 | 0.7 | 0.1 | 0.2 | 1.3 | 70% | 86% |
+| Assassin | 2.1 | 2.8 | 2.1 | 1.4 | 1.0 | 1.2 | 0.9 | 0.5 | 0.2 | 0.3 | 1.3 | 70% | 74% |
+| Alchemist | 2.8 | 2.1 | 2.5 | 1.4 | 1.5 | 0.5 | 0.9 | 0.4 | 0.1 | 0.1 | 1.2 | 68% | 92% |
+
+## Reaction delay
+
+Class parity in real time at each reaction delay, 100 gauntlets per cell. A delay of 0 is a bot that sees and acts in the same tick; the cooldown is 10 ticks.
+
+| Reaction delay | Median class mean | Of turn mode | Best class | Worst class | Far behind |
+| --- | --- | --- | --- | --- | --- |
+| Turn mode | 2.1 | 100% | Mage 380% | Alchemist 62% | none |
+| 0 ticks (0 ms) | 2.1 | 100% | Mage 389% | Alchemist 60% | none |
+| 5 ticks (250 ms) | 1.8 | 85% | Mage 454% | Alchemist 68% | none |
+| 10 ticks (500 ms) | 1.6 | 75% | Mage 505% | Assassin 64% | none |
+| 20 ticks (1000 ms) | 1.1 | 53% | Mage 320% | Shaman 74% | none |
 <!-- balance:end -->
