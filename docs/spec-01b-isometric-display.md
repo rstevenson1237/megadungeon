@@ -133,7 +133,7 @@ The asset list leaves four points of naming and size open. Proposed as built in 
 - **The size table** gives each brief a real-world height against the player's 1.8 m: a rat 0.25 m, a goblin 1.1 m, an ogre 3.6 m (twice the player), a giant 4.5 m, a dragon 4 m. A boss keeps its family's height and is drawn at the large frame size.
 - **Effects carry no height:** they are sized by what they show (a cell, an area), not by a real-world height.
 
-## Clarification (task 6.3, proposed October 12, 2026)
+## Clarification (task 6.3, proposed and approved October 12, 2026)
 
 The spec leaves three points open for drawing the view with no art. Proposed as built in `src/ui/iso-view.ts` and `src/ui/iso-paint.ts`:
 
