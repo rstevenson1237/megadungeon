@@ -1,0 +1,31 @@
+// class-bard base.v1 (r1) — the Bard on the shared player body (art/lib/person.v1.js), from the approved class probe:
+// a slim slashed doublet, a wide feathered hat, a long face with a pointed chin and goatee, a rapier in the right hand
+// and a lute on the back.
+import { person, personAnchors } from '../../../lib/person.v1.js';
+export const meta = { brief: 'class-bard', pass: 'r1', notes: 'probe bard: feathered hat, doublet, rapier, lute', mirror: false };
+
+export function render(ctx) {
+  return person(ctx, k => {
+    const { pal, X, Y, cx, waist, shoulder, headY, foot, L, R } = k;
+    k.worn(() => {
+      k.add({ type: 'ellipse', name: 'lute', cx: R - X(2), cy: shoulder + Y(1), rx: X(3.5), ry: X(4.5), mat: pal.leather, shade: 'sphere', underlay: true });
+      k.pole(pal.leather, R - X(3), shoulder - Y(2), R + X(4), shoulder - Y(10), 0.7, 'lute-neck');
+    });
+    k.legs(pal.leather, 2, 1.4); k.boots(pal.leather);
+    k.neck();
+    k.shape('doublet', pal.cloth, [[0, shoulder - Y(0.5)], [4.5, shoulder], [4.8, shoulder + Y(3)], [3.4, waist - Y(1)], [5, waist + Y(2)], [0, waist + Y(2.5)]]);
+    k.front(() => k.add({ type: 'capsule', name: 'slash', a: [cx, shoulder + Y(1.5)], b: [cx, waist], r: X(0.6), mat: pal.accent, shade: 'flat', band: 1 }));
+    k.head(headY, { wide: 2.8, crown: 4.4, jaw: 1.2, chin: 5, point: 0.8, eyes: 1.6, nose: 1.5 });
+    k.front(() => k.add({ type: 'path', name: 'goatee', mat: pal.hair, shade: 'flat', band: 1, d: `M${cx - X(1) - 1} ${headY + Y(3)} Q${cx - 1} ${headY + Y(6.5)} ${cx + X(1) - 1} ${headY + Y(3)} Z` }));
+    k.add({ type: 'ellipse', name: 'brim', cx, cy: headY - Y(3.5), rx: X(7), ry: Y(1.8), mat: pal.cloth, shade: 'normal', round: X(1), underlay: true });
+    k.add({ type: 'ellipse', name: 'crown', cx: cx + X(0.5), cy: headY - Y(5.5), rx: X(3.5), ry: Y(2.5), mat: pal.cloth, shade: 'sphere', underlay: true });
+    k.add({ type: 'tube', name: 'feather', pts: [[cx + X(3), headY - Y(5.5)], [cx + X(6), headY - Y(9.5)], [cx + X(10), headY - Y(10.5)]], w: X(2), w1: X(0.6), mat: pal.accent, shade: 'flat', band: 0 });
+    k.main(() => {
+      k.arm(-1, pal.cloth, L + X(2), waist);
+      k.pole(pal.metal, L + X(2), waist, L - X(5), k.foot - Y(1), 0.45, 'rapier');
+      k.add({ type: 'arc', name: 'guard', cx: L + X(2), cy: waist, r: X(1.8), w: X(0.8), a0: 0, a1: 200, mat: pal.metal, shade: 'flat', band: 0 });
+    });
+    k.off(() => k.arm(1, pal.cloth, R - X(2.5), waist - Y(1)));
+  });
+}
+export const anchors = ctx => personAnchors(ctx, { eyes: 1.6, hand: L => [L.L + L.X(2), L.waist] });

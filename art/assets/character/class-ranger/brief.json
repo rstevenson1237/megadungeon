@@ -1,0 +1,9 @@
+{
+  "id": "class-ranger",
+  "template": "topdown/character-walk",
+  "review": {
+    "scale": 5,
+    "sym": "none",
+    "iso": true
+  }
+}

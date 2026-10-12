@@ -1,0 +1,9 @@
+{
+  "id": "family-l-cap",
+  "template": "topdown/character-walk",
+  "review": {
+    "scale": 5,
+    "sym": "none",
+    "iso": true
+  }
+}

@@ -280,3 +280,4 @@
 {"ts":"2026-10-12T21:35:59.209Z","type":"contract","asset":"terrain-lava","change":"created","by":"agent"}
 {"ts":"2026-10-12T21:35:59.210Z","type":"contract","asset":"terrain-teleporter","change":"created","by":"agent"}
 {"ts":"2026-10-12T21:35:59.210Z","type":"contract","asset":"terrain-debris","change":"created","by":"agent"}
+{"ts":"2026-10-12T22:28:13.173Z","type":"review","asset":"class-warrior","version":"base.v1","pass":"r1","sheet":"assets/character/class-warrior/out/review-base.v1.png","imageTokens":755,"by":"agent"}
