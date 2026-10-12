@@ -137,7 +137,7 @@ export function person(ctx, draw, opts = {}) {
 
 /**
  * Named points per cell, on the drawn pixels: `head`, `hand` (the right hand, exported for effects and held props),
- * and on the facings where the face shows, the face anchors `eye`, `eye2` and `mouth` the finishing pass paints at.
+ * `ground` (where the figure stands: the game puts it on the cell's centre), and on the facings where the face shows, the face anchors `eye`, `eye2` and `mouth` the finishing pass paints at.
  * `hand` is where the right hand rests before the pose turns it (default the probe's L + 1 at the waist).
  */
 export function personAnchors(ctx, opts = {}) {
@@ -155,5 +155,7 @@ export function personAnchors(ctx, opts = {}) {
     const px = Math.round(x), py = Math.round(y);
     out[name] = [flip ? w - 1 - px : px, py];
   }
+  // where the figure stands: the cell's centre in game (the middle of the frame at the feet), the same in every facing
+  out.ground = [w / 2, Math.round(Lo.foot)];
   return out;
 }

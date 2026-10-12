@@ -168,14 +168,16 @@ export function bipedAnchors(ctx, opts = {}) {
   if (!back && opts.face !== false) { pts.eye = [cx - ex + turn, hy]; pts.eye2 = [cx + ex + turn, hy]; pts.mouth = [cx + turn, hy + Y(3)]; }
   const out = {};
   for (const [name, [x, y]] of Object.entries(pts)) { const px = Math.round(x); out[name] = [flip ? w - 1 - px : px, Math.round(y)]; }
+  out.ground = [w / 2 + (opts.cx ?? 0), Math.round(Lo.foot)]; // where it stands: the game puts this on the cell's centre
   return out;
 }
 
-/** Anchors of a creature given in its ground frame: { name: [u, v, h] } (as `k.at`), turned for the facing. */
+/** Anchors of a creature given in its ground frame: { name: [u, v, h] } (as `k.at`), turned for the facing, and `ground`. */
 export function groundAnchors(ctx, pts, opts = {}) {
   const [w, h] = ctx.size, back = isBack(ctx), P = pose(ctx);
   const F = back ? [-0.894, -0.447] : [-0.894, 0.447], Rt = back ? [0.894, -0.447] : [-0.894, -0.447];
   const g0 = [w / 2 + (opts.cx ?? 0), h - (opts.ground ?? 6)], L = (opts.lunge ?? 0) * P.lunge, out = {};
   for (const [name, [u, v, ht]] of Object.entries(pts)) out[name] = [g0[0] + F[0] * (u + L) + Rt[0] * v, g0[1] + F[1] * (u + L) + Rt[1] * v - ht];
-  return creatureAnchors(ctx, out);
+  // where it stands (the ground frame's centre): the game puts this on the cell's centre, the same in every facing
+  return { ...creatureAnchors(ctx, out), ground: [g0[0], g0[1]] };
 }
