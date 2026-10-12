@@ -1,0 +1,12 @@
+{"ts":"2026-10-12T03:14:36.192Z","type":"note","asset":"direction","note":"candidates a, b, c from interview","by":"agent"}
+{"ts":"2026-10-12T03:15:17.294Z","type":"review","asset":"direction","version":"tile-r1","sheet":"candidates/style-tile-r1.png","imageTokens":1716,"candidates":["a","b","c"],"by":"agent"}
+{"ts":"2026-10-12T03:16:51.882Z","type":"review","asset":"direction","version":"tile-r2","sheet":"candidates/style-tile-r2.png","imageTokens":1716,"candidates":["a","b","c"],"by":"agent"}
+{"ts":"2026-10-12T03:16:57.099Z","type":"review","asset":"direction","version":"tile-r3","sheet":"candidates/style-tile-r3.png","imageTokens":1716,"candidates":["a","b","c"],"by":"agent"}
+{"ts":"2026-10-12T03:17:14.179Z","type":"review","asset":"direction","version":"tile-r4","sheet":"candidates/style-tile-r4.png","imageTokens":1716,"candidates":["a","b","c"],"by":"agent"}
+{"ts":"2026-10-12T03:17:21.701Z","type":"note","asset":"direction","note":"mix mix1: A as the base, scale from C","by":"user"}
+{"ts":"2026-10-12T03:17:26.282Z","type":"review","asset":"direction","version":"tile-r5","sheet":"candidates/style-tile-r5.png","imageTokens":1716,"candidates":["mix1","a","c"],"by":"agent"}
+{"ts":"2026-10-12T04:19:59.562Z","type":"review","asset":"direction","version":"tile-r6","sheet":"candidates/style-tile-r6.png","imageTokens":1012,"candidates":["mix1"],"by":"agent"}
+{"ts":"2026-10-12T04:29:06.905Z","type":"review","asset":"direction","version":"tile-r7","sheet":"candidates/style-tile-r7.png","imageTokens":1012,"candidates":["mix1"],"by":"agent"}
+{"ts":"2026-10-12T04:30:55.115Z","type":"approve","asset":"direction","version":"v1","note":"locked mix1: A's palette, line and shading with C's slim proportions; 32 x 40 character frame; class silhouette and organic-shape rules; highlights one step brighter (owner's choice, October 12, 2026)","direction":{"id":"megadungeon","version":1},"by":"user"}
+{"ts":"2026-10-12T04:30:55.698Z","type":"note","asset":"direction","version":"v1","note":"anchors from probes character finish.v1, prop finish.v1, tile finish.v1, effect finish.v1","by":"agent"}
+{"ts":"2026-10-12T04:31:13.672Z","type":"note","asset":"direction","version":"v1","note":"anchors from probes character finish.v1, prop finish.v1, tile finish.v1, effect finish.v1","by":"agent"}

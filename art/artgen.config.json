@@ -1,0 +1,54 @@
+{
+  "version": 1,
+  "export": {
+    "packDir": "public/art",
+    "runtimeDir": "src/ui/art/runtime",
+    "assetsTs": "src/ui/art/assets.ts"
+  },
+  "runtime": {
+    "adapters": [
+      "canvas2d"
+    ]
+  },
+  "packs": {
+    "main": {
+      "include": [
+        "*"
+      ]
+    }
+  },
+  "budget": {
+    "revisionPasses": 3,
+    "maxSheetEdge": 1568,
+    "maxUserIterations": 3,
+    "extraAutonomousRevisions": 1,
+    "tiers": {
+      "hero": {
+        "revisionPasses": 4
+      },
+      "filler": {
+        "revisionPasses": 2
+      }
+    },
+    "perKind": {
+      "texture": {
+        "revisionPasses": 2
+      },
+      "prop": {
+        "revisionPasses": 4
+      }
+    }
+  },
+  "models": {
+    "base": "default",
+    "revise": "default",
+    "finish": "default",
+    "review": "default"
+  },
+  "review": {
+    "blind": true,
+    "approveMin": 6.5,
+    "blindMaxGap": 1
+  },
+  "gate": {}
+}

@@ -1,0 +1,32 @@
+{
+  "pitch": "Megadungeon - a classic roguelike drawn as an isometric pixel-art view. A lone delver goes down from a surface village into a 100-level megadungeon of 13 themes (cellars and crypts, goblin warrens, flooded sewers, old mines, ruined temples, fungal caverns, dwarven holds, catacombs, a wizard's sanctum, an underdark lake, lava forges, void halls, the Abyssal Throne), fights by dice in tight rooms, and carries treasure back up, because only banked treasure counts. The dungeon is old, indifferent and slightly wrong; it is never cute. The text panes around the view stay CP437 text, so the art sits inside a black, text-mode frame.",
+  "id": "megadungeon",
+  "view": "iso",
+  "scale": "medium",
+  "mood": [
+    "grim",
+    "dry",
+    "archaic",
+    "cold stone",
+    "lonely"
+  ],
+  "era": "dark fantasy, old-school dungeon crawl",
+  "directions": 4,
+  "maxColors": 32,
+  "background": "#0a0a0c",
+  "notes": "Fixed 2:1 iso camera, 32 x 16 px floor diamonds, walls 24 px above the floor, one fixed light from the upper left, no dynamic lighting at first (Spec 01b). Terrain is one shape set recoloured per theme from the 13 theme palettes (content/world/level_themes.yaml), so tiles are drawn in neutral ramps that recolour well. Monsters are 35 glyph families recoloured per row by their colour token, so a creature's body is one dominant ramp the swap can replace. Art is shown at 1x, scaled up pixelated with the screen.",
+  "rules": {
+    "do": [
+      "keep floors low in contrast so creatures stand out",
+      "keep a creature's colour token its dominant hue, so recoloured family sprites read like the text display's colours",
+      "read every creature's facing and silhouette at 1x against a dark floor",
+      "draw to the size table: a rat below the knee, an ogre twice the player's height"
+    ],
+    "dont": [
+      "cute or chibi proportions",
+      "saturated greens or purples on floors",
+      "pure black fills",
+      "light that implies a torch the game does not have"
+    ]
+  }
+}

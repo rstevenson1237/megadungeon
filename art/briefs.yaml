@@ -1,0 +1,2767 @@
+# The isometric display's asset briefs (Spec 01b), generated from the content tables by `npm run art:briefs`.
+# Do not edit by hand: change tools/art-briefs.ts and run it again. `batch` is the Spec 01b art batch.
+- id: terrain-floor
+  kind: tile
+  variants: 4
+  notes: flagstone floor diamond, low in contrast so creatures stand out; variants vary the worn stones. Recoloured for
+    each of the 13 themes from its eight palette tokens.
+  batch: 1
+  priority: 100
+  importance: standard
+- id: terrain-wall
+  kind: tile
+  states:
+    - full
+    - cap
+  notes: stone block one cell wide, 24 px above the floor; the cap is the cut-away near wall, a few pixels high.
+    Recoloured for each of the 13 themes from its eight palette tokens.
+  batch: 1
+  priority: 101
+  importance: standard
+- id: terrain-door
+  kind: tile
+  states:
+    - closed
+    - open
+    - locked
+    - sealed
+    - broken
+  notes: plank door in its wall cell, following the wall height rule; locked shows a lock plate, sealed a wax-and-chain
+    seal. Recoloured for each of the 13 themes from its eight palette tokens.
+  batch: 1
+  priority: 102
+  importance: standard
+- id: terrain-stairs-up
+  kind: tile
+  notes: stone stair rising toward map north. Recoloured for each of the 13 themes from its eight palette tokens.
+  batch: 1
+  priority: 103
+  importance: standard
+- id: terrain-stairs-down
+  kind: tile
+  notes: stone stair sinking into a dark opening. Recoloured for each of the 13 themes from its eight palette tokens.
+  batch: 1
+  priority: 104
+  importance: standard
+- id: terrain-water-shallow
+  kind: tile
+  anims:
+    idle:
+      frames: 4
+      loop: true
+  notes: shallow water over visible stones, slow ripple loop. Recoloured for each of the 13 themes from its eight palette
+    tokens.
+  batch: 1
+  priority: 105
+  importance: standard
+- id: terrain-water-deep
+  kind: tile
+  anims:
+    idle:
+      frames: 4
+      loop: true
+  notes: deep dark water, slow ripple loop. Recoloured for each of the 13 themes from its eight palette tokens.
+  batch: 1
+  priority: 106
+  importance: standard
+- id: terrain-lava
+  kind: tile
+  anims:
+    idle:
+      frames: 4
+      loop: true
+  notes: molten rock with a cooling crust, slow glow loop. Recoloured for each of the 13 themes from its eight palette tokens.
+  batch: 1
+  priority: 107
+  importance: standard
+- id: terrain-teleporter
+  kind: prop
+  height: 0.1
+  anims:
+    idle:
+      frames: 4
+      loop: true
+  notes: a ring of carved stones set in the floor, faint glow loop. Recoloured for each of the 13 themes from its eight
+    palette tokens.
+  batch: 1
+  priority: 108
+  importance: standard
+- id: terrain-debris
+  kind: prop
+  height: 0.3
+  variants: 3
+  notes: low heap of broken masonry and rubbish, walkable. Recoloured for each of the 13 themes from its eight palette tokens.
+  batch: 1
+  priority: 109
+  importance: standard
+- id: class-warrior
+  kind: character
+  batch: 2
+  priority: 200
+  importance: hero
+  height: 1.8
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+    - hurt
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+    hurt:
+      frames: 2
+  notes: the player as a Warrior, on the shared player body so every class has the same proportions
+- id: class-mage
+  kind: character
+  batch: 2
+  priority: 201
+  importance: hero
+  height: 1.8
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+    - hurt
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+    hurt:
+      frames: 2
+  notes: the player as a Mage, on the shared player body so every class has the same proportions
+- id: class-thief
+  kind: character
+  batch: 2
+  priority: 202
+  importance: hero
+  height: 1.8
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+    - hurt
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+    hurt:
+      frames: 2
+  notes: the player as a Thief, on the shared player body so every class has the same proportions
+- id: class-priest
+  kind: character
+  batch: 2
+  priority: 203
+  importance: hero
+  height: 1.8
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+    - hurt
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+    hurt:
+      frames: 2
+  notes: the player as a Priest, on the shared player body so every class has the same proportions
+- id: class-barbarian
+  kind: character
+  batch: 2
+  priority: 204
+  importance: hero
+  height: 1.8
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+    - hurt
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+    hurt:
+      frames: 2
+  notes: the player as a Barbarian, on the shared player body so every class has the same proportions
+- id: class-knight
+  kind: character
+  batch: 2
+  priority: 205
+  importance: hero
+  height: 1.8
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+    - hurt
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+    hurt:
+      frames: 2
+  notes: the player as a Knight, on the shared player body so every class has the same proportions
+- id: class-paladin
+  kind: character
+  batch: 2
+  priority: 206
+  importance: hero
+  height: 1.8
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+    - hurt
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+    hurt:
+      frames: 2
+  notes: the player as a Paladin, on the shared player body so every class has the same proportions
+- id: class-ranger
+  kind: character
+  batch: 2
+  priority: 207
+  importance: hero
+  height: 1.8
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+    - hurt
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+    hurt:
+      frames: 2
+  notes: the player as a Ranger, on the shared player body so every class has the same proportions
+- id: class-monk
+  kind: character
+  batch: 2
+  priority: 208
+  importance: hero
+  height: 1.8
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+    - hurt
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+    hurt:
+      frames: 2
+  notes: the player as a Monk, on the shared player body so every class has the same proportions
+- id: class-bard
+  kind: character
+  batch: 2
+  priority: 209
+  importance: hero
+  height: 1.8
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+    - hurt
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+    hurt:
+      frames: 2
+  notes: the player as a Bard, on the shared player body so every class has the same proportions
+- id: class-druid
+  kind: character
+  batch: 2
+  priority: 210
+  importance: hero
+  height: 1.8
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+    - hurt
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+    hurt:
+      frames: 2
+  notes: the player as a Druid, on the shared player body so every class has the same proportions
+- id: class-necromancer
+  kind: character
+  batch: 2
+  priority: 211
+  importance: hero
+  height: 1.8
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+    - hurt
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+    hurt:
+      frames: 2
+  notes: the player as a Necromancer, on the shared player body so every class has the same proportions
+- id: class-sorcerer
+  kind: character
+  batch: 2
+  priority: 212
+  importance: hero
+  height: 1.8
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+    - hurt
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+    hurt:
+      frames: 2
+  notes: the player as a Sorcerer, on the shared player body so every class has the same proportions
+- id: class-illusionist
+  kind: character
+  batch: 2
+  priority: 213
+  importance: hero
+  height: 1.8
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+    - hurt
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+    hurt:
+      frames: 2
+  notes: the player as a Illusionist, on the shared player body so every class has the same proportions
+- id: class-warlock
+  kind: character
+  batch: 2
+  priority: 214
+  importance: hero
+  height: 1.8
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+    - hurt
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+    hurt:
+      frames: 2
+  notes: the player as a Warlock, on the shared player body so every class has the same proportions
+- id: class-assassin
+  kind: character
+  batch: 2
+  priority: 215
+  importance: hero
+  height: 1.8
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+    - hurt
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+    hurt:
+      frames: 2
+  notes: the player as a Assassin, on the shared player body so every class has the same proportions
+- id: class-alchemist
+  kind: character
+  batch: 2
+  priority: 216
+  importance: hero
+  height: 1.8
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+    - hurt
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+    hurt:
+      frames: 2
+  notes: the player as a Alchemist, on the shared player body so every class has the same proportions
+- id: class-shaman
+  kind: character
+  batch: 2
+  priority: 217
+  importance: hero
+  height: 1.8
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+    - hurt
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+    hurt:
+      frames: 2
+  notes: the player as a Shaman, on the shared player body so every class has the same proportions
+- id: class-witch-hunter
+  kind: character
+  batch: 2
+  priority: 218
+  importance: hero
+  height: 1.8
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+    - hurt
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+    hurt:
+      frames: 2
+  notes: the player as a Witch Hunter, on the shared player body so every class has the same proportions
+- id: class-beastmaster
+  kind: character
+  batch: 2
+  priority: 219
+  importance: hero
+  height: 1.8
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+    - hurt
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+    hurt:
+      frames: 2
+  notes: the player as a Beastmaster, on the shared player body so every class has the same proportions
+- id: family-a-cap
+  kind: creature
+  batch: 2
+  priority: 240
+  importance: standard
+  height: 2.2
+  size: large
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+  notes: "glyph A: aberrations: eye tyrants and mind horrors (mind reaver, star-eater, sea of eyes, mind tyrant, ancient
+    horror, world-eater, void sovereign, The Ninefold Eye, …). Recoloured per row by its colour token, which stays the
+    dominant hue"
+- id: family-c-cap
+  kind: creature
+  batch: 2
+  priority: 241
+  importance: standard
+  height: 3
+  size: large
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+  notes: "glyph C: golems and constructs (stone golem, iron sentinel, iron colossus, adamant guardian, iron titan, molten
+    colossus, void colossus, final guardian, …). Recoloured per row by its colour token, which stays the dominant hue"
+- id: family-d-cap
+  kind: creature
+  batch: 2
+  priority: 242
+  importance: standard
+  height: 4
+  size: large
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+  notes: "glyph D: drakes and dragons (cave drake, wyvern, rust drake, cave dragon, bone dragon, shadow dragon, lava
+    drake, ancient dragon, …). Recoloured per row by its colour token, which stays the dominant hue"
+- id: family-e-cap
+  kind: creature
+  batch: 2
+  priority: 243
+  importance: standard
+  height: 2.4
+  size: large
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+  notes: "glyph E: elementals (flame guardian, crystal elemental, The Crystal Warden). Recoloured per row by its colour
+    token, which stays the dominant hue"
+- id: family-f-cap
+  kind: creature
+  batch: 2
+  priority: 244
+  importance: standard
+  height: 2
+  size: large
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+  notes: "glyph F: stalkers (cave stalker, void stalker). Recoloured per row by its colour token, which stays the dominant
+    hue"
+- id: family-g-cap
+  kind: creature
+  batch: 2
+  priority: 245
+  importance: standard
+  height: 4.5
+  size: large
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+  notes: "glyph G: giants and titans (gargoyle, hill giant, stone giant, frost giant, fire giant, storm giant, granite
+    titan, grave titan, …). Recoloured per row by its colour token, which stays the dominant hue"
+- id: family-h-cap
+  kind: creature
+  batch: 2
+  priority: 246
+  importance: standard
+  height: 3
+  size: large
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+  notes: "glyph H: many-headed beasts (chimera, hydra, Old Mawkin). Recoloured per row by its colour token, which stays
+    the dominant hue"
+- id: family-i-cap
+  kind: creature
+  batch: 2
+  priority: 247
+  importance: standard
+  height: 1.2
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+  notes: "glyph I: insect swarms (giant wasp swarm). Recoloured per row by its colour token, which stays the dominant hue"
+- id: family-k-cap
+  kind: creature
+  batch: 2
+  priority: 248
+  importance: standard
+  height: 2
+  size: large
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+  notes: "glyph K: death knights and dread lords (death knight, dread knight, death lord, reaper, dread emperor, death
+    incarnate, The Tallow King, The Drowned Duke, …). Recoloured per row by its colour token, which stays the dominant
+    hue"
+- id: family-l-cap
+  kind: creature
+  batch: 2
+  priority: 249
+  importance: standard
+  height: 1.9
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+  notes: "glyph L: liches (lich acolyte, lich, arch lich, elder lich, eternal lich, Sovereign Aurelian). Recoloured per
+    row by its colour token, which stays the dominant hue"
+- id: family-m-cap
+  kind: creature
+  batch: 2
+  priority: 250
+  importance: standard
+  height: 1.8
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+  notes: "glyph M: mummies (mummy, The Hollow Abbot). Recoloured per row by its colour token, which stays the dominant hue"
+- id: family-o-cap
+  kind: creature
+  batch: 2
+  priority: 251
+  importance: standard
+  height: 3.6
+  size: large
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+  notes: "glyph O: ogres (ogre, ogre mage, Grask the Pale, Kharn the Unbowed). Recoloured per row by its colour token,
+    which stays the dominant hue"
+- id: family-p-cap
+  kind: creature
+  batch: 2
+  priority: 252
+  importance: standard
+  height: 3.2
+  size: large
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+  notes: "glyph P: fiends and demon lords (pit fiend, fire lord, demon prince, archdevil, hellfire lord, lord of ashes,
+    Azhul Emberheart, Nethys the Forgotten). Recoloured per row by its colour token, which stays the dominant hue"
+- id: family-s-cap
+  kind: creature
+  batch: 2
+  priority: 253
+  importance: standard
+  height: 1
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+  notes: "glyph S: snakes, serpents and spiders (sewer snake, giant spider, lake serpent, Qorra of the Lake). Recoloured
+    per row by its colour token, which stays the dominant hue"
+- id: family-t-cap
+  kind: creature
+  batch: 2
+  priority: 254
+  importance: standard
+  height: 3
+  size: large
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+  notes: "glyph T: trolls (troll, cave troll, war troll, ancient troll). Recoloured per row by its colour token, which
+    stays the dominant hue"
+- id: family-v-cap
+  kind: creature
+  batch: 2
+  priority: 255
+  importance: standard
+  height: 1.8
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+  notes: "glyph V: vampires (vampire spawn, vampire, elder vampire, Lord Vael of the Deep). Recoloured per row by its
+    colour token, which stays the dominant hue"
+- id: family-w-cap
+  kind: creature
+  batch: 2
+  priority: 256
+  importance: standard
+  height: 2
+  size: large
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+  notes: "glyph W: wraiths and shades (shade, wight, wraith, mirror shade, shadow assassin, banshee, spirit lord, flame
+    wraith, …). Recoloured per row by its colour token, which stays the dominant hue"
+- id: family-y-cap
+  kind: creature
+  batch: 2
+  priority: 257
+  importance: standard
+  height: 1.6
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+  notes: "glyph Y: bears (cave bear). Recoloured per row by its colour token, which stays the dominant hue"
+- id: family-a
+  kind: creature
+  batch: 2
+  priority: 258
+  importance: standard
+  height: 0.3
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+  notes: "glyph a: giant insects and scorpions (giant roach, giant scorpion). Recoloured per row by its colour token,
+    which stays the dominant hue"
+- id: family-b
+  kind: creature
+  batch: 2
+  priority: 259
+  importance: standard
+  height: 0.4
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+  notes: "glyph b: cave bats (cave bat). Recoloured per row by its colour token, which stays the dominant hue"
+- id: family-c
+  kind: creature
+  batch: 2
+  priority: 260
+  importance: standard
+  height: 0.3
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+  notes: "glyph c: giant centipedes and crayfish (giant centipede, giant crayfish). Recoloured per row by its colour
+    token, which stays the dominant hue"
+- id: family-e
+  kind: creature
+  batch: 2
+  priority: 261
+  importance: standard
+  height: 0.8
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+  notes: "glyph e: eels and deep things of the water (pit eel, sewer lurker, giant eel, lake horror, abyssal eel, tide
+    lord, horror of the deep, abyssal leviathan, …). Recoloured per row by its colour token, which stays the dominant
+    hue"
+- id: family-f
+  kind: creature
+  batch: 2
+  priority: 262
+  importance: standard
+  height: 1.4
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+  notes: "glyph f: fungus horrors and spore beasts (fungus horror, spore mother, mushroom lord, spore tyrant, The Spore
+    Queen). Recoloured per row by its colour token, which stays the dominant hue"
+- id: family-g
+  kind: creature
+  batch: 2
+  priority: 263
+  importance: standard
+  height: 1.1
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+  notes: "glyph g: goblins with slings, bows and war-chants (goblin slinger, goblin archer, goblin warchanter). Recoloured
+    per row by its colour token, which stays the dominant hue"
+- id: family-h
+  kind: creature
+  batch: 2
+  priority: 264
+  importance: standard
+  height: 1.8
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+  notes: "glyph h: men and dwarves: acolytes, priests, mages, crossbowmen (hobgoblin, dark acolyte, dwarf crossbowman,
+    dark mage, dark priest, dwarven ironclad, mind weaver, archmage, …). Recoloured per row by its colour token, which
+    stays the dominant hue"
+- id: family-j
+  kind: creature
+  batch: 2
+  priority: 265
+  importance: standard
+  height: 2.4
+  size: large
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+  notes: "glyph j: gelatinous cubes (gelatinous cube). Recoloured per row by its colour token, which stays the dominant hue"
+- id: family-k
+  kind: creature
+  batch: 2
+  priority: 266
+  importance: standard
+  height: 1
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+  notes: "glyph k: kobolds (kobold scrapper, kobold shaman). Recoloured per row by its colour token, which stays the
+    dominant hue"
+- id: family-l
+  kind: creature
+  batch: 2
+  priority: 267
+  importance: standard
+  height: 1
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+  notes: "glyph l: lizards, frogs and lizardmen (cave lizard, bog frog, lizardman spearman, basilisk). Recoloured per row
+    by its colour token, which stays the dominant hue"
+- id: family-n
+  kind: creature
+  batch: 2
+  priority: 268
+  importance: standard
+  height: 2.2
+  size: large
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+  notes: "glyph n: bone nagas (bone naga). Recoloured per row by its colour token, which stays the dominant hue"
+- id: family-o
+  kind: creature
+  batch: 2
+  priority: 269
+  importance: standard
+  height: 1.9
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+  notes: "glyph o: orcs (orc raider, orc archer, orc warlord). Recoloured per row by its colour token, which stays the
+    dominant hue"
+- id: family-q
+  kind: creature
+  batch: 2
+  priority: 270
+  importance: standard
+  height: 1
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+  notes: "glyph q: wolves, boars and hounds (wolf, dire boar, wild boar herd, chaos hound pack, nightmare). Recoloured per
+    row by its colour token, which stays the dominant hue"
+- id: family-r
+  kind: creature
+  batch: 2
+  priority: 271
+  importance: standard
+  height: 0.25
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+  notes: "glyph r: rats (cave rat, plague rat swarm, grave rat). Recoloured per row by its colour token, which stays the
+    dominant hue"
+- id: family-s
+  kind: creature
+  batch: 2
+  priority: 272
+  importance: standard
+  height: 1.8
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+  notes: "glyph s: skeletons (crypt skeleton, bone archer, bone wolf pack, bone colossus, bone sovereign, The Bone
+    Regent). Recoloured per row by its colour token, which stays the dominant hue"
+- id: family-w
+  kind: creature
+  batch: 2
+  priority: 273
+  importance: standard
+  height: 0.6
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+  notes: "glyph w: worms, leeches and crawlers (mud crawler, giant leech, carrion crawler, magma worm). Recoloured per row
+    by its colour token, which stays the dominant hue"
+- id: family-z
+  kind: creature
+  batch: 2
+  priority: 274
+  importance: standard
+  height: 1.7
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+  notes: "glyph z: ghouls and zombies (ghoul, rot zombie). Recoloured per row by its colour token, which stays the
+    dominant hue"
+- id: npc-rival
+  kind: character
+  batch: 2
+  priority: 280
+  importance: standard
+  height: 1.8
+  directions: 4
+  states:
+    - idle
+    - walk
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+  notes: a rival, a person of the dungeon; stands on a ring in its role colour
+- id: npc-trader
+  kind: character
+  batch: 2
+  priority: 281
+  importance: standard
+  height: 1.8
+  directions: 4
+  states:
+    - idle
+    - walk
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+  notes: a trader, a person of the dungeon; stands on a ring in its role colour
+- id: npc-bandit
+  kind: character
+  batch: 2
+  priority: 282
+  importance: standard
+  height: 1.8
+  directions: 4
+  states:
+    - idle
+    - walk
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+  notes: a bandit, a person of the dungeon; stands on a ring in its role colour
+- id: npc-hermit
+  kind: character
+  batch: 2
+  priority: 283
+  importance: standard
+  height: 1.8
+  directions: 4
+  states:
+    - idle
+    - walk
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+  notes: a hermit, a person of the dungeon; stands on a ring in its role colour
+- id: npc-captive
+  kind: character
+  batch: 2
+  priority: 284
+  importance: standard
+  height: 1.8
+  directions: 4
+  states:
+    - idle
+    - walk
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+  notes: a captive, a person of the dungeon; stands on a ring in its role colour
+- id: feature-chest
+  kind: prop
+  batch: 3
+  priority: 300
+  importance: standard
+  height: 0.7
+  states:
+    - closed
+    - open
+    - looted
+  notes: an iron-bound chest
+- id: feature-sack
+  kind: prop
+  batch: 3
+  priority: 301
+  importance: standard
+  height: 0.6
+  states:
+    - closed
+    - looted
+  notes: a tied sack of coarse cloth
+- id: feature-pottery
+  kind: prop
+  batch: 3
+  priority: 302
+  importance: standard
+  height: 0.6
+  states:
+    - whole
+    - smashed
+  notes: a clay urn
+- id: feature-weapon-rack
+  kind: prop
+  batch: 3
+  priority: 303
+  importance: standard
+  height: 1.6
+  states:
+    - full
+    - looted
+  notes: a wooden weapon rack
+- id: feature-fountain
+  kind: prop
+  batch: 3
+  priority: 304
+  importance: standard
+  height: 1.4
+  states:
+    - flowing
+    - dry
+  notes: a stone basin fountain
+- id: feature-altar
+  kind: prop
+  batch: 3
+  priority: 305
+  importance: standard
+  height: 1.1
+  states:
+    - idle
+    - offered
+  notes: a stone altar to a nameless god
+- id: feature-sarcophagus
+  kind: prop
+  batch: 3
+  priority: 306
+  importance: standard
+  height: 0.9
+  states:
+    - closed
+    - open
+    - looted
+  notes: a carved stone sarcophagus
+- id: feature-rune
+  kind: prop
+  batch: 3
+  priority: 307
+  importance: standard
+  height: 0.05
+  states:
+    - dormant
+    - spent
+  notes: a carved floor rune
+- id: feature-sign
+  kind: prop
+  batch: 3
+  priority: 308
+  importance: standard
+  height: 1.6
+  states:
+    - idle
+  notes: a wall-mounted sign or scrawled graffiti
+- id: feature-lever
+  kind: prop
+  batch: 3
+  priority: 309
+  importance: standard
+  height: 1
+  states:
+    - up
+    - pulled
+  notes: an iron wall lever
+- id: feature-spirit-totem
+  kind: prop
+  batch: 3
+  priority: 310
+  importance: standard
+  height: 1.8
+  states:
+    - idle
+  notes: a carved spirit totem pole
+- id: feature-trap
+  kind: prop
+  batch: 3
+  priority: 311
+  importance: standard
+  height: 0.1
+  states:
+    - armed
+    - disarmed
+  notes: "a found floor trap: a pressure plate and its mechanism"
+- id: family-coins
+  kind: prop
+  batch: 3
+  priority: 320
+  importance: filler
+  height: 0.1
+  notes: a spill of coins, the top item of a cell
+- id: family-gems
+  kind: prop
+  batch: 3
+  priority: 321
+  importance: filler
+  height: 0.1
+  notes: a few cut gems, the top item of a cell
+- id: family-jewelry
+  kind: prop
+  batch: 3
+  priority: 322
+  importance: filler
+  height: 0.1
+  notes: a necklace and a ring, the top item of a cell
+- id: family-potion
+  kind: prop
+  batch: 3
+  priority: 323
+  importance: filler
+  height: 0.25
+  notes: a stoppered glass potion bottle, the top item of a cell
+- id: family-ring
+  kind: prop
+  batch: 3
+  priority: 324
+  importance: filler
+  height: 0.05
+  notes: a single ring, the top item of a cell
+- id: family-rod
+  kind: prop
+  batch: 3
+  priority: 325
+  importance: filler
+  height: 0.2
+  notes: a rod, staff or wand lying on the floor, the top item of a cell
+- id: family-weapon
+  kind: prop
+  batch: 3
+  priority: 326
+  importance: filler
+  height: 0.2
+  notes: a sword lying on the floor, the top item of a cell
+- id: family-armour
+  kind: prop
+  batch: 3
+  priority: 327
+  importance: filler
+  height: 0.25
+  notes: a folded mail shirt, the top item of a cell
+- id: family-clothing
+  kind: prop
+  batch: 3
+  priority: 328
+  importance: filler
+  height: 0.15
+  notes: a folded cloak, the top item of a cell
+- id: family-book
+  kind: prop
+  batch: 3
+  priority: 329
+  importance: filler
+  height: 0.15
+  notes: a heavy closed book, the top item of a cell
+- id: family-key
+  kind: prop
+  batch: 3
+  priority: 330
+  importance: filler
+  height: 0.05
+  notes: an iron key, the top item of a cell
+- id: family-ammunition
+  kind: prop
+  batch: 3
+  priority: 331
+  importance: filler
+  height: 0.1
+  notes: a bundle of arrows, the top item of a cell
+- id: family-quest-item
+  kind: prop
+  batch: 3
+  priority: 332
+  importance: filler
+  height: 0.3
+  notes: a wrapped relic tied with cord, the top item of a cell
+- id: fx-hit
+  kind: effect
+  batch: 3
+  priority: 340
+  importance: filler
+  object: a star of sparks
+  anims:
+    play:
+      frames: 4
+  notes: shows a hit; at most 300 ms
+- id: fx-miss
+  kind: effect
+  batch: 3
+  priority: 341
+  importance: filler
+  object: a puff of dust
+  anims:
+    play:
+      frames: 4
+  notes: shows a miss; at most 300 ms
+- id: fx-arrow
+  kind: effect
+  batch: 3
+  priority: 342
+  importance: filler
+  object: an arrow in flight
+  anims:
+    play:
+      frames: 4
+  notes: shows a shot or thrown missile; at most 300 ms
+- id: fx-bolt
+  kind: effect
+  batch: 3
+  priority: 343
+  importance: filler
+  object: an arcane dart
+  anims:
+    play:
+      frames: 4
+  notes: shows a bolt spell; at most 300 ms
+- id: fx-burst
+  kind: effect
+  batch: 3
+  priority: 344
+  importance: filler
+  object: a ring of fire
+  anims:
+    play:
+      frames: 4
+  notes: shows an area spell's footprint; at most 300 ms
+- id: fx-frost
+  kind: effect
+  batch: 3
+  priority: 345
+  importance: filler
+  object: shards of ice
+  anims:
+    play:
+      frames: 4
+  notes: shows a cold spell; at most 300 ms
+- id: fx-push
+  kind: effect
+  batch: 3
+  priority: 346
+  importance: filler
+  object: a curved shock wave
+  anims:
+    play:
+      frames: 4
+  notes: shows a push or knockback; at most 300 ms
+- id: fx-aura
+  kind: effect
+  batch: 3
+  priority: 347
+  importance: filler
+  object: a ring of rising motes
+  anims:
+    play:
+      frames: 4
+  notes: shows a self spell; at most 300 ms
+- id: fx-die-lost
+  kind: effect
+  batch: 3
+  priority: 348
+  importance: filler
+  object: a small six-sided die
+  anims:
+    play:
+      frames: 4
+  notes: shows a die lost; at most 300 ms
+- id: fx-alert
+  kind: effect
+  batch: 3
+  priority: 349
+  importance: filler
+  object: an exclamation mark
+  anims:
+    play:
+      frames: 4
+  notes: shows a creature becoming alert; at most 300 ms
+- id: icon-poisoned
+  kind: ui-icon
+  batch: 3
+  priority: 360
+  importance: filler
+  notes: "status icon above the head: a dripping fang"
+- id: icon-slowed
+  kind: ui-icon
+  batch: 3
+  priority: 361
+  importance: filler
+  notes: "status icon above the head: a snail shell"
+- id: icon-hasted
+  kind: ui-icon
+  batch: 3
+  priority: 362
+  importance: filler
+  notes: "status icon above the head: a winged boot"
+- id: icon-asleep
+  kind: ui-icon
+  batch: 3
+  priority: 363
+  importance: filler
+  notes: "status icon above the head: a closed eye"
+- id: icon-held
+  kind: ui-icon
+  batch: 3
+  priority: 364
+  importance: filler
+  notes: "status icon above the head: a shackle"
+- id: icon-frightened
+  kind: ui-icon
+  batch: 3
+  priority: 365
+  importance: filler
+  notes: "status icon above the head: a skull"
+- id: icon-blessed
+  kind: ui-icon
+  batch: 3
+  priority: 366
+  importance: filler
+  notes: "status icon above the head: a sunburst"
+- id: icon-cursed
+  kind: ui-icon
+  batch: 3
+  priority: 367
+  importance: filler
+  notes: "status icon above the head: a broken circle"
+- id: icon-shield
+  kind: ui-icon
+  batch: 3
+  priority: 368
+  importance: filler
+  notes: "status icon above the head: a kite shield"
+- id: boss-grask-the-pale
+  kind: creature
+  batch: 4
+  priority: 400
+  importance: hero
+  size: large
+  height: 3.6
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+  notes: Grask the Pale, a unique boss of the family-o-cap family, drawn at the large size
+- id: boss-the-tallow-king
+  kind: creature
+  batch: 4
+  priority: 401
+  importance: hero
+  size: large
+  height: 2
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+  notes: The Tallow King, a unique boss of the family-k-cap family, drawn at the large size
+- id: boss-old-mawkin
+  kind: creature
+  batch: 4
+  priority: 402
+  importance: hero
+  size: large
+  height: 3
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+  notes: Old Mawkin, a unique boss of the family-h-cap family, drawn at the large size
+- id: boss-varn-ironmouth
+  kind: creature
+  batch: 4
+  priority: 403
+  importance: hero
+  size: large
+  height: 1.8
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+  notes: Varn Ironmouth, a unique boss of the family-h family, drawn at the large size
+- id: boss-mother-cinder
+  kind: creature
+  batch: 4
+  priority: 404
+  importance: hero
+  size: large
+  height: 1.8
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+  notes: Mother Cinder, a unique boss of the family-h family, drawn at the large size
+- id: boss-the-hollow-abbot
+  kind: creature
+  batch: 4
+  priority: 405
+  importance: hero
+  size: large
+  height: 1.8
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+  notes: The Hollow Abbot, a unique boss of the family-m-cap family, drawn at the large size
+- id: boss-sister-gloam
+  kind: creature
+  batch: 4
+  priority: 406
+  importance: hero
+  size: large
+  height: 1.8
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+  notes: Sister Gloam, a unique boss of the family-h family, drawn at the large size
+- id: boss-the-drowned-duke
+  kind: creature
+  batch: 4
+  priority: 407
+  importance: hero
+  size: large
+  height: 2
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+  notes: The Drowned Duke, a unique boss of the family-k-cap family, drawn at the large size
+- id: boss-brutus-stonehand
+  kind: creature
+  batch: 4
+  priority: 408
+  importance: hero
+  size: large
+  height: 4.5
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+  notes: Brutus Stonehand, a unique boss of the family-g-cap family, drawn at the large size
+- id: boss-the-spore-queen
+  kind: creature
+  batch: 4
+  priority: 409
+  importance: hero
+  size: large
+  height: 1.4
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+  notes: The Spore Queen, a unique boss of the family-f family, drawn at the large size
+- id: boss-ulgrim-deepwarden
+  kind: creature
+  batch: 4
+  priority: 410
+  importance: hero
+  size: large
+  height: 1.8
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+  notes: Ulgrim Deepwarden, a unique boss of the family-h family, drawn at the large size
+- id: boss-the-bone-regent
+  kind: creature
+  batch: 4
+  priority: 411
+  importance: hero
+  size: large
+  height: 1.8
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+  notes: The Bone Regent, a unique boss of the family-s family, drawn at the large size
+- id: boss-hexmother-yarrow
+  kind: creature
+  batch: 4
+  priority: 412
+  importance: hero
+  size: large
+  height: 1.8
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+  notes: Hexmother Yarrow, a unique boss of the family-h family, drawn at the large size
+- id: boss-the-lantern-man
+  kind: creature
+  batch: 4
+  priority: 413
+  importance: hero
+  size: large
+  height: 2
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+  notes: The Lantern Man, a unique boss of the family-w-cap family, drawn at the large size
+- id: boss-skarn-the-burning
+  kind: creature
+  batch: 4
+  priority: 414
+  importance: hero
+  size: large
+  height: 4
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+  notes: Skarn the Burning, a unique boss of the family-d-cap family, drawn at the large size
+- id: boss-the-gilded-wyrm
+  kind: creature
+  batch: 4
+  priority: 415
+  importance: hero
+  size: large
+  height: 4
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+  notes: The Gilded Wyrm, a unique boss of the family-d-cap family, drawn at the large size
+- id: boss-thorne-ashgrave
+  kind: creature
+  batch: 4
+  priority: 416
+  importance: hero
+  size: large
+  height: 2
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+  notes: Thorne Ashgrave, a unique boss of the family-k-cap family, drawn at the large size
+- id: boss-the-pale-prior
+  kind: creature
+  batch: 4
+  priority: 417
+  importance: hero
+  size: large
+  height: 1.8
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+  notes: The Pale Prior, a unique boss of the family-h family, drawn at the large size
+- id: boss-magister-voss
+  kind: creature
+  batch: 4
+  priority: 418
+  importance: hero
+  size: large
+  height: 1.8
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+  notes: Magister Voss, a unique boss of the family-h family, drawn at the large size
+- id: boss-the-stone-mother
+  kind: creature
+  batch: 4
+  priority: 419
+  importance: hero
+  size: large
+  height: 3
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+  notes: The Stone Mother, a unique boss of the family-c-cap family, drawn at the large size
+- id: boss-qorra-of-the-lake
+  kind: creature
+  batch: 4
+  priority: 420
+  importance: hero
+  size: large
+  height: 1
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+  notes: Qorra of the Lake, a unique boss of the family-s-cap family, drawn at the large size
+- id: boss-the-black-abbess
+  kind: creature
+  batch: 4
+  priority: 421
+  importance: hero
+  size: large
+  height: 1.8
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+  notes: The Black Abbess, a unique boss of the family-h family, drawn at the large size
+- id: boss-hrolf-the-hammerlord
+  kind: creature
+  batch: 4
+  priority: 422
+  importance: hero
+  size: large
+  height: 4.5
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+  notes: Hrolf the Hammerlord, a unique boss of the family-g-cap family, drawn at the large size
+- id: boss-the-weeping-knight
+  kind: creature
+  batch: 4
+  priority: 423
+  importance: hero
+  size: large
+  height: 2
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+  notes: The Weeping Knight, a unique boss of the family-k-cap family, drawn at the large size
+- id: boss-azhul-emberheart
+  kind: creature
+  batch: 4
+  priority: 424
+  importance: hero
+  size: large
+  height: 3.2
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+  notes: Azhul Emberheart, a unique boss of the family-p-cap family, drawn at the large size
+- id: boss-the-ninefold-eye
+  kind: creature
+  batch: 4
+  priority: 425
+  importance: hero
+  size: large
+  height: 2.2
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+  notes: The Ninefold Eye, a unique boss of the family-a-cap family, drawn at the large size
+- id: boss-the-crystal-warden
+  kind: creature
+  batch: 4
+  priority: 426
+  importance: hero
+  size: large
+  height: 2.4
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+  notes: The Crystal Warden, a unique boss of the family-e-cap family, drawn at the large size
+- id: boss-lord-vael-of-the-deep
+  kind: creature
+  batch: 4
+  priority: 427
+  importance: hero
+  size: large
+  height: 1.8
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+  notes: Lord Vael of the Deep, a unique boss of the family-v-cap family, drawn at the large size
+- id: boss-the-iron-choir
+  kind: creature
+  batch: 4
+  priority: 428
+  importance: hero
+  size: large
+  height: 3
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+  notes: The Iron Choir, a unique boss of the family-c-cap family, drawn at the large size
+- id: boss-kharn-the-unbowed
+  kind: creature
+  batch: 4
+  priority: 429
+  importance: hero
+  size: large
+  height: 3.6
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+  notes: Kharn the Unbowed, a unique boss of the family-o-cap family, drawn at the large size
+- id: boss-the-leviathan-below
+  kind: creature
+  batch: 4
+  priority: 430
+  importance: hero
+  size: large
+  height: 0.8
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+  notes: The Leviathan Below, a unique boss of the family-e family, drawn at the large size
+- id: boss-morrigan-dusk
+  kind: creature
+  batch: 4
+  priority: 431
+  importance: hero
+  size: large
+  height: 2
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+  notes: Morrigan Dusk, a unique boss of the family-w-cap family, drawn at the large size
+- id: boss-the-hungering-dark
+  kind: creature
+  batch: 4
+  priority: 432
+  importance: hero
+  size: large
+  height: 2.2
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+  notes: The Hungering Dark, a unique boss of the family-a-cap family, drawn at the large size
+- id: boss-sovereign-aurelian
+  kind: creature
+  batch: 4
+  priority: 433
+  importance: hero
+  size: large
+  height: 1.9
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+  notes: Sovereign Aurelian, a unique boss of the family-l-cap family, drawn at the large size
+- id: boss-nethys-the-forgotten
+  kind: creature
+  batch: 4
+  priority: 434
+  importance: hero
+  size: large
+  height: 3.2
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+  notes: Nethys the Forgotten, a unique boss of the family-p-cap family, drawn at the large size
+- id: boss-the-magma-sovereign
+  kind: creature
+  batch: 4
+  priority: 435
+  importance: hero
+  size: large
+  height: 4.5
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+  notes: The Magma Sovereign, a unique boss of the family-g-cap family, drawn at the large size
+- id: boss-the-last-delver
+  kind: creature
+  batch: 4
+  priority: 436
+  importance: hero
+  size: large
+  height: 1.8
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+  notes: The Last Delver, a unique boss of the family-h family, drawn at the large size
+- id: boss-the-throne-warden
+  kind: creature
+  batch: 4
+  priority: 437
+  importance: hero
+  size: large
+  height: 3
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+  notes: The Throne Warden, a unique boss of the family-c-cap family, drawn at the large size
+- id: boss-eshkal-the-unmaker
+  kind: creature
+  batch: 4
+  priority: 438
+  importance: hero
+  size: large
+  height: 4
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+  notes: Eshkal the Unmaker, a unique boss of the family-d-cap family, drawn at the large size
+- id: boss-the-hollow-emperor
+  kind: creature
+  batch: 4
+  priority: 439
+  importance: hero
+  size: large
+  height: 2
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+  notes: The Hollow Emperor, a unique boss of the family-k-cap family, drawn at the large size
+- id: boss-the-king-below
+  kind: creature
+  batch: 4
+  priority: 440
+  importance: hero
+  size: large
+  height: 2
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+  notes: The King Below, a unique boss of the family-k-cap family, drawn at the large size
+- id: boss-the-unnamed-regent
+  kind: creature
+  batch: 4
+  priority: 441
+  importance: hero
+  size: large
+  height: 2
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+  notes: The Unnamed Regent, a unique boss of the family-k-cap family, drawn at the large size
+- id: boss-the-seat-itself
+  kind: creature
+  batch: 4
+  priority: 442
+  importance: hero
+  size: large
+  height: 3
+  directions: 4
+  states:
+    - idle
+    - walk
+    - attack
+  anims:
+    idle:
+      frames: 2
+      loop: true
+    walk:
+      frames: 4
+      loop: true
+    attack:
+      frames: 4
+  notes: The Seat Itself, a unique boss of the family-c-cap family, drawn at the large size
+- id: setpiece-abyssal-throne
+  kind: prop
+  batch: 4
+  priority: 499
+  importance: hero
+  size: large
+  height: 4
+  notes: "the Abyssal Throne of level 100: a vast black throne on a stepped dais"
