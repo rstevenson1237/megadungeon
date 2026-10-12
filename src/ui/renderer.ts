@@ -3,12 +3,13 @@
 
 import type { Atlas } from './atlas.ts';
 import { cssColor } from './atlas.ts';
-import { CELL_H, CELL_W, COLS, Grid, ROWS } from './grid.ts';
+import { CELL_H, CELL_W, COLS, Grid, ROWS, TRANSPARENT } from './grid.ts';
 
 /** The slice of CanvasRenderingContext2D the renderer uses. */
 export interface RenderContext {
   fillStyle: string | CanvasGradient | CanvasPattern;
   fillRect(x: number, y: number, w: number, h: number): void;
+  clearRect(x: number, y: number, w: number, h: number): void;
   drawImage: CanvasDrawImage['drawImage'];
 }
 
@@ -37,6 +38,12 @@ export class Renderer {
       this.shownBg[i] = bg;
       const dx = (i % COLS) * CELL_W;
       const dy = Math.floor(i / COLS) * CELL_H;
+      if (bg === TRANSPARENT) {
+        // A clear cell over the isometric picture (Spec 01b, Layout).
+        this.ctx.clearRect(dx, dy, CELL_W, CELL_H);
+        painted++;
+        continue;
+      }
       if (bg !== lastBg) {
         this.ctx.fillStyle = cssColor(bg);
         lastBg = bg;

@@ -17,7 +17,7 @@ import { mapLook } from '../../src/ui/palette.ts';
 import { fitScale } from '../../src/ui/viewport.ts';
 
 // The isometric check page of task 6.3: a generated level drawn by the isometric renderer with no art (the glyph
-// fallback alone), before the shell gets the display flag in task 6.4. `?seed=` and `?depth=` choose the level; W A S D
+// fallback alone), on its own, without the shell (the game itself has it behind the display flag since task 6.4). `?seed=` and `?depth=` choose the level; W A S D
 // walk; `harness.frame()` times one build and paint. The Vite dev server serves it; it is not part of the build.
 
 const BUNDLE = bundle as ContentBundle;

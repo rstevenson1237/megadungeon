@@ -5,14 +5,17 @@
 // Projection: a fixed 2:1 view; cell (x, y) has its centre at ((x - y) x 16, (x + y) x 8) from the camera, so map
 // north is screen up and right. Depth: cells back to front by x + y, then x; within a cell floor, floor marks, wall
 // or door, feature, item, marker, creature, effects. Walls whose far side is open and known are cut to a low cap.
+// Aiming and looking (task 6.4) add diamonds: footprints and the line of fire lie on the floor, and the cursors and
+// the outlines of creatures in a footprint are drawn last, over everything.
 
 import type { GameState } from '../game/game.ts';
 import { ALLY_COLOUR } from '../game/monsters.ts';
+import type { CellCursor, Targeting } from '../game/targeting.ts';
 import type { StatusEffect } from '../rules/magic/status.ts';
 import type { Point, Rect } from '../rules/world/level.ts';
 import { artId, familyId } from './art-ids.ts';
 import { CELL_H, CELL_W } from './grid.ts';
-import { DEFAULT_LOOK, type MapLook } from './palette.ts';
+import { DEFAULT_LOOK, ISO, type MapLook } from './palette.ts';
 import { MAIN_PANE, inner } from './panes.ts';
 import { buildScene, sceneAt, type FeatureKind, type Scene, type SceneCell, type SceneOccupant, type TerrainKind } from './scene.ts';
 
@@ -42,8 +45,11 @@ const ICONS_MAX = 3;
 const ICON_GAP = 10;
 const ICON_RISE = FRAME.character[1] + 6;
 
-/** What part of a cell a draw belongs to; the order here is the paint order within one cell. */
-export const ISO_LAYERS = ['floor', 'mark', 'wall', 'feature', 'item', 'marker', 'creature', 'effect'] as const;
+/**
+ * What part of a cell a draw belongs to; the order here is the paint order within one cell. 'aim' is a footprint or
+ * the line of fire on the floor; 'cursor' draws (a cursor, an outline) come after every cell, on top of the picture.
+ */
+export const ISO_LAYERS = ['floor', 'mark', 'aim', 'wall', 'feature', 'item', 'marker', 'creature', 'effect', 'cursor'] as const;
 export type IsoLayer = (typeof ISO_LAYERS)[number];
 
 /**
@@ -51,7 +57,30 @@ export type IsoLayer = (typeof ISO_LAYERS)[number];
  * with their glyph on top, walls and doors as shaded blocks, everything else as its glyph on a standing card. A ring
  * marks an ally or a person; an icon has no glyph, so it is left out until its art is loaded.
  */
-export type IsoShape = 'diamond' | 'block' | 'card' | 'ring' | 'none';
+export type IsoShape = 'diamond' | 'block' | 'card' | 'ring' | 'none' | IsoAimShape;
+
+/**
+ * How aiming and looking draw (Spec 01b, Targeting and look; task 6.4): a tinted diamond (a footprint cell, a cell
+ * Blink can reach), a small diamond (the line of fire), a diamond outline (the selected target, a cursor), and a
+ * frame around a creature inside a footprint.
+ */
+export type IsoAimShape = 'tint' | 'dot' | 'outline' | 'frame';
+
+/** What is being aimed or looked at, drawn over the picture (Spec 01b, Targeting and look). */
+export interface IsoAim {
+  /** Choosing a target for a shot, a spell or an ability. */
+  targeting?: Targeting | null;
+  /** Choosing a cell: Blink's destination or Decoy's phantom. */
+  cursor?: CellCursor | null;
+  /** Look's cursor (L). */
+  look?: CellCursor | null;
+}
+
+/** A footprint's tint and the line of fire's small diamonds are see-through, so the floor stays readable. */
+export const TINT_ALPHA = 0.3;
+export const DOT_ALPHA = 0.5;
+/** A cell cursor on a cell it cannot choose (out of reach, not free) draws dimmed. */
+export const REFUSED_ALPHA = 0.5;
 
 export interface IsoDraw {
   /** The level cell it belongs to. */
@@ -201,6 +230,8 @@ export interface IsoOptions {
   pack?: IsoPack;
   /** The camera; the player's cell when omitted. */
   camera?: IsoCamera;
+  /** Targeting, a cell cursor or look, when one is open. */
+  aim?: IsoAim;
 }
 
 /** Every draw of the isometric main view, in paint order (back to front), culled to the view area. */
@@ -276,8 +307,65 @@ export function buildIsoDraws(state: GameState, options: IsoOptions = {}): IsoDr
       });
     }
   }
+  const aim = options.aim ?? {};
+  draws.push(...floorAim(aim, camera));
   // Back to front by cell, then by layer within a cell (the sort is stable, so a cell's draws keep their order otherwise).
   const order = new Map(ISO_LAYERS.map((l, i) => [l, i]));
   draws.sort((a, b) => a.cell.x + a.cell.y - (b.cell.x + b.cell.y) || a.cell.x - b.cell.x || order.get(a.layer)! - order.get(b.layer)!);
+  draws.push(...cursorDraws(aim, camera, draws));
   return draws.filter((d) => overlaps(d.box, ISO_VIEW));
+}
+
+/** One aiming draw on cell `p`: a diamond-sized box, no asset and no glyph. */
+function aimDraw(p: { x: number; y: number }, camera: IsoCamera, layer: IsoLayer, shape: IsoAimShape, colour: number, alpha: number): IsoDraw {
+  const at = project(p.x, p.y, camera);
+  return {
+    cell: { x: p.x, y: p.y }, layer, x: at.x, y: at.y, asset: null, frame: '', variant: 0, tint: colour, shape, glyph: 0, fg: colour,
+    height: 0, alpha, dim: false, large: false, box: { x: at.x - TILE_W / 2, y: at.y - TILE_H / 2, w: TILE_W, h: TILE_H },
+  };
+}
+
+/**
+ * What aiming lays on the floor (Spec 01b, Targeting): an area footprint as tinted diamonds and the line of fire as
+ * small dim diamonds, both ends left out; Blink's and Decoy's reachable cells tinted as a footprint is.
+ */
+function floorAim(aim: IsoAim, camera: IsoCamera): IsoDraw[] {
+  const out: IsoDraw[] = [];
+  const t = aim.targeting;
+  if (t) {
+    for (const c of t.footprint()) out.push(aimDraw(c, camera, 'aim', 'tint', ISO.target, TINT_ALPHA));
+    for (const c of t.path()) out.push(aimDraw(c, camera, 'aim', 'dot', ISO.target, DOT_ALPHA));
+  }
+  for (const c of aim.cursor?.cells ?? []) out.push(aimDraw(c, camera, 'aim', 'tint', ISO.target, TINT_ALPHA));
+  return out;
+}
+
+/**
+ * What is drawn over the whole picture: the creatures inside a footprint framed, the selected target's diamond
+ * outline in the targeting colour, a cell cursor's outline (dimmed where it cannot choose), and look's outline in the
+ * look colour. `drawn` is the picture so far, for the boxes of the creatures to frame.
+ */
+function cursorDraws(aim: IsoAim, camera: IsoCamera, drawn: readonly IsoDraw[]): IsoDraw[] {
+  const out: IsoDraw[] = [];
+  const t = aim.targeting;
+  if (t) {
+    for (const m of t.marked()) {
+      const body = drawn.find((d) => d.layer === 'creature' && d.cell.x === m.x && d.cell.y === m.y);
+      if (body) out.push({ ...aimDraw(m, camera, 'cursor', 'frame', ISO.target, 1), box: body.box });
+    }
+    out.push(aimDraw(t.selected, camera, 'cursor', 'outline', ISO.target, 1));
+  }
+  const c = aim.cursor;
+  if (c) out.push(aimDraw(c.at, camera, 'cursor', 'outline', ISO.target, c.ok ? 1 : REFUSED_ALPHA));
+  if (aim.look) out.push(aimDraw(aim.look.at, camera, 'cursor', 'outline', ISO.look, 1));
+  return out;
+}
+
+/**
+ * Whether a cell's centre is on screen, above the bottom row that look's description takes: where look's cursor may
+ * go in the isometric display, as the text display keeps it within the main view (Spec 01, Addendum A).
+ */
+export function isoOnScreen(p: Point, camera: IsoCamera): boolean {
+  const at = project(p.x, p.y, camera);
+  return at.x >= ISO_VIEW.x && at.x < ISO_VIEW.x + ISO_VIEW.w && at.y >= ISO_VIEW.y && at.y < ISO_VIEW.y + ISO_VIEW.h - CELL_H;
 }

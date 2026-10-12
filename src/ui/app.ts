@@ -15,6 +15,8 @@ import { Run, type RunOptions } from '../game/run.ts';
 import type { CharacterPaneData } from './character-pane.ts';
 import { type ClassCard, CreationScreen } from './creation.ts';
 import { type DeathChoice, DeathScreen } from './death.ts';
+import { DISPLAY_KEY, type DisplayMode, startingDisplay } from './display.ts';
+import type { IsoPicture } from './iso-paint.ts';
 import type { Grid } from './grid.ts';
 import { type KeyInput, keyToCommand } from './input.ts';
 import { FULL_GRID, LeaderboardOverlay } from './leaderboard.ts';
@@ -46,6 +48,11 @@ export interface AppDeps extends TitleDeps {
    * outranks the choice remembered in `flags`, and is not remembered itself.
    */
   time?: TimeMode;
+  /**
+   * The display the page opens with, from the page parameter `?display=` (Spec 01, Addendum B). Like `time`, a preset
+   * outranks the choice remembered in `flags` and is not remembered itself.
+   */
+  display?: DisplayMode;
 }
 
 /** What a new character on the seed brings from the one who died (Spec 09), and how the creation screen names it. */
@@ -88,9 +95,12 @@ export class App {
 
   /** The time mode of the next new game: the preset, else the remembered choice, else turn-based. */
   private time: TimeMode;
+  /** How the main view is drawn, for every run on this page: a browser preference, never saved (Spec 01, Addendum B). */
+  display: DisplayMode;
 
   constructor(private readonly deps: AppDeps) {
     this.time = deps.time ?? (deps.flags?.getItem(TIME_KEY) === 'real' ? 'real' : 'turn');
+    this.display = startingDisplay(deps.display, deps.flags?.getItem(DISPLAY_KEY));
     this.openTitle();
   }
 
@@ -205,6 +215,11 @@ export class App {
     const shell = new Shell('', character);
     shell.onQuit = () => this.openTitle();
     shell.onMilestone = (kind) => this.milestone(shell, kind);
+    shell.display = this.display;
+    shell.onDisplay = (display) => {
+      this.display = display;
+      this.deps.flags?.setItem(DISPLAY_KEY, display);
+    };
     shell.menuHost = {
       ...(this.deps.board ? { leaderboard: () => new LeaderboardOverlay(this.deps.board!, this.today) } : {}),
       ...(this.deps.saves && this.deps.download ? { exportSave: () => void this.exportSave(shell) } : {}),
@@ -313,6 +328,14 @@ export class App {
   /** The shell of the run on screen, with no other screen over it: the frame loop drives its clock (Spec 01, Addendum B). */
   get clock(): Shell | null {
     return this.leaderboard || this.death || this.creation ? null : this.shell;
+  }
+
+  /**
+   * The isometric picture to paint under the text, when the display is isometric and a level is on screen with no
+   * other screen over it (Spec 01b); null otherwise, and the text display draws the whole screen.
+   */
+  picture(): IsoPicture | null {
+    return this.clock?.picture() ?? null;
   }
 
   /** Whether a real-time run is on screen, where the browser's own key repeat is ignored (Spec 01, Addendum B). */

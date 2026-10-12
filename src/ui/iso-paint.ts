@@ -1,7 +1,8 @@
 // Painting the isometric draw list (Spec 01b; task 6.3) on the picture's canvas, which sits under the text canvas at
 // the same native size. Each draw takes its art when a sprite source can draw it, else its glyph shape: a flat
 // diamond with its glyph, a shaded block, a ring, or the glyph on a small dark standing card. Shapes are filled in
-// whole-pixel spans, never anti-aliased paths, so they stay crisp when the screen scales.
+// whole-pixel spans, never anti-aliased paths, so they stay crisp when the screen scales. `paintPicture` (task 6.4)
+// adds the compass and, while an overlay is open, dims the picture to 40%.
 
 import type { Atlas } from './atlas.ts';
 import { cssColor } from './atlas.ts';
@@ -44,15 +45,38 @@ const RING_H = 12;
 /** Walls draw full or cap; a door's frame is its state. */
 const isDoor = (d: IsoDraw): boolean => d.frame !== 'full' && d.frame !== 'cap';
 
-/** Half the width of the diamond's row `r` (0 to 15): 2 at the tips, 16 across the middle. */
-const halfWidth = (r: number): number => (r < TILE_H / 2 ? 2 * (r + 1) : 2 * (TILE_H - r));
+/** Half the width of row `r` of a 2:1 diamond `h` rows high: 2 at the tips, `h` across the middle. */
+const halfWidth = (r: number, h = TILE_H): number => (r < h / 2 ? 2 * (r + 1) : 2 * (h - r));
 
-function diamond(ctx: IsoContext, x: number, y: number, colour: number): void {
+/** A filled 2:1 diamond centred on (x, y), `h` rows high: a floor tile, or a smaller one. */
+function diamond(ctx: IsoContext, x: number, y: number, colour: number, h = TILE_H): void {
+  ctx.fillStyle = cssColor(colour);
+  for (let r = 0; r < h; r++) {
+    const hw = halfWidth(r, h);
+    ctx.fillRect(x - hw, y - h / 2 + r, hw * 2, 1);
+  }
+}
+
+/** The line of fire's small diamond: a quarter of a tile. */
+const DOT_H = TILE_H / 4;
+
+/** A tile's diamond outline: two pixels at each end of every row, so its 2:1 edges join up. */
+function outline(ctx: IsoContext, x: number, y: number, colour: number): void {
   ctx.fillStyle = cssColor(colour);
   for (let r = 0; r < TILE_H; r++) {
     const hw = halfWidth(r);
-    ctx.fillRect(x - hw, y - TILE_H / 2 + r, hw * 2, 1);
+    ctx.fillRect(x - hw, y - TILE_H / 2 + r, 2, 1);
+    ctx.fillRect(x + hw - 2, y - TILE_H / 2 + r, 2, 1);
   }
+}
+
+/** A one-pixel frame around a box: a creature inside a footprint. */
+function frame(ctx: IsoContext, box: { x: number; y: number; w: number; h: number }, colour: number): void {
+  ctx.fillStyle = cssColor(colour);
+  ctx.fillRect(box.x - 1, box.y - 1, box.w + 2, 1);
+  ctx.fillRect(box.x - 1, box.y + box.h, box.w + 2, 1);
+  ctx.fillRect(box.x - 1, box.y, 1, box.h);
+  ctx.fillRect(box.x + box.w, box.y, 1, box.h);
 }
 
 /** A block one cell wide and `h` px high on the diamond centred at (x, y): two side faces, then the top. */
@@ -132,10 +156,60 @@ export function paintIso(ctx: IsoContext, draws: readonly IsoDraw[], atlas: Atla
       case 'card':
         card(ctx, atlas, d.x, d.y, d.glyph, d.fg);
         break;
+      case 'tint':
+        diamond(ctx, d.x, d.y, d.fg);
+        break;
+      case 'dot':
+        diamond(ctx, d.x, d.y, d.fg, DOT_H);
+        break;
+      case 'outline':
+        outline(ctx, d.x, d.y, d.fg);
+        break;
+      case 'frame':
+        frame(ctx, d.box, d.fg);
+        break;
       case 'none':
         break;
     }
   }
   ctx.globalAlpha = 1;
   ctx.restore();
+}
+
+/** What the picture canvas shows of a level: its draw list, and whether an overlay is open over it. */
+export interface IsoPicture {
+  draws: readonly IsoDraw[];
+  /** An overlay is open: the picture stays, dimmed to 40% (Spec 01b, Layout). */
+  dimmed: boolean;
+}
+
+/** The compass's base, in the view area's top right corner, and its arrow's length along the 2:1 slope. */
+const COMPASS_LEN = 12;
+export const COMPASS_BASE = { x: ISO_VIEW.x + ISO_VIEW.w - 28, y: ISO_VIEW.y + 26 } as const;
+const GLYPH_N = 78;
+
+/**
+ * The compass (Spec 01b, Layout): a small arrow pointing to map north, up and to the right on screen along a
+ * diamond's edge, with an N past its tip.
+ */
+function compass(ctx: IsoContext, atlas: Atlas): void {
+  const { x, y } = COMPASS_BASE;
+  ctx.fillStyle = cssColor(ISO.compass);
+  for (let k = 0; k <= COMPASS_LEN; k++) ctx.fillRect(x + k, y - (k >> 1), 1, 1);
+  const tip = { x: x + COMPASS_LEN, y: y - (COMPASS_LEN >> 1) };
+  // The head: a short stroke back to the left and one down from the tip.
+  ctx.fillRect(tip.x - 4, tip.y, 4, 1);
+  ctx.fillRect(tip.x, tip.y + 1, 1, 3);
+  atlas.draw(ctx, GLYPH_N, ISO.compass, tip.x + 2, tip.y - CELL_H + 2);
+}
+
+/** Paint a level's picture: the draw list, the compass, and the dimming while an overlay is open. */
+export function paintPicture(ctx: IsoContext, picture: IsoPicture, atlas: Atlas, sprites?: SpriteSource): void {
+  paintIso(ctx, picture.draws, atlas, sprites);
+  compass(ctx, atlas);
+  if (!picture.dimmed) return;
+  ctx.globalAlpha = ISO.dim;
+  ctx.fillStyle = cssColor(0x000000);
+  ctx.fillRect(ISO_VIEW.x, ISO_VIEW.y, ISO_VIEW.w, ISO_VIEW.h);
+  ctx.globalAlpha = 1;
 }
