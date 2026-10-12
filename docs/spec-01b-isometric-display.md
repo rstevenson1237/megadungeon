@@ -124,6 +124,15 @@ About 160 assets, in four batches (decision D9).
 - **Browser smoke:** in Chromium, Firefox and WebKit, the isometric display draws a non-empty view, switches back and forth with the text display, shows an overlay over it, and shows the targeting cursor.
 - **Art checks:** artgen's conformance checks and the content check of sprite ids (Spec 08, Addendum B) run in CI.
 
+## Clarification (task 6.1, proposed October 12, 2026, awaiting approval)
+
+The asset list leaves four points of naming and size open. Proposed as built in `tools/art-briefs.ts`, which writes `art/briefs.yaml` from the tables:
+
+- **Family ids keep upper and lower case apart:** artgen ids are lower case, and both `h` (men and dwarves) and `H` (many-headed beasts) are families, so a lower case letter's family is `family-h` and an upper case letter's is `family-h-cap`. Floor items use their glyph class: `family-potion`, `family-coins`, `family-quest-item` (Spec 08, Addendum B, fallback step 2).
+- **Other ids by group:** `terrain-<piece>`, `class-<class id>`, `npc-<role>`, `feature-<fixture>`, `fx-<effect>`, `icon-<status>`, `boss-<boss id>` and `setpiece-abyssal-throne`, with content ids' underscores written as hyphens.
+- **The size table** gives each brief a real-world height against the player's 1.8 m: a rat 0.25 m, a goblin 1.1 m, an ogre 3.6 m (twice the player), a giant 4.5 m, a dragon 4 m. A boss keeps its family's height and is drawn at the large frame size.
+- **Effects carry no height:** they are sized by what they show (a cell, an area), not by a real-world height.
+
 ## Acceptance criteria
 
 - [ ] With no art loaded, every cell and thing the text display shows is drawn, by the glyph fallback where nothing better exists.

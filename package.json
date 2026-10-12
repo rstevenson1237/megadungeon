@@ -18,9 +18,11 @@
     "dev": "npm run content:build && vite",
     "build": "npm run typecheck && vite build",
     "preview": "vite preview",
-    "ci": "npm run content:check && npm run typecheck && npm test && npm run build",
+    "ci": "npm run content:check && npm run art:check && npm run typecheck && npm test && npm run build",
     "smoke": "playwright test",
-    "balance": "tsx tools/balance.ts"
+    "balance": "tsx tools/balance.ts",
+    "art:briefs": "tsx tools/art-briefs.ts",
+    "art:check": "tsx tools/art-briefs.ts --check"
   },
   "repository": {
     "type": "git",
