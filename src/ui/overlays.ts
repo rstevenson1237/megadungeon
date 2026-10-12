@@ -7,7 +7,8 @@ import type { MessageLog } from '../game/log.ts';
 import { wrapText } from '../game/log.ts';
 import type { Grid } from './grid.ts';
 import { KEY_BINDINGS } from './input.ts';
-import { FULL_WINDOW, Menu, type Overlay, type OverlayResult, drawWindow } from './overlay.ts';
+import { DISPLAY_NAME, type DisplayMode } from './display.ts';
+import { FULL_WINDOW, Menu, type MenuItem, type Overlay, type OverlayResult, drawWindow } from './overlay.ts';
 import { LOG_COLOURS, OVERLAY, UI } from './palette.ts';
 import { inner } from './panes.ts';
 
@@ -61,6 +62,9 @@ export class HistoryOverlay implements Overlay {
   }
 }
 
+/** The isometric display keeps W A S D in their map directions (Spec 01b, Projection; decision D8). */
+export const ISO_KEYS = 'In the isometric display W A S D keep their map directions: W is up and right.';
+
 /** The key list, built from the key map so the two cannot drift apart. */
 export class HelpOverlay implements Overlay {
   draw(grid: Grid): void {
@@ -74,7 +78,8 @@ export class HelpOverlay implements Overlay {
       lines.forEach((text, i) => grid.text(area.x + 1 + keyWidth, y + i, text, UI.value, UI.background));
       y += lines.length;
     }
-    grid.text(area.x + 1, y + 1, 'In menus, arrows or W/S move the selection and Enter confirms.', OVERLAY.hint, UI.background);
+    grid.text(area.x + 1, y, 'In menus, arrows or W/S move the selection and Enter confirms.', OVERLAY.hint, UI.background);
+    grid.text(area.x + 1, y + 1, ISO_KEYS, OVERLAY.hint, UI.background);
     grid.text(area.x + 1, area.y + area.h - 1, 'Esc close', OVERLAY.hint, UI.background);
   }
 
@@ -93,11 +98,18 @@ export interface GameMenuHost {
   importSave?: () => void;
 }
 
+/** The display row of the game menu: what it shows, and how Enter switches it (Spec 01, Addendum B). */
+export interface DisplayRow {
+  current: () => DisplayMode;
+  toggle: () => void;
+}
+
 /**
  * The game menu Esc opens when there is nothing to cancel (Spec 01, Spec 09). `onQuit` returns to the title screen
- * without saving: everything since the last rest is lost, and Continue loads that rest.
+ * without saving: everything since the last rest is lost, and Continue loads that rest. The display row, before
+ * quitting, switches between text and isometric; the menu stays open with the row's new name.
  */
-export function gameMenu(onQuit?: () => void, host: GameMenuHost = {}): Menu {
+export function gameMenu(onQuit?: () => void, host: GameMenuHost = {}, display?: DisplayRow): Menu {
   const unavailable = (what: string): OverlayResult => ({
     close: true,
     message: { kind: 'system', text: `${what} is not available.` },
@@ -107,9 +119,23 @@ export function gameMenu(onQuit?: () => void, host: GameMenuHost = {}): Menu {
     { label: 'Leaderboard', choose: () => (host.leaderboard ? { close: true, open: host.leaderboard() } : unavailable('The leaderboard')) },
     { label: 'Export save to a file', choose: () => (host.exportSave ? (host.exportSave(), { close: true }) : unavailable('Export')) },
     { label: 'Import save from a file', choose: () => (host.importSave ? (host.importSave(), { close: true }) : unavailable('Import')) },
+    ...(display ? [displayItem(display)] : []),
     {
       label: 'Quit without saving',
       choose: () => (onQuit ? (onQuit(), { close: true }) : unavailable('Quitting')),
     },
   ]);
+}
+
+function displayItem(display: DisplayRow): MenuItem {
+  const label = (): string => `Display: ${DISPLAY_NAME[display.current()]}`;
+  const item: MenuItem = {
+    label: label(),
+    choose: () => {
+      display.toggle();
+      item.label = label();
+      return {};
+    },
+  };
+  return item;
 }

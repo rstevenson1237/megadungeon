@@ -6,7 +6,10 @@ import { creationContentOf } from './game/lifecycle.ts';
 import { SaveSlot, idbStore } from './game/store.ts';
 import { runOptionsFor } from './game/world.ts';
 import { App, type AppDeps } from './ui/app.ts';
+import { displayParam } from './ui/display.ts';
 import { FrameLoop } from './ui/frame-loop.ts';
+import { paintPicture } from './ui/iso-paint.ts';
+import { ISO_VIEW } from './ui/iso-view.ts';
 import { Grid } from './ui/grid.ts';
 import { claimsKey, keyToCommand } from './ui/input.ts';
 import { mountScreen } from './ui/screen.ts';
@@ -55,13 +58,21 @@ export function mountGame(root: HTMLElement, options: Partial<AppDeps> = {}): Ap
     runOptions: (seed) => runOptionsFor(bundle as ContentBundle, seed),
     creation: creationContentOf(bundle as ContentBundle),
     ...(timeParam(location.search) ? { time: timeParam(location.search) } : {}),
+    ...(displayParam(location.search) ? { display: displayParam(location.search) } : {}),
     ...options,
   });
   const grid = new Grid();
-  void mountScreen(root, 'Px437 IBM VGA 9x16').then((renderer) => {
+  void mountScreen(root, 'Px437 IBM VGA 9x16').then(({ renderer, picture, atlas }) => {
+    // Whether the picture canvas holds a picture, so it is cleared once when the text display takes over again.
+    let painted = false;
     redraw = (): void => {
       app.draw(grid);
       renderer.render(grid);
+      // The isometric picture beneath the text, repainted with every redraw while it shows (Spec 01b, Redraw).
+      const shown = app.picture();
+      if (shown) paintPicture(picture, shown, atlas);
+      else if (painted) picture.clearRect(ISO_VIEW.x, ISO_VIEW.y, ISO_VIEW.w, ISO_VIEW.h);
+      painted = shown !== null;
     };
     // The text of the screen as last drawn, and the clock of a level, read-only, for the browser checks (plan, tasks
     // 3.11 and 5.5): the canvas has no text of its own.
@@ -69,7 +80,7 @@ export function mountGame(root: HTMLElement, options: Partial<AppDeps> = {}): Ap
       const game = app.clock?.game;
       return game ? { tick: game.tick, round: game.state.round, ticking: app.clock!.ticking } : null;
     };
-    Object.assign(window, { megadungeon: { screen: (): string => grid.lines().join('\n'), clock } });
+    Object.assign(window, { megadungeon: { screen: (): string => grid.lines().join('\n'), clock, display: () => app.display } });
     window.addEventListener('keydown', (e) => {
       // Real time ignores the browser's own key repeat: a held movement key steps once per cooldown (Spec 01, Addendum B).
       if (e.repeat && app.realTime) {

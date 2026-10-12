@@ -9,6 +9,11 @@ export const CELL_W = 9;
 export const CELL_H = 16;
 export const NATIVE_W = COLS * CELL_W; // 900
 export const NATIVE_H = ROWS * CELL_H; // 640
+/**
+ * A background no 24-bit colour can be: the cell is left clear, so the isometric picture on the canvas beneath shows
+ * through (Spec 01b, Layout). Only `see` sets it; any write of a glyph or colour makes the cell opaque again.
+ */
+export const TRANSPARENT = 0x1000000;
 
 export class Grid {
   readonly glyph = new Uint8Array(COLS * ROWS);
@@ -42,6 +47,19 @@ export class Grid {
   /** Fill a rectangle with one glyph and colours. */
   fill(x: number, y: number, w: number, h: number, glyph: number, fg: number, bg: number): void {
     for (let cy = y; cy < y + h; cy++) for (let cx = x; cx < x + w; cx++) this.set(cx, cy, glyph, fg, bg);
+  }
+
+  /** Leave a rectangle clear, with no glyph, so what is drawn under the text canvas shows (the isometric view area). */
+  see(x: number, y: number, w: number, h: number): void {
+    for (let cy = y; cy < y + h; cy++) {
+      for (let cx = x; cx < x + w; cx++) {
+        if (!this.inBounds(cx, cy)) continue;
+        const i = cy * COLS + cx;
+        this.glyph[i] = 0;
+        this.fg[i] = 0;
+        this.bg[i] = TRANSPARENT;
+      }
+    }
   }
 
   clear(bg = 0): void {

@@ -165,13 +165,15 @@ describe('overlays', () => {
     expect(menu.selected).toBe(2);
     press(shell, 's');
     press(shell, 's');
-    expect(menu.selected).toBe(4);
+    expect(menu.selected).toBe(4); // the display row (task 6.4)
+    press(shell, 's');
+    expect(menu.selected).toBe(5);
     press(shell, 's');
     expect(menu.selected).toBe(0); // wraps
     press(shell, 'w');
-    expect(menu.selected).toBe(4);
+    expect(menu.selected).toBe(5);
     press(shell, 'a'); // sideways does nothing
-    expect(menu.selected).toBe(4);
+    expect(menu.selected).toBe(5);
     press(shell, 'Enter'); // Quit, with no title screen to go to here: the menu closes and says so
     expect(shell.overlays).toHaveLength(0);
     expect(shell.log.lines(1).at(-1)!.text).toBe('Quitting is not available.');

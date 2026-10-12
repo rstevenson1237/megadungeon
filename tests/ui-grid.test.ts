@@ -110,15 +110,17 @@ describe('fitScale', () => {
 
 describe('Renderer', () => {
   function harness() {
-    const calls = { fills: [] as [number, number][], glyphs: [] as { code: number; fg: number; x: number; y: number }[] };
+    const calls = { fills: [] as [number, number][], clears: [] as [number, number][], glyphs: [] as { code: number; fg: number; x: number; y: number }[] };
     const ctx: RenderContext = {
       fillStyle: '',
       fillRect: (x, y) => void calls.fills.push([x, y]),
+      clearRect: (x, y) => void calls.clears.push([x, y]),
       drawImage: () => undefined,
     };
     const atlas: Atlas = { draw: (_c, code, fg, x, y) => void calls.glyphs.push({ code, fg, x, y }) };
     const reset = () => {
       calls.fills.length = 0;
+      calls.clears.length = 0;
       calls.glyphs.length = 0;
     };
     return { calls, reset, renderer: new Renderer(ctx, atlas) };

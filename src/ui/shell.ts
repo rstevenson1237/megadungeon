@@ -16,6 +16,9 @@ import { type GameMenuHost, HelpOverlay, HistoryOverlay, gameMenu } from './over
 import { MAIN_PANE, drawPanes, inner } from './panes.ts';
 import { UI, mapLook } from './palette.ts';
 import { drawMap } from './map-view.ts';
+import type { DisplayMode } from './display.ts';
+import { buildIsoDraws, isoOnScreen } from './iso-view.ts';
+import type { IsoPicture } from './iso-paint.ts';
 import type { Game } from '../game/game.ts';
 import type { Run } from '../game/run.ts';
 import { VillageScreen, type TownHost } from './town.ts';
@@ -85,6 +88,13 @@ export class Shell {
   paused: 'key' | 'focus' | null = null;
   /** Real time: Z is fast-forwarding, and this watches for what stops it. */
   private waiting: WaitWatch | null = null;
+  /**
+   * How the main view is drawn: text, or the isometric picture (Spec 01, Addendum B; Spec 01b). A browser preference,
+   * never part of the run: switching it changes nothing in the game.
+   */
+  display: DisplayMode = 'text';
+  /** Called when the game menu switches the display, so the choice is remembered. */
+  onDisplay: ((display: DisplayMode) => void) | null = null;
 
   constructor(
     public title: string,
@@ -388,7 +398,7 @@ export class Shell {
     }
     switch (command.type) {
       case 'cancel':
-        this.overlays.push(gameMenu(this.onQuit ?? undefined, this.menuHost));
+        this.overlays.push(gameMenu(this.onQuit ?? undefined, this.menuHost, { current: () => this.display, toggle: () => this.toggleDisplay() }));
         return;
       case 'history':
         this.overlays.push(new HistoryOverlay(this.log, this.turn, this.brightRounds));
@@ -448,6 +458,12 @@ export class Shell {
     this.log.add({ kind: 'system', text: nothingToDo(command.type, this.run ? (this.game ? 'dungeon' : 'village') : 'none') }, this.turn);
   }
 
+  /** The game menu's display row: switch between text and isometric, with no round spent (Spec 01, Addendum B). */
+  private toggleDisplay(): void {
+    this.display = this.display === 'text' ? 'iso' : 'text';
+    this.onDisplay?.(this.display);
+  }
+
   // --- L: look (Spec 01, Addendum A), a free action ---
 
   /** Start looking: a cursor on the player, kept within the main view. */
@@ -463,6 +479,12 @@ export class Shell {
     const game = this.game!;
     switch (command.type) {
       case 'move': {
+        if (this.display === 'iso') {
+          // The isometric view is not a rectangle of cells: the cursor goes wherever its cell is still on screen.
+          const next = { x: cursor.at.x + command.dx, y: cursor.at.y + command.dy };
+          if (isoOnScreen(next, game.state.map.player)) cursor.at = next;
+          return;
+        }
         const { x0, y0, x1, y1 } = this.viewBounds();
         cursor.at = { x: Math.min(x1, Math.max(x0, cursor.at.x + command.dx)), y: Math.min(y1, Math.max(y0, cursor.at.y + command.dy)) };
         return;
@@ -920,14 +942,27 @@ export class Shell {
     this.showTarget();
   }
 
+  /**
+   * The isometric picture of the level, when the display is isometric and a level is on screen (Spec 01b): its draws,
+   * with whatever is being aimed or looked at, and dimmed while an overlay is open. Null in a village or the text display.
+   */
+  picture(): IsoPicture | null {
+    const game = this.game;
+    if (!game || this.display !== 'iso') return null;
+    const aim = { targeting: this.targeting, cursor: this.cursor, look: this.looking };
+    return { draws: buildIsoDraws(game.state, { look: mapLook(this.run?.theme), aim }), dimmed: this.overlays.length > 0 };
+  }
+
   /** Draw the whole screen: panes, character, log, then any overlay on top. */
   draw(grid: Grid): void {
     drawPanes(grid, this.header);
     if (this.game) {
-      drawMap(grid, this.game.state, this.targeting, this.cursor ?? this.looking, mapLook(this.run?.theme));
+      const view = inner(MAIN_PANE);
+      // The isometric picture is on the canvas beneath: the view area's cells are left clear (Spec 01b, Layout).
+      if (this.display === 'iso') grid.see(view.x, view.y, view.w, view.h);
+      else drawMap(grid, this.game.state, this.targeting, this.cursor ?? this.looking, mapLook(this.run?.theme));
       const text = this.lookText();
       if (text !== null) {
-        const view = inner(MAIN_PANE);
         grid.text(view.x, view.y + view.h - 1, text.slice(0, view.w).padEnd(view.w), UI.value, UI.background);
       }
     }

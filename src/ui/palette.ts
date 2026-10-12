@@ -62,10 +62,18 @@ export const MAP = {
   background: 0x000000,
 } as const;
 
-/** The isometric display's own colours (Spec 01b): the background outside the level, and the glyph card's face. */
+/**
+ * The isometric display's own colours (Spec 01b): the background outside the level, the glyph card's face, the
+ * targeting colour (the text display's line of fire), look's cursor, the compass, and the dimming under an overlay.
+ */
 export const ISO = {
   background: 0x000000,
   card: 0x141414,
+  target: UI.target,
+  look: UI.bright,
+  compass: UI.label,
+  /** Under an overlay the picture shows at 40% (Spec 01b, Layout): a black layer of 60% over it. */
+  dim: 0.6,
 } as const;
 
 /** Traders, hermits and captives on the map (Spec 01 core glyph table, Spec 07): an @ coloured by role. */
