@@ -1,0 +1,24 @@
+{
+  "format": 1,
+  "asset": "terrain-wall",
+  "facings": [
+    "s"
+  ],
+  "states": {
+    "full": {
+      "frames": 1,
+      "durations": [
+        125
+      ],
+      "loop": true
+    },
+    "cap": {
+      "frames": 1,
+      "durations": [
+        125
+      ],
+      "loop": true
+    }
+  },
+  "anchors": []
+}

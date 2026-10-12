@@ -1,0 +1,80 @@
+{
+  "format": 1,
+  "asset": "terrain-door",
+  "facings": [
+    "s"
+  ],
+  "states": {
+    "closed": {
+      "frames": 1,
+      "durations": [
+        125
+      ],
+      "loop": true
+    },
+    "open": {
+      "frames": 1,
+      "durations": [
+        125
+      ],
+      "loop": true
+    },
+    "locked": {
+      "frames": 1,
+      "durations": [
+        125
+      ],
+      "loop": true
+    },
+    "sealed": {
+      "frames": 1,
+      "durations": [
+        125
+      ],
+      "loop": true
+    },
+    "broken": {
+      "frames": 1,
+      "durations": [
+        125
+      ],
+      "loop": true
+    },
+    "closed-cap": {
+      "frames": 1,
+      "durations": [
+        125
+      ],
+      "loop": true
+    },
+    "open-cap": {
+      "frames": 1,
+      "durations": [
+        125
+      ],
+      "loop": true
+    },
+    "locked-cap": {
+      "frames": 1,
+      "durations": [
+        125
+      ],
+      "loop": true
+    },
+    "sealed-cap": {
+      "frames": 1,
+      "durations": [
+        125
+      ],
+      "loop": true
+    },
+    "broken-cap": {
+      "frames": 1,
+      "durations": [
+        125
+      ],
+      "loop": true
+    }
+  },
+  "anchors": []
+}

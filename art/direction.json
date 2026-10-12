@@ -79,8 +79,8 @@
     "perKindMax": {
       "character": 19,
       "creature": 19,
-      "prop": 16,
-      "tile": 10,
+      "prop": 18,
+      "tile": 21,
       "effect": 6
     },
     "perKind": {
@@ -105,12 +105,17 @@
         "metal",
         "stone",
         "leather",
-        "accent"
+        "accent",
+        "glow"
       ],
       "tile": [
         "dirt",
         "grass",
-        "stone"
+        "stone",
+        "wood",
+        "metal",
+        "accent",
+        "glow"
       ],
       "effect": [
         "accent",

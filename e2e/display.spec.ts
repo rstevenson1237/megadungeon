@@ -54,6 +54,9 @@ test('the isometric display draws the level, dims under an overlay, shows look, 
 
   // The picture is drawn, and the text leaves the view area clear: no map glyphs in it.
   await expect.poll(async () => (await probe(page)).lit).toBeGreaterThan(2000);
+  // The art pack (task 6.5) loaded: the display did not fall back to text.
+  expect(await screen(page)).not.toContain('could not be loaded');
+  expect(await display(page)).toBe('iso');
   const shown = await probe(page);
   const viewText = (await screen(page)).split('\n').slice(1, 29).map((r) => r.slice(1, 71)).join('');
   expect(viewText.replace(/[\s\0]/g, '')).toBe('');

@@ -7,6 +7,7 @@ import { SaveSlot, idbStore } from './game/store.ts';
 import { runOptionsFor } from './game/world.ts';
 import { App, type AppDeps } from './ui/app.ts';
 import { displayParam } from './ui/display.ts';
+import { loadIsoArt } from './ui/art/iso-art.ts';
 import { FrameLoop } from './ui/frame-loop.ts';
 import { paintPicture } from './ui/iso-paint.ts';
 import { ISO_VIEW } from './ui/iso-view.ts';
@@ -55,6 +56,8 @@ export function mountGame(root: HTMLElement, options: Partial<AppDeps> = {}): Ap
     download,
     upload,
     onChange: () => redraw(),
+    // The isometric display's art, under Vite's base path so it loads on the GitHub Pages sub-path (Spec 01b, Loading).
+    loadArt: () => loadIsoArt(`${import.meta.env.BASE_URL}art/main/pack.json`),
     runOptions: (seed) => runOptionsFor(bundle as ContentBundle, seed),
     creation: creationContentOf(bundle as ContentBundle),
     ...(timeParam(location.search) ? { time: timeParam(location.search) } : {}),
@@ -70,7 +73,7 @@ export function mountGame(root: HTMLElement, options: Partial<AppDeps> = {}): Ap
       renderer.render(grid);
       // The isometric picture beneath the text, repainted with every redraw while it shows (Spec 01b, Redraw).
       const shown = app.picture();
-      if (shown) paintPicture(picture, shown, atlas);
+      if (shown) paintPicture(picture, shown, atlas, app.art ?? undefined);
       else if (painted) picture.clearRect(ISO_VIEW.x, ISO_VIEW.y, ISO_VIEW.w, ISO_VIEW.h);
       painted = shown !== null;
     };

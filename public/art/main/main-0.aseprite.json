@@ -1,0 +1,981 @@
+{
+  "frames": [
+    {
+      "filename": "terrain-floor/idle/s/0",
+      "frame": {
+        "x": 33,
+        "y": 239,
+        "w": 32,
+        "h": 16
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 16
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 16
+      },
+      "duration": 125
+    },
+    {
+      "filename": "terrain-floor/idle/s/0#v1",
+      "frame": {
+        "x": 99,
+        "y": 41,
+        "w": 32,
+        "h": 16
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 16
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 16
+      },
+      "duration": 125
+    },
+    {
+      "filename": "terrain-floor/idle/s/0#v2",
+      "frame": {
+        "x": 132,
+        "y": 41,
+        "w": 32,
+        "h": 16
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 16
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 16
+      },
+      "duration": 125
+    },
+    {
+      "filename": "terrain-floor/idle/s/0#v3",
+      "frame": {
+        "x": 165,
+        "y": 41,
+        "w": 32,
+        "h": 16
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 16
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 16
+      },
+      "duration": 125
+    },
+    {
+      "filename": "terrain-wall/full/s/0",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 40
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 40
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 40
+      },
+      "duration": 125
+    },
+    {
+      "filename": "terrain-wall/cap/s/0",
+      "frame": {
+        "x": 0,
+        "y": 41,
+        "w": 32,
+        "h": 40
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 40
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 40
+      },
+      "duration": 125
+    },
+    {
+      "filename": "terrain-door/closed/s/0",
+      "frame": {
+        "x": 0,
+        "y": 82,
+        "w": 32,
+        "h": 40
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 40
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 40
+      },
+      "duration": 125
+    },
+    {
+      "filename": "terrain-door/open/s/0",
+      "frame": {
+        "x": 0,
+        "y": 123,
+        "w": 32,
+        "h": 40
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 40
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 40
+      },
+      "duration": 125
+    },
+    {
+      "filename": "terrain-door/locked/s/0",
+      "frame": {
+        "x": 0,
+        "y": 164,
+        "w": 32,
+        "h": 40
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 40
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 40
+      },
+      "duration": 125
+    },
+    {
+      "filename": "terrain-door/sealed/s/0",
+      "frame": {
+        "x": 0,
+        "y": 205,
+        "w": 32,
+        "h": 40
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 40
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 40
+      },
+      "duration": 125
+    },
+    {
+      "filename": "terrain-door/broken/s/0",
+      "frame": {
+        "x": 33,
+        "y": 0,
+        "w": 32,
+        "h": 40
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 40
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 40
+      },
+      "duration": 125
+    },
+    {
+      "filename": "terrain-door/closed-cap/s/0",
+      "frame": {
+        "x": 66,
+        "y": 0,
+        "w": 32,
+        "h": 40
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 40
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 40
+      },
+      "duration": 125
+    },
+    {
+      "filename": "terrain-door/open-cap/s/0",
+      "frame": {
+        "x": 99,
+        "y": 0,
+        "w": 32,
+        "h": 40
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 40
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 40
+      },
+      "duration": 125
+    },
+    {
+      "filename": "terrain-door/locked-cap/s/0",
+      "frame": {
+        "x": 132,
+        "y": 0,
+        "w": 32,
+        "h": 40
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 40
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 40
+      },
+      "duration": 125
+    },
+    {
+      "filename": "terrain-door/sealed-cap/s/0",
+      "frame": {
+        "x": 165,
+        "y": 0,
+        "w": 32,
+        "h": 40
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 40
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 40
+      },
+      "duration": 125
+    },
+    {
+      "filename": "terrain-door/broken-cap/s/0",
+      "frame": {
+        "x": 198,
+        "y": 0,
+        "w": 32,
+        "h": 40
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 40
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 40
+      },
+      "duration": 125
+    },
+    {
+      "filename": "terrain-stairs-up/idle/s/0",
+      "frame": {
+        "x": 33,
+        "y": 41,
+        "w": 32,
+        "h": 32
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 32
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 32
+      },
+      "duration": 125
+    },
+    {
+      "filename": "terrain-stairs-down/idle/s/0",
+      "frame": {
+        "x": 198,
+        "y": 41,
+        "w": 32,
+        "h": 16
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 16
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 16
+      },
+      "duration": 125
+    },
+    {
+      "filename": "terrain-water-shallow/idle/s/0",
+      "frame": {
+        "x": 99,
+        "y": 58,
+        "w": 32,
+        "h": 16
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 16
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 16
+      },
+      "duration": 125
+    },
+    {
+      "filename": "terrain-water-shallow/idle/s/1",
+      "frame": {
+        "x": 66,
+        "y": 74,
+        "w": 32,
+        "h": 16
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 16
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 16
+      },
+      "duration": 125
+    },
+    {
+      "filename": "terrain-water-shallow/idle/s/2",
+      "frame": {
+        "x": 132,
+        "y": 58,
+        "w": 32,
+        "h": 16
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 16
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 16
+      },
+      "duration": 125
+    },
+    {
+      "filename": "terrain-water-shallow/idle/s/3",
+      "frame": {
+        "x": 66,
+        "y": 74,
+        "w": 32,
+        "h": 16
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 16
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 16
+      },
+      "duration": 125
+    },
+    {
+      "filename": "terrain-water-deep/idle/s/0",
+      "frame": {
+        "x": 165,
+        "y": 58,
+        "w": 32,
+        "h": 16
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 16
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 16
+      },
+      "duration": 125
+    },
+    {
+      "filename": "terrain-water-deep/idle/s/1",
+      "frame": {
+        "x": 198,
+        "y": 58,
+        "w": 32,
+        "h": 16
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 16
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 16
+      },
+      "duration": 125
+    },
+    {
+      "filename": "terrain-water-deep/idle/s/2",
+      "frame": {
+        "x": 99,
+        "y": 75,
+        "w": 32,
+        "h": 16
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 16
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 16
+      },
+      "duration": 125
+    },
+    {
+      "filename": "terrain-water-deep/idle/s/3",
+      "frame": {
+        "x": 66,
+        "y": 91,
+        "w": 32,
+        "h": 16
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 16
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 16
+      },
+      "duration": 125
+    },
+    {
+      "filename": "terrain-lava/idle/s/0",
+      "frame": {
+        "x": 132,
+        "y": 75,
+        "w": 32,
+        "h": 16
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 16
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 16
+      },
+      "duration": 125
+    },
+    {
+      "filename": "terrain-lava/idle/s/1",
+      "frame": {
+        "x": 165,
+        "y": 75,
+        "w": 32,
+        "h": 16
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 16
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 16
+      },
+      "duration": 125
+    },
+    {
+      "filename": "terrain-lava/idle/s/2",
+      "frame": {
+        "x": 198,
+        "y": 75,
+        "w": 32,
+        "h": 16
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 16
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 16
+      },
+      "duration": 125
+    },
+    {
+      "filename": "terrain-lava/idle/s/3",
+      "frame": {
+        "x": 165,
+        "y": 75,
+        "w": 32,
+        "h": 16
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 16
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 16
+      },
+      "duration": 125
+    },
+    {
+      "filename": "terrain-teleporter/idle/s/0",
+      "frame": {
+        "x": 33,
+        "y": 74,
+        "w": 32,
+        "h": 32
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 32
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 32
+      },
+      "duration": 125
+    },
+    {
+      "filename": "terrain-teleporter/idle/s/1",
+      "frame": {
+        "x": 33,
+        "y": 107,
+        "w": 32,
+        "h": 32
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 32
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 32
+      },
+      "duration": 125
+    },
+    {
+      "filename": "terrain-teleporter/idle/s/2",
+      "frame": {
+        "x": 33,
+        "y": 140,
+        "w": 32,
+        "h": 32
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 32
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 32
+      },
+      "duration": 125
+    },
+    {
+      "filename": "terrain-teleporter/idle/s/3",
+      "frame": {
+        "x": 33,
+        "y": 107,
+        "w": 32,
+        "h": 32
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 32
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 32
+      },
+      "duration": 125
+    },
+    {
+      "filename": "terrain-debris/idle/s/0",
+      "frame": {
+        "x": 33,
+        "y": 173,
+        "w": 32,
+        "h": 32
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 32
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 32
+      },
+      "duration": 125
+    },
+    {
+      "filename": "terrain-debris/idle/s/0#v1",
+      "frame": {
+        "x": 33,
+        "y": 206,
+        "w": 32,
+        "h": 32
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 32
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 32
+      },
+      "duration": 125
+    },
+    {
+      "filename": "terrain-debris/idle/s/0#v2",
+      "frame": {
+        "x": 66,
+        "y": 41,
+        "w": 32,
+        "h": 32
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 32
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 32
+      },
+      "duration": 125
+    }
+  ],
+  "meta": {
+    "app": "artgen",
+    "version": "artgen 0.9.0",
+    "image": "main-0.png",
+    "format": "RGBA8888",
+    "size": {
+      "w": 256,
+      "h": 256
+    },
+    "scale": "1",
+    "frameTags": [
+      {
+        "name": "terrain-floor/idle/s",
+        "from": 0,
+        "to": 0,
+        "direction": "forward"
+      },
+      {
+        "name": "terrain-floor/idle/s#v1",
+        "from": 1,
+        "to": 1,
+        "direction": "forward"
+      },
+      {
+        "name": "terrain-floor/idle/s#v2",
+        "from": 2,
+        "to": 2,
+        "direction": "forward"
+      },
+      {
+        "name": "terrain-floor/idle/s#v3",
+        "from": 3,
+        "to": 3,
+        "direction": "forward"
+      },
+      {
+        "name": "terrain-wall/full/s",
+        "from": 4,
+        "to": 4,
+        "direction": "forward"
+      },
+      {
+        "name": "terrain-wall/cap/s",
+        "from": 5,
+        "to": 5,
+        "direction": "forward"
+      },
+      {
+        "name": "terrain-door/closed/s",
+        "from": 6,
+        "to": 6,
+        "direction": "forward"
+      },
+      {
+        "name": "terrain-door/open/s",
+        "from": 7,
+        "to": 7,
+        "direction": "forward"
+      },
+      {
+        "name": "terrain-door/locked/s",
+        "from": 8,
+        "to": 8,
+        "direction": "forward"
+      },
+      {
+        "name": "terrain-door/sealed/s",
+        "from": 9,
+        "to": 9,
+        "direction": "forward"
+      },
+      {
+        "name": "terrain-door/broken/s",
+        "from": 10,
+        "to": 10,
+        "direction": "forward"
+      },
+      {
+        "name": "terrain-door/closed-cap/s",
+        "from": 11,
+        "to": 11,
+        "direction": "forward"
+      },
+      {
+        "name": "terrain-door/open-cap/s",
+        "from": 12,
+        "to": 12,
+        "direction": "forward"
+      },
+      {
+        "name": "terrain-door/locked-cap/s",
+        "from": 13,
+        "to": 13,
+        "direction": "forward"
+      },
+      {
+        "name": "terrain-door/sealed-cap/s",
+        "from": 14,
+        "to": 14,
+        "direction": "forward"
+      },
+      {
+        "name": "terrain-door/broken-cap/s",
+        "from": 15,
+        "to": 15,
+        "direction": "forward"
+      },
+      {
+        "name": "terrain-stairs-up/idle/s",
+        "from": 16,
+        "to": 16,
+        "direction": "forward"
+      },
+      {
+        "name": "terrain-stairs-down/idle/s",
+        "from": 17,
+        "to": 17,
+        "direction": "forward"
+      },
+      {
+        "name": "terrain-water-shallow/idle/s",
+        "from": 18,
+        "to": 21,
+        "direction": "forward"
+      },
+      {
+        "name": "terrain-water-deep/idle/s",
+        "from": 22,
+        "to": 25,
+        "direction": "forward"
+      },
+      {
+        "name": "terrain-lava/idle/s",
+        "from": 26,
+        "to": 29,
+        "direction": "forward"
+      },
+      {
+        "name": "terrain-teleporter/idle/s",
+        "from": 30,
+        "to": 33,
+        "direction": "forward"
+      },
+      {
+        "name": "terrain-debris/idle/s",
+        "from": 34,
+        "to": 34,
+        "direction": "forward"
+      },
+      {
+        "name": "terrain-debris/idle/s#v1",
+        "from": 35,
+        "to": 35,
+        "direction": "forward"
+      },
+      {
+        "name": "terrain-debris/idle/s#v2",
+        "from": 36,
+        "to": 36,
+        "direction": "forward"
+      }
+    ]
+  }
+}

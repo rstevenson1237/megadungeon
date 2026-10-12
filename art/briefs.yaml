@@ -3,43 +3,62 @@
 - id: terrain-floor
   kind: tile
   variants: 4
-  notes: flagstone floor diamond, low in contrast so creatures stand out; variants vary the worn stones. Recoloured for
-    each of the 13 themes from its eight palette tokens.
+  notes: flagstone floor diamond, low in contrast so creatures stand out; variants vary the worn stones. Dirt ramp only
+    (the floor token). Recoloured for each of the 13 themes from its eight palette tokens.
   batch: 1
   priority: 100
   importance: standard
 - id: terrain-wall
   kind: tile
+  size:
+    - 32
+    - 40
   states:
     - full
     - cap
-  notes: stone block one cell wide, 24 px above the floor; the cap is the cut-away near wall, a few pixels high.
-    Recoloured for each of the 13 themes from its eight palette tokens.
+  notes: stone block one cell wide on a floor diamond at the frame bottom, 24 px above the floor; the cap is the cut-away
+    near wall, 4 px high. Stone ramp only (the wall token). Recoloured for each of the 13 themes from its eight palette
+    tokens.
   batch: 1
   priority: 101
   importance: standard
 - id: terrain-door
   kind: tile
+  size:
+    - 32
+    - 40
   states:
     - closed
     - open
     - locked
     - sealed
     - broken
-  notes: plank door in its wall cell, following the wall height rule; locked shows a lock plate, sealed a wax-and-chain
-    seal. Recoloured for each of the 13 themes from its eight palette tokens.
+    - closed-cap
+    - open-cap
+    - locked-cap
+    - sealed-cap
+    - broken-cap
+  notes: plank door in its wall cell, a stone block as the wall, 24 px high; the -cap states are the cut-away door, 4 px
+    high, its state shown on top. Locked shows an iron lock plate, sealed a wax-and-chain seal, open the doorway with
+    the door swung back, broken split planks. Stone ramp for the wall (the wall token), wood for the door (the door
+    token), metal and accent for iron and wax. Recoloured for each of the 13 themes from its eight palette tokens.
   batch: 1
   priority: 102
   importance: standard
 - id: terrain-stairs-up
   kind: tile
-  notes: stone stair rising toward map north. Recoloured for each of the 13 themes from its eight palette tokens.
+  size:
+    - 32
+    - 32
+  notes: stone stair rising toward map north from a floor diamond at the frame bottom. Stone ramp (the stairs token), dirt
+    for the floor round it (the floor token). Recoloured for each of the 13 themes from its eight palette tokens.
   batch: 1
   priority: 103
   importance: standard
 - id: terrain-stairs-down
   kind: tile
-  notes: stone stair sinking into a dark opening. Recoloured for each of the 13 themes from its eight palette tokens.
+  notes: stone stair sinking into a dark opening. Stone ramp (the stairs token), dirt for the floor round it (the floor
+    token). Recoloured for each of the 13 themes from its eight palette tokens.
   batch: 1
   priority: 104
   importance: standard
@@ -49,8 +68,8 @@
     idle:
       frames: 4
       loop: true
-  notes: shallow water over visible stones, slow ripple loop. Recoloured for each of the 13 themes from its eight palette
-    tokens.
+  notes: shallow water over visible stones, slow ripple loop. Grass ramp for the water (the shallow water token), dirt for
+    the stones under it (the floor token). Recoloured for each of the 13 themes from its eight palette tokens.
   batch: 1
   priority: 105
   importance: standard
@@ -60,7 +79,8 @@
     idle:
       frames: 4
       loop: true
-  notes: deep dark water, slow ripple loop. Recoloured for each of the 13 themes from its eight palette tokens.
+  notes: deep dark water, slow ripple loop. Grass ramp only (the deep water token). Recoloured for each of the 13 themes
+    from its eight palette tokens.
   batch: 1
   priority: 106
   importance: standard
@@ -70,7 +90,8 @@
     idle:
       frames: 4
       loop: true
-  notes: molten rock with a cooling crust, slow glow loop. Recoloured for each of the 13 themes from its eight palette tokens.
+  notes: molten rock with a cooling crust, slow glow loop. Accent and glow ramps only (the lava token). Recoloured for
+    each of the 13 themes from its eight palette tokens.
   batch: 1
   priority: 107
   importance: standard
@@ -81,8 +102,8 @@
     idle:
       frames: 4
       loop: true
-  notes: a ring of carved stones set in the floor, faint glow loop. Recoloured for each of the 13 themes from its eight
-    palette tokens.
+  notes: a ring of carved stones set in the floor, faint glow loop. Stone ramp for the stones (the wall token), glow for
+    the light (the accent token). Recoloured for each of the 13 themes from its eight palette tokens.
   batch: 1
   priority: 108
   importance: standard
@@ -90,7 +111,8 @@
   kind: prop
   height: 0.3
   variants: 3
-  notes: low heap of broken masonry and rubbish, walkable. Recoloured for each of the 13 themes from its eight palette tokens.
+  notes: low heap of broken masonry and rubbish, walkable. Stone ramp for masonry (the wall token), dirt for rubbish (the
+    floor token). Recoloured for each of the 13 themes from its eight palette tokens.
   batch: 1
   priority: 109
   importance: standard

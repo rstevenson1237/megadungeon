@@ -17,6 +17,7 @@ import { type ClassCard, CreationScreen } from './creation.ts';
 import { type DeathChoice, DeathScreen } from './death.ts';
 import { DISPLAY_KEY, type DisplayMode, startingDisplay } from './display.ts';
 import type { IsoPicture } from './iso-paint.ts';
+import type { IsoArt } from './art/iso-art.ts';
 import type { Grid } from './grid.ts';
 import { type KeyInput, keyToCommand } from './input.ts';
 import { FULL_GRID, LeaderboardOverlay } from './leaderboard.ts';
@@ -53,6 +54,11 @@ export interface AppDeps extends TitleDeps {
    * outranks the choice remembered in `flags` and is not remembered itself.
    */
   display?: DisplayMode;
+  /**
+   * Load the isometric display's art pack (Spec 01b, Loading), the first time the isometric display is chosen. Without
+   * it the isometric display draws with the glyph fallback alone.
+   */
+  loadArt?: () => Promise<IsoArt>;
 }
 
 /** What a new character on the seed brings from the one who died (Spec 09), and how the creation screen names it. */
@@ -97,6 +103,10 @@ export class App {
   private time: TimeMode;
   /** How the main view is drawn, for every run on this page: a browser preference, never saved (Spec 01, Addendum B). */
   display: DisplayMode;
+  /** The isometric art, once loaded; it serves every run on this page. */
+  art: IsoArt | null = null;
+  /** The art pack is loading. */
+  private artLoading = false;
 
   constructor(private readonly deps: AppDeps) {
     this.time = deps.time ?? (deps.flags?.getItem(TIME_KEY) === 'real' ? 'real' : 'turn');
@@ -216,10 +226,13 @@ export class App {
     shell.onQuit = () => this.openTitle();
     shell.onMilestone = (kind) => this.milestone(shell, kind);
     shell.display = this.display;
+    shell.art = this.art;
     shell.onDisplay = (display) => {
       this.display = display;
       this.deps.flags?.setItem(DISPLAY_KEY, display);
+      this.wantArt(shell);
     };
+    this.wantArt(shell);
     shell.menuHost = {
       ...(this.deps.board ? { leaderboard: () => new LeaderboardOverlay(this.deps.board!, this.today) } : {}),
       ...(this.deps.saves && this.deps.download ? { exportSave: () => void this.exportSave(shell) } : {}),
@@ -233,6 +246,42 @@ export class App {
     this.death = null;
     this.creation = null;
     this.shell = shell;
+  }
+
+  /**
+   * Load the art the first time the isometric display is chosen (Spec 01b, Loading). Until it arrives the text display
+   * stays; if it fails, the log says why and the display goes back to text, and choosing isometric again tries again.
+   */
+  private wantArt(shell: Shell): void {
+    const load = this.deps.loadArt;
+    if (shell.display !== 'iso' || this.art || !load) return;
+    shell.artWaiting = true;
+    if (this.artLoading) return;
+    this.artLoading = true;
+    load().then(
+      (art) => {
+        this.art = art;
+        this.artLoading = false;
+        const now = this.shell;
+        if (now) {
+          now.art = art;
+          now.artWaiting = false;
+        }
+        this.deps.onChange?.();
+      },
+      (error: unknown) => {
+        this.artLoading = false;
+        const now = this.shell;
+        if (now?.artWaiting) {
+          now.artWaiting = false;
+          now.display = 'text';
+          this.display = 'text';
+          const why = error instanceof Error ? error.message : String(error);
+          now.log.add({ kind: 'system', text: `The isometric art could not be loaded (${why}), so the map stays in text.` }, now.turn);
+        }
+        this.deps.onChange?.();
+      },
+    );
   }
 
   /** Write the save: only on a village rest, and when a new run begins (Spec 09). Never throws; says if it failed. */

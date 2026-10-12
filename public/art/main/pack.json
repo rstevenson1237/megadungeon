@@ -1,0 +1,795 @@
+{
+  "format": 1,
+  "pack": "main",
+  "generator": "artgen 0.9.0",
+  "direction": {
+    "id": "megadungeon",
+    "version": 1
+  },
+  "runtime": "1.2.1",
+  "atlases": [
+    "main-0.png"
+  ],
+  "normals": [
+    "main-0.n.png"
+  ],
+  "assets": {
+    "terrain-floor": {
+      "kind": "tile",
+      "view": "iso",
+      "size": [
+        32,
+        16
+      ],
+      "anchor": [
+        16,
+        8
+      ],
+      "directions": 1,
+      "facings": [
+        "s"
+      ],
+      "states": {
+        "idle": {
+          "frames": 1,
+          "fps": 8,
+          "loop": true
+        }
+      },
+      "frames": [
+        [
+          0,
+          33,
+          239,
+          32,
+          16,
+          0,
+          "idle",
+          0,
+          0
+        ],
+        [
+          0,
+          99,
+          41,
+          32,
+          16,
+          0,
+          "idle",
+          0,
+          1
+        ],
+        [
+          0,
+          132,
+          41,
+          32,
+          16,
+          0,
+          "idle",
+          0,
+          2
+        ],
+        [
+          0,
+          165,
+          41,
+          32,
+          16,
+          0,
+          "idle",
+          0,
+          3
+        ]
+      ],
+      "variants": [
+        "base",
+        "v1",
+        "v2",
+        "v3"
+      ],
+      "version": "finish.v2",
+      "sourceHash": "f52c56d3290869e9",
+      "tile": 32,
+      "normals": true
+    },
+    "terrain-wall": {
+      "kind": "tile",
+      "view": "iso",
+      "size": [
+        32,
+        40
+      ],
+      "anchor": [
+        16,
+        20
+      ],
+      "directions": 1,
+      "facings": [
+        "s"
+      ],
+      "states": {
+        "full": {
+          "frames": 1,
+          "fps": 8,
+          "loop": true
+        },
+        "cap": {
+          "frames": 1,
+          "fps": 8,
+          "loop": true
+        }
+      },
+      "frames": [
+        [
+          0,
+          0,
+          0,
+          32,
+          40,
+          0,
+          "full",
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          41,
+          32,
+          40,
+          0,
+          "cap",
+          0,
+          0
+        ]
+      ],
+      "variants": [
+        "base"
+      ],
+      "version": "finish.v1",
+      "sourceHash": "296278ed67d5953d",
+      "tile": 32
+    },
+    "terrain-door": {
+      "kind": "tile",
+      "view": "iso",
+      "size": [
+        32,
+        40
+      ],
+      "anchor": [
+        16,
+        20
+      ],
+      "directions": 1,
+      "facings": [
+        "s"
+      ],
+      "states": {
+        "closed": {
+          "frames": 1,
+          "fps": 8,
+          "loop": true
+        },
+        "open": {
+          "frames": 1,
+          "fps": 8,
+          "loop": true
+        },
+        "locked": {
+          "frames": 1,
+          "fps": 8,
+          "loop": true
+        },
+        "sealed": {
+          "frames": 1,
+          "fps": 8,
+          "loop": true
+        },
+        "broken": {
+          "frames": 1,
+          "fps": 8,
+          "loop": true
+        },
+        "closed-cap": {
+          "frames": 1,
+          "fps": 8,
+          "loop": true
+        },
+        "open-cap": {
+          "frames": 1,
+          "fps": 8,
+          "loop": true
+        },
+        "locked-cap": {
+          "frames": 1,
+          "fps": 8,
+          "loop": true
+        },
+        "sealed-cap": {
+          "frames": 1,
+          "fps": 8,
+          "loop": true
+        },
+        "broken-cap": {
+          "frames": 1,
+          "fps": 8,
+          "loop": true
+        }
+      },
+      "frames": [
+        [
+          0,
+          0,
+          82,
+          32,
+          40,
+          0,
+          "closed",
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          123,
+          32,
+          40,
+          0,
+          "open",
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          164,
+          32,
+          40,
+          0,
+          "locked",
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          205,
+          32,
+          40,
+          0,
+          "sealed",
+          0,
+          0
+        ],
+        [
+          0,
+          33,
+          0,
+          32,
+          40,
+          0,
+          "broken",
+          0,
+          0
+        ],
+        [
+          0,
+          66,
+          0,
+          32,
+          40,
+          0,
+          "closed-cap",
+          0,
+          0
+        ],
+        [
+          0,
+          99,
+          0,
+          32,
+          40,
+          0,
+          "open-cap",
+          0,
+          0
+        ],
+        [
+          0,
+          132,
+          0,
+          32,
+          40,
+          0,
+          "locked-cap",
+          0,
+          0
+        ],
+        [
+          0,
+          165,
+          0,
+          32,
+          40,
+          0,
+          "sealed-cap",
+          0,
+          0
+        ],
+        [
+          0,
+          198,
+          0,
+          32,
+          40,
+          0,
+          "broken-cap",
+          0,
+          0
+        ]
+      ],
+      "variants": [
+        "base"
+      ],
+      "version": "finish.v1",
+      "sourceHash": "2524e5c4463155b6",
+      "tile": 32
+    },
+    "terrain-stairs-up": {
+      "kind": "tile",
+      "view": "iso",
+      "size": [
+        32,
+        32
+      ],
+      "anchor": [
+        16,
+        16
+      ],
+      "directions": 1,
+      "facings": [
+        "s"
+      ],
+      "states": {
+        "idle": {
+          "frames": 1,
+          "fps": 8,
+          "loop": true
+        }
+      },
+      "frames": [
+        [
+          0,
+          33,
+          41,
+          32,
+          32,
+          0,
+          "idle",
+          0,
+          0
+        ]
+      ],
+      "variants": [
+        "base"
+      ],
+      "version": "finish.v2",
+      "sourceHash": "9cbca0708770beb5",
+      "tile": 32,
+      "normals": true
+    },
+    "terrain-stairs-down": {
+      "kind": "tile",
+      "view": "iso",
+      "size": [
+        32,
+        16
+      ],
+      "anchor": [
+        16,
+        8
+      ],
+      "directions": 1,
+      "facings": [
+        "s"
+      ],
+      "states": {
+        "idle": {
+          "frames": 1,
+          "fps": 8,
+          "loop": true
+        }
+      },
+      "frames": [
+        [
+          0,
+          198,
+          41,
+          32,
+          16,
+          0,
+          "idle",
+          0,
+          0
+        ]
+      ],
+      "variants": [
+        "base"
+      ],
+      "version": "finish.v2",
+      "sourceHash": "4e756a0f7bf2f899",
+      "tile": 32,
+      "normals": true
+    },
+    "terrain-water-shallow": {
+      "kind": "tile",
+      "view": "iso",
+      "size": [
+        32,
+        16
+      ],
+      "anchor": [
+        16,
+        8
+      ],
+      "directions": 1,
+      "facings": [
+        "s"
+      ],
+      "states": {
+        "idle": {
+          "frames": 4,
+          "fps": 8,
+          "loop": true
+        }
+      },
+      "frames": [
+        [
+          0,
+          99,
+          58,
+          32,
+          16,
+          0,
+          "idle",
+          0,
+          0
+        ],
+        [
+          0,
+          66,
+          74,
+          32,
+          16,
+          0,
+          "idle",
+          1,
+          0
+        ],
+        [
+          0,
+          132,
+          58,
+          32,
+          16,
+          0,
+          "idle",
+          2,
+          0
+        ],
+        [
+          0,
+          66,
+          74,
+          32,
+          16,
+          0,
+          "idle",
+          3,
+          0
+        ]
+      ],
+      "variants": [
+        "base"
+      ],
+      "version": "finish.v1",
+      "sourceHash": "8748391d51ccca8e",
+      "tile": 32
+    },
+    "terrain-water-deep": {
+      "kind": "tile",
+      "view": "iso",
+      "size": [
+        32,
+        16
+      ],
+      "anchor": [
+        16,
+        8
+      ],
+      "directions": 1,
+      "facings": [
+        "s"
+      ],
+      "states": {
+        "idle": {
+          "frames": 4,
+          "fps": 8,
+          "loop": true
+        }
+      },
+      "frames": [
+        [
+          0,
+          165,
+          58,
+          32,
+          16,
+          0,
+          "idle",
+          0,
+          0
+        ],
+        [
+          0,
+          198,
+          58,
+          32,
+          16,
+          0,
+          "idle",
+          1,
+          0
+        ],
+        [
+          0,
+          99,
+          75,
+          32,
+          16,
+          0,
+          "idle",
+          2,
+          0
+        ],
+        [
+          0,
+          66,
+          91,
+          32,
+          16,
+          0,
+          "idle",
+          3,
+          0
+        ]
+      ],
+      "variants": [
+        "base"
+      ],
+      "version": "finish.v2",
+      "sourceHash": "a68eb09e358ddc44",
+      "tile": 32,
+      "normals": true
+    },
+    "terrain-lava": {
+      "kind": "tile",
+      "view": "iso",
+      "size": [
+        32,
+        16
+      ],
+      "anchor": [
+        16,
+        8
+      ],
+      "directions": 1,
+      "facings": [
+        "s"
+      ],
+      "states": {
+        "idle": {
+          "frames": 4,
+          "fps": 8,
+          "loop": true
+        }
+      },
+      "frames": [
+        [
+          0,
+          132,
+          75,
+          32,
+          16,
+          0,
+          "idle",
+          0,
+          0
+        ],
+        [
+          0,
+          165,
+          75,
+          32,
+          16,
+          0,
+          "idle",
+          1,
+          0
+        ],
+        [
+          0,
+          198,
+          75,
+          32,
+          16,
+          0,
+          "idle",
+          2,
+          0
+        ],
+        [
+          0,
+          165,
+          75,
+          32,
+          16,
+          0,
+          "idle",
+          3,
+          0
+        ]
+      ],
+      "variants": [
+        "base"
+      ],
+      "version": "finish.v2",
+      "sourceHash": "c05ab6adbcaa041d",
+      "tile": 32,
+      "normals": true
+    },
+    "terrain-teleporter": {
+      "kind": "prop",
+      "view": "iso",
+      "size": [
+        32,
+        32
+      ],
+      "anchor": [
+        16,
+        31
+      ],
+      "directions": 1,
+      "facings": [
+        "s"
+      ],
+      "states": {
+        "idle": {
+          "frames": 4,
+          "fps": 8,
+          "loop": true
+        }
+      },
+      "frames": [
+        [
+          0,
+          33,
+          74,
+          32,
+          32,
+          0,
+          "idle",
+          0,
+          0
+        ],
+        [
+          0,
+          33,
+          107,
+          32,
+          32,
+          0,
+          "idle",
+          1,
+          0
+        ],
+        [
+          0,
+          33,
+          140,
+          32,
+          32,
+          0,
+          "idle",
+          2,
+          0
+        ],
+        [
+          0,
+          33,
+          107,
+          32,
+          32,
+          0,
+          "idle",
+          3,
+          0
+        ]
+      ],
+      "variants": [
+        "base"
+      ],
+      "version": "finish.v2",
+      "sourceHash": "f43fbc9ae0360ef9",
+      "normals": true
+    },
+    "terrain-debris": {
+      "kind": "prop",
+      "view": "iso",
+      "size": [
+        32,
+        32
+      ],
+      "anchor": [
+        16,
+        31
+      ],
+      "directions": 1,
+      "facings": [
+        "s"
+      ],
+      "states": {
+        "idle": {
+          "frames": 1,
+          "fps": 8,
+          "loop": true
+        }
+      },
+      "frames": [
+        [
+          0,
+          33,
+          173,
+          32,
+          32,
+          0,
+          "idle",
+          0,
+          0
+        ],
+        [
+          0,
+          33,
+          206,
+          32,
+          32,
+          0,
+          "idle",
+          0,
+          1
+        ],
+        [
+          0,
+          66,
+          41,
+          32,
+          32,
+          0,
+          "idle",
+          0,
+          2
+        ]
+      ],
+      "variants": [
+        "base",
+        "v1",
+        "v2"
+      ],
+      "version": "finish.v2",
+      "sourceHash": "bd6272f19e1b7f4a",
+      "normals": true
+    }
+  }
+}
