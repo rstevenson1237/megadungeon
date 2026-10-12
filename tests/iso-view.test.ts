@@ -14,7 +14,7 @@ import {
 import { DEFAULT_LOOK, MAP, NPC_LOOK, mapLook } from '../src/ui/palette.ts';
 import { buildScene, type SceneCell } from '../src/ui/scene.ts';
 import { GOLDEN_CASES, frozenLevel } from './frozen.ts';
-import { gameAt, gameOn, levelFrom, monsterAt, room, walk, withThings } from './helpers.ts';
+import { cell, gameAt, gameOn, levelFrom, monsterAt, room, walk, withThings } from './helpers.ts';
 
 const at = (draws: IsoDraw[], x: number, y: number): IsoDraw[] => draws.filter((d) => d.cell.x === x && d.cell.y === y);
 const one = (draws: IsoDraw[], x: number, y: number, layer: IsoDraw['layer']): IsoDraw | undefined => at(draws, x, y).find((d) => d.layer === layer);
@@ -293,6 +293,14 @@ describe('isometric fallback chain (Spec 08, Addendum B)', () => {
     // With no stair art, or no floor art, the stair is one draw as before.
     expect(at(buildIsoDraws(game.state, { pack: new Set(['terrain-stairs-up']) }), 2, 2).filter((d) => d.layer === 'floor')).toHaveLength(1);
     expect(at(buildIsoDraws(game.state), 2, 2).filter((d) => d.layer === 'floor')).toHaveLength(1);
+  });
+
+  it('draws searched debris with its one drawn state, not the glyph (task 6.5)', () => {
+    const level = withThings(room(8, 6, 2, 2), { features: [{ x: 3, y: 2, type: 'debris' }] });
+    const game = gameOn(level);
+    game.state.used.searched.push(cell(level, 3, 2));
+    const debris = at(buildIsoDraws(game.state, { pack: new Set(['terrain-debris']) }), 3, 2).find((d) => d.layer === 'mark');
+    expect(debris).toMatchObject({ asset: 'terrain-debris', frame: '' });
   });
 
   it('spreads the floor variants with no grid: a cell four along does not repeat its variant', () => {

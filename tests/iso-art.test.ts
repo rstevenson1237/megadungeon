@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { type ArtImage, IsoArt, checkPack, frameIndex } from '../src/ui/art/iso-art.ts';
 import { DIRECTION_RAMPS } from '../src/ui/art/ramps.ts';
@@ -92,6 +93,22 @@ describe('the isometric art (task 6.5)', () => {
     expect(frameIndex(wall, { state: '', variant: 0, frame: 0 })).toBe(0);
     expect(frameIndex(wall, { state: 'full', variant: 3, frame: 2 })).toBe(0);
     expect(frameIndex(wall, { state: 'gone', variant: 0, frame: 0 })).toBe(-1);
+  });
+
+  it('the shipped pack has every frame the terrain draws ask for', () => {
+    const pack = checkPack(JSON.parse(readFileSync('public/art/main/pack.json', 'utf8')));
+    const doors = ['closed', 'open', 'locked', 'sealed', 'broken'];
+    const asks: Record<string, string[]> = {
+      'terrain-floor': [''], 'terrain-wall': ['full', 'cap'], 'terrain-door': [...doors, ...doors.map((d) => `${d}-cap`)],
+      'terrain-stairs-up': [''], 'terrain-stairs-down': [''], 'terrain-water-shallow': ['idle'], 'terrain-water-deep': ['idle'],
+      'terrain-lava': ['idle'], 'terrain-teleporter': [''], 'terrain-debris': [''],
+    };
+    for (const [id, states] of Object.entries(asks)) {
+      for (const state of states) expect(frameIndex(pack.assets[id]!, { state, variant: 0, frame: 0 }), `${id} ${state}`).toBeGreaterThanOrEqual(0);
+    }
+    // The floor's four variants are each drawn, not the first one four times.
+    const floor = pack.assets['terrain-floor']!;
+    expect(new Set([0, 1, 2, 3].map((variant) => frameIndex(floor, { state: '', variant, frame: 0 }))).size).toBe(4);
   });
 
   it('refuses a file that is not an artgen pack', () => {

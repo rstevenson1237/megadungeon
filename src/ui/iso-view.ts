@@ -293,8 +293,10 @@ export function buildIsoDraws(state: GameState, options: IsoOptions = {}): IsoDr
     }
     const f = cell.feature;
     if (f) {
+      // Debris and the teleporter are terrain art of one state (task 6.5): searched or spent, they draw the same.
+      const oneState = FEATURE_ASSET[f.kind].startsWith('terrain-');
       draws.push({
-        ...base, layer: FLOOR_MARKS.has(f.kind) ? 'mark' : 'feature', asset: resolveAsset([FEATURE_ASSET[f.kind]], pack), frame: f.state ?? '',
+        ...base, layer: FLOOR_MARKS.has(f.kind) ? 'mark' : 'feature', asset: resolveAsset([FEATURE_ASSET[f.kind]], pack), frame: oneState ? '' : f.state ?? '',
         tint: f.fg, shape: 'card', glyph: f.glyph, fg: f.fg, box: standing(FRAME.prop),
       });
     }
