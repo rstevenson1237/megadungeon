@@ -5,12 +5,14 @@ import { treasureBudget } from '../src/rules/world/depth.ts';
 import {
   PACE_TARGET,
   PARITY_DEPTHS,
+  REACTION_TICKS,
   characterAt,
   foesFor,
   gauntlet,
   measureEconomy,
   measureParity,
   measurePace,
+  measureRealtime,
   parityContentOf,
   type PaceReport,
 } from '../tools/balance.ts';
@@ -85,6 +87,35 @@ describe('Task 4.11: class parity (Spec 03)', () => {
 
   it('no class wins fewer than half the fights of the median class', () => {
     const report = measureParity(pc, pace().levelOnArrival, 6, PARITY_DEPTHS);
+    expect(report.rows).toHaveLength(20);
+    expect(report.farBehind).toEqual([]);
+  }, 300_000);
+});
+
+describe('Task 5.8: class parity in real time (Spec 04, Addendum B)', () => {
+  const pc = parityContentOf(bundle);
+  // A few depths and gauntlets keep this quick; `npm run balance` measures the full table.
+  const depths = [10, 30, 50];
+
+  it('a real-time gauntlet is deterministic: the same seed and delay win the same fights', () => {
+    const foes = foesFor(bundle, 20);
+    const cls = pc.classes[0]!;
+    expect(gauntlet(pc, cls, 5, 20, foes, 7, 20, REACTION_TICKS)).toBe(gauntlet(pc, cls, 5, 20, foes, 7, 20, REACTION_TICKS));
+  });
+
+  it('with no reaction delay the bot does as well as the turn-mode player; a longer delay does worse', () => {
+    const turn = measureParity(pc, pace().levelOnArrival, 4, depths);
+    const real = measureRealtime(pc, pace().levelOnArrival, 4, [0, REACTION_TICKS, 20], depths).byDelay;
+    // The same rules: only when things act differs, so a bot that acts the moment it can matches turn mode.
+    expect(real.get(0)!.medianMean / turn.medianMean).toBeGreaterThan(0.85);
+    expect(real.get(0)!.medianMean / turn.medianMean).toBeLessThan(1.15);
+    // Hesitating gives the creatures time: a second's delay costs far more than a quick reaction.
+    expect(real.get(20)!.medianMean).toBeLessThan(real.get(REACTION_TICKS)!.medianMean);
+    expect(real.get(REACTION_TICKS)!.medianMean).toBeLessThanOrEqual(real.get(0)!.medianMean * 1.05);
+  }, 300_000);
+
+  it('at the default reaction delay no class wins fewer than half the fights of the median class', () => {
+    const report = measureRealtime(pc, pace().levelOnArrival, 6, [REACTION_TICKS]).byDelay.get(REACTION_TICKS)!;
     expect(report.rows).toHaveLength(20);
     expect(report.farBehind).toEqual([]);
   }, 300_000);
