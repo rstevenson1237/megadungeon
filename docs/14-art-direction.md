@@ -51,4 +51,4 @@ The owner took `mix1` as revised: A's palette, line and shading with C's slim pr
 
 ## For the owner
 
-- **Approve the clarification** in Spec 01b (task 6.1): asset ids (`family-h` and `family-h-cap` for the two cases of a letter, and the other id prefixes), and the size table (a rat 0.25 m, a goblin 1.1 m, an ogre 3.6 m, a giant 4.5 m, a dragon 4 m, against the player's 1.8 m).
+- **Approved October 12, 2026:** the clarification in Spec 01b (task 6.1): asset ids (`family-h` and `family-h-cap` for the two cases of a letter, and the other id prefixes), and the size table (a rat 0.25 m, a goblin 1.1 m, an ogre 3.6 m, a giant 4.5 m, a dragon 4 m, against the player's 1.8 m).

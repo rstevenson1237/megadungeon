@@ -124,7 +124,7 @@ About 160 assets, in four batches (decision D9).
 - **Browser smoke:** in Chromium, Firefox and WebKit, the isometric display draws a non-empty view, switches back and forth with the text display, shows an overlay over it, and shows the targeting cursor.
 - **Art checks:** artgen's conformance checks and the content check of sprite ids (Spec 08, Addendum B) run in CI.
 
-## Clarification (task 6.1, proposed October 12, 2026, awaiting approval)
+## Clarification (task 6.1, proposed and approved October 12, 2026)
 
 The asset list leaves four points of naming and size open. Proposed as built in `tools/art-briefs.ts`, which writes `art/briefs.yaml` from the tables:
 
