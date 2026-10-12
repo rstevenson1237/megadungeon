@@ -2,7 +2,7 @@
 
 Oct 12, 2026 · @Robert Stevenson
 
-This is the inner checkpoint of task 6.1 (Intake Addendum B, Phase 6; Spec 01b, Art pipeline). artgen is installed, the asset briefs are generated from the content, and three art directions are rendered as style tiles. Nothing is locked: the owner picks one, or a mix, and only then is it written to `art/direction.json`. No game code changed.
+This is the inner checkpoint of task 6.1 (Intake Addendum B, Phase 6; Spec 01b, Art pipeline). artgen is installed, the asset briefs are generated from the content, and three art directions are rendered as style tiles. On October 12, 2026 the owner chose the recommended mix after three rounds of changes to the class lineup, and it is locked as `art/direction.json` (megadungeon v1). No game code changed.
 
 ## What was done
 
@@ -45,7 +45,10 @@ The owner asked for more variety in the character shapes, with a reference sheet
 
 The owner then asked for more human heads and less square, more organic shapes. `base.v2.js` of the class probe answers it: egg-shaped heads with a round cranium, a narrower jaw, ears, a nose shadow and a neck; every body, robe, cloak, helm, hood, mask and shield drawn as a smooth curve, with tapered legs and arms bent at the elbow. `mix1` gains the matching rules: human, egg-shaped heads and organic curved bodies (do), and no square or boxy bodies, heads or robes (don't). The owner's third note asked for v1's boxy armour on the paladin with v2's mace, a different head shape for each class, and highlights one step brighter. `base.v3.js` answers it: the paladin wears v1's plate, great helm and shield; heads take their own width, crown, jaw and chin (the bard a long face with a pointed chin and goatee, the monk a broad round skull, the druid a square bearded jaw, the sorcerer a narrow face with high cheekbones); and `mix1` lifts the lightest colour of every ramp except the floor's, so highlights are brighter while floors stay low in contrast. The lineup sheet shows v3 above v2 (v2 in the earlier palette).
 
+## Locked (October 12, 2026)
+
+The owner took `mix1` as revised: A's palette, line and shading with C's slim proportions, a 32 x 40 character frame, highlights one step brighter, and the rules for class silhouettes and organic shapes. One wording fix at lock: the rule against boxy shapes now says plate armour may stay boxy, since the owner kept the paladin's boxy plate. `art/direction.png` is the style sheet; `art/anchors/` holds the four probe anchors and `classes.png`, the eight-class lineup (class probe v3) that later class sprites are judged against.
+
 ## For the owner
 
-- **Pick a direction:** `mix1` (recommended), A, B, C, or another mix (for example "A's palette, B's outlines"). On your answer it is locked as `art/direction.json` with its anchors and style sheet, and this checkpoint is closed.
 - **Approve the clarification** in Spec 01b (task 6.1): asset ids (`family-h` and `family-h-cap` for the two cases of a letter, and the other id prefixes), and the size table (a rat 0.25 m, a goblin 1.1 m, an ogre 3.6 m, a giant 4.5 m, a dragon 4 m, against the player's 1.8 m).
