@@ -9,7 +9,7 @@
       "lonely"
     ],
     "era": "dark fantasy, old-school dungeon crawl",
-    "notes": "mix mix1: A as the base, scale from C"
+    "notes": "mix mix1: A as the base, scale from C Highlights lifted one step (owner feedback): the lightest colour of every ramp but the floor's is brighter."
   },
   "camera": {
     "light": [
@@ -121,37 +121,37 @@
     "maxColors": 32,
     "ramps": {
       "skin": [
-        "#d1bdaf",
+        "#dfcfc4",
         "#b16f5c",
         "#6b312f"
       ],
       "hair": [
-        "#919164",
+        "#b3b38c",
         "#514b31",
         "#0d0b07"
       ],
       "cloth": [
-        "#84a5ae",
+        "#a5bfc6",
         "#45647a",
         "#1a2332"
       ],
       "leather": [
-        "#a07c6f",
+        "#bca096",
         "#633c39",
         "#1b0f10"
       ],
       "metal": [
-        "#bcc1c4",
+        "#ced2d5",
         "#7c8591",
         "#464955"
       ],
       "wood": [
-        "#acac7d",
+        "#c5c5a0",
         "#766e40",
         "#2d2517"
       ],
       "stone": [
-        "#a0a5ab",
+        "#babec3",
         "#636875",
         "#2e2f37"
       ],
@@ -161,17 +161,17 @@
         "#3a3b43"
       ],
       "grass": [
-        "#b7c8c7",
+        "#cbd8d7",
         "#71949b",
         "#3e515b"
       ],
       "accent": [
-        "#dda885",
+        "#eac0a4",
         "#d1421e",
         "#710b0b"
       ],
       "glow": [
-        "#eacda0",
+        "#f3dcb8",
         "#f84114"
       ]
     },
@@ -186,7 +186,7 @@
     "bands": 3,
     "hueShift": 12,
     "dither": "none",
-    "highlight": "sparing",
+    "highlight": "rich",
     "aa": false
   },
   "detail": {
