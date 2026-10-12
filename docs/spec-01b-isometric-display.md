@@ -133,6 +133,14 @@ The asset list leaves four points of naming and size open. Proposed as built in 
 - **The size table** gives each brief a real-world height against the player's 1.8 m: a rat 0.25 m, a goblin 1.1 m, an ogre 3.6 m (twice the player), a giant 4.5 m, a dragon 4 m. A boss keeps its family's height and is drawn at the large frame size.
 - **Effects carry no height:** they are sized by what they show (a cell, an area), not by a real-world height.
 
+## Clarification (task 6.3, proposed and approved October 12, 2026)
+
+The spec leaves three points open for drawing the view with no art. Proposed as built in `src/ui/iso-view.ts` and `src/ui/iso-paint.ts`:
+
+- **Terrain with no art:** a glyph card cannot show a wall's height or the cutaway, so terrain has its own fallback. Floors, stairs and liquids draw as flat diamonds in a dark shade of their colour (35%, so floors stay low in contrast) with their glyph on top; walls draw as plain blocks shaded from their colour (top face full, side faces darker), 24 px high or a 4 px cap; doors draw the same way in a darker shade with their glyph (closed or open) on top. Everything else (found traps, features, items, creatures and people) draws as the glyph card: an 11 x 18 px dark card whose bottom edge stands 2 px below the cell's centre.
+- **The near corner:** a wall is also cut low when the cell directly north-west of it is open and known, so the near corner of a room is cut as its near walls are; otherwise it stands full height over the room's nearest floor. "Open" means any known cell that is not a wall or a door.
+- **Status icons** have no glyph, so with no art they are listed in the draw list but draw nothing, until their art is approved in batch 3 (task 6.7).
+
 ## Acceptance criteria
 
 - [ ] With no art loaded, every cell and thing the text display shows is drawn, by the glyph fallback where nothing better exists.

@@ -62,6 +62,12 @@ export const MAP = {
   background: 0x000000,
 } as const;
 
+/** The isometric display's own colours (Spec 01b): the background outside the level, and the glyph card's face. */
+export const ISO = {
+  background: 0x000000,
+  card: 0x141414,
+} as const;
+
 /** Traders, hermits and captives on the map (Spec 01 core glyph table, Spec 07): an @ coloured by role. */
 export const NPC_LOOK: Readonly<Record<string, { glyph: string; colour: number }>> = {
   trader: { glyph: '@', colour: 0xf0c840 },
