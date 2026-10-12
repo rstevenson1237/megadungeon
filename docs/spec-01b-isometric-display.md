@@ -141,9 +141,9 @@ The spec leaves three points open for drawing the view with no art. Proposed as 
 - **The near corner:** a wall is also cut low when the cell directly north-west of it is open and known, so the near corner of a room is cut as its near walls are; otherwise it stands full height over the room's nearest floor. "Open" means any known cell that is not a wall or a door.
 - **Status icons** have no glyph, so with no art they are listed in the draw list but draw nothing, until their art is approved in batch 3 (task 6.7).
 
-## Clarification (task 6.4, proposed October 12, 2026, awaiting approval)
+## Clarification (task 6.4, proposed and approved October 12, 2026)
 
-The spec leaves six points of the display flag and the shell open. Proposed as built in `src/ui/display.ts`, `src/ui/shell.ts`, `src/ui/iso-view.ts` and `src/ui/iso-paint.ts`:
+The spec leaves six points of the display flag and the shell open. Approved as built in `src/ui/display.ts`, `src/ui/shell.ts`, `src/ui/iso-view.ts` and `src/ui/iso-paint.ts`:
 
 - **The display row** is the fifth row of the game menu, after "Import save from a file" and before "Quit without saving": "Display: Text" or "Display: Isometric". Enter switches it and the menu stays open with the new name, over the picture as it now is, as the title's time row starts nothing.
 - **`?display=` presets the display for that page load only and is not remembered,** as `?time=` is (Spec 01, clarification of task 5.6): it outranks the choice kept in local storage and leaves it as it was. Switching in the game menu is remembered.
