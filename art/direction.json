@@ -1,0 +1,9 @@
+{
+  "id": "untitled",
+  "version": 0,
+  "status": "draft",
+  "theme": {
+    "pitch": ""
+  },
+  "note": "Not set yet. Run the art direction workflow (/artgen-direction, or `artgen direction candidates`) to create and lock one."
+}

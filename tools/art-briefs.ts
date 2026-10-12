@@ -35,6 +35,9 @@ export const BRIEF_ID = /^[a-z][a-z0-9_-]*$/;
 /** The player's height, the yardstick of the size table. */
 export const PLAYER_HEIGHT = 1.8;
 
+/** Heights above this outgrow the character frame (32 px at the direction's 16 px a metre) and use the large one. */
+export const LARGE_ABOVE = 1.9;
+
 /**
  * The monster family of a glyph letter. Lower case letters keep their letter (`family-h`); upper case ones add
  * `-cap` (`family-h-cap`), because artgen ids are lower case and both `h` and `H` are families (Spec 08, Addendum B).
@@ -146,6 +149,7 @@ export function buildBriefs(tables: Record<string, unknown[]>): ArtBrief[] {
   [...families.keys()].sort().forEach((g, i) =>
     add({
       id: familyId(g), kind: 'creature', batch: 2, priority: 240 + i, importance: 'standard', height: FAMILY_HEIGHTS[g],
+      ...(FAMILY_HEIGHTS[g]! > LARGE_ABOVE ? { size: 'large' } : {}),
       directions: 4, states: ['idle', 'walk', 'attack'], anims: fighter,
       notes: `glyph ${g}: ${FAMILY_NOTES[g] ?? 'monsters'} (${sample(families.get(g)!)}). Recoloured per row by its colour token, which stays the dominant hue`,
     }),

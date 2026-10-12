@@ -1,0 +1,241 @@
+{
+  "theme": {
+    "pitch": "Megadungeon - a classic roguelike drawn as an isometric pixel-art view. A lone delver goes down from a surface village into a 100-level megadungeon of 13 themes (cellars and crypts, goblin warrens, flooded sewers, old mines, ruined temples, fungal caverns, dwarven holds, catacombs, a wizard's sanctum, an underdark lake, lava forges, void halls, the Abyssal Throne), fights by dice in tight rooms, and carries treasure back up, because only banked treasure counts. The dungeon is old, indifferent and slightly wrong; it is never cute. The text panes around the view stay CP437 text, so the art sits inside a black, text-mode frame.",
+    "mood": [
+      "grim",
+      "dry",
+      "archaic",
+      "cold stone",
+      "lonely"
+    ],
+    "era": "dark fantasy, old-school dungeon crawl",
+    "notes": "mix mix1: A as the base, scale from C"
+  },
+  "camera": {
+    "light": [
+      -1,
+      -1,
+      1
+    ],
+    "directions": 4,
+    "pixelScale": 3,
+    "view": "iso",
+    "iso": {
+      "tile": [
+        32,
+        16
+      ]
+    }
+  },
+  "scale": {
+    "character": [
+      24,
+      32
+    ],
+    "prop": [
+      32,
+      32
+    ],
+    "tile": [
+      32,
+      16
+    ],
+    "effect": [
+      24,
+      24
+    ],
+    "large": [
+      64,
+      80
+    ],
+    "proportions": {
+      "headRatio": 0.32
+    },
+    "metre": 16
+  },
+  "palette": {
+    "shadow": {
+      "color": "#091514",
+      "alpha": 0.35
+    },
+    "materials": {
+      "cloth": "cloth",
+      "skin": "skin",
+      "hair": "hair",
+      "leather": "leather",
+      "metal": "metal",
+      "steel": "metal",
+      "wood": "wood",
+      "stone": "stone",
+      "dirt": "dirt",
+      "ground": "dirt",
+      "grass": "grass",
+      "foliage": "grass",
+      "accent": "accent",
+      "gold": "accent",
+      "glow": "glow",
+      "fx": "glow"
+    },
+    "perKindMax": {
+      "character": 19,
+      "creature": 19,
+      "prop": 16,
+      "tile": 10,
+      "effect": 6
+    },
+    "perKind": {
+      "character": [
+        "skin",
+        "hair",
+        "cloth",
+        "leather",
+        "metal",
+        "accent"
+      ],
+      "creature": [
+        "skin",
+        "hair",
+        "cloth",
+        "leather",
+        "grass",
+        "accent"
+      ],
+      "prop": [
+        "wood",
+        "metal",
+        "stone",
+        "leather",
+        "accent"
+      ],
+      "tile": [
+        "dirt",
+        "grass",
+        "stone"
+      ],
+      "effect": [
+        "accent",
+        "glow"
+      ]
+    },
+    "source": "generated",
+    "maxColors": 32,
+    "ramps": {
+      "skin": [
+        "#d1bdaf",
+        "#b16f5c",
+        "#6b312f"
+      ],
+      "hair": [
+        "#919164",
+        "#514b31",
+        "#0d0b07"
+      ],
+      "cloth": [
+        "#84a5ae",
+        "#45647a",
+        "#1a2332"
+      ],
+      "leather": [
+        "#a07c6f",
+        "#633c39",
+        "#1b0f10"
+      ],
+      "metal": [
+        "#bcc1c4",
+        "#7c8591",
+        "#464955"
+      ],
+      "wood": [
+        "#acac7d",
+        "#766e40",
+        "#2d2517"
+      ],
+      "stone": [
+        "#a0a5ab",
+        "#636875",
+        "#2e2f37"
+      ],
+      "dirt": [
+        "#5c5d66",
+        "#4a4b54",
+        "#3a3b43"
+      ],
+      "grass": [
+        "#b7c8c7",
+        "#71949b",
+        "#3e515b"
+      ],
+      "accent": [
+        "#dda885",
+        "#d1421e",
+        "#710b0b"
+      ],
+      "glow": [
+        "#eacda0",
+        "#f84114"
+      ]
+    },
+    "outline": "#101918"
+  },
+  "line": {
+    "outer": "dark",
+    "inner": "selective",
+    "weight": 1
+  },
+  "shading": {
+    "bands": 3,
+    "hueShift": 12,
+    "dither": "none",
+    "highlight": "sparing",
+    "aa": false
+  },
+  "detail": {
+    "density": "medium",
+    "minFeaturePx": 2
+  },
+  "pipeline": {
+    "revisionPasses": 3,
+    "finishPass": true,
+    "raster": {
+      "directMaxPx": 32,
+      "ss": 8
+    },
+    "procedural": [],
+    "finish": {
+      "allow": [
+        "patch",
+        "fix",
+        "fx",
+        "light",
+        "outline"
+      ]
+    }
+  },
+  "effects": {
+    "fps": 12,
+    "maxFrames": 8,
+    "palette": [
+      "glow",
+      "accent"
+    ]
+  },
+  "anchors": [],
+  "rules": {
+    "do": [
+      "keep floors low in contrast so creatures stand out",
+      "keep a creature's colour token its dominant hue, so recoloured family sprites read like the text display's colours",
+      "read every creature's facing and silhouette at 1x against a dark floor",
+      "draw to the size table: a rat below the knee, an ogre twice the player's height"
+    ],
+    "dont": [
+      "cute or chibi proportions",
+      "saturated greens or purples on floors",
+      "pure black fills",
+      "light that implies a torch the game does not have"
+    ]
+  },
+  "id": "megadungeon-mix1",
+  "version": 1,
+  "status": "candidate",
+  "background": "#0a0a0c"
+}

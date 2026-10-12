@@ -580,6 +580,7 @@
   priority: 240
   importance: standard
   height: 2.2
+  size: large
   directions: 4
   states:
     - idle
@@ -603,6 +604,7 @@
   priority: 241
   importance: standard
   height: 3
+  size: large
   directions: 4
   states:
     - idle
@@ -625,6 +627,7 @@
   priority: 242
   importance: standard
   height: 4
+  size: large
   directions: 4
   states:
     - idle
@@ -647,6 +650,7 @@
   priority: 243
   importance: standard
   height: 2.4
+  size: large
   directions: 4
   states:
     - idle
@@ -669,6 +673,7 @@
   priority: 244
   importance: standard
   height: 2
+  size: large
   directions: 4
   states:
     - idle
@@ -691,6 +696,7 @@
   priority: 245
   importance: standard
   height: 4.5
+  size: large
   directions: 4
   states:
     - idle
@@ -713,6 +719,7 @@
   priority: 246
   importance: standard
   height: 3
+  size: large
   directions: 4
   states:
     - idle
@@ -756,6 +763,7 @@
   priority: 248
   importance: standard
   height: 2
+  size: large
   directions: 4
   states:
     - idle
@@ -822,6 +830,7 @@
   priority: 251
   importance: standard
   height: 3.6
+  size: large
   directions: 4
   states:
     - idle
@@ -844,6 +853,7 @@
   priority: 252
   importance: standard
   height: 3.2
+  size: large
   directions: 4
   states:
     - idle
@@ -888,6 +898,7 @@
   priority: 254
   importance: standard
   height: 3
+  size: large
   directions: 4
   states:
     - idle
@@ -932,6 +943,7 @@
   priority: 256
   importance: standard
   height: 2
+  size: large
   directions: 4
   states:
     - idle
@@ -1130,6 +1142,7 @@
   priority: 265
   importance: standard
   height: 2.4
+  size: large
   directions: 4
   states:
     - idle
@@ -1195,6 +1208,7 @@
   priority: 268
   importance: standard
   height: 2.2
+  size: large
   directions: 4
   states:
     - idle

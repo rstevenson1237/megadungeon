@@ -48,6 +48,8 @@ describe('art briefs (Spec 01b, Briefs)', () => {
     // the spec's yardsticks: a rat below the knee, an ogre twice the player's height
     expect(FAMILY_HEIGHTS['r']!).toBeLessThan(PLAYER_HEIGHT / 3);
     expect(FAMILY_HEIGHTS['O']).toBe(PLAYER_HEIGHT * 2);
+    expect(byId.get('family-o-cap')?.size).toBe('large');
+    expect(byId.get('family-r')?.size).toBeUndefined();
   });
 
   it('keeps the briefs runs in batch order', () => {

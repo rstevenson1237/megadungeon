@@ -3,7 +3,13 @@
   "id": "megadungeon",
   "view": "iso",
   "scale": "medium",
-  "mood": ["grim", "dry", "archaic", "cold stone", "lonely"],
+  "mood": [
+    "grim",
+    "dry",
+    "archaic",
+    "cold stone",
+    "lonely"
+  ],
   "era": "dark fantasy, old-school dungeon crawl",
   "directions": 4,
   "maxColors": 32,
