@@ -2,6 +2,7 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { stringify } from 'yaml';
+import { familyId } from '../src/ui/art-ids.ts';
 import { buildContent } from './content-build.ts';
 
 /**
@@ -38,12 +39,8 @@ export const PLAYER_HEIGHT = 1.8;
 /** Heights above this outgrow the character frame (32 px at the direction's 16 px a metre) and use the large one. */
 export const LARGE_ABOVE = 1.9;
 
-/**
- * The monster family of a glyph letter. Lower case letters keep their letter (`family-h`); upper case ones add
- * `-cap` (`family-h-cap`), because artgen ids are lower case and both `h` and `H` are families (Spec 08, Addendum B).
- */
-export const familyId = (glyph: string): string =>
-  glyph >= 'A' && glyph <= 'Z' ? `family-${glyph.toLowerCase()}-cap` : `family-${glyph}`;
+/** The monster family of a glyph letter, named as the isometric display looks it up (src/ui/art-ids.ts). */
+export { familyId };
 
 /** Size table by glyph family: drawn height in metres, judged against the player (1.8 m) in the roster lineup. */
 export const FAMILY_HEIGHTS: Record<string, number> = {
