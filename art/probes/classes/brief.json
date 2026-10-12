@@ -1,0 +1,24 @@
+{
+  "id": "probe-classes",
+  "kind": "character",
+  "size": [
+    32,
+    40
+  ],
+  "states": [
+    "paladin",
+    "bard",
+    "monk",
+    "druid",
+    "ranger",
+    "necromancer",
+    "shaman",
+    "sorcerer"
+  ],
+  "review": {
+    "scale": 6,
+    "sym": "none",
+    "iso": true
+  },
+  "view": "iso"
+}

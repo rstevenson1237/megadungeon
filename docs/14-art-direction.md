@@ -36,6 +36,13 @@ The style tiles are `art/candidates/style-tile-r4.png` (A, B, C side by side) an
 
 **Lock `mix1`: A's palette, line and shading with C's slim proportions** (`art/candidates/mix1.json`). A is the direction truest to "grim, dry, archaic" and its dark outline sits well inside the black CP437 frame. C's slimmer figures keep the delver from reading as cute, which the style guide forbids. B is too bright for the voice, and its 42 colours exceed the interview's 32. C's ordered dither fights the per-row recolouring of family sprites (Spec 08, Addendum B), since a dithered body has no single dominant ramp to swap.
 
+## Class silhouettes (owner feedback, October 12, 2026)
+
+The owner asked for more variety in the character shapes, with a reference sheet of eight classes (`art/refs/class-silhouettes-ref.jpg`). `art/probes/classes/` draws those eight on one shared body under `mix1`, and `art/candidates/class-lineup-mix1.png` shows them at 5x, 1x and 2x. Each class changes the outline first: what covers the body (plate, doublet, robe, pelt, cloak), what crowns the head (great helm, feathered hat, bare scalp, bear head, deep hood, mask and feathers, loose hair) and what the hands hold (mace and shield, rapier and lute, staff, crossbow, book and orb, totem and flame). Two changes to `mix1` follow from it:
+
+- **The character frame grows from 24 x 32 to 32 x 40,** so hats, feathers, staffs and shields fit beside a figure that stays about 29 px (1.8 m) tall.
+- **A new rule:** give every class its own silhouette by body covering, headgear and held item. Reviewers check it, and batch 2's roster review compares silhouettes.
+
 ## For the owner
 
 - **Pick a direction:** `mix1` (recommended), A, B, C, or another mix (for example "A's palette, B's outlines"). On your answer it is locked as `art/direction.json` with its anchors and style sheet, and this checkpoint is closed.
