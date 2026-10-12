@@ -43,6 +43,8 @@ The owner asked for more variety in the character shapes, with a reference sheet
 - **The character frame grows from 24 x 32 to 32 x 40,** so hats, feathers, staffs and shields fit beside a figure that stays about 29 px (1.8 m) tall.
 - **A new rule:** give every class its own silhouette by body covering, headgear and held item. Reviewers check it, and batch 2's roster review compares silhouettes.
 
+The owner then asked for more human heads and less square, more organic shapes. `base.v2.js` of the class probe answers it: egg-shaped heads with a round cranium, a narrower jaw, ears, a nose shadow and a neck; every body, robe, cloak, helm, hood, mask and shield drawn as a smooth curve, with tapered legs and arms bent at the elbow. `mix1` gains the matching rules: human, egg-shaped heads and organic curved bodies (do), and no square or boxy bodies, heads or robes (don't). The lineup sheet shows v2 above v1.
+
 ## For the owner
 
 - **Pick a direction:** `mix1` (recommended), A, B, C, or another mix (for example "A's palette, B's outlines"). On your answer it is locked as `art/direction.json` with its anchors and style sheet, and this checkpoint is closed.

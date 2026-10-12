@@ -226,13 +226,15 @@
       "keep a creature's colour token its dominant hue, so recoloured family sprites read like the text display's colours",
       "read every creature's facing and silhouette at 1x against a dark floor",
       "draw to the size table: a rat below the knee, an ogre twice the player's height",
-      "give every class its own silhouette: what covers the body (plate, doublet, robe, pelt, cloak), what crowns the head (helm, hat, bare scalp, hood, mask) and what the hands hold"
+      "give every class its own silhouette: what covers the body (plate, doublet, robe, pelt, cloak), what crowns the head (helm, hat, bare scalp, hood, mask) and what the hands hold",
+      "draw people with human, egg-shaped heads (round cranium, narrower jaw, a neck) and organic curved bodies; arms bend at the elbow"
     ],
     "dont": [
       "cute or chibi proportions",
       "saturated greens or purples on floors",
       "pure black fills",
-      "light that implies a torch the game does not have"
+      "light that implies a torch the game does not have",
+      "square or boxy bodies, heads and robes"
     ]
   },
   "id": "megadungeon-mix1",
