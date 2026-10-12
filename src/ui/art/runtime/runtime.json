@@ -1,0 +1,17 @@
+{
+  "runtime": "1.2.1",
+  "generator": "artgen 0.9.0",
+  "adapters": [
+    "canvas2d"
+  ],
+  "files": {
+    "autotile.ts": "fcc60c490bfb4b56",
+    "coords.ts": "e05e1eb86735bc76",
+    "facing.ts": "59e8c2fc65b50b2c",
+    "index.ts": "76a386077807cf9d",
+    "pack.ts": "ed1f029b763d7a5e",
+    "stack.ts": "5a997815f7636a42",
+    "types.ts": "ab6f0f59af433a66",
+    "adapters/canvas2d.ts": "b91df5971d97d1cd"
+  }
+}

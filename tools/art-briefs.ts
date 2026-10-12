@@ -22,7 +22,7 @@ export interface ArtBrief {
   importance: 'hero' | 'standard' | 'filler';
   notes: string;
   height?: number;
-  size?: string;
+  size?: string | [number, number];
   object?: string;
   variants?: number;
   directions?: 1 | 4;
@@ -60,6 +60,9 @@ const FAMILY_NOTES: Record<string, string> = {
   G: 'giants and titans', H: 'many-headed beasts', I: 'insect swarms', K: 'death knights and dread lords', L: 'liches', M: 'mummies',
   O: 'ogres', P: 'fiends and demon lords', S: 'snakes, serpents and spiders', T: 'trolls', V: 'vampires', W: 'wraiths and shades', Y: 'bears',
 };
+
+/** A door's states (Spec 01b, Walls and doors), each also drawn cut to a cap. */
+export const DOOR_STATES = ['closed', 'open', 'locked', 'sealed', 'broken'] as const;
 
 /** The NPC roles of Spec 01 ("@ coloured by role"). */
 export const NPC_ROLES = ['rival', 'trader', 'bandit', 'hermit', 'captive'] as const;
@@ -115,19 +118,23 @@ export function buildBriefs(tables: Record<string, unknown[]>): ArtBrief[] {
   const rows = (t: string) => (tables[t] ?? []) as Row[];
   const themes = rows('level_themes');
 
-  // Batch 1: terrain, one shape set recoloured per theme from its eight palette tokens (decision D9).
+  // Batch 1: terrain, one shape set recoloured per theme from its eight palette tokens (decision D9). Each piece keeps
+  // to the direction ramps named in its notes, since the game recolours a ramp to its theme token (task 6.5).
   const recolour = `Recoloured for each of the ${themes.length} themes from its eight palette tokens.`;
   const terrain: Array<Omit<ArtBrief, 'batch' | 'priority' | 'importance' | 'kind'> & { kind?: ArtBrief['kind'] }> = [
-    { id: 'floor', variants: 4, notes: 'flagstone floor diamond, low in contrast so creatures stand out; variants vary the worn stones' },
-    { id: 'wall', states: ['full', 'cap'], notes: 'stone block one cell wide, 24 px above the floor; the cap is the cut-away near wall, a few pixels high' },
-    { id: 'door', states: ['closed', 'open', 'locked', 'sealed', 'broken'], notes: 'plank door in its wall cell, following the wall height rule; locked shows a lock plate, sealed a wax-and-chain seal' },
-    { id: 'stairs-up', notes: 'stone stair rising toward map north' },
-    { id: 'stairs-down', notes: 'stone stair sinking into a dark opening' },
-    { id: 'water-shallow', anims: { idle: { frames: 4, loop: true } }, notes: 'shallow water over visible stones, slow ripple loop' },
-    { id: 'water-deep', anims: { idle: { frames: 4, loop: true } }, notes: 'deep dark water, slow ripple loop' },
-    { id: 'lava', anims: { idle: { frames: 4, loop: true } }, notes: 'molten rock with a cooling crust, slow glow loop' },
-    { id: 'teleporter', kind: 'prop', height: 0.1, anims: { idle: { frames: 4, loop: true } }, notes: 'a ring of carved stones set in the floor, faint glow loop' },
-    { id: 'debris', kind: 'prop', height: 0.3, variants: 3, notes: 'low heap of broken masonry and rubbish, walkable' },
+    { id: 'floor', variants: 4, notes: 'flagstone floor diamond, low in contrast so creatures stand out; variants vary the worn stones. Dirt ramp only (the floor token)' },
+    { id: 'wall', size: [32, 40], states: ['full', 'cap'], notes: 'stone block one cell wide on a floor diamond at the frame bottom, 24 px above the floor; the cap is the cut-away near wall, 4 px high. Stone ramp only (the wall token)' },
+    {
+      id: 'door', size: [32, 40], states: [...DOOR_STATES, ...DOOR_STATES.map((s) => `${s}-cap`)],
+      notes: 'plank door in its wall cell, a stone block as the wall, 24 px high; the -cap states are the cut-away door, 4 px high, its state shown on top. Locked shows an iron lock plate, sealed a wax-and-chain seal, open the doorway with the door swung back, broken split planks. Stone ramp for the wall (the wall token), wood for the door (the door token), metal and accent for iron and wax',
+    },
+    { id: 'stairs-up', size: [32, 32], notes: 'stone stair rising toward map north from a floor diamond at the frame bottom. Stone ramp (the stairs token), dirt for the floor round it (the floor token)' },
+    { id: 'stairs-down', notes: 'stone stair sinking into a dark opening. Stone ramp (the stairs token), dirt for the floor round it (the floor token)' },
+    { id: 'water-shallow', anims: { idle: { frames: 4, loop: true } }, notes: 'shallow water over visible stones, slow ripple loop. Grass ramp for the water (the shallow water token), dirt for the stones under it (the floor token)' },
+    { id: 'water-deep', anims: { idle: { frames: 4, loop: true } }, notes: 'deep dark water, slow ripple loop. Grass ramp only (the deep water token)' },
+    { id: 'lava', anims: { idle: { frames: 4, loop: true } }, notes: 'molten rock with a cooling crust, slow glow loop. Accent and glow ramps only (the lava token)' },
+    { id: 'teleporter', kind: 'prop', height: 0.1, anims: { idle: { frames: 4, loop: true } }, notes: 'a ring of carved stones set in the floor, faint glow loop. Stone ramp for the stones (the wall token), glow for the light (the accent token)' },
+    { id: 'debris', kind: 'prop', height: 0.3, variants: 3, notes: 'low heap of broken masonry and rubbish, walkable. Stone ramp for masonry (the wall token), dirt for rubbish (the floor token)' },
   ];
   terrain.forEach((t, i) =>
     add({ kind: 'tile', ...t, id: `terrain-${t.id}`, batch: 1, priority: 100 + i, importance: 'standard', notes: `${t.notes}. ${recolour}` }),
@@ -195,24 +202,36 @@ const HEADER =
 export const briefsText = (briefs: ArtBrief[]): string =>
   HEADER + stringify(briefs.map(({ id, kind, ...rest }) => ({ id, kind, ...rest })), { lineWidth: 120, aliasDuplicateObjects: false });
 
+/** The TypeScript text of `src/ui/art/ramps.ts`: the direction's ramps, which the game recolours terrain by (task 6.5). */
+export const rampsText = (direction: { palette: { ramps: Record<string, string[]> } }): string =>
+  '// The art direction\'s colour ramps (art/direction.json, palette.ramps), lightest first, which the isometric display\n' +
+  '// recolours terrain by (src/ui/art/terrain-recolour.ts). Generated by `npm run art:briefs`; do not edit by hand.\n\n' +
+  `export const DIRECTION_RAMPS = {\n${Object.entries(direction.palette.ramps)
+    .map(([name, ramp]) => `  ${name}: [${ramp.map((c) => `'${c}'`).join(', ')}],`)
+    .join('\n')}\n} as const;\n`;
+
 function main(): void {
   const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
   const { bundle, errors } = buildContent(join(root, 'content'));
   if (errors.length) throw new Error(`content errors:\n${errors.join('\n')}`);
-  const text = briefsText(buildBriefs(bundle.tables as Record<string, unknown[]>));
-  const out = join(root, 'art', 'briefs.yaml');
+  const outputs: Array<[string, string]> = [
+    [join(root, 'art', 'briefs.yaml'), briefsText(buildBriefs(bundle.tables as Record<string, unknown[]>))],
+    [join(root, 'src', 'ui', 'art', 'ramps.ts'), rampsText(JSON.parse(readFileSync(join(root, 'art', 'direction.json'), 'utf8')))],
+  ];
   if (process.argv.includes('--check')) {
-    let old = '';
-    try { old = readFileSync(out, 'utf8'); } catch { /* missing */ }
-    if (old !== text) {
-      console.error('art/briefs.yaml is out of date: run "npm run art:briefs"');
-      process.exit(1);
+    for (const [out, text] of outputs) {
+      let old = '';
+      try { old = readFileSync(out, 'utf8'); } catch { /* missing */ }
+      if (old !== text) {
+        console.error(`${out.slice(root.length + 1)} is out of date: run "npm run art:briefs"`);
+        process.exit(1);
+      }
     }
-    console.log('art/briefs.yaml is up to date.');
+    console.log('art/briefs.yaml and src/ui/art/ramps.ts are up to date.');
     return;
   }
-  writeFileSync(out, text);
-  console.log(`Wrote ${text.split('\n- id:').length - 1} briefs to art/briefs.yaml.`);
+  for (const [out, text] of outputs) writeFileSync(out, text);
+  console.log(`Wrote ${outputs[0]![1].split('\n- id:').length - 1} briefs to art/briefs.yaml, and src/ui/art/ramps.ts.`);
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) main();

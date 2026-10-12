@@ -9,6 +9,7 @@ import { toSave } from '../src/game/save.ts';
 import { MemoryStore, SaveSlot } from '../src/game/store.ts';
 import { runOptionsFor } from '../src/game/world.ts';
 import { App } from '../src/ui/app.ts';
+import type { IsoArt } from '../src/ui/art/iso-art.ts';
 import type { Atlas } from '../src/ui/atlas.ts';
 import { CP437_TO_UNICODE } from '../src/ui/cp437.ts';
 import { DISPLAY_KEY, displayParam, startingDisplay } from '../src/ui/display.ts';
@@ -98,7 +99,7 @@ describe('the display flag (Spec 01, Addendum B)', () => {
   });
 
   describe('in the app', () => {
-    function app(options: { display?: 'iso' | 'text'; flags?: MemoryStorage } = {}): { app: App; flags: MemoryStorage } {
+    function app(options: { display?: 'iso' | 'text'; flags?: MemoryStorage; loadArt?: () => Promise<IsoArt> } = {}): { app: App; flags: MemoryStorage } {
       const flags = options.flags ?? new MemoryStorage();
       const a = new App({
         creation: creationContentOf(content().bundle),
@@ -110,6 +111,7 @@ describe('the display flag (Spec 01, Addendum B)', () => {
         flags,
         contentVersion: 'test',
         ...(options.display ? { display: options.display } : {}),
+        ...(options.loadArt ? { loadArt: options.loadArt } : {}),
       });
       return { app: a, flags };
     }
@@ -144,6 +146,40 @@ describe('the display flag (Spec 01, Addendum B)', () => {
       begin(a, 'Ada');
       const save = JSON.stringify(toSave({ run: a.shell!.run!, contentVersion: 'test', now: new Date('2026-10-01T12:00:00Z') }));
       expect(save).not.toMatch(/display|"iso"/);
+    });
+
+    it('loads the art the first time isometric is chosen, keeping the text display until it arrives (Spec 01b, Loading)', async () => {
+      let loads = 0;
+      let arrive: (art: IsoArt) => void = () => undefined;
+      const { app: a } = app({ loadArt: () => (loads++, new Promise((resolve) => (arrive = resolve))) });
+      begin(a, 'Ada');
+      expect(loads).toBe(0);
+      a.shell!.display = 'iso';
+      a.shell!.onDisplay!('iso');
+      a.shell!.onDisplay!('iso');
+      expect(loads).toBe(1);
+      expect(a.shell!.iso).toBe(false);
+      const art = { ids: new Set<string>() } as unknown as IsoArt;
+      arrive(art);
+      await Promise.resolve();
+      expect(a.art).toBe(art);
+      expect(a.shell!.art).toBe(art);
+      expect(a.shell!.iso).toBe(true);
+    });
+
+    it('says why in the log and stays in text when the art fails to load, and tries again when chosen again', async () => {
+      let loads = 0;
+      const { app: a } = app({ display: 'iso', loadArt: () => (loads++, Promise.reject(new Error('HTTP 404'))) });
+      begin(a, 'Ada');
+      expect(loads).toBe(1);
+      await Promise.resolve();
+      await Promise.resolve();
+      expect(a.shell!.display).toBe('text');
+      expect(a.display).toBe('text');
+      expect(screenText(a.shell!).join('\n')).toContain('isometric art could not be loaded (HTTP 404)');
+      a.shell!.display = 'iso';
+      a.shell!.onDisplay!('iso');
+      expect(loads).toBe(2);
     });
 
     it('shows no picture in a village, where the menu is text in both displays', () => {

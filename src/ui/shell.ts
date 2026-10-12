@@ -19,6 +19,7 @@ import { drawMap } from './map-view.ts';
 import type { DisplayMode } from './display.ts';
 import { buildIsoDraws, isoOnScreen } from './iso-view.ts';
 import type { IsoPicture } from './iso-paint.ts';
+import type { IsoArt } from './art/iso-art.ts';
 import type { Game } from '../game/game.ts';
 import type { Run } from '../game/run.ts';
 import { VillageScreen, type TownHost } from './town.ts';
@@ -95,6 +96,10 @@ export class Shell {
   display: DisplayMode = 'text';
   /** Called when the game menu switches the display, so the choice is remembered. */
   onDisplay: ((display: DisplayMode) => void) | null = null;
+  /** The loaded isometric art, if any; without it the picture draws with the glyph fallback (Spec 01b, Sprites). */
+  art: IsoArt | null = null;
+  /** The art is still loading: until it arrives the text display stays (Spec 01b, Loading). */
+  artWaiting = false;
 
   constructor(
     public title: string,
@@ -459,6 +464,11 @@ export class Shell {
   }
 
   /** The game menu's display row: switch between text and isometric, with no round spent (Spec 01, Addendum B). */
+  /** Whether the main view is drawn as the isometric picture now: chosen, and not waiting on its art. */
+  get iso(): boolean {
+    return this.display === 'iso' && !this.artWaiting;
+  }
+
   private toggleDisplay(): void {
     this.display = this.display === 'text' ? 'iso' : 'text';
     this.onDisplay?.(this.display);
@@ -479,7 +489,7 @@ export class Shell {
     const game = this.game!;
     switch (command.type) {
       case 'move': {
-        if (this.display === 'iso') {
+        if (this.iso) {
           // The isometric view is not a rectangle of cells: the cursor goes wherever its cell is still on screen.
           const next = { x: cursor.at.x + command.dx, y: cursor.at.y + command.dy };
           if (isoOnScreen(next, game.state.map.player)) cursor.at = next;
@@ -948,9 +958,11 @@ export class Shell {
    */
   picture(): IsoPicture | null {
     const game = this.game;
-    if (!game || this.display !== 'iso') return null;
+    if (!game || !this.iso) return null;
     const aim = { targeting: this.targeting, cursor: this.cursor, look: this.looking };
-    return { draws: buildIsoDraws(game.state, { look: mapLook(this.run?.theme), aim }), dimmed: this.overlays.length > 0 };
+    const look = mapLook(this.run?.theme);
+    if (this.art) this.art.look = look;
+    return { draws: buildIsoDraws(game.state, { look, aim, pack: this.art?.ids ?? null }), dimmed: this.overlays.length > 0 };
   }
 
   /** Draw the whole screen: panes, character, log, then any overlay on top. */
@@ -959,7 +971,7 @@ export class Shell {
     if (this.game) {
       const view = inner(MAIN_PANE);
       // The isometric picture is on the canvas beneath: the view area's cells are left clear (Spec 01b, Layout).
-      if (this.display === 'iso') grid.see(view.x, view.y, view.w, view.h);
+      if (this.iso) grid.see(view.x, view.y, view.w, view.h);
       else drawMap(grid, this.game.state, this.targeting, this.cursor ?? this.looking, mapLook(this.run?.theme));
       const text = this.lookText();
       if (text !== null) {

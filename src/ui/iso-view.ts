@@ -220,8 +220,15 @@ function icons(statuses: readonly StatusEffect[], shield = 0): string[] {
   return [...statuses.map((s) => `icon-${s.id}`), ...(shield > 0 ? ['icon-shield'] : [])].slice(0, ICONS_MAX);
 }
 
-/** A small stable number per cell, so a floor's variant never changes as the camera moves. */
-const variantOf = (x: number, y: number): number => ((((x * 73856093) ^ (y * 19349663)) >>> 0) % 4);
+/**
+ * A floor cell's variant: a stable hash of its position, so it never changes as the camera moves, taken from the hash's
+ * high bits so the four variants never fall into a grid.
+ */
+const variantOf = (x: number, y: number): number => {
+  let h = Math.imul(x, 73856093) ^ Math.imul(y, 19349663);
+  h = Math.imul(h ^ (h >>> 16), 0x45d9f3b);
+  return (h ^ (h >>> 16)) >>> 30;
+};
 
 export interface IsoOptions {
   /** The level theme's colours and tiles (Spec 01, Rendering); the default set when omitted. */
@@ -258,7 +265,8 @@ export function buildIsoDraws(state: GameState, options: IsoOptions = {}): IsoDr
     if (t) {
       if (t.kind === 'wall' || t.kind === 'door') {
         const height = isCut(scene, cell.x, cell.y) ? CAP_H : WALL_H;
-        const frame = t.kind === 'door' ? t.door! : height === CAP_H ? 'cap' : 'full';
+        // A door cut low draws its state's cap (art/briefs.yaml: closed-cap, open-cap...), as a wall draws its cap.
+        const frame = t.kind === 'door' ? (height === CAP_H ? `${t.door!}-cap` : t.door!) : height === CAP_H ? 'cap' : 'full';
         draws.push({
           ...base, layer: 'wall', asset: resolveAsset([TERRAIN_ASSET[t.kind]], pack), frame, tint: t.fg,
           shape: 'block', glyph: t.glyph, fg: t.fg, height,
@@ -266,8 +274,16 @@ export function buildIsoDraws(state: GameState, options: IsoOptions = {}): IsoDr
         });
       } else {
         const liquid = t.kind === 'shallowWater' || t.kind === 'deepWater' || t.kind === 'lava';
+        const asset = resolveAsset([TERRAIN_ASSET[t.kind]], pack);
+        // The rising stair's art stands on the floor, as a feature does: the floor's art is drawn under it first.
+        if (t.kind === 'stairsUp' && asset && pack?.has(TERRAIN_ASSET.floor)) {
+          draws.push({
+            ...base, layer: 'floor', asset: TERRAIN_ASSET.floor, frame: '', variant: variantOf(cell.x, cell.y), tint: t.fg,
+            shape: 'none', glyph: 0, fg: t.fg, box: diamondBox,
+          });
+        }
         draws.push({
-          ...base, layer: 'floor', asset: resolveAsset([TERRAIN_ASSET[t.kind]], pack), frame: liquid ? 'idle' : '',
+          ...base, layer: 'floor', asset, frame: liquid ? 'idle' : '',
           variant: t.kind === 'floor' ? variantOf(cell.x, cell.y) : 0, tint: t.fg, shape: 'diamond', glyph: t.glyph, fg: t.fg, box: diamondBox,
         });
       }

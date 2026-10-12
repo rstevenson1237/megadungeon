@@ -163,7 +163,7 @@ describe('isometric walls and doors (Spec 01b, Walls and doors)', () => {
     const game = gameAt(lvl, 3, 1);
     game.state.map.exploration.explored.fill(1);
     const door = one(buildIsoDraws(game.state), 3, 2, 'wall')!;
-    expect(door).toMatchObject({ shape: 'block', frame: 'locked', height: CAP_H, glyph: 43 });
+    expect(door).toMatchObject({ shape: 'block', frame: 'locked-cap', height: CAP_H, glyph: 43 });
   });
 });
 
@@ -284,6 +284,31 @@ describe('isometric fallback chain (Spec 08, Addendum B)', () => {
     expect(one(draws, 6, 4, 'creature')!.asset).toBe('npc-captive');
     expect(one(draws, 4, 2, 'item')!.asset).toBe('family-coins');
     expect(one(draws, 3, 4, 'feature')).toMatchObject({ asset: 'feature-weapon-rack', frame: 'closed' });
+  });
+
+  it('draws the floor\'s art under a rising stair\'s art, which stands on it (Spec 01b, clarification of task 6.5)', () => {
+    const game = gameOn(room(8, 6, 2, 2));
+    const stair = at(buildIsoDraws(game.state, { pack: new Set(['terrain-floor', 'terrain-stairs-up']) }), 2, 2).filter((d) => d.layer === 'floor');
+    expect(stair.map((d) => d.asset)).toEqual(['terrain-floor', 'terrain-stairs-up']);
+    // With no stair art, or no floor art, the stair is one draw as before.
+    expect(at(buildIsoDraws(game.state, { pack: new Set(['terrain-stairs-up']) }), 2, 2).filter((d) => d.layer === 'floor')).toHaveLength(1);
+    expect(at(buildIsoDraws(game.state), 2, 2).filter((d) => d.layer === 'floor')).toHaveLength(1);
+  });
+
+  it('spreads the floor variants with no grid: a cell four along does not repeat its variant', () => {
+    const game = gameOn(room(40, 20, 2, 2));
+    const draws = buildIsoDraws(game.state).filter((d) => d.layer === 'floor');
+    const variant = new Map(draws.map((d) => [`${d.cell.x},${d.cell.y}`, d.variant]));
+    let pairs = 0;
+    let same = 0;
+    for (const d of draws) {
+      const v = variant.get(`${d.cell.x + 4},${d.cell.y}`);
+      if (v === undefined) continue;
+      pairs++;
+      if (v === d.variant) same++;
+    }
+    expect(pairs).toBeGreaterThan(20);
+    expect(same / pairs).toBeLessThan(0.5);
   });
 
   it('keeps each floor cell\'s variant as the camera moves', () => {

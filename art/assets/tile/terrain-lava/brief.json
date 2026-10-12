@@ -1,0 +1,9 @@
+{
+  "id": "terrain-lava",
+  "template": "iso/tile",
+  "review": {
+    "scale": 6,
+    "sym": "none",
+    "iso": true
+  }
+}
