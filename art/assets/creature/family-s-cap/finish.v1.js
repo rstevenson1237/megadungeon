@@ -2,7 +2,7 @@
 // a helmeted bird/robot: the 2x2 red eye sits mid-face and the hood is no wider than the head".
 // - the 2x2 red hood mark (read as an eye in mid-face) is painted out with the hood's own grass steps;
 // - the real eye, at the side of the wedge head, becomes a single red pixel;
-// - the hood flares behind the head: its rows below the head are pushed out 1-2 px on each side (new edge inked),
+// - the hood flares behind the head: its rows below the head (3) are pushed out 1-2 px on each side (new edge inked),
 //   so the hood spreads wider than the neck and the head, a cobra's hood rather than a collar.
 // Coordinates are taken in the s/n frame and mirrored for e/w. Colours are direction tokens (R11).
 export const base = 'base.v2';
@@ -19,12 +19,12 @@ export function finish(g, ctx) {
     for (let y = hy - 4; y <= hy + 4; y++) for (let x = 0; x < W; x++) {
       const t = at(x, y);
       if (!t || !t.startsWith('accent.')) continue;
-      if (x >= hx - 1 && y >= hy) set(x, y, x <= hx + 2 ? 'grass.1' : 'grass.2'); // the hood mark
+      if (x >= hx - 3 && y >= hy) set(x, y, 'grass.1');              // the hood mark
       else if (t === 'accent.0' && y < hy) set(x, y, 'accent.1');                  // the eye: one red pixel
     }
   }
   // the hood flare: rows under the head, pushed out on both sides
-  const flare = back ? [1, 2, 2, 1] : [1, 2, 2, 1], y0 = back ? hy + 1 : hy + 1, x0 = back ? hx - 2 : hx + 1, added = [];
+  const flare = [1, 2, 2], y0 = back ? hy + 1 : hy + 1, x0 = back ? hx - 2 : hx + 1, added = [];
   flare.forEach((f, i) => {
     const y = y0 + i;
     if (empty(at(x0, y))) return;

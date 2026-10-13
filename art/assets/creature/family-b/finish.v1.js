@@ -51,10 +51,12 @@ export function finish(g, ctx) {
   const tops = ears.map(([x, y]) => { let t = y - 1; while (t < y + 6 && !tok([x, t])) t++; return t; });
   const yt = Math.min(...tops) - 2; // both points rise to the same height
   ears.forEach(([x], i) => {
-    px.set(g, [x, yt], 'outline');
+    const out = x < ears[1 - i][0] ? -1 : 1; // the tip leans outward, away from the other ear
     for (let y = yt + 1; y <= tops[i]; y++) {
-      px.set(g, [x, y], 'leather.0');
-      for (const sx of [x - 1, x + 1]) if (!tok([sx, y])) px.set(g, [sx, y], 'outline');
+      const cx = y === yt + 1 ? x + out : x;
+      if (y === yt + 1) px.set(g, [cx, yt], 'outline');
+      px.set(g, [cx, y], 'leather.0');
+      for (const sx of [cx - 1, cx + 1]) if (!tok([sx, y])) px.set(g, [sx, y], 'outline');
     }
   });
   return g;

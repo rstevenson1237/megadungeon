@@ -1,43 +1,42 @@
-// finish.v1 (f) on base.v3 — character finish: clean-up first, then the face (R2: the one direct-pixel pass).
-// Eyes and mouth are 1–2 px features: the downsample vote cannot draw them, so the face is painted here, at final
-// resolution, last, so no other op can touch it. It changes with the state — calm (idle, walk), fierce (attacks,
-// casts), hurt — because a face that never changes reads as a doll. The base exports the face anchors (eye, eye2,
-// mouth) only on facings where the face is visible, so back views are skipped. Colours are direction tokens (R11).
+// family-f finish.v1 (f) on base.v3 — the one direct-pixel pass (R2). Review of base.v3: a pale/orange stick down
+// the stem centre reads as a pole or a single leg and the root legs are invisible. This pass repaints the foot of the
+// stalk (the 8 rows above and at the ground point): the stem is closed in its own two tones with no centre stripe,
+// flares into a dark root crown, and splits into three dark root legs (skin.2, lit edge skin.1, inked) that splay
+// 2-3 px out past the stalk at the foot: left, centre and right. Pixels of the old stick and roots outside the new
+// roots go back to the ground shadow (or clear). Mirrored on the flipped facings (e, n). Colours are tokens (R11).
 export const base = 'base.v3';
-export const meta = { notes: 'template character finish: clean-up, then a per-state face at the face anchors' };
+export const meta = { pass: 'f', notes: 'centre stem stripe removed; three dark root legs splayed at the foot' };
 
-const MOODS = [[/hurt|hit|die|dead|stun|dizzy|fall|knock/, 'hurt'], [/attack|cast|punch|kick|slash|shoot|throw|special|charge/, 'fierce'], [/win|victory|cheer|taunt|happy/, 'happy']];
-const moodOf = state => MOODS.find(([re]) => re.test(state))?.[1] ?? 'calm';
-
-/** Eye column for a mood: `k` dark, `s` the skin beside it. Narrowed (fierce) or squeezed (hurt) when the eye is ≥ 2 px. */
-const eyeRows = (mood, eh) => {
-  const open = Array(eh).fill('k');
-  if (eh < 2) return open;
-  if (mood === 'fierce') return ['s', ...open.slice(1)]; // brow down: the top of the eye goes
-  if (mood === 'hurt') return [...open.slice(1), 's'];   // squeezed shut toward the top
-  return open;
-};
-/** Mouth for a mood (top-left at the `mouth` anchor); calm shows none at sprite sizes. */
-const MOUTH = { calm: null, fierce: ['k'], hurt: ['k', 'k'], happy: ['kk'] };
+// x from ground.x-7 to ground.x+8, rows from ground.y-5 to ground.y+2 (s facing); '.' leave, '_' back to shadow/clear
+const FOOT = [
+  '...oSSsssdddo...',
+  '...oSsssddddo...',
+  '.ossSsssddddddo.',
+  '.osddoosdoosddo.',
+  'osdo__osdo_oddo.',
+  'odo____odo___odo',
+  '_o______o_____o_',
+  '________________',
+];
+// 'o' ink, 'S' / 's' the stem's lit and mid tones (and a root's lit edge), 'd' the dark root body (skin.2)
+const KEY = { o: 'outline', S: 'skin.0', s: 'skin.1', d: 'skin.2' };
 
 export function finish(g, ctx) {
-  const { px } = ctx.lib, a = ctx.anchors, mood = moodOf(ctx.state);
-  px.fix.orphans(g);
-  px.fix.jaggies(g);
-  // px.light.rim(g, { ramps: ['cloth'] });
-  // px.fx.glint(g, ctx.at('hand', 0, -4), 'glow.0');
-
-  // face last
-  const skinNear = ([x, y]) => [[x + 1, y], [x - 1, y], [x, y + 1]].map(p => px.tokenAt(g, p)).find(t => t && t !== 'outline') ?? 'skin.1';
-  for (const name of ['eye', 'eye2']) {
-    if (!a[name]) continue;
-    const [x, y] = a[name];
-    let eh = 0;
-    while (eh < (g.h >= 32 ? 3 : 2) && px.tokenAt(g, [x, y + eh]) === 'outline') eh++;
-    px.patch(g, ctx.at(name), eyeRows(mood, Math.max(1, eh)), { k: 'outline', s: skinNear([x, y]) }, { anchor: 'topleft' });
-  }
-  const mouth = MOUTH[mood];
-  if (mouth && a.mouth && px.tokenAt(g, a.mouth) && px.tokenAt(g, a.mouth) !== 'outline')
-    px.patch(g, ctx.at('mouth'), mouth, { k: 'outline' }, { anchor: 'topleft' });
+  const { px } = ctx.lib, flip = ctx.facing === 'e' || ctx.facing === 'n';
+  const [gx, gy] = ctx.anchors.ground, x0 = gx - 7, y0 = gy - 5;
+  // a ground-shadow pixel to copy (translucent), if the frame has one
+  let shadow = null;
+  for (let i = 3; i < g.d.length && !shadow; i += 4) if (g.d[i] > 0 && g.d[i] < 255) shadow = g.d.slice(i - 3, i + 1);
+  // an erased pixel on the ground (from a row above the ground point down) takes the shadow, higher up it clears
+  const erase = (x, y) => {
+    if (!g.alpha(x, y)) return;
+    if (shadow && y >= gy - 1) g.d.set(shadow, (y * g.w + x) * 4); else g.clear(x, y);
+  };
+  FOOT.forEach((row, j) => [...row].forEach((ch, i) => {
+    const x = flip ? g.w - 1 - (x0 + i) : x0 + i, y = y0 + j; // ground.x is the unflipped centre
+    if (ch === '.') return;
+    if (ch === '_') return erase(x, y);
+    px.set(g, [x, y], KEY[ch]);
+  }));
   return g;
 }

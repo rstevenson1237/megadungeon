@@ -1,43 +1,34 @@
-// finish.v1 (f) on base.v3 — character finish: clean-up first, then the face (R2: the one direct-pixel pass).
-// Eyes and mouth are 1–2 px features: the downsample vote cannot draw them, so the face is painted here, at final
-// resolution, last, so no other op can touch it. It changes with the state — calm (idle, walk), fierce (attacks,
-// casts), hurt — because a face that never changes reads as a doll. The base exports the face anchors (eye, eye2,
-// mouth) only on facings where the face is visible, so back views are skipped. Colours are direction tokens (R11).
+// family-f-cap finish.v1 (f) on base.v3 — the one direct-pixel pass (R2). Review of base.v3: the huge pale shoulder
+// plate is the brightest, largest area, so it reads as a beetle shell and weakens the recoloured ramp's dominance.
+// This pass cuts the plate's pale fill (skin.0) to a 2 px highlight rim along its top edge (the spine side) and fills
+// the rest with the mid skin tone (skin.1); the ribs (skin.2) and the small pale runs on the limbs are untouched. The
+// plate is found as the largest connected skin.0 area of each frame, so it follows every pose. Tokens only (R11).
 export const base = 'base.v3';
-export const meta = { notes: 'template character finish: clean-up, then a per-state face at the face anchors' };
-
-const MOODS = [[/hurt|hit|die|dead|stun|dizzy|fall|knock/, 'hurt'], [/attack|cast|punch|kick|slash|shoot|throw|special|charge/, 'fierce'], [/win|victory|cheer|taunt|happy/, 'happy']];
-const moodOf = state => MOODS.find(([re]) => re.test(state))?.[1] ?? 'calm';
-
-/** Eye column for a mood: `k` dark, `s` the skin beside it. Narrowed (fierce) or squeezed (hurt) when the eye is ≥ 2 px. */
-const eyeRows = (mood, eh) => {
-  const open = Array(eh).fill('k');
-  if (eh < 2) return open;
-  if (mood === 'fierce') return ['s', ...open.slice(1)]; // brow down: the top of the eye goes
-  if (mood === 'hurt') return [...open.slice(1), 's'];   // squeezed shut toward the top
-  return open;
-};
-/** Mouth for a mood (top-left at the `mouth` anchor); calm shows none at sprite sizes. */
-const MOUTH = { calm: null, fierce: ['k'], hurt: ['k', 'k'], happy: ['kk'] };
+export const meta = { pass: 'f', notes: 'pale back plate cut to a 2 px top rim, the rest mid skin' };
 
 export function finish(g, ctx) {
-  const { px } = ctx.lib, a = ctx.anchors, mood = moodOf(ctx.state);
-  px.fix.orphans(g);
-  px.fix.jaggies(g);
-  // px.light.rim(g, { ramps: ['cloth'] });
-  // px.fx.glint(g, ctx.at('hand', 0, -4), 'glow.0');
-
-  // face last
-  const skinNear = ([x, y]) => [[x + 1, y], [x - 1, y], [x, y + 1]].map(p => px.tokenAt(g, p)).find(t => t && t !== 'outline') ?? 'skin.1';
-  for (const name of ['eye', 'eye2']) {
-    if (!a[name]) continue;
-    const [x, y] = a[name];
-    let eh = 0;
-    while (eh < (g.h >= 32 ? 3 : 2) && px.tokenAt(g, [x, y + eh]) === 'outline') eh++;
-    px.patch(g, ctx.at(name), eyeRows(mood, Math.max(1, eh)), { k: 'outline', s: skinNear([x, y]) }, { anchor: 'topleft' });
+  const { px } = ctx.lib, W = g.w, H = g.h;
+  const tok = [];
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) tok.push(px.tokenAt(g, [x, y]));
+  const at = (x, y) => (x < 0 || y < 0 || x >= W || y >= H ? null : tok[y * W + x]);
+  const fill = (x, y) => { const t = at(x, y); return !!t && t !== 'outline'; };
+  // the connected skin.0 areas (4-neighbour); the plate is the largest
+  const seen = new Uint8Array(W * H);
+  let plate = [];
+  for (let i = 0; i < W * H; i++) {
+    if (seen[i] || tok[i] !== 'skin.0') continue;
+    const comp = [], stack = [i]; seen[i] = 1;
+    while (stack.length) {
+      const j = stack.pop(), x = j % W, y = (j / W) | 0; comp.push([x, y]);
+      for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+        const nx = x + dx, ny = y + dy, k = ny * W + nx;
+        if (nx >= 0 && ny >= 0 && nx < W && ny < H && !seen[k] && tok[k] === 'skin.0') { seen[k] = 1; stack.push(k); }
+      }
+    }
+    if (comp.length > plate.length) plate = comp;
   }
-  const mouth = MOUTH[mood];
-  if (mouth && a.mouth && px.tokenAt(g, a.mouth) && px.tokenAt(g, a.mouth) !== 'outline')
-    px.patch(g, ctx.at('mouth'), mouth, { k: 'outline' }, { anchor: 'topleft' });
+  if (plate.length < 30) return g;
+  // keep a 2 px rim under the top edge; everything deeper goes to the mid tone
+  for (const [x, y] of plate) if (fill(x, y - 1) && fill(x, y - 2)) px.set(g, [x, y], 'skin.1');
   return g;
 }

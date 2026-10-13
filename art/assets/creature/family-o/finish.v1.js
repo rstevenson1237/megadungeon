@@ -1,43 +1,33 @@
-// finish.v1 (f) on base.v3 — character finish: clean-up first, then the face (R2: the one direct-pixel pass).
-// Eyes and mouth are 1–2 px features: the downsample vote cannot draw them, so the face is painted here, at final
-// resolution, last, so no other op can touch it. It changes with the state — calm (idle, walk), fierce (attacks,
-// casts), hurt — because a face that never changes reads as a doll. The base exports the face anchors (eye, eye2,
-// mouth) only on facings where the face is visible, so back views are skipped. Colours are direction tokens (R11).
+// family-o finish.v1 (f) on base.v3 — the one direct-pixel pass (R2). Review of base.v3: the head reads as a boxy
+// helmet; the tusks are lost at 1x (they sit inside the face) and the back view's pale horizontal band reads as a
+// headband. This pass (1) on s/e paints two 1x2 pale tusks just outside the jaw outline at its corners, each inked on
+// its outer side and top, and folds the old tusk pixels inside the face back into the mouth line and skin; (2) on n/w
+// steps the pale skin.0 band across the back of the skull down to skin.1. Positions follow the face anchors (mouth,
+// head), so they ride the bob and the attack lean. No other clean-up. Colours are direction tokens (R11).
 export const base = 'base.v3';
-export const meta = { notes: 'template character finish: clean-up, then a per-state face at the face anchors' };
-
-const MOODS = [[/hurt|hit|die|dead|stun|dizzy|fall|knock/, 'hurt'], [/attack|cast|punch|kick|slash|shoot|throw|special|charge/, 'fierce'], [/win|victory|cheer|taunt|happy/, 'happy']];
-const moodOf = state => MOODS.find(([re]) => re.test(state))?.[1] ?? 'calm';
-
-/** Eye column for a mood: `k` dark, `s` the skin beside it. Narrowed (fierce) or squeezed (hurt) when the eye is ≥ 2 px. */
-const eyeRows = (mood, eh) => {
-  const open = Array(eh).fill('k');
-  if (eh < 2) return open;
-  if (mood === 'fierce') return ['s', ...open.slice(1)]; // brow down: the top of the eye goes
-  if (mood === 'hurt') return [...open.slice(1), 's'];   // squeezed shut toward the top
-  return open;
-};
-/** Mouth for a mood (top-left at the `mouth` anchor); calm shows none at sprite sizes. */
-const MOUTH = { calm: null, fierce: ['k'], hurt: ['k', 'k'], happy: ['kk'] };
+export const meta = { pass: 'f', notes: 'tusks outside the jaw corners on s/e; pale band off the back of the skull on n/w' };
 
 export function finish(g, ctx) {
-  const { px } = ctx.lib, a = ctx.anchors, mood = moodOf(ctx.state);
-  px.fix.orphans(g);
-  px.fix.jaggies(g);
-  // px.light.rim(g, { ramps: ['cloth'] });
-  // px.fx.glint(g, ctx.at('hand', 0, -4), 'glow.0');
-
-  // face last
-  const skinNear = ([x, y]) => [[x + 1, y], [x - 1, y], [x, y + 1]].map(p => px.tokenAt(g, p)).find(t => t && t !== 'outline') ?? 'skin.1';
-  for (const name of ['eye', 'eye2']) {
-    if (!a[name]) continue;
-    const [x, y] = a[name];
-    let eh = 0;
-    while (eh < (g.h >= 32 ? 3 : 2) && px.tokenAt(g, [x, y + eh]) === 'outline') eh++;
-    px.patch(g, ctx.at(name), eyeRows(mood, Math.max(1, eh)), { k: 'outline', s: skinNear([x, y]) }, { anchor: 'topleft' });
+  const { px } = ctx.lib, a = ctx.anchors, flip = ctx.facing === 'e' || ctx.facing === 'n';
+  const fx = x => (flip ? g.w - 1 - x : x);
+  if (a.mouth) {
+    const mx = fx(a.mouth[0]), my = a.mouth[1]; // the mouth in the unflipped (s) frame; the jaw's corners are at mx-5 .. mx+4
+    // the old tusks inside the face: cloth.0 pixels just above the mouth line become the mouth ink / skin beside them
+    for (let dy = -3; dy <= -1; dy++) for (let dx = -3; dx <= 5; dx++) {
+      const p = [fx(mx + dx), my + dy];
+      if (px.tokenAt(g, p) !== 'cloth.0') continue;
+      const below = px.tokenAt(g, [p[0], p[1] + 1]), side = px.tokenAt(g, [p[0] + 1, p[1]]);
+      px.set(g, p, below === 'outline' || below === 'cloth.0' ? (side && side !== 'outline' && side !== 'cloth.0' ? side : 'skin.1') : 'outline');
+    }
+    // the new tusks: 1x2 pale, outside the jaw outline at its two corners, pointing up
+    for (const [tx, out] of [[mx - 5, -1], [mx + 5, 1]]) {
+      px.set(g, [fx(tx), my - 4], 'outline');
+      for (const y of [my - 3, my - 2]) { px.set(g, [fx(tx), y], 'hair.0'); px.set(g, [fx(tx + out), y], 'outline'); }
+    }
+  } else if (a.head) {
+    // from behind: no pale band across the skull
+    const [hx, hy] = a.head;
+    for (let y = hy - 3; y <= hy + 2; y++) for (let x = hx - 5; x <= hx + 5; x++) if (px.tokenAt(g, [x, y]) === 'skin.0') px.set(g, [x, y], 'skin.1');
   }
-  const mouth = MOUTH[mood];
-  if (mouth && a.mouth && px.tokenAt(g, a.mouth) && px.tokenAt(g, a.mouth) !== 'outline')
-    px.patch(g, ctx.at('mouth'), mouth, { k: 'outline' }, { anchor: 'topleft' });
   return g;
 }

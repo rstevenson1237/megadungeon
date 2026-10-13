@@ -1,10 +1,13 @@
-// finish.v1 (f) on base.v4 — character finish: clean-up first, then the face (R2: the one direct-pixel pass).
+// finish.v1 (f) on base.v4 — character finish (R2: the one direct-pixel pass). Review of base.v4 (6.5): the stray pale
+// pixels on the apron front (accent.0 vial specks, s/e facings, every state) read as holes. This pass repaints them in
+// the leather around them and runs a single 1px leather.0 edge down the lit apron border (left in s, right in e, where
+// the base already lights it). Then the template face.
 // Eyes and mouth are 1–2 px features: the downsample vote cannot draw them, so the face is painted here, at final
 // resolution, last, so no other op can touch it. It changes with the state — calm (idle, walk), fierce (attacks,
 // casts), hurt — because a face that never changes reads as a doll. The base exports the face anchors (eye, eye2,
 // mouth) only on facings where the face is visible, so back views are skipped. Colours are direction tokens (R11).
 export const base = 'base.v4';
-export const meta = { notes: 'template character finish: clean-up, then a per-state face at the face anchors' };
+export const meta = { pass: 'f', notes: 'apron specks removed, lit apron edge in leather.0, per-state face' };
 
 const MOODS = [[/hurt|hit|die|dead|stun|dizzy|fall|knock/, 'hurt'], [/attack|cast|punch|kick|slash|shoot|throw|special|charge/, 'fierce'], [/win|victory|cheer|taunt|happy/, 'happy']];
 const moodOf = state => MOODS.find(([re]) => re.test(state))?.[1] ?? 'calm';
@@ -22,14 +25,9 @@ const MOUTH = { calm: null, fierce: ['k'], hurt: ['k', 'k'], happy: ['kk'] };
 
 export function finish(g, ctx) {
   const { px } = ctx.lib, a = ctx.anchors, mood = moodOf(ctx.state);
-  if (process.env.DUMP && ctx.key(process.env.DUMP.split('/')[0], 0) && ctx.facing === process.env.DUMP.split('/')[1]) {
-    const S = {skin:'s',hair:'h',cloth:'c',leather:'l',metal:'m',accent:'a',outline:'#'};
-    let out = ctx.state+' '+ctx.facing+' '+JSON.stringify(ctx.anchors)+'\n';
-    for (let y=0;y<g.h;y++){ let r=String(y).padStart(2)+' '; for(let x=0;x<g.w;x++){const t=px.tokenAt(g,[x,y]); r+= t? (t==='outline'?'##':S[t.split('.')[0]]+t.split('.')[1]) : '  ';} out+=r+'\n';}
-    console.error(out);
-  }
   px.fix.orphans(g);
   px.fix.jaggies(g);
+  if ((ctx.facing === 's' || ctx.facing === 'e') && a.head && a.ground) apron(g, px, a.head[1] + 7, a.ground[1] - 7, ctx.facing === 's' ? 1 : -1);
   // px.light.rim(g, { ramps: ['cloth'] });
   // px.fx.glint(g, ctx.at('hand', 0, -4), 'glow.0');
 
@@ -46,4 +44,28 @@ export function finish(g, ctx) {
   if (mouth && a.mouth && px.tokenAt(g, a.mouth) && px.tokenAt(g, a.mouth) !== 'outline')
     px.patch(g, ctx.at('mouth'), mouth, { k: 'outline' }, { anchor: 'topleft' });
   return g;
+}
+
+const ramp = t => t && t.split('.')[0];
+/** Apron rows y0..y1: pale accent.0 specks with leather around them become leather; then the lit border goes leather.0. */
+function apron(g, px, y0, y1, dir) {
+  const N4 = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+  const writes = [];
+  for (let y = y0; y <= y1; y++) for (let x = 0; x < g.w; x++) {
+    if (px.tokenAt(g, [x, y]) !== 'accent.0') continue;
+    const n = N4.map(([dx, dy]) => px.tokenAt(g, [x + dx, y + dy]));
+    if (n.some(t => t === 'accent.1' || t === 'accent.2') || !n.some(t => ramp(t) === 'leather')) continue;
+    const lea = n.filter(t => ramp(t) === 'leather' && t !== 'leather.0');
+    writes.push([x, y, lea.includes('leather.2') && !lea.includes('leather.1') ? 'leather.2' : 'leather.1']);
+  }
+  for (const [x, y, t] of writes) px.set(g, [x, y], t);
+  for (let y = y0; y <= y1; y++) {
+    const xs = dir > 0 ? [...Array(g.w).keys()] : [...Array(g.w).keys()].reverse();
+    for (const x of xs) {
+      if (ramp(px.tokenAt(g, [x, y])) !== 'leather' || px.tokenAt(g, [x - dir, y]) !== 'outline') continue;
+      let run = 0;
+      while (ramp(px.tokenAt(g, [x + dir * run, y])) === 'leather') run++;
+      if (run >= 4) { px.set(g, [x, y], 'leather.0'); if (px.tokenAt(g, [x + dir, y]) === 'leather.0') px.set(g, [x + dir, y], 'leather.1'); break; }
+    }
+  }
 }
