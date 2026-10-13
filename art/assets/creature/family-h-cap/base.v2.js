@@ -28,9 +28,9 @@ export function render(ctx) {
       }
       k.add({ type: 'tube', name: 'neck', underlay: true, mat: c, shade: 'cyl', pts, w: 4.4, w1: 3.2 }, d);
       // the head: a wedge snout toward the heading, the lower jaw dropped open (wider as it strikes)
-      const [hx, hy] = hd, gape = 1 + k.P.open * 2;
-      k.add({ type: 'path', name: 'jaw', underlay: true, mat: c, shade: 'flat', band: 2, d: k.smooth([[hx + 1.5, hy + 0.5], [hx - 2, hy + 1 + gape * 0.6], [hx - 4.5, hy + 1.5 + gape], [hx - 4, hy + 2.5 + gape], [hx + 1, hy + 2.5]]) }, d + 0.001);
-      k.add({ type: 'path', name: 'head', underlay: true, mat: c, shade: 'sphere', d: k.smooth([[hx + 2.5, hy - 2.2], [hx - 0.5, hy - 2.6], [hx - 5, hy - 0.6], [hx - 5.5, hy + 0.8], [hx - 1, hy + 0.8], [hx + 2.5, hy + 1.2]]) }, d + 0.002);
+      const [hx, hy] = hd, gape = 1 + k.P.open * 2, S = 1.25;
+      k.add({ type: 'path', name: 'jaw', underlay: true, mat: c, shade: 'flat', band: 1, d: k.smooth([[hx + S * (1.5), hy + S * (0.5)], [hx - S * (2), hy + S * (1 + gape * 0.6)], [hx - S * (4.5), hy + S * (1.5 + gape)], [hx - S * (4), hy + S * (2.5 + gape)], [hx + S * (1), hy + S * (2.5)]]) }, d + 0.001);
+      k.add({ type: 'path', name: 'head', underlay: true, mat: c, shade: 'sphere', d: k.smooth([[hx + S * (2.5), hy - S * (2.2)], [hx - S * (0.5), hy - S * (2.6)], [hx - S * (5), hy - S * (0.6)], [hx - S * (5.5), hy + S * (0.8)], [hx - S * (1), hy + S * (0.8)], [hx + S * (2.5), hy + S * (1.2)]]) }, d + 0.002);
       if (!k.back) k.add({ type: 'rect', name: 'eye', x: Math.round(hx - 1), y: Math.round(hy - 1.5), w: 1, h: 1, color: 'accent.0' }, d + 0.003);
     });
   }, { ground: 10 });

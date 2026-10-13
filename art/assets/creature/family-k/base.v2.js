@@ -1,8 +1,10 @@
+// family-k base.v2 (r2, from base.v1): the pick is held lower, its hand at shoulder height and its head below the
+// chin, so the head clears; the snout is a longer 3-4 px muzzle pointing toward the facing.
 // family-k base.v1 (r1) — kobolds (glyph k, 1.0 m): a small dog-headed kobold on the biped rig
 // (art/lib/beast.v1.js): a long snout, small horns, a scaly body in a loincloth, a long tail, a rusty pick held up in
 // the right hand and a small round lid for a shield. The scales are the recoloured ramp (recolour: skin).
 import { biped, bipedAnchors } from '../../../lib/beast.v1.js';
-export const meta = { brief: 'family-k', pass: 'r1', notes: 'dog-snouted kobold, little horns, tail, pick, lid shield', mirror: false, recolour: 'skin' };
+export const meta = { brief: 'family-k', pass: 'r2', notes: 'dog-snouted kobold, little horns, tail, pick, lid shield', mirror: false, recolour: 'skin' };
 const H = 1.0;
 export function render(ctx) {
   return biped(ctx, k => {
@@ -17,12 +19,14 @@ export function render(ctx) {
     });
     k.head(headY + Y(1.5), { mat: pal.skin, wide: 3.8, crown: 4.4, jaw: 2.6, chin: 3, point: 0, eyes: 2, eyeSize: 1.2, eye: 'accent.1', hair: pal.skin, nose: false });
     for (const s of [-1, 1]) k.add({ type: 'poly', name: 'horn', underlay: true, mat: pal.leather, shade: 'flat', band: 0, pts: [[cx + s * X(1.5), headY - Y(2)], [cx + s * X(3.4), headY - Y(6)], [cx + s * X(3), headY - Y(2)]] });
-    k.front(() => k.add({ type: 'capsule', name: 'snout', underlay: true, mat: pal.skin, shade: 'cyl', a: [cx + k.turn, headY + Y(2.5)], b: [cx + k.turn - X(4), headY + Y(4.5)], r: X(2), r1: X(1.4) }));
+    k.front(() => k.add({ type: 'capsule', name: 'snout', underlay: true, mat: pal.skin, shade: 'cyl', a: [cx + k.turn, headY + Y(2.5)], b: [cx + k.turn - X(8.5), headY + Y(3.8)], r: X(2), r1: X(1.3) }));
     k.main(() => {
-      k.arm(-1, pal.skin, L + X(1.5), waist - Y(2), { r: 1.4 });
-      k.pole(pal.leather, L + X(1.5), waist - Y(1), L, headY - Y(1), 0.7, 'haft');
-      k.add({ type: 'path', name: 'pick', underlay: true, mat: pal.cloth, shade: 'bevel', d: `M${L - X(5)} ${headY + Y(1)} Q${L} ${headY - Y(4)} ${L + X(5)} ${headY + Y(1)} Q${L} ${headY - Y(1.5)} ${L - X(5)} ${headY + Y(1)} Z` });
+      // the hand at shoulder height, the haft running down past the hip and the pick's head just under the chin
+      const hx = L + X(2.5), hy = shoulder + Y(1.5), py = shoulder + Y(3);
+      k.pole(pal.leather, L + X(4.5), waist + Y(3), L + X(0.5), py - Y(1), 0.7, 'haft');
+      k.arm(-1, pal.skin, hx, hy, { r: 1.4 });
+      k.add({ type: 'path', name: 'pick', underlay: true, mat: pal.cloth, shade: 'bevel', d: `M${L - X(5)} ${py + Y(1)} Q${L} ${py - Y(4)} ${L + X(5)} ${py + Y(1)} Q${L} ${py - Y(1.5)} ${L - X(5)} ${py + Y(1)} Z` });
     });
   }, { height: H });
 }
-export const anchors = ctx => bipedAnchors(ctx, { height: H, headDy: 1.5, hand: L => [L.L + L.X(1.5), L.waist - L.Y(2)] });
+export const anchors = ctx => bipedAnchors(ctx, { height: H, headDy: 1.5, hand: L => [L.L + L.X(2.5), L.shoulder + L.Y(1.5)] });
