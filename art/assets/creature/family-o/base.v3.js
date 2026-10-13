@@ -20,15 +20,15 @@ export function render(ctx) {
     k.add({ type: 'ellipse', name: 'pauldron', cx: cx - X(5.6), cy: shoulder, rx: X(3), ry: Y(2.2), mat: pal.cloth, shade: 'sphere', underlay: true });
     for (const d of [-1, 0, 1]) k.add({ type: 'poly', name: 'spike', mat: pal.cloth, shade: 'flat', band: 0, pts: [[cx - X(5.6) + X(d * 1.6) - X(0.6), shoulder - Y(1.6)], [cx - X(5.6) + X(d * 1.6), shoulder - Y(4)], [cx - X(5.6) + X(d * 1.6) + X(0.6), shoulder - Y(1.6)]] });
     k.off(() => k.arm(1, pal.skin, R - X(1), waist, { r: 1.9 }));
-    const hy = headY - Y(1), jw = 2.4, ch = 3.6;
+    const hy = headY - Y(1.5), jw = 2.4, ch = 3;
     k.neck(pal.skin);
     k.head(hy, { mat: pal.skin, wide: 3.8, crown: 4.8, jaw: jw, chin: ch, point: 0.2, eyes: 1.8, eye: 'accent.1', hair: false });
     // the underbite: a heavy lower jaw wider than the skull, jutting below it (seen from behind too)
     const jx = cx + (k.back ? 0 : k.turn);
-    k.add({ type: 'path', name: 'jaw', underlay: true, mat: pal.skin, shade: 'sphere', d: k.smooth([[jx - X(3.2), hy + Y(1.4)], [jx + X(3.2), hy + Y(1.4)], [jx + X(4.4), hy + Y(3)], [jx + X(3.4), hy + Y(4.8)], [jx - X(3.4), hy + Y(4.8)], [jx - X(4.4), hy + Y(3)]]) });
+    k.add({ type: 'path', name: 'jaw', underlay: true, mat: pal.skin, shade: 'flat', band: 1, d: k.smooth([[jx - X(3), hy + Y(2)], [jx + X(3), hy + Y(2)], [jx + X(4.2), hy + Y(3)], [jx + X(3.2), hy + Y(4.2)], [jx - X(3.2), hy + Y(4.2)], [jx - X(4.2), hy + Y(3)]]) });
     k.front(() => {
       k.add({ type: 'rect', name: 'brow', x: Math.round(cx - X(2.8) + k.turn), y: Math.round(hy) - 1, w: Math.round(X(5.6)) + 1, h: 1, mat: pal.skin, shade: 'flat', band: 2 });
-      for (const s of [-1, 1]) k.add({ type: 'rect', name: 'tusk', x: Math.round(jx + s * X(3.2)), y: Math.round(hy + Y(2.4)) - 2, w: 1, h: 2, mat: pal.cloth, shade: 'flat', band: 0 });
+      for (const s of [-1, 1]) k.add({ type: 'rect', name: 'tusk', x: Math.round(jx + s * X(3.2)), y: Math.round(hy + Y(2.6)) - 2, w: 1, h: 2, mat: pal.cloth, shade: 'flat', band: 0 });
     });
     k.add({ type: 'ellipse', name: 'topknot', cx, cy: hy - Y(4.9), rx: X(1.4), ry: Y(2), mat: pal.hair, shade: 'sphere', underlay: true });
     k.main(() => {
@@ -38,4 +38,4 @@ export function render(ctx) {
     });
   }, { height: H });
 }
-export const anchors = ctx => bipedAnchors(ctx, { height: H, headDy: -1, eyes: 1.8, hand: L => [L.L + L.X(1.5), L.waist - L.Y(1)] });
+export const anchors = ctx => bipedAnchors(ctx, { height: H, headDy: -1.5, eyes: 1.8, hand: L => [L.L + L.X(1.5), L.waist - L.Y(1)] });

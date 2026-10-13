@@ -1,5 +1,5 @@
 // class-ranger base.v3 (r3, from base.v2) — ONE change, the attack: no more short-sword thrust while the bow hangs.
-// The four attack frames shoot the bow: 0 anticipation (bow raised forward at shoulder height, arrow nocked), 1 draw
+// The four attack frames shoot the bow: 0 anticipation (bow raised forward at shoulder height, out past the cloak on the heading's side, arrow nocked), 1 draw
 // (string hand pulled back to the cheek, string in a V), 2 loose (arrow gone, string straight, hand flung back), 3
 // recovery (bow lowering). The arms and bow are drawn in the hand groups with the pose's turn undone, so the bow stays
 // upright; the other states are unchanged.
@@ -34,11 +34,11 @@ export function render(ctx) {
     if (k.state === 'attack') {
       // the shot: bow grip forward (toward the viewer's left), string hand at the nock, the cheek, or flung back
       const f = k.frame % 4, sy = shoulder + Y(1.2);
-      const gx = cx - X(f === 3 ? 4.5 : 5.5), gy = shoulder + Y(f === 3 ? 3.5 : 1), r = X(8), a = 48, bx = gx + r; // arc centre right of the grip
+      const gx = cx - X(f === 3 ? 8 : 9.5), gy = shoulder + Y(f === 3 ? 4 : 0.5), r = X(9), a = 50, bx = gx + r; // arc centre right of the grip
       const top = [bx + r * Math.cos((180 - a) * Math.PI / 180), gy - r * Math.sin(a * Math.PI / 180)], bot = [top[0], gy + r * Math.sin(a * Math.PI / 180)];
-      const hand = [[top[0] + X(1), gy], [cx + X(1.5), gy - Y(1)], [cx + X(3.5), gy - Y(0.5)], [top[0] + X(1), gy]][f];
+      const hand = [[top[0] + X(1.5), gy], [cx + X(1), gy - Y(1.5)], [cx + X(4.5), gy - Y(1)], [cx + X(3), gy + Y(3)]][f];
       const limb = (side, h) => {
-        const sx = cx + side * X(5), ex = (sx + h[0]) / 2 + X(0.5), ey = Math.max(sy, h[1]) + Y(1.2), rr = X(1.3);
+        const sx = cx + side * X(5), ex = (sx + h[0]) / 2 + side * X(0.5), ey = Math.max(sy, h[1]) + Y(1.2), rr = X(1.3);
         return [{ type: 'capsule', name: 'upper-arm', underlay: true, mat: pal.leather, shade: 'cyl', a: [sx, sy], b: [ex, ey], r: rr, r1: rr * 0.9 },
           { type: 'capsule', name: 'forearm', underlay: true, mat: pal.leather, shade: 'cyl', a: [ex, ey], b: h, r: rr * 0.9, r1: rr * 0.8 },
           { type: 'circle', name: 'hand', cx: h[0], cy: h[1], r: X(1.1), mat: pal.leather, shade: 'sphere' }];
@@ -49,9 +49,10 @@ export function render(ctx) {
       const arrow = f < 2 ? [{ type: 'tube', name: 'arrow', mat: pal.leather, shade: 'flat', band: 1, pts: [hand, [gx - X(3), gy - Y(0.3)]], w: 0.9 },
         { type: 'rect', name: 'arrowhead', x: Math.round(gx - X(3.6)), y: Math.round(gy - Y(0.8)), w: 2, h: 1, color: 'metal.0' },
         { type: 'rect', name: 'fletch', x: Math.round(hand[0]) - 1, y: Math.round(hand[1]) - 1, w: 2, h: 1, color: 'accent.1' }] : [];
-      // the bow arm (the left hand, held in the off group) and the string hand (the main group), the pose's turn undone
-      k.off(() => k.add({ type: 'group', name: 'bow-arm', rotate: -k.P.off, origin: k.offShoulder, children: [...limb(1, [gx, gy]), ...bow, ...string] }));
-      k.main(() => k.add({ type: 'group', name: 'string-arm', rotate: -k.P.main, origin: k.mainShoulder, children: [...arrow, ...limb(-1, hand)] }));
+      // the bow arm reaches forward on the heading's side (the viewer's left, the main group) and the string hand
+      // draws back across the chest (the off group), each with the pose's turn undone so the bow stays upright
+      k.off(() => k.add({ type: 'group', name: 'string-arm', rotate: -k.P.off, origin: k.offShoulder, children: limb(1, hand) }));
+      k.main(() => k.add({ type: 'group', name: 'bow-arm', rotate: -k.P.main, origin: k.mainShoulder, children: [...limb(-1, [gx + X(0.5), gy]), ...bow, ...string, ...arrow] }));
     } else {
       k.off(() => {
         k.arm(1, pal.leather, R - X(1), waist - Y(2), { glove: pal.leather });
