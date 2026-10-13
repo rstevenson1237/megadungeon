@@ -1,0 +1,35 @@
+{
+  "format": 1,
+  "asset": "npc-bandit",
+  "facings": [
+    "s",
+    "w",
+    "n",
+    "e"
+  ],
+  "states": {
+    "idle": {
+      "frames": 2,
+      "durations": [
+        600,
+        600
+      ],
+      "loop": true
+    },
+    "walk": {
+      "frames": 4,
+      "durations": [
+        120,
+        120,
+        120,
+        120
+      ],
+      "loop": true
+    }
+  },
+  "anchors": [
+    "ground",
+    "hand",
+    "head"
+  ]
+}

@@ -1,0 +1,53 @@
+{
+  "format": 1,
+  "asset": "class-shaman",
+  "facings": [
+    "s",
+    "w",
+    "n",
+    "e"
+  ],
+  "states": {
+    "idle": {
+      "frames": 2,
+      "durations": [
+        600,
+        600
+      ],
+      "loop": true
+    },
+    "walk": {
+      "frames": 4,
+      "durations": [
+        120,
+        120,
+        120,
+        120
+      ],
+      "loop": true
+    },
+    "attack": {
+      "frames": 4,
+      "durations": [
+        80,
+        40,
+        120,
+        60
+      ],
+      "loop": false
+    },
+    "hurt": {
+      "frames": 2,
+      "durations": [
+        100,
+        100
+      ],
+      "loop": false
+    }
+  },
+  "anchors": [
+    "ground",
+    "hand",
+    "head"
+  ]
+}

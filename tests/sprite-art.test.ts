@@ -4,7 +4,10 @@
 
 import { readdirSync, readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { type ArtImage, IsoArt } from '../src/ui/art/iso-art.ts';
+import { resolve } from 'node:path';
+import { type ArtImage, checkPack, frameIndex, IsoArt } from '../src/ui/art/iso-art.ts';
+import { artId, familyId } from '../src/ui/art-ids.ts';
+import { buildContent } from '../tools/content-build.ts';
 import { DIRECTION_RAMPS } from '../src/ui/art/ramps.ts';
 import type { PackAsset, PackManifest } from '../src/ui/art/runtime/types.ts';
 import { FAMILY_RAMPS, spriteColourMap } from '../src/ui/art/sprite-recolour.ts';
@@ -112,6 +115,36 @@ describe('sprites in the isometric display (task 6.6)', () => {
       const newest = bases.sort((a, b) => Number(a.match(/\d+/)![0]) - Number(b.match(/\d+/)![0])).pop()!;
       const ramp = readFileSync(`${dir}/${id}/${newest}`, 'utf8').match(/recolour:\s*'(\w+)'/)?.[1];
       expect(ramp, `${id} ${newest}`).toBe(FAMILY_RAMPS[id]);
+    }
+  });
+});
+
+// The large families of the task 6.6 clarification, drawn in 64 x 80 frames.
+const LARGE = new Set([...'ACDEFGHKOPTWjn'].map(familyId));
+
+describe('the shipped pack (task 6.6)', () => {
+  const pack = checkPack(JSON.parse(readFileSync('public/art/main/pack.json', 'utf8')));
+  const tables = buildContent(resolve(import.meta.dirname, '..', 'content')).bundle.tables as Record<string, Array<{ id: string; glyph?: string }>>;
+  const wanted = [
+    ...tables['classes']!.map((c) => `class-${artId(c.id)}`),
+    ...['rival', 'trader', 'bandit', 'hermit', 'captive'].map((role) => `npc-${role}`),
+    ...new Set([...tables['monsters']!, ...tables['bosses']!].map((row) => familyId(row.glyph!))),
+  ];
+
+  it('has a sprite for every class, person and monster family', () => {
+    expect(wanted).toHaveLength(60);
+    for (const id of wanted) expect(pack.assets[id], id).toBeDefined();
+  });
+
+  it('draws each sprite idle in all four facings, standing on its ground anchor', () => {
+    for (const id of wanted) {
+      const asset = pack.assets[id]!;
+      for (const facing of ['s', 'e', 'n', 'w'] as const) {
+        const index = frameIndex(asset, { state: 'idle', variant: 0, frame: 0, facing });
+        expect(index, `${id} ${facing}`).toBeGreaterThanOrEqual(0);
+        expect(asset.anchors?.ground?.[index], `${id} ${facing} ground`).toBeDefined();
+      }
+      expect(asset.size, id).toEqual(LARGE.has(id) ? [64, 80] : [32, 40]);
     }
   });
 });
