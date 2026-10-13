@@ -437,3 +437,7 @@
 {"ts":"2026-10-13T02:20:13.892Z","type":"review","asset":"class-barbarian","version":"base.v2","pass":"r2","sheet":"assets/character/class-barbarian/out/review-base.v2.png","imageTokens":2130,"by":"agent"}
 {"ts":"2026-10-13T02:20:15.517Z","type":"review","asset":"family-o","version":"base.v2","pass":"r2","sheet":"assets/creature/family-o/out/review-base.v2.png","imageTokens":1485,"by":"agent"}
 {"ts":"2026-10-13T02:20:16.167Z","type":"review","asset":"family-c-cap","version":"base.v2","pass":"r2","sheet":"assets/creature/family-c-cap/out/review-base.v2.png","imageTokens":1841,"by":"agent"}
+{"ts":"2026-10-13T02:20:27.563Z","type":"review","asset":"family-y-cap","version":"base.v2","pass":"r2","sheet":"assets/creature/family-y-cap/out/review-base.v2.png","imageTokens":1485,"by":"agent"}
+{"ts":"2026-10-13T02:20:28.059Z","type":"review","asset":"family-k-cap","version":"base.v2","pass":"r2","sheet":"assets/creature/family-k-cap/out/review-base.v2.png","imageTokens":1841,"by":"agent"}
+{"ts":"2026-10-13T02:20:36.790Z","type":"review","asset":"npc-rival","version":"base.v2","pass":"r2","sheet":"assets/character/npc-rival/out/review-base.v2.png","imageTokens":1739,"by":"agent"}
+{"ts":"2026-10-13T02:20:40.365Z","type":"review","asset":"family-b","version":"base.v2","pass":"r2","sheet":"assets/creature/family-b/out/review-base.v2.png","imageTokens":1485,"by":"agent"}
