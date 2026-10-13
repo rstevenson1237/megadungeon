@@ -2,13 +2,16 @@
 // atlases under `public/art/`) read through the vendored runtime's pack format, and drawn for the painter. Terrain is
 // recoloured per theme (terrain-recolour.ts) and remembered cells are drawn at half brightness; each recoloured frame
 // is cut from its atlas once and kept. Every terrain frame sits on its cell the same way: the cell's 32 x 16 diamond is
-// the frame's bottom 16 rows, centred, so taller things (a wall, a rising stair, a heap) stand above it.
+// the frame's bottom 16 rows, centred, so taller things (a wall, a rising stair, a heap) stand above it. Players,
+// creatures and people (task 6.6) are drawn in their facing and stand on the cell's centre by their frame's `ground`
+// anchor; a family sprite is recoloured to its row's colour (sprite-recolour.ts).
 
 import type { IsoContext, SpriteSource } from '../iso-paint.ts';
 import { TILE_H, type IsoDraw } from '../iso-view.ts';
 import type { MapLook } from '../palette.ts';
 import type { PackAsset, PackManifest } from './runtime/types.ts';
-import { type MainSteps, mainSteps, terrainColourMap } from './terrain-recolour.ts';
+import { FAMILY_RAMPS, mainStep, spriteColourMap } from './sprite-recolour.ts';
+import { type ColourMap, type MainSteps, mainSteps, terrainColourMap } from './terrain-recolour.ts';
 
 /** Decoded atlas pixels: straight-alpha RGBA, rows top to bottom. */
 export interface ArtImage {
@@ -25,6 +28,8 @@ interface Selection {
   state: string;
   variant: number;
   frame: number;
+  /** The facing's name (s, e, n or w); the asset's first facing when it has no such facing or none is asked. */
+  facing?: string;
 }
 
 /** The pack format this reader knows (artgen pack.json format 1). */
@@ -56,22 +61,29 @@ export class IsoArt implements SpriteSource {
   draw(ctx: IsoContext, d: IsoDraw): boolean {
     const asset = d.asset ? this.manifest.assets[d.asset] : undefined;
     if (!asset || !this.look) return false;
-    const index = frameIndex(asset, { state: d.frame, variant: d.variant, frame: 0 });
+    const index = frameIndex(asset, { state: d.frame, variant: d.variant, frame: 0, facing: d.facing });
     if (index < 0) return false;
     const [, , , w, h] = asset.frames[index]!;
+    const family = FAMILY_RAMPS[d.asset!] !== undefined;
     // A new theme recolours everything again (the look is rebuilt each paint, so it is compared by its colours).
     const lookKey = Object.values(this.look.colours).map((c) => c.visible).join();
     if (this.cutLook !== lookKey) {
       this.cut.clear();
       this.cutLook = lookKey;
     }
-    const key = `${d.asset}|${index}|${d.dim ? 1 : 0}`;
+    const key = `${d.asset}|${index}|${d.dim ? 1 : 0}|${family ? d.tint : ''}`;
     let image = this.cut.get(key);
     if (!image) {
-      image = this.makeImage(this.pixels(d.asset!, asset, index, d.dim));
+      const map = family
+        ? spriteColourMap(d.asset!, d.tint, this.familyMain(d.asset!, asset))
+        : terrainColourMap(d.asset!, this.look, d.dim, this.mainOf(d.asset!, asset));
+      image = this.makeImage(this.pixels(asset, index, map, d.dim));
       this.cut.set(key, image);
     }
-    ctx.drawImage(image, d.x - Math.floor(w / 2), d.y + TILE_H / 2 - h);
+    // A sprite stands on the cell's centre by the point between its feet; terrain sits its diamond on the cell.
+    const ground = asset.anchors?.ground?.[index];
+    if (ground) ctx.drawImage(image, d.x - ground[0], d.y - ground[1]);
+    else ctx.drawImage(image, d.x - Math.floor(w / 2), d.y + TILE_H / 2 - h);
     return true;
   }
 
@@ -79,30 +91,42 @@ export class IsoArt implements SpriteSource {
   private mainOf(id: string, asset: PackAsset): MainSteps {
     let main = this.mains.get(id);
     if (!main) {
-      const atlases = this.atlases;
-      main = mainSteps(id, (function* () {
-        for (const [bin, x, y, w, h] of asset.frames) {
-          const a = atlases[bin]!;
-          for (let r = y; r < y + h; r++) {
-            for (let c = x; c < x + w; c++) {
-              const i = (r * a.width + c) * 4;
-              if (a.data[i + 3]) yield (a.data[i]! << 16) | (a.data[i + 1]! << 8) | a.data[i + 2]!;
-            }
-          }
-        }
-      })());
+      main = mainSteps(id, this.colours(asset));
       this.mains.set(id, main);
     }
     return main;
   }
 
-  /** One frame's pixels, recoloured to the level's theme, at half brightness for a remembered cell. */
-  private pixels(id: string, asset: PackAsset, index: number, dim: boolean): ArtImage {
+  /** A family sprite's main step of its body ramp, counted over all its frames once. */
+  private familyMain(id: string, asset: PackAsset): number {
+    const ramp = FAMILY_RAMPS[id]!;
+    let main = this.mains.get(id);
+    if (!main) {
+      main = { [ramp]: mainStep(ramp, this.colours(asset)) };
+      this.mains.set(id, main);
+    }
+    return main[ramp]!;
+  }
+
+  /** Every opaque pixel's colour over all of an asset's frames. */
+  private *colours(asset: PackAsset): Generator<number> {
+    for (const [bin, x, y, w, h] of asset.frames) {
+      const a = this.atlases[bin]!;
+      for (let r = y; r < y + h; r++) {
+        for (let c = x; c < x + w; c++) {
+          const i = (r * a.width + c) * 4;
+          if (a.data[i + 3]) yield (a.data[i]! << 16) | (a.data[i + 1]! << 8) | a.data[i + 2]!;
+        }
+      }
+    }
+  }
+
+  /** One frame's pixels through a colour map, at half brightness for a remembered cell. */
+  private pixels(asset: PackAsset, index: number, map: ColourMap, dim: boolean): ArtImage {
     const [bin, x, y, w, h] = asset.frames[index]!;
     const atlas = this.atlases[bin]!;
     const data = new Uint8ClampedArray(w * h * 4);
     for (let r = 0; r < h; r++) data.set(atlas.data.subarray(((y + r) * atlas.width + x) * 4, ((y + r) * atlas.width + x + w) * 4), r * w * 4);
-    const map = terrainColourMap(id, this.look!, dim, this.mainOf(id, asset));
     const to = new Map(Object.entries(map).map(([from, hex]) => [parseInt(from.slice(1), 16), parseInt(hex.slice(1), 16)]));
     for (let i = 0; i < data.length; i += 4) {
       if (!data[i + 3]) continue;
@@ -120,7 +144,7 @@ export class IsoArt implements SpriteSource {
 const halve = (rgb: number): number => (((rgb >> 17) & 0x7f) << 16) | (((rgb >> 9) & 0x7f) << 8) | ((rgb >> 1) & 0x7f);
 
 /**
- * The index into an asset's frames for a selection, as the runtime's `Pack.frameIndex` picks it (facing 0; a missing
+ * The index into an asset's frames for a selection, as the runtime's `Pack.frameIndex` picks it (a missing facing,
  * variant or frame falls back to the first), or -1 when the asset has no such state. An empty state is the first.
  */
 export function frameIndex(asset: PackAsset, sel: Selection): number {
@@ -128,10 +152,11 @@ export function frameIndex(asset: PackAsset, sel: Selection): number {
   if (!asset.states[state]) return -1;
   const params = asset.variants.length - Object.keys(asset.swaps ?? {}).length;
   const variant = sel.variant < params ? sel.variant : 0;
+  const facing = Math.max(0, sel.facing ? asset.facings.indexOf(sel.facing) : 0);
   let fallback = -1;
   for (let i = 0; i < asset.frames.length; i++) {
     const f = asset.frames[i]!;
-    if (f[6] !== state || f[5] !== 0) continue;
+    if (f[6] !== state || f[5] !== facing) continue;
     if (f[8] === variant && f[7] === sel.frame) return i;
     if (fallback < 0 && f[8] === 0 && f[7] === 0) fallback = i;
   }
