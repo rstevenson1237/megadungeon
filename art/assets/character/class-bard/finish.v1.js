@@ -1,7 +1,7 @@
 // finish.v1 (f) on base.v4 — character finish (R2: the one direct-pixel pass). Review of base.v4 (7): the brown
 // instrument at the free hand reads as a sack or purse, not a lute. This pass finds the lute body (the first 6+ px
 // leather run beside the hips, s/e facings, every state), punches a 1px dark sound-hole in its middle, clears the lump
-// above it to ink and draws a 3px neck rising from the body toward the shoulder (leather.1: characters have no wood
+// above it to ink and draws a 3px neck rising from the body toward the shoulder (leather.0: characters have no wood
 // ramp). Then the template face.
 // Eyes and mouth are 1–2 px features: the downsample vote cannot draw them, so the face is painted here, at final
 // resolution, last, so no other op can touch it. It changes with the state — calm (idle, walk), fierce (attacks,
@@ -66,6 +66,6 @@ function lute(g, px, [hx, hy], side) {
   const lo = side > 0 ? bx0 + 2 : bx0, hi = side > 0 ? bx1 : bx1 - 2;
   for (let y = R - 3; y < R; y++) for (let x = lo; x <= hi; x++) if (lea(x, y)) px.set(g, [x, y], 'outline');
   // neck: 3 px from the top of the body, rising toward the shoulder (up-left in s, up-right in e)
-  for (let i = 0; i < 3; i++) px.set(g, [mid + side - side * i, R - 1 - i], 'leather.1');
+  for (let i = 0; i < 3; i++) px.set(g, [mid + side - side * i, R - 1 - i], 'leather.0');
   px.set(g, [mid, R + 1], 'outline');                    // sound-hole
 }
