@@ -422,7 +422,7 @@ describe('painting the draw list', () => {
   it('paints a full wall taller than a cap', () => {
     const tops = (frame: string, height: number): number => {
       const { ctx, calls, atlas } = recorder();
-      const d: IsoDraw = { cell: { x: 0, y: 0 }, layer: 'wall', x: 100, y: 100, asset: null, frame, variant: 0, tint: 0x808080, shape: 'block', glyph: 35, fg: 0x808080, height, alpha: 1, dim: false, large: false, box: { x: 0, y: 0, w: 1, h: 1 } };
+      const d: IsoDraw = { cell: { x: 0, y: 0 }, layer: 'wall', x: 100, y: 100, asset: null, frame, variant: 0, facing: 's', tint: 0x808080, shape: 'block', glyph: 35, fg: 0x808080, height, alpha: 1, dim: false, large: false, box: { x: 0, y: 0, w: 1, h: 1 } };
       paintIso(ctx, [d], atlas);
       return Math.min(...calls.filter((c) => c.startsWith('rect #808080')).map((c) => Number(c.split(' ')[2]!.split(',')[1])));
     };

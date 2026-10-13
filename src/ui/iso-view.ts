@@ -95,6 +95,8 @@ export interface IsoDraw {
   frame: string;
   /** Which of a tile's variants (floors have four), chosen by the cell so it never flickers. */
   variant: number;
+  /** The map direction a player, creature or person faces (task 6.6); terrain and things are drawn as 's'. */
+  facing: IsoFacing;
   /** The colour a family sprite or shared terrain is recoloured to, and the fallback's colour. */
   tint: number;
   /** Fallback step 3: the glyph and its colour, already chosen for the cell's light. */
@@ -111,6 +113,19 @@ export interface IsoDraw {
   large: boolean;
   /** The screen box it may cover, with art or without; draws whose box misses the view are left out. */
   box: Rect;
+}
+
+/**
+ * The four map directions a sprite can face (Spec 01b, Sprites, task 6.6 clarification). Map south is toward the
+ * viewer's lower left and shows the front drawing, east its mirror; west, toward the upper left, shows the back drawing,
+ * north its mirror.
+ */
+export type IsoFacing = 's' | 'e' | 'n' | 'w';
+
+/** The facing of a direction: its larger part, the vertical one on a tie; south for no direction. */
+export function facingOf(dx: number, dy: number): IsoFacing {
+  if (Math.abs(dy) >= Math.abs(dx)) return dy < 0 ? 'n' : 's';
+  return dx < 0 ? 'w' : 'e';
 }
 
 /** The camera: the level position, in cells, that the player's drawn position is (fractional while a step slides). */
@@ -253,7 +268,7 @@ export function buildIsoDraws(state: GameState, options: IsoOptions = {}): IsoDr
   for (const cell of known) {
     const at = project(cell.x, cell.y, camera);
     const dim = cell.light === 'remembered';
-    const base = { cell: { x: cell.x, y: cell.y }, x: at.x, y: at.y, variant: 0, height: 0, alpha: 1, dim, large: false };
+    const base = { cell: { x: cell.x, y: cell.y }, x: at.x, y: at.y, variant: 0, facing: 's' as IsoFacing, height: 0, alpha: 1, dim, large: false };
     const diamondBox: Rect = { x: at.x - TILE_W / 2, y: at.y - TILE_H / 2, w: TILE_W, h: TILE_H };
     const standing = (size: readonly [number, number]): Rect => {
       const w = Math.max(size[0], CARD_W);
@@ -313,9 +328,15 @@ export function buildIsoDraws(state: GameState, options: IsoOptions = {}): IsoDr
       if (ringColour !== null) {
         draws.push({ ...base, layer: 'marker', asset: null, frame: '', tint: ringColour, shape: 'ring', glyph: 0, fg: ringColour, box: { x: at.x - 12, y: at.y - 6, w: 24, h: 12 } });
       }
+      // The player faces their last move or attack; until task 6.8 tracks every last step, others face the player.
+      const me = state.map.player;
+      const facing = o.kind === 'player' ? facingOf(state.player.facing.dx, state.player.facing.dy) : facingOf(me.x - cell.x, me.y - cell.y);
+      const asset = resolveAsset(occupantChain(o, classId), pack);
+      // A family's sprite may be drawn in the large frame (a giant, a dragon), so its box allows for it.
+      const box = standing(asset?.startsWith('family-') ? FRAME.large : size);
       draws.push({
-        ...base, layer: 'creature', asset: resolveAsset(occupantChain(o, classId), pack), frame: 'idle', tint: o.fg,
-        shape: 'card', glyph: o.glyph, fg: o.fg, alpha: o.kind === 'creature' && o.role === 'phantom' ? 0.5 : 1, large, box: standing(size),
+        ...base, layer: 'creature', asset, frame: 'idle', facing, tint: o.fg,
+        shape: 'card', glyph: o.glyph, fg: o.fg, alpha: o.kind === 'creature' && o.role === 'phantom' ? 0.5 : 1, large, box,
       });
       const shown = o.kind === 'player' ? icons(state.player.statuses, state.player.shield) : o.kind === 'creature' ? icons(o.creature.statuses) : [];
       shown.forEach((id, i) => {
@@ -338,7 +359,7 @@ export function buildIsoDraws(state: GameState, options: IsoOptions = {}): IsoDr
 function aimDraw(p: { x: number; y: number }, camera: IsoCamera, layer: IsoLayer, shape: IsoAimShape, colour: number, alpha: number): IsoDraw {
   const at = project(p.x, p.y, camera);
   return {
-    cell: { x: p.x, y: p.y }, layer, x: at.x, y: at.y, asset: null, frame: '', variant: 0, tint: colour, shape, glyph: 0, fg: colour,
+    cell: { x: p.x, y: p.y }, layer, x: at.x, y: at.y, asset: null, frame: '', variant: 0, facing: 's', tint: colour, shape, glyph: 0, fg: colour,
     height: 0, alpha, dim: false, large: false, box: { x: at.x - TILE_W / 2, y: at.y - TILE_H / 2, w: TILE_W, h: TILE_H },
   };
 }

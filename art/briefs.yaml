@@ -132,13 +132,29 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
     hurt:
       frames: 2
+      durations:
+        - 100
+        - 100
   notes: the player as a Warrior, on the shared player body so every class has the same proportions
 - id: class-mage
   kind: character
@@ -156,13 +172,29 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
     hurt:
       frames: 2
+      durations:
+        - 100
+        - 100
   notes: the player as a Mage, on the shared player body so every class has the same proportions
 - id: class-thief
   kind: character
@@ -180,13 +212,29 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
     hurt:
       frames: 2
+      durations:
+        - 100
+        - 100
   notes: the player as a Thief, on the shared player body so every class has the same proportions
 - id: class-priest
   kind: character
@@ -204,13 +252,29 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
     hurt:
       frames: 2
+      durations:
+        - 100
+        - 100
   notes: the player as a Priest, on the shared player body so every class has the same proportions
 - id: class-barbarian
   kind: character
@@ -228,13 +292,29 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
     hurt:
       frames: 2
+      durations:
+        - 100
+        - 100
   notes: the player as a Barbarian, on the shared player body so every class has the same proportions
 - id: class-knight
   kind: character
@@ -252,13 +332,29 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
     hurt:
       frames: 2
+      durations:
+        - 100
+        - 100
   notes: the player as a Knight, on the shared player body so every class has the same proportions
 - id: class-paladin
   kind: character
@@ -276,13 +372,29 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
     hurt:
       frames: 2
+      durations:
+        - 100
+        - 100
   notes: the player as a Paladin, on the shared player body so every class has the same proportions
 - id: class-ranger
   kind: character
@@ -300,13 +412,29 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
     hurt:
       frames: 2
+      durations:
+        - 100
+        - 100
   notes: the player as a Ranger, on the shared player body so every class has the same proportions
 - id: class-monk
   kind: character
@@ -324,13 +452,29 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
     hurt:
       frames: 2
+      durations:
+        - 100
+        - 100
   notes: the player as a Monk, on the shared player body so every class has the same proportions
 - id: class-bard
   kind: character
@@ -348,13 +492,29 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
     hurt:
       frames: 2
+      durations:
+        - 100
+        - 100
   notes: the player as a Bard, on the shared player body so every class has the same proportions
 - id: class-druid
   kind: character
@@ -372,13 +532,29 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
     hurt:
       frames: 2
+      durations:
+        - 100
+        - 100
   notes: the player as a Druid, on the shared player body so every class has the same proportions
 - id: class-necromancer
   kind: character
@@ -396,13 +572,29 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
     hurt:
       frames: 2
+      durations:
+        - 100
+        - 100
   notes: the player as a Necromancer, on the shared player body so every class has the same proportions
 - id: class-sorcerer
   kind: character
@@ -420,13 +612,29 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
     hurt:
       frames: 2
+      durations:
+        - 100
+        - 100
   notes: the player as a Sorcerer, on the shared player body so every class has the same proportions
 - id: class-illusionist
   kind: character
@@ -444,13 +652,29 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
     hurt:
       frames: 2
+      durations:
+        - 100
+        - 100
   notes: the player as a Illusionist, on the shared player body so every class has the same proportions
 - id: class-warlock
   kind: character
@@ -468,13 +692,29 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
     hurt:
       frames: 2
+      durations:
+        - 100
+        - 100
   notes: the player as a Warlock, on the shared player body so every class has the same proportions
 - id: class-assassin
   kind: character
@@ -492,13 +732,29 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
     hurt:
       frames: 2
+      durations:
+        - 100
+        - 100
   notes: the player as a Assassin, on the shared player body so every class has the same proportions
 - id: class-alchemist
   kind: character
@@ -516,13 +772,29 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
     hurt:
       frames: 2
+      durations:
+        - 100
+        - 100
   notes: the player as a Alchemist, on the shared player body so every class has the same proportions
 - id: class-shaman
   kind: character
@@ -540,13 +812,29 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
     hurt:
       frames: 2
+      durations:
+        - 100
+        - 100
   notes: the player as a Shaman, on the shared player body so every class has the same proportions
 - id: class-witch-hunter
   kind: character
@@ -564,13 +852,29 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
     hurt:
       frames: 2
+      durations:
+        - 100
+        - 100
   notes: the player as a Witch Hunter, on the shared player body so every class has the same proportions
 - id: class-beastmaster
   kind: character
@@ -588,13 +892,29 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
     hurt:
       frames: 2
+      durations:
+        - 100
+        - 100
   notes: the player as a Beastmaster, on the shared player body so every class has the same proportions
 - id: family-a-cap
   kind: creature
@@ -612,11 +932,24 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
   notes: "glyph A: aberrations: eye tyrants and mind horrors (mind reaver, star-eater, sea of eyes, mind tyrant, ancient
     horror, world-eater, void sovereign, The Ninefold Eye, …). Recoloured per row by its colour token, which stays the
     dominant hue"
@@ -636,11 +969,24 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
   notes: "glyph C: golems and constructs (stone golem, iron sentinel, iron colossus, adamant guardian, iron titan, molten
     colossus, void colossus, final guardian, …). Recoloured per row by its colour token, which stays the dominant hue"
 - id: family-d-cap
@@ -659,11 +1005,24 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
   notes: "glyph D: drakes and dragons (cave drake, wyvern, rust drake, cave dragon, bone dragon, shadow dragon, lava
     drake, ancient dragon, …). Recoloured per row by its colour token, which stays the dominant hue"
 - id: family-e-cap
@@ -682,11 +1041,24 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
   notes: "glyph E: elementals (flame guardian, crystal elemental, The Crystal Warden). Recoloured per row by its colour
     token, which stays the dominant hue"
 - id: family-f-cap
@@ -705,11 +1077,24 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
   notes: "glyph F: stalkers (cave stalker, void stalker). Recoloured per row by its colour token, which stays the dominant
     hue"
 - id: family-g-cap
@@ -728,11 +1113,24 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
   notes: "glyph G: giants and titans (gargoyle, hill giant, stone giant, frost giant, fire giant, storm giant, granite
     titan, grave titan, …). Recoloured per row by its colour token, which stays the dominant hue"
 - id: family-h-cap
@@ -751,11 +1149,24 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
   notes: "glyph H: many-headed beasts (chimera, hydra, Old Mawkin). Recoloured per row by its colour token, which stays
     the dominant hue"
 - id: family-i-cap
@@ -773,11 +1184,24 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
   notes: "glyph I: insect swarms (giant wasp swarm). Recoloured per row by its colour token, which stays the dominant hue"
 - id: family-k-cap
   kind: creature
@@ -795,11 +1219,24 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
   notes: "glyph K: death knights and dread lords (death knight, dread knight, death lord, reaper, dread emperor, death
     incarnate, The Tallow King, The Drowned Duke, …). Recoloured per row by its colour token, which stays the dominant
     hue"
@@ -818,11 +1255,24 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
   notes: "glyph L: liches (lich acolyte, lich, arch lich, elder lich, eternal lich, Sovereign Aurelian). Recoloured per
     row by its colour token, which stays the dominant hue"
 - id: family-m-cap
@@ -840,11 +1290,24 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
   notes: "glyph M: mummies (mummy, The Hollow Abbot). Recoloured per row by its colour token, which stays the dominant hue"
 - id: family-o-cap
   kind: creature
@@ -862,11 +1325,24 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
   notes: "glyph O: ogres (ogre, ogre mage, Grask the Pale, Kharn the Unbowed). Recoloured per row by its colour token,
     which stays the dominant hue"
 - id: family-p-cap
@@ -885,11 +1361,24 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
   notes: "glyph P: fiends and demon lords (pit fiend, fire lord, demon prince, archdevil, hellfire lord, lord of ashes,
     Azhul Emberheart, Nethys the Forgotten). Recoloured per row by its colour token, which stays the dominant hue"
 - id: family-s-cap
@@ -907,11 +1396,24 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
   notes: "glyph S: snakes, serpents and spiders (sewer snake, giant spider, lake serpent, Qorra of the Lake). Recoloured
     per row by its colour token, which stays the dominant hue"
 - id: family-t-cap
@@ -930,11 +1432,24 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
   notes: "glyph T: trolls (troll, cave troll, war troll, ancient troll). Recoloured per row by its colour token, which
     stays the dominant hue"
 - id: family-v-cap
@@ -952,11 +1467,24 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
   notes: "glyph V: vampires (vampire spawn, vampire, elder vampire, Lord Vael of the Deep). Recoloured per row by its
     colour token, which stays the dominant hue"
 - id: family-w-cap
@@ -975,11 +1503,24 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
   notes: "glyph W: wraiths and shades (shade, wight, wraith, mirror shade, shadow assassin, banshee, spirit lord, flame
     wraith, …). Recoloured per row by its colour token, which stays the dominant hue"
 - id: family-y-cap
@@ -997,11 +1538,24 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
   notes: "glyph Y: bears (cave bear). Recoloured per row by its colour token, which stays the dominant hue"
 - id: family-a
   kind: creature
@@ -1018,11 +1572,24 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
   notes: "glyph a: giant insects and scorpions (giant roach, giant scorpion). Recoloured per row by its colour token,
     which stays the dominant hue"
 - id: family-b
@@ -1040,11 +1607,24 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
   notes: "glyph b: cave bats (cave bat). Recoloured per row by its colour token, which stays the dominant hue"
 - id: family-c
   kind: creature
@@ -1061,11 +1641,24 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
   notes: "glyph c: giant centipedes and crayfish (giant centipede, giant crayfish). Recoloured per row by its colour
     token, which stays the dominant hue"
 - id: family-e
@@ -1083,11 +1676,24 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
   notes: "glyph e: eels and deep things of the water (pit eel, sewer lurker, giant eel, lake horror, abyssal eel, tide
     lord, horror of the deep, abyssal leviathan, …). Recoloured per row by its colour token, which stays the dominant
     hue"
@@ -1106,11 +1712,24 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
   notes: "glyph f: fungus horrors and spore beasts (fungus horror, spore mother, mushroom lord, spore tyrant, The Spore
     Queen). Recoloured per row by its colour token, which stays the dominant hue"
 - id: family-g
@@ -1128,11 +1747,24 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
   notes: "glyph g: goblins with slings, bows and war-chants (goblin slinger, goblin archer, goblin warchanter). Recoloured
     per row by its colour token, which stays the dominant hue"
 - id: family-h
@@ -1150,11 +1782,24 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
   notes: "glyph h: men and dwarves: acolytes, priests, mages, crossbowmen (hobgoblin, dark acolyte, dwarf crossbowman,
     dark mage, dark priest, dwarven ironclad, mind weaver, archmage, …). Recoloured per row by its colour token, which
     stays the dominant hue"
@@ -1174,11 +1819,24 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
   notes: "glyph j: gelatinous cubes (gelatinous cube). Recoloured per row by its colour token, which stays the dominant hue"
 - id: family-k
   kind: creature
@@ -1195,11 +1853,24 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
   notes: "glyph k: kobolds (kobold scrapper, kobold shaman). Recoloured per row by its colour token, which stays the
     dominant hue"
 - id: family-l
@@ -1217,11 +1888,24 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
   notes: "glyph l: lizards, frogs and lizardmen (cave lizard, bog frog, lizardman spearman, basilisk). Recoloured per row
     by its colour token, which stays the dominant hue"
 - id: family-n
@@ -1240,11 +1924,24 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
   notes: "glyph n: bone nagas (bone naga). Recoloured per row by its colour token, which stays the dominant hue"
 - id: family-o
   kind: creature
@@ -1261,11 +1958,24 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
   notes: "glyph o: orcs (orc raider, orc archer, orc warlord). Recoloured per row by its colour token, which stays the
     dominant hue"
 - id: family-q
@@ -1283,11 +1993,24 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
   notes: "glyph q: wolves, boars and hounds (wolf, dire boar, wild boar herd, chaos hound pack, nightmare). Recoloured per
     row by its colour token, which stays the dominant hue"
 - id: family-r
@@ -1305,11 +2028,24 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
   notes: "glyph r: rats (cave rat, plague rat swarm, grave rat). Recoloured per row by its colour token, which stays the
     dominant hue"
 - id: family-s
@@ -1327,11 +2063,24 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
   notes: "glyph s: skeletons (crypt skeleton, bone archer, bone wolf pack, bone colossus, bone sovereign, The Bone
     Regent). Recoloured per row by its colour token, which stays the dominant hue"
 - id: family-w
@@ -1349,11 +2098,24 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
   notes: "glyph w: worms, leeches and crawlers (mud crawler, giant leech, carrion crawler, magma worm). Recoloured per row
     by its colour token, which stays the dominant hue"
 - id: family-z
@@ -1371,11 +2133,24 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
   notes: "glyph z: ghouls and zombies (ghoul, rot zombie). Recoloured per row by its colour token, which stays the
     dominant hue"
 - id: npc-rival
@@ -1392,9 +2167,17 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
   notes: a rival, a person of the dungeon; stands on a ring in its role colour
 - id: npc-trader
   kind: character
@@ -1410,9 +2193,17 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
   notes: a trader, a person of the dungeon; stands on a ring in its role colour
 - id: npc-bandit
   kind: character
@@ -1428,9 +2219,17 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
   notes: a bandit, a person of the dungeon; stands on a ring in its role colour
 - id: npc-hermit
   kind: character
@@ -1446,9 +2245,17 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
   notes: a hermit, a person of the dungeon; stands on a ring in its role colour
 - id: npc-captive
   kind: character
@@ -1464,9 +2271,17 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
   notes: a captive, a person of the dungeon; stands on a ring in its role colour
 - id: feature-chest
   kind: prop
@@ -1849,11 +2664,24 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
   notes: Grask the Pale, a unique boss of the family-o-cap family, drawn at the large size
 - id: boss-the-tallow-king
   kind: creature
@@ -1871,11 +2699,24 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
   notes: The Tallow King, a unique boss of the family-k-cap family, drawn at the large size
 - id: boss-old-mawkin
   kind: creature
@@ -1893,11 +2734,24 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
   notes: Old Mawkin, a unique boss of the family-h-cap family, drawn at the large size
 - id: boss-varn-ironmouth
   kind: creature
@@ -1915,11 +2769,24 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
   notes: Varn Ironmouth, a unique boss of the family-h family, drawn at the large size
 - id: boss-mother-cinder
   kind: creature
@@ -1937,11 +2804,24 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
   notes: Mother Cinder, a unique boss of the family-h family, drawn at the large size
 - id: boss-the-hollow-abbot
   kind: creature
@@ -1959,11 +2839,24 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
   notes: The Hollow Abbot, a unique boss of the family-m-cap family, drawn at the large size
 - id: boss-sister-gloam
   kind: creature
@@ -1981,11 +2874,24 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
   notes: Sister Gloam, a unique boss of the family-h family, drawn at the large size
 - id: boss-the-drowned-duke
   kind: creature
@@ -2003,11 +2909,24 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
   notes: The Drowned Duke, a unique boss of the family-k-cap family, drawn at the large size
 - id: boss-brutus-stonehand
   kind: creature
@@ -2025,11 +2944,24 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
   notes: Brutus Stonehand, a unique boss of the family-g-cap family, drawn at the large size
 - id: boss-the-spore-queen
   kind: creature
@@ -2047,11 +2979,24 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
   notes: The Spore Queen, a unique boss of the family-f family, drawn at the large size
 - id: boss-ulgrim-deepwarden
   kind: creature
@@ -2069,11 +3014,24 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
   notes: Ulgrim Deepwarden, a unique boss of the family-h family, drawn at the large size
 - id: boss-the-bone-regent
   kind: creature
@@ -2091,11 +3049,24 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
   notes: The Bone Regent, a unique boss of the family-s family, drawn at the large size
 - id: boss-hexmother-yarrow
   kind: creature
@@ -2113,11 +3084,24 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
   notes: Hexmother Yarrow, a unique boss of the family-h family, drawn at the large size
 - id: boss-the-lantern-man
   kind: creature
@@ -2135,11 +3119,24 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
   notes: The Lantern Man, a unique boss of the family-w-cap family, drawn at the large size
 - id: boss-skarn-the-burning
   kind: creature
@@ -2157,11 +3154,24 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
   notes: Skarn the Burning, a unique boss of the family-d-cap family, drawn at the large size
 - id: boss-the-gilded-wyrm
   kind: creature
@@ -2179,11 +3189,24 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
   notes: The Gilded Wyrm, a unique boss of the family-d-cap family, drawn at the large size
 - id: boss-thorne-ashgrave
   kind: creature
@@ -2201,11 +3224,24 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
   notes: Thorne Ashgrave, a unique boss of the family-k-cap family, drawn at the large size
 - id: boss-the-pale-prior
   kind: creature
@@ -2223,11 +3259,24 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
   notes: The Pale Prior, a unique boss of the family-h family, drawn at the large size
 - id: boss-magister-voss
   kind: creature
@@ -2245,11 +3294,24 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
   notes: Magister Voss, a unique boss of the family-h family, drawn at the large size
 - id: boss-the-stone-mother
   kind: creature
@@ -2267,11 +3329,24 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
   notes: The Stone Mother, a unique boss of the family-c-cap family, drawn at the large size
 - id: boss-qorra-of-the-lake
   kind: creature
@@ -2289,11 +3364,24 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
   notes: Qorra of the Lake, a unique boss of the family-s-cap family, drawn at the large size
 - id: boss-the-black-abbess
   kind: creature
@@ -2311,11 +3399,24 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
   notes: The Black Abbess, a unique boss of the family-h family, drawn at the large size
 - id: boss-hrolf-the-hammerlord
   kind: creature
@@ -2333,11 +3434,24 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
   notes: Hrolf the Hammerlord, a unique boss of the family-g-cap family, drawn at the large size
 - id: boss-the-weeping-knight
   kind: creature
@@ -2355,11 +3469,24 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
   notes: The Weeping Knight, a unique boss of the family-k-cap family, drawn at the large size
 - id: boss-azhul-emberheart
   kind: creature
@@ -2377,11 +3504,24 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
   notes: Azhul Emberheart, a unique boss of the family-p-cap family, drawn at the large size
 - id: boss-the-ninefold-eye
   kind: creature
@@ -2399,11 +3539,24 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
   notes: The Ninefold Eye, a unique boss of the family-a-cap family, drawn at the large size
 - id: boss-the-crystal-warden
   kind: creature
@@ -2421,11 +3574,24 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
   notes: The Crystal Warden, a unique boss of the family-e-cap family, drawn at the large size
 - id: boss-lord-vael-of-the-deep
   kind: creature
@@ -2443,11 +3609,24 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
   notes: Lord Vael of the Deep, a unique boss of the family-v-cap family, drawn at the large size
 - id: boss-the-iron-choir
   kind: creature
@@ -2465,11 +3644,24 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
   notes: The Iron Choir, a unique boss of the family-c-cap family, drawn at the large size
 - id: boss-kharn-the-unbowed
   kind: creature
@@ -2487,11 +3679,24 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
   notes: Kharn the Unbowed, a unique boss of the family-o-cap family, drawn at the large size
 - id: boss-the-leviathan-below
   kind: creature
@@ -2509,11 +3714,24 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
   notes: The Leviathan Below, a unique boss of the family-e family, drawn at the large size
 - id: boss-morrigan-dusk
   kind: creature
@@ -2531,11 +3749,24 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
   notes: Morrigan Dusk, a unique boss of the family-w-cap family, drawn at the large size
 - id: boss-the-hungering-dark
   kind: creature
@@ -2553,11 +3784,24 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
   notes: The Hungering Dark, a unique boss of the family-a-cap family, drawn at the large size
 - id: boss-sovereign-aurelian
   kind: creature
@@ -2575,11 +3819,24 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
   notes: Sovereign Aurelian, a unique boss of the family-l-cap family, drawn at the large size
 - id: boss-nethys-the-forgotten
   kind: creature
@@ -2597,11 +3854,24 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
   notes: Nethys the Forgotten, a unique boss of the family-p-cap family, drawn at the large size
 - id: boss-the-magma-sovereign
   kind: creature
@@ -2619,11 +3889,24 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
   notes: The Magma Sovereign, a unique boss of the family-g-cap family, drawn at the large size
 - id: boss-the-last-delver
   kind: creature
@@ -2641,11 +3924,24 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
   notes: The Last Delver, a unique boss of the family-h family, drawn at the large size
 - id: boss-the-throne-warden
   kind: creature
@@ -2663,11 +3959,24 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
   notes: The Throne Warden, a unique boss of the family-c-cap family, drawn at the large size
 - id: boss-eshkal-the-unmaker
   kind: creature
@@ -2685,11 +3994,24 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
   notes: Eshkal the Unmaker, a unique boss of the family-d-cap family, drawn at the large size
 - id: boss-the-hollow-emperor
   kind: creature
@@ -2707,11 +4029,24 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
   notes: The Hollow Emperor, a unique boss of the family-k-cap family, drawn at the large size
 - id: boss-the-king-below
   kind: creature
@@ -2729,11 +4064,24 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
   notes: The King Below, a unique boss of the family-k-cap family, drawn at the large size
 - id: boss-the-unnamed-regent
   kind: creature
@@ -2751,11 +4099,24 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
   notes: The Unnamed Regent, a unique boss of the family-k-cap family, drawn at the large size
 - id: boss-the-seat-itself
   kind: creature
@@ -2773,11 +4134,24 @@
     idle:
       frames: 2
       loop: true
+      durations:
+        - 600
+        - 600
     walk:
       frames: 4
       loop: true
+      durations:
+        - 120
+        - 120
+        - 120
+        - 120
     attack:
       frames: 4
+      durations:
+        - 80
+        - 40
+        - 120
+        - 60
   notes: The Seat Itself, a unique boss of the family-c-cap family, drawn at the large size
 - id: setpiece-abyssal-throne
   kind: prop

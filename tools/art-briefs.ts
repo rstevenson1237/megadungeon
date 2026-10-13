@@ -27,7 +27,7 @@ export interface ArtBrief {
   variants?: number;
   directions?: 1 | 4;
   states?: string[];
-  anims?: Record<string, { frames: number; loop?: boolean }>;
+  anims?: Record<string, { frames: number; loop?: boolean; durations?: number[] }>;
 }
 
 /** artgen's id rule (artgen-core `briefs.ts`). */
@@ -106,8 +106,10 @@ export const FEATURES: Array<[string, string, number, string[]]> = [
   ['trap', 'a found floor trap: a pressure plate and its mechanism', 0.1, ['armed', 'disarmed']],
 ];
 
-const walker = { idle: { frames: 2, loop: true }, walk: { frames: 4, loop: true } };
-const fighter = { ...walker, attack: { frames: 4 } };
+// Frame times in ms (task 6.6): a slow breath, a step cycle, and an attack of 300 ms at most (Spec 01b, Animation)
+// whose contact frame is held longest: anticipation, swing, contact, recovery.
+const walker = { idle: { frames: 2, loop: true, durations: [600, 600] }, walk: { frames: 4, loop: true, durations: [120, 120, 120, 120] } };
+const fighter = { ...walker, attack: { frames: 4, durations: [80, 40, 120, 60] } };
 const sample = (names: string[], n = 8): string => names.slice(0, n).join(', ') + (names.length > n ? ', …' : '');
 
 /** Build every brief from the content bundle's tables. */
@@ -144,7 +146,7 @@ export function buildBriefs(tables: Record<string, unknown[]>): ArtBrief[] {
   rows('classes').forEach((c, i) =>
     add({
       id: `class-${c.id.replace(/_/g, '-')}`, kind: 'character', batch: 2, priority: 200 + i, importance: 'hero', height: PLAYER_HEIGHT,
-      directions: 4, states: ['idle', 'walk', 'attack', 'hurt'], anims: { ...fighter, hurt: { frames: 2 } },
+      directions: 4, states: ['idle', 'walk', 'attack', 'hurt'], anims: { ...fighter, hurt: { frames: 2, durations: [100, 100] } },
       notes: `the player as a ${c.name}, on the shared player body so every class has the same proportions`,
     }),
   );

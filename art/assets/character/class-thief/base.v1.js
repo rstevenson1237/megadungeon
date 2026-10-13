@@ -1,0 +1,25 @@
+// class-thief base.v1 (r1) — the Thief on the shared player body (art/lib/person.v1.js): a soft cap pulled low and a
+// scarf over the mouth, a short cape, a bulging loot sack slung over the left shoulder, a short sword held low and
+// forward in the right hand. Crouched a little: knees bent, shoulders forward.
+import { person, personAnchors } from '../../../lib/person.v1.js';
+export const meta = { brief: 'class-thief', pass: 'r1', notes: 'low cap and scarf, short cape, loot sack, short sword low', mirror: false };
+
+export function render(ctx) {
+  return person(ctx, k => {
+    const { pal, X, Y, cx, waist, shoulder, headY, knee, L, R } = k;
+    k.worn(() => k.add({ type: 'path', name: 'sack', underlay: true, mat: pal.cloth, shade: 'sphere', d: k.smooth([[R - X(1), shoulder - Y(3)], [R + X(3), shoulder - Y(1)], [R + X(3.5), waist - Y(2)], [R, waist], [R - X(3), waist - Y(2)], [R - X(3), shoulder]]) }));
+    k.legs(pal.leather, 2.6, 1.5); k.boots(pal.leather);
+    k.shape('cape', pal.hair, [[0, shoulder - Y(1)], [5.5, shoulder], [6.5, shoulder + Y(5)], [5.5, waist], [0, waist - Y(1)]]);
+    k.front(() => k.shape('vest', pal.leather, [[0, shoulder + Y(1)], [3.4, shoulder + Y(1)], [3.6, waist], [3.8, waist + Y(2)], [0, waist + Y(2.5)]]));
+    k.add({ type: 'rect', name: 'belt', x: cx - X(4), y: waist - Y(0.2), w: X(8), h: Y(1.2), mat: pal.leather, shade: 'flat', band: 2 });
+    k.head(headY + Y(0.5), { wide: 3.1, crown: 4.4, jaw: 1.5, chin: 4.2, point: 0.5, eyes: 1.7 });
+    k.front(() => k.add({ type: 'path', name: 'scarf', mat: pal.hair, shade: 'flat', band: 1, d: k.smooth([[cx - X(3.2), headY + Y(2)], [cx + X(3.2), headY + Y(2)], [cx + X(2), headY + Y(5.2)], [cx, headY + Y(5.8)], [cx - X(2), headY + Y(5.2)]]) }));
+    k.add({ type: 'path', name: 'cap', underlay: true, mat: pal.hair, shade: 'sphere', d: k.smooth([[cx - X(3.8), headY - Y(0.2)], [cx - X(3.6), headY - Y(4)], [cx, headY - Y(5)], [cx + X(4), headY - Y(4.5)], [cx + X(6), headY - Y(3)], [cx + X(4), headY - Y(1.2)], [cx + X(3.8), headY - Y(0.2)]]) });
+    k.off(() => k.arm(1, pal.leather, R - X(2), shoulder + Y(0.5), { glove: pal.leather }));
+    k.main(() => {
+      k.arm(-1, pal.leather, L + X(1), waist + Y(1), { glove: pal.leather });
+      k.add({ type: 'path', name: 'short-sword', underlay: true, mat: pal.metal, shade: 'bevel', d: `M${L + X(0.5)} ${waist} L${L - X(4.5)} ${waist - Y(4)} L${L - X(5)} ${waist - Y(5)} L${L - X(3.6)} ${waist - Y(4.6)} L${L + X(1.4)} ${waist + Y(0.8)} Z` });
+    });
+  });
+}
+export const anchors = ctx => personAnchors(ctx, { eyes: 1.7, headDy: 0.5, hand: L => [L.L + L.X(1), L.waist + L.Y(1)] });

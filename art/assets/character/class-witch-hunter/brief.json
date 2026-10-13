@@ -1,0 +1,9 @@
+{
+  "id": "class-witch-hunter",
+  "template": "topdown/character-walk",
+  "review": {
+    "scale": 5,
+    "sym": "none",
+    "iso": true
+  }
+}
