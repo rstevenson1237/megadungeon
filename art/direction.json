@@ -98,7 +98,10 @@
         "cloth",
         "leather",
         "grass",
-        "accent"
+        "accent",
+        "metal",
+        "stone",
+        "glow"
       ],
       "prop": [
         "wood",
@@ -106,7 +109,9 @@
         "stone",
         "leather",
         "accent",
-        "glow"
+        "glow",
+        "cloth",
+        "dirt"
       ],
       "tile": [
         "dirt",

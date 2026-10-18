@@ -18,13 +18,13 @@
     }
   },
   "budget": {
-    "revisionPasses": 3,
+    "revisionPasses": 2,
     "maxSheetEdge": 1568,
     "maxUserIterations": 3,
     "extraAutonomousRevisions": 1,
     "tiers": {
       "hero": {
-        "revisionPasses": 4
+        "revisionPasses": 3
       },
       "filler": {
         "revisionPasses": 2
@@ -35,20 +35,31 @@
         "revisionPasses": 2
       },
       "prop": {
-        "revisionPasses": 4
+        "revisionPasses": 3
       }
     }
   },
   "models": {
-    "base": "default",
+    "base": "sonnet",
     "revise": "default",
     "finish": "default",
-    "review": "default"
+    "review": "default",
+    "reviewEarly": "sonnet",
+    "blind": "default",
+    "roster": "default"
   },
   "review": {
     "blind": true,
     "approveMin": 6.5,
-    "blindMaxGap": 1
+    "blindMaxGap": 1,
+    "blindRevisions": 1,
+    "finish": "auto",
+    "earlyRoster": true,
+    "rosterRevisions": 1,
+    "heightFail": 0.15,
+    "sheetDetail": {
+      "r1": "low"
+    }
   },
   "gate": {}
 }

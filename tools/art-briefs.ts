@@ -23,6 +23,8 @@ export interface ArtBrief {
   notes: string;
   height?: number;
   size?: string | [number, number];
+  /** artgen's body rig for shapes the humanoid walker doesn't cover (artgen 0.10). */
+  body?: 'quadruped' | 'serpent' | 'flyer' | 'large';
   object?: string;
   variants?: number;
   directions?: 1 | 4;
@@ -59,6 +61,17 @@ const FAMILY_NOTES: Record<string, string> = {
   A: 'aberrations: eye tyrants and mind horrors', C: 'golems and constructs', D: 'drakes and dragons', E: 'elementals', F: 'stalkers',
   G: 'giants and titans', H: 'many-headed beasts', I: 'insect swarms', K: 'death knights and dread lords', L: 'liches', M: 'mummies',
   O: 'ogres', P: 'fiends and demon lords', S: 'snakes, serpents and spiders', T: 'trolls', V: 'vampires', W: 'wraiths and shades', Y: 'bears',
+};
+
+/**
+ * Body rigs by glyph family (artgen 0.10): low beasts on four legs, long bodies as serpents, winged things as flyers,
+ * and the great beasts on the large rig. Families left out are upright and use the humanoid walker.
+ */
+export const FAMILY_BODIES: Record<string, NonNullable<ArtBrief['body']>> = {
+  q: 'quadruped', r: 'quadruped', l: 'quadruped', Y: 'quadruped',
+  c: 'serpent', e: 'serpent', n: 'serpent', w: 'serpent', S: 'serpent',
+  b: 'flyer', I: 'flyer',
+  D: 'large', H: 'large',
 };
 
 /** A door's states (Spec 01b, Walls and doors), each also drawn cut to a cap. */
@@ -156,6 +169,7 @@ export function buildBriefs(tables: Record<string, unknown[]>): ArtBrief[] {
     add({
       id: familyId(g), kind: 'creature', batch: 2, priority: 240 + i, importance: 'standard', height: FAMILY_HEIGHTS[g],
       ...(FAMILY_HEIGHTS[g]! > LARGE_ABOVE ? { size: 'large' } : {}),
+      ...(FAMILY_BODIES[g] ? { body: FAMILY_BODIES[g] } : {}),
       directions: 4, states: ['idle', 'walk', 'attack'], anims: fighter,
       notes: `glyph ${g}: ${FAMILY_NOTES[g] ?? 'monsters'} (${sample(families.get(g)!)}). Recoloured per row by its colour token, which stays the dominant hue`,
     }),
@@ -185,7 +199,8 @@ export function buildBriefs(tables: Record<string, unknown[]>): ArtBrief[] {
   rows('bosses').forEach((b, i) =>
     add({
       id: `boss-${b.id.replace(/_/g, '-')}`, kind: 'creature', batch: 4, priority: 400 + i, importance: 'hero', size: 'large',
-      height: FAMILY_HEIGHTS[b.glyph!], directions: 4, states: ['idle', 'walk', 'attack'], anims: fighter,
+      height: FAMILY_HEIGHTS[b.glyph!], ...(FAMILY_BODIES[b.glyph!] ? { body: FAMILY_BODIES[b.glyph!] } : {}),
+      directions: 4, states: ['idle', 'walk', 'attack'], anims: fighter,
       notes: `${b.name}, a unique boss of the ${familyId(b.glyph!)} family, drawn at the large size`,
     }),
   );

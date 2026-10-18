@@ -996,6 +996,7 @@
   importance: standard
   height: 4
   size: large
+  body: large
   directions: 4
   states:
     - idle
@@ -1140,6 +1141,7 @@
   importance: standard
   height: 3
   size: large
+  body: large
   directions: 4
   states:
     - idle
@@ -1175,6 +1177,7 @@
   priority: 247
   importance: standard
   height: 1.2
+  body: flyer
   directions: 4
   states:
     - idle
@@ -1387,6 +1390,7 @@
   priority: 253
   importance: standard
   height: 1
+  body: serpent
   directions: 4
   states:
     - idle
@@ -1529,6 +1533,7 @@
   priority: 257
   importance: standard
   height: 1.6
+  body: quadruped
   directions: 4
   states:
     - idle
@@ -1598,6 +1603,7 @@
   priority: 259
   importance: standard
   height: 0.4
+  body: flyer
   directions: 4
   states:
     - idle
@@ -1632,6 +1638,7 @@
   priority: 260
   importance: standard
   height: 0.3
+  body: serpent
   directions: 4
   states:
     - idle
@@ -1667,6 +1674,7 @@
   priority: 261
   importance: standard
   height: 0.8
+  body: serpent
   directions: 4
   states:
     - idle
@@ -1879,6 +1887,7 @@
   priority: 267
   importance: standard
   height: 1
+  body: quadruped
   directions: 4
   states:
     - idle
@@ -1915,6 +1924,7 @@
   importance: standard
   height: 2.2
   size: large
+  body: serpent
   directions: 4
   states:
     - idle
@@ -1984,6 +1994,7 @@
   priority: 270
   importance: standard
   height: 1
+  body: quadruped
   directions: 4
   states:
     - idle
@@ -2019,6 +2030,7 @@
   priority: 271
   importance: standard
   height: 0.25
+  body: quadruped
   directions: 4
   states:
     - idle
@@ -2089,6 +2101,7 @@
   priority: 273
   importance: standard
   height: 0.6
+  body: serpent
   directions: 4
   states:
     - idle
@@ -2725,6 +2738,7 @@
   importance: hero
   size: large
   height: 3
+  body: large
   directions: 4
   states:
     - idle
@@ -3145,6 +3159,7 @@
   importance: hero
   size: large
   height: 4
+  body: large
   directions: 4
   states:
     - idle
@@ -3180,6 +3195,7 @@
   importance: hero
   size: large
   height: 4
+  body: large
   directions: 4
   states:
     - idle
@@ -3355,6 +3371,7 @@
   importance: hero
   size: large
   height: 1
+  body: serpent
   directions: 4
   states:
     - idle
@@ -3705,6 +3722,7 @@
   importance: hero
   size: large
   height: 0.8
+  body: serpent
   directions: 4
   states:
     - idle
@@ -3985,6 +4003,7 @@
   importance: hero
   size: large
   height: 4
+  body: large
   directions: 4
   states:
     - idle

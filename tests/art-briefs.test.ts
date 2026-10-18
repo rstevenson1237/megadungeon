@@ -3,6 +3,7 @@ import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
   BRIEF_ID,
+  FAMILY_BODIES,
   FAMILY_HEIGHTS,
   PLAYER_HEIGHT,
   buildBriefs,
@@ -50,6 +51,16 @@ describe('art briefs (Spec 01b, Briefs)', () => {
     expect(FAMILY_HEIGHTS['O']).toBe(PLAYER_HEIGHT * 2);
     expect(byId.get('family-o-cap')?.size).toBe('large');
     expect(byId.get('family-r')?.size).toBeUndefined();
+  });
+
+  it('gives non-humanoid families and their bosses an artgen body rig', () => {
+    expect(byId.get('family-q')?.body).toBe('quadruped');
+    expect(byId.get('family-e')?.body).toBe('serpent');
+    expect(byId.get('family-b')?.body).toBe('flyer');
+    expect(byId.get('family-d-cap')?.body).toBe('large');
+    expect(byId.get('family-o')?.body).toBeUndefined();
+    for (const g of Object.keys(FAMILY_BODIES)) expect(FAMILY_HEIGHTS[g], g).toBeGreaterThan(0);
+    for (const b of tables['bosses']!) expect(byId.get(`boss-${b.id.replace(/_/g, '-')}`)?.body).toBe(FAMILY_BODIES[b.glyph!]);
   });
 
   it('keeps the briefs runs in batch order', () => {
