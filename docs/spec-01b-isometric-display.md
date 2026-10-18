@@ -174,6 +174,13 @@ The spec says creatures face "the direction of their last step" with two facings
 - **Frames:** players, people and most families use the 32 x 40 character frame; the 14 families that outgrow it (A eye tyrant, C golem, D dragon, E elemental, F stalker, G giant, H hydra, K death knight, O ogre, P pit fiend, T troll, W wraith, j cube, n bone naga) use the 64 x 80 large frame. Each is drawn to its height in the size table at 16 px a metre, so a rat stays small in its frame. Frame lengths: idle 2 frames of 600 ms, walk 4 of 120 ms, attack 4 frames of 80, 40, 120 (the held hit) and 60 ms, hurt 2 of 100 ms. Until task 6.8 the map draws idle's first frame.
 - **Colour limits:** creature art has no metal ramp in the art direction, so a creature's steel (a knight's sword, a golem's plates) is drawn in the cloth ramp. No colour of the direction changes.
 
+## Clarification (art workflow before task 6.7, proposed and approved October 18, 2026)
+
+The review of batches 1 and 2 found that each batch hit a per-kind colour limit partway through (rubble with no dirt, a sack and a cloak with no cloth, a golem's iron and a fire creature's glow drawn in cloth). Approved by the owner before batch 3 (all six workflow changes), and recorded in `art/direction.json` and `docs/15-art-workflow.md`:
+
+- **Colour limits:** props may also use the cloth and dirt ramps, and creatures the metal, stone and glow ramps. No colour of the direction changes, and no approved asset changes; the direction keeps its version.
+- **Body rigs:** briefs for non-humanoid families and their bosses name an artgen body rig (quadruped, serpent, flyer or large), as listed in `tools/art-briefs.ts`. Frames, anchors and placement stay as task 6.6 set them.
+
 ## Acceptance criteria
 
 - [ ] With no art loaded, every cell and thing the text display shows is drawn, by the glyph fallback where nothing better exists.
