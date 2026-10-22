@@ -2315,8 +2315,9 @@
   height: 0.6
   states:
     - closed
+    - open
     - looted
-  notes: a tied sack of coarse cloth
+  notes: a tied sack of coarse cloth; open is untied and slumped, looted is empty and flat
 - id: feature-pottery
   kind: prop
   batch: 3
@@ -2324,9 +2325,9 @@
   importance: standard
   height: 0.6
   states:
-    - whole
+    - closed
     - smashed
-  notes: a clay urn
+  notes: a clay urn; smashed is a low ring of shards
 - id: feature-weapon-rack
   kind: prop
   batch: 3
@@ -2334,9 +2335,10 @@
   importance: standard
   height: 1.6
   states:
-    - full
+    - closed
+    - open
     - looted
-  notes: a wooden weapon rack
+  notes: a wooden weapon rack; closed is full, open has a gap, looted is bare
 - id: feature-fountain
   kind: prop
   batch: 3
@@ -2366,8 +2368,7 @@
   states:
     - closed
     - open
-    - looted
-  notes: a carved stone sarcophagus
+  notes: a carved stone sarcophagus; open has its lid pushed aside
 - id: feature-rune
   kind: prop
   batch: 3
@@ -2377,30 +2378,56 @@
   states:
     - dormant
     - spent
-  notes: a carved floor rune
+  notes: a rune carved in the floor
 - id: feature-sign
   kind: prop
   batch: 3
   priority: 308
   importance: standard
-  height: 1.6
+  height: 0.5
   states:
-    - idle
-  notes: a wall-mounted sign or scrawled graffiti
-- id: feature-lever
+    - left
+    - right
+    - cap
+  notes: "a weathered wooden plaque with scratched letters, for signs and graffiti; drawn over a wall block in its own 32
+    x 40 frame, placed as the wall is (terrain-wall): on the lower-left face (left), the lower-right face (right) or the
+    top of the 4 px cap (cap)"
+  size:
+    - 32
+    - 40
+- id: feature-wall-rune
   kind: prop
   batch: 3
   priority: 309
+  importance: standard
+  height: 0.4
+  states:
+    - left
+    - right
+    - cap
+    - left-spent
+    - right-spent
+    - cap-spent
+  notes: "a rune carved in a wall, glowing while dormant and cold once spent; drawn over a wall block in its own 32 x 40
+    frame, placed as the wall is (terrain-wall): on the lower-left face (left), the lower-right face (right) or the top
+    of the 4 px cap (cap)"
+  size:
+    - 32
+    - 40
+- id: feature-lever
+  kind: prop
+  batch: 3
+  priority: 310
   importance: standard
   height: 1
   states:
     - up
     - pulled
-  notes: an iron wall lever
+  notes: an iron lever on a stone post; pulled is thrown down
 - id: feature-spirit-totem
   kind: prop
   batch: 3
-  priority: 310
+  priority: 311
   importance: standard
   height: 1.8
   states:
@@ -2409,12 +2436,11 @@
 - id: feature-trap
   kind: prop
   batch: 3
-  priority: 311
+  priority: 312
   importance: standard
   height: 0.1
   states:
     - armed
-    - disarmed
   notes: "a found floor trap: a pressure plate and its mechanism"
 - id: family-coins
   kind: prop
@@ -2612,54 +2638,81 @@
   batch: 3
   priority: 360
   importance: filler
+  size:
+    - 9
+    - 9
   notes: "status icon above the head: a dripping fang"
 - id: icon-slowed
   kind: ui-icon
   batch: 3
   priority: 361
   importance: filler
+  size:
+    - 9
+    - 9
   notes: "status icon above the head: a snail shell"
 - id: icon-hasted
   kind: ui-icon
   batch: 3
   priority: 362
   importance: filler
+  size:
+    - 9
+    - 9
   notes: "status icon above the head: a winged boot"
 - id: icon-asleep
   kind: ui-icon
   batch: 3
   priority: 363
   importance: filler
+  size:
+    - 9
+    - 9
   notes: "status icon above the head: a closed eye"
 - id: icon-held
   kind: ui-icon
   batch: 3
   priority: 364
   importance: filler
+  size:
+    - 9
+    - 9
   notes: "status icon above the head: a shackle"
 - id: icon-frightened
   kind: ui-icon
   batch: 3
   priority: 365
   importance: filler
+  size:
+    - 9
+    - 9
   notes: "status icon above the head: a skull"
 - id: icon-blessed
   kind: ui-icon
   batch: 3
   priority: 366
   importance: filler
+  size:
+    - 9
+    - 9
   notes: "status icon above the head: a sunburst"
 - id: icon-cursed
   kind: ui-icon
   batch: 3
   priority: 367
   importance: filler
+  size:
+    - 9
+    - 9
   notes: "status icon above the head: a broken circle"
 - id: icon-shield
   kind: ui-icon
   batch: 3
   priority: 368
   importance: filler
+  size:
+    - 9
+    - 9
   notes: "status icon above the head: a kite shield"
 - id: boss-grask-the-pale
   kind: creature

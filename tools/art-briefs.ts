@@ -89,6 +89,9 @@ export const ITEM_CLASSES: Array<[string, string, number]> = [
   ['quest-item', 'a wrapped relic tied with cord', 0.3],
 ];
 
+/** A status icon's frame: up to three stand 10 px apart over a head (src/ui/iso-view.ts). */
+export const ICON_SIZE: [number, number] = [9, 9];
+
 /** The eight status effects of Spec 04, in the Status block's order, then Shield. */
 export const STATUS_ICONS: Array<[string, string]> = [
   ['poisoned', 'a dripping fang'], ['slowed', 'a snail shell'], ['hasted', 'a winged boot'], ['asleep', 'a closed eye'],
@@ -103,20 +106,29 @@ export const EFFECTS: Array<[string, string, string]> = [
   ['die-lost', 'a small six-sided die', 'a die lost'], ['alert', 'an exclamation mark', 'a creature becoming alert'],
 ];
 
-/** Fixtures and containers of Spec 06, with the states the look description names (Spec 01, Addendum A). */
-export const FEATURES: Array<[string, string, number, string[]]> = [
+/**
+ * Fixtures and containers of Spec 06, with the states the scene model names (src/ui/scene.ts, as the look description
+ * words them): a container is closed, open (searched, something left) or looted, pottery closed or smashed. Marks on a
+ * wall (a sign or graffiti, a rune carved in the wall) stand in a wall's 32 x 40 frame and are drawn over it: on its
+ * lower-left face (read from map south), its lower-right face (read from map east), or the top of its cut cap.
+ */
+export const WALL_MARK_STATES = ['left', 'right', 'cap'] as const;
+const WALL_MARK = 'drawn over a wall block in its own 32 x 40 frame, placed as the wall is (terrain-wall): on the lower-left face (left), the lower-right face (right) or the top of the 4 px cap (cap)';
+export const FEATURES: Array<[string, string, number, string[], [number, number]?]> = [
   ['chest', 'an iron-bound chest', 0.7, ['closed', 'open', 'looted']],
-  ['sack', 'a tied sack of coarse cloth', 0.6, ['closed', 'looted']],
-  ['pottery', 'a clay urn', 0.6, ['whole', 'smashed']],
-  ['weapon-rack', 'a wooden weapon rack', 1.6, ['full', 'looted']],
+  ['sack', 'a tied sack of coarse cloth; open is untied and slumped, looted is empty and flat', 0.6, ['closed', 'open', 'looted']],
+  ['pottery', 'a clay urn; smashed is a low ring of shards', 0.6, ['closed', 'smashed']],
+  ['weapon-rack', 'a wooden weapon rack; closed is full, open has a gap, looted is bare', 1.6, ['closed', 'open', 'looted']],
   ['fountain', 'a stone basin fountain', 1.4, ['flowing', 'dry']],
   ['altar', 'a stone altar to a nameless god', 1.1, ['idle', 'offered']],
-  ['sarcophagus', 'a carved stone sarcophagus', 0.9, ['closed', 'open', 'looted']],
-  ['rune', 'a carved floor rune', 0.05, ['dormant', 'spent']],
-  ['sign', 'a wall-mounted sign or scrawled graffiti', 1.6, ['idle']],
-  ['lever', 'an iron wall lever', 1.0, ['up', 'pulled']],
+  ['sarcophagus', 'a carved stone sarcophagus; open has its lid pushed aside', 0.9, ['closed', 'open']],
+  ['rune', 'a rune carved in the floor', 0.05, ['dormant', 'spent']],
+  ['sign', `a weathered wooden plaque with scratched letters, for signs and graffiti; ${WALL_MARK}`, 0.5, [...WALL_MARK_STATES], [32, 40]],
+  ['wall-rune', `a rune carved in a wall, glowing while dormant and cold once spent; ${WALL_MARK}`, 0.4,
+    [...WALL_MARK_STATES, ...WALL_MARK_STATES.map((s) => `${s}-spent`)], [32, 40]],
+  ['lever', 'an iron lever on a stone post; pulled is thrown down', 1.0, ['up', 'pulled']],
   ['spirit-totem', 'a carved spirit totem pole', 1.8, ['idle']],
-  ['trap', 'a found floor trap: a pressure plate and its mechanism', 0.1, ['armed', 'disarmed']],
+  ['trap', 'a found floor trap: a pressure plate and its mechanism', 0.1, ['armed']],
 ];
 
 // Frame times in ms (task 6.6): a slow breath, a step cycle, and an attack of 300 ms at most (Spec 01b, Animation)
@@ -182,8 +194,8 @@ export function buildBriefs(tables: Record<string, unknown[]>): ArtBrief[] {
   );
 
   // Batch 3: features, floor items, effects and status icons.
-  FEATURES.forEach(([id, notes, height, states], i) =>
-    add({ id: `feature-${id}`, kind: 'prop', batch: 3, priority: 300 + i, importance: 'standard', height, states, notes }),
+  FEATURES.forEach(([id, notes, height, states, size], i) =>
+    add({ id: `feature-${id}`, kind: 'prop', batch: 3, priority: 300 + i, importance: 'standard', height, states, notes, ...(size ? { size } : {}) }),
   );
   ITEM_CLASSES.forEach(([id, notes, height], i) =>
     add({ id: `family-${id}`, kind: 'prop', batch: 3, priority: 320 + i, importance: 'filler', height, notes: `${notes}, the top item of a cell` }),
@@ -192,7 +204,7 @@ export function buildBriefs(tables: Record<string, unknown[]>): ArtBrief[] {
     add({ id: `fx-${id}`, kind: 'effect', batch: 3, priority: 340 + i, importance: 'filler', object, anims: { play: { frames: 4 } }, notes: `shows ${use}; at most 300 ms` }),
   );
   STATUS_ICONS.forEach(([id, object], i) =>
-    add({ id: `icon-${id}`, kind: 'ui-icon', batch: 3, priority: 360 + i, importance: 'filler', notes: `status icon above the head: ${object}` }),
+    add({ id: `icon-${id}`, kind: 'ui-icon', batch: 3, priority: 360 + i, importance: 'filler', size: ICON_SIZE, notes: `status icon above the head: ${object}` }),
   );
 
   // Batch 4: unique bosses at the large size, and the level 100 set piece.
