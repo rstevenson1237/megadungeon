@@ -181,9 +181,9 @@ The review of batches 1 and 2 found that each batch hit a per-kind colour limit 
 - **Colour limits:** props may also use the cloth and dirt ramps, and creatures the metal, stone and glow ramps. No colour of the direction changes, and no approved asset changes; the direction keeps its version.
 - **Body rigs:** briefs for non-humanoid families and their bosses name an artgen body rig (quadruped, serpent, flyer or large), as listed in `tools/art-briefs.ts`. Frames, anchors and placement stay as task 6.6 set them.
 
-## Clarification (task 6.7, proposed October 22, 2026)
+## Clarification (task 6.7, proposed October 22 and approved October 23, 2026)
 
-The spec lists batch 3's features, floor items, effects and icons, but not which state names the art carries, where a mark on a wall is drawn, how big a status icon is, or which colours a cold effect may use. Proposed as built in `tools/art-briefs.ts` and `src/ui/iso-view.ts`:
+The spec lists batch 3's features, floor items, effects and icons, but not which state names the art carries, where a mark on a wall is drawn, how big a status icon is, or which colours a cold effect may use. Approved by the owner (all four points) and built in `tools/art-briefs.ts` and `src/ui/iso-view.ts`:
 
 - **Feature states are the game's own:** each feature's art carries the states the scene model names (as the look description words them), so the draw list needs no table between them. A chest, a sack and a weapon rack are closed, open (searched, something left) or looted; pottery is closed or smashed; a sarcophagus closed or open; a fountain flowing or dry; an altar idle or offered; a floor rune dormant or spent; a lever up or pulled; a found trap is drawn only while armed. The totem has one state.
 - **Marks on a wall** (a sign, graffiti, a rune carved in a wall; Spec 06 puts every lore mark on a wall cell) are drawn over the wall block in the feature layer, in a 32 x 40 frame placed as the wall is: on the wall's lower-left face when the cell to its map south is open, else on its lower-right face, and on the top of the cap when the wall is cut. Signs and graffiti share `feature-sign`; a wall rune is its own asset, `feature-wall-rune`, with a spent state for each face. (Until now a rune on a wall was drawn in the floor-mark layer, under its own wall, and could not be seen.)

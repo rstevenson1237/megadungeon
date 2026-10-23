@@ -81,7 +81,7 @@
       "creature": 19,
       "prop": 18,
       "tile": 21,
-      "effect": 6
+      "effect": 9
     },
     "perKind": {
       "character": [
@@ -124,7 +124,8 @@
       ],
       "effect": [
         "accent",
-        "glow"
+        "glow",
+        "cloth"
       ]
     },
     "source": "generated",
