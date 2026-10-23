@@ -114,11 +114,13 @@ export const EFFECTS: Array<[string, string, string]> = [
  */
 export const WALL_MARK_STATES = ['left', 'right', 'cap'] as const;
 const WALL_MARK = 'drawn over a wall block in its own 32 x 40 frame, placed as the wall is (terrain-wall): on the lower-left face (left), the lower-right face (right) or the top of the 4 px cap (cap)';
+/** Features taller than a prop frame holds above its cell (1.5 m at 16 px a metre) stand in the character frame. */
+const TALL: [number, number] = [32, 40];
 export const FEATURES: Array<[string, string, number, string[], [number, number]?]> = [
   ['chest', 'an iron-bound chest', 0.7, ['closed', 'open', 'looted']],
   ['sack', 'a tied sack of coarse cloth; open is untied and slumped, looted is empty and flat', 0.6, ['closed', 'open', 'looted']],
   ['pottery', 'a clay urn; smashed is a low ring of shards', 0.6, ['closed', 'smashed']],
-  ['weapon-rack', 'a wooden weapon rack; closed is full, open has a gap, looted is bare', 1.6, ['closed', 'open', 'looted']],
+  ['weapon-rack', 'a wooden weapon rack; closed is full, open has a gap, looted is bare', 1.6, ['closed', 'open', 'looted'], TALL],
   ['fountain', 'a stone basin fountain', 1.4, ['flowing', 'dry']],
   ['altar', 'a stone altar to a nameless god', 1.1, ['idle', 'offered']],
   ['sarcophagus', 'a carved stone sarcophagus; open has its lid pushed aside', 0.9, ['closed', 'open']],
@@ -127,7 +129,7 @@ export const FEATURES: Array<[string, string, number, string[], [number, number]
   ['wall-rune', `a rune carved in a wall, glowing while dormant and cold once spent; ${WALL_MARK}`, 0.4,
     [...WALL_MARK_STATES, ...WALL_MARK_STATES.map((s) => `${s}-spent`)], [32, 40]],
   ['lever', 'an iron lever on a stone post; pulled is thrown down', 1.0, ['up', 'pulled']],
-  ['spirit-totem', 'a carved spirit totem pole', 1.8, ['idle']],
+  ['spirit-totem', 'a carved spirit totem pole', 1.8, ['idle'], TALL],
   ['trap', 'a found floor trap: a pressure plate and its mechanism', 0.1, ['armed']],
 ];
 
@@ -201,7 +203,7 @@ export function buildBriefs(tables: Record<string, unknown[]>): ArtBrief[] {
     add({ id: `family-${id}`, kind: 'prop', batch: 3, priority: 320 + i, importance: 'filler', height, notes: `${notes}, the top item of a cell` }),
   );
   EFFECTS.forEach(([id, object, use], i) =>
-    add({ id: `fx-${id}`, kind: 'effect', batch: 3, priority: 340 + i, importance: 'filler', object, anims: { play: { frames: 4 } }, notes: `shows ${use}; at most 300 ms` }),
+    add({ id: `fx-${id}`, kind: 'effect', batch: 3, priority: 340 + i, importance: 'filler', object, states: ['play'], anims: { play: { frames: 4, loop: false, durations: [75, 75, 75, 75] } }, notes: `shows ${use}; 300 ms` }),
   );
   STATUS_ICONS.forEach(([id, object], i) =>
     add({ id: `icon-${id}`, kind: 'ui-icon', batch: 3, priority: 360 + i, importance: 'filler', size: ICON_SIZE, notes: `status icon above the head: ${object}` }),

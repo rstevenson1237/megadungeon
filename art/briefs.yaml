@@ -2339,6 +2339,9 @@
     - open
     - looted
   notes: a wooden weapon rack; closed is full, open has a gap, looted is bare
+  size:
+    - 32
+    - 40
 - id: feature-fountain
   kind: prop
   batch: 3
@@ -2433,6 +2436,9 @@
   states:
     - idle
   notes: a carved spirit totem pole
+  size:
+    - 32
+    - 40
 - id: feature-trap
   kind: prop
   batch: 3
@@ -2539,100 +2545,180 @@
   priority: 340
   importance: filler
   object: a star of sparks
+  states:
+    - play
   anims:
     play:
       frames: 4
-  notes: shows a hit; at most 300 ms
+      loop: false
+      durations:
+        - 75
+        - 75
+        - 75
+        - 75
+  notes: shows a hit; 300 ms
 - id: fx-miss
   kind: effect
   batch: 3
   priority: 341
   importance: filler
   object: a puff of dust
+  states:
+    - play
   anims:
     play:
       frames: 4
-  notes: shows a miss; at most 300 ms
+      loop: false
+      durations:
+        - 75
+        - 75
+        - 75
+        - 75
+  notes: shows a miss; 300 ms
 - id: fx-arrow
   kind: effect
   batch: 3
   priority: 342
   importance: filler
   object: an arrow in flight
+  states:
+    - play
   anims:
     play:
       frames: 4
-  notes: shows a shot or thrown missile; at most 300 ms
+      loop: false
+      durations:
+        - 75
+        - 75
+        - 75
+        - 75
+  notes: shows a shot or thrown missile; 300 ms
 - id: fx-bolt
   kind: effect
   batch: 3
   priority: 343
   importance: filler
   object: an arcane dart
+  states:
+    - play
   anims:
     play:
       frames: 4
-  notes: shows a bolt spell; at most 300 ms
+      loop: false
+      durations:
+        - 75
+        - 75
+        - 75
+        - 75
+  notes: shows a bolt spell; 300 ms
 - id: fx-burst
   kind: effect
   batch: 3
   priority: 344
   importance: filler
   object: a ring of fire
+  states:
+    - play
   anims:
     play:
       frames: 4
-  notes: shows an area spell's footprint; at most 300 ms
+      loop: false
+      durations:
+        - 75
+        - 75
+        - 75
+        - 75
+  notes: shows an area spell's footprint; 300 ms
 - id: fx-frost
   kind: effect
   batch: 3
   priority: 345
   importance: filler
   object: shards of ice
+  states:
+    - play
   anims:
     play:
       frames: 4
-  notes: shows a cold spell; at most 300 ms
+      loop: false
+      durations:
+        - 75
+        - 75
+        - 75
+        - 75
+  notes: shows a cold spell; 300 ms
 - id: fx-push
   kind: effect
   batch: 3
   priority: 346
   importance: filler
   object: a curved shock wave
+  states:
+    - play
   anims:
     play:
       frames: 4
-  notes: shows a push or knockback; at most 300 ms
+      loop: false
+      durations:
+        - 75
+        - 75
+        - 75
+        - 75
+  notes: shows a push or knockback; 300 ms
 - id: fx-aura
   kind: effect
   batch: 3
   priority: 347
   importance: filler
   object: a ring of rising motes
+  states:
+    - play
   anims:
     play:
       frames: 4
-  notes: shows a self spell; at most 300 ms
+      loop: false
+      durations:
+        - 75
+        - 75
+        - 75
+        - 75
+  notes: shows a self spell; 300 ms
 - id: fx-die-lost
   kind: effect
   batch: 3
   priority: 348
   importance: filler
   object: a small six-sided die
+  states:
+    - play
   anims:
     play:
       frames: 4
-  notes: shows a die lost; at most 300 ms
+      loop: false
+      durations:
+        - 75
+        - 75
+        - 75
+        - 75
+  notes: shows a die lost; 300 ms
 - id: fx-alert
   kind: effect
   batch: 3
   priority: 349
   importance: filler
   object: an exclamation mark
+  states:
+    - play
   anims:
     play:
       frames: 4
-  notes: shows a creature becoming alert; at most 300 ms
+      loop: false
+      durations:
+        - 75
+        - 75
+        - 75
+        - 75
+  notes: shows a creature becoming alert; 300 ms
 - id: icon-poisoned
   kind: ui-icon
   batch: 3

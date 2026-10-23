@@ -4,6 +4,7 @@
 
 import { describe, expect, it } from 'vitest';
 import type { Game } from '../src/game/game.ts';
+import type { LoreMark } from '../src/rules/world/level.ts';
 import { ALLY_COLOUR, BANDIT, RIVAL } from '../src/game/monsters.ts';
 import { applyStatus } from '../src/rules/magic/status.ts';
 import type { Atlas } from '../src/ui/atlas.ts';
@@ -164,6 +165,33 @@ describe('isometric walls and doors (Spec 01b, Walls and doors)', () => {
     game.state.map.exploration.explored.fill(1);
     const door = one(buildIsoDraws(game.state), 3, 2, 'wall')!;
     expect(door).toMatchObject({ shape: 'block', frame: 'locked-cap', height: CAP_H, glyph: 43 });
+  });
+});
+
+describe('isometric marks on a wall (Spec 01b, clarification of task 6.7)', () => {
+  // A 6 x 4 room inside a wall border: the north (y 0) and west (x 0) walls stand, the south and east are cut.
+  const marks: LoreMark[] = [
+    { kind: 'sign', id: 'sign_1', text: 'North.', x: 3, y: 0 },
+    { kind: 'rune', id: 'rune_1', text: 'A rune.', x: 0, y: 2 },
+    { kind: 'graffiti', id: 'graffiti_1', text: 'Turn back.', x: 3, y: 5 },
+    { kind: 'rune', id: 'rune_2', text: 'A spent rune.', x: 7, y: 2 },
+  ];
+  const level = withThings(room(6, 4, 3, 2), { lore: marks });
+
+  it('draws each mark over its wall, on the face it is read from, or on the cap of a cut wall', () => {
+    const game = gameAt(level, 3, 2);
+    game.state.used.marks.push(3);
+    const pack = new Set(['terrain-wall', 'feature-sign', 'feature-wall-rune']);
+    const draws = buildIsoDraws(game.state, { pack });
+    expect(one(draws, 3, 0, 'feature')).toMatchObject({ asset: 'feature-sign', frame: 'left' }); // read from map south
+    expect(one(draws, 0, 2, 'feature')).toMatchObject({ asset: 'feature-wall-rune', frame: 'right' }); // read from map east
+    expect(one(draws, 3, 5, 'feature')).toMatchObject({ asset: 'feature-sign', frame: 'cap' }); // a cut wall
+    expect(one(draws, 7, 2, 'feature')).toMatchObject({ asset: 'feature-wall-rune', frame: 'cap-spent' });
+    // The mark paints after its own wall, so the wall never hides it.
+    for (const m of marks) {
+      const cellDraws = at(draws, m.x, m.y).map((d) => d.layer);
+      expect(cellDraws.indexOf('feature'), `${m.id}`).toBeGreaterThan(cellDraws.indexOf('wall'));
+    }
   });
 });
 

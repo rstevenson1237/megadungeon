@@ -1,0 +1,9 @@
+{
+  "id": "feature-fountain",
+  "template": "iso/prop",
+  "review": {
+    "scale": 6,
+    "sym": "none",
+    "iso": true
+  }
+}
