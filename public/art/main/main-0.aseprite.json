@@ -39335,11 +39335,737 @@
         "h": 80
       },
       "duration": 60
+    },
+    {
+      "filename": "feature-chest/closed/s/0",
+      "frame": {
+        "x": 1011,
+        "y": 2009,
+        "w": 32,
+        "h": 32
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 32
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 32
+      },
+      "duration": 125
+    },
+    {
+      "filename": "feature-chest/open/s/0",
+      "frame": {
+        "x": 1044,
+        "y": 2009,
+        "w": 32,
+        "h": 32
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 32
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 32
+      },
+      "duration": 125
+    },
+    {
+      "filename": "feature-chest/looted/s/0",
+      "frame": {
+        "x": 1077,
+        "y": 2009,
+        "w": 32,
+        "h": 32
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 32
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 32
+      },
+      "duration": 125
+    },
+    {
+      "filename": "feature-sack/closed/s/0",
+      "frame": {
+        "x": 1110,
+        "y": 2009,
+        "w": 32,
+        "h": 32
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 32
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 32
+      },
+      "duration": 125
+    },
+    {
+      "filename": "feature-sack/open/s/0",
+      "frame": {
+        "x": 1143,
+        "y": 2009,
+        "w": 32,
+        "h": 32
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 32
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 32
+      },
+      "duration": 125
+    },
+    {
+      "filename": "feature-sack/looted/s/0",
+      "frame": {
+        "x": 1176,
+        "y": 2009,
+        "w": 32,
+        "h": 32
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 32
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 32
+      },
+      "duration": 125
+    },
+    {
+      "filename": "feature-pottery/closed/s/0",
+      "frame": {
+        "x": 1209,
+        "y": 2009,
+        "w": 32,
+        "h": 32
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 32
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 32
+      },
+      "duration": 125
+    },
+    {
+      "filename": "feature-pottery/smashed/s/0",
+      "frame": {
+        "x": 1242,
+        "y": 2009,
+        "w": 32,
+        "h": 32
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 32
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 32
+      },
+      "duration": 125
+    },
+    {
+      "filename": "feature-fountain/flowing/s/0",
+      "frame": {
+        "x": 1275,
+        "y": 2009,
+        "w": 32,
+        "h": 32
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 32
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 32
+      },
+      "duration": 125
+    },
+    {
+      "filename": "feature-fountain/dry/s/0",
+      "frame": {
+        "x": 1308,
+        "y": 2009,
+        "w": 32,
+        "h": 32
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 32
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 32
+      },
+      "duration": 125
+    },
+    {
+      "filename": "feature-lever/up/s/0",
+      "frame": {
+        "x": 1341,
+        "y": 2009,
+        "w": 32,
+        "h": 32
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 32
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 32
+      },
+      "duration": 125
+    },
+    {
+      "filename": "feature-lever/pulled/s/0",
+      "frame": {
+        "x": 1374,
+        "y": 2009,
+        "w": 32,
+        "h": 32
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 32
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 32
+      },
+      "duration": 125
+    },
+    {
+      "filename": "feature-trap/armed/s/0",
+      "frame": {
+        "x": 1407,
+        "y": 2009,
+        "w": 32,
+        "h": 32
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 32
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 32
+      },
+      "duration": 125
+    },
+    {
+      "filename": "family-jewelry/idle/s/0",
+      "frame": {
+        "x": 1440,
+        "y": 2009,
+        "w": 32,
+        "h": 32
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 32
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 32
+      },
+      "duration": 125
+    },
+    {
+      "filename": "family-potion/idle/s/0",
+      "frame": {
+        "x": 1473,
+        "y": 2009,
+        "w": 32,
+        "h": 32
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 32
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 32
+      },
+      "duration": 125
+    },
+    {
+      "filename": "family-ring/idle/s/0",
+      "frame": {
+        "x": 1506,
+        "y": 2009,
+        "w": 32,
+        "h": 32
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 32
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 32
+      },
+      "duration": 125
+    },
+    {
+      "filename": "family-rod/idle/s/0",
+      "frame": {
+        "x": 1539,
+        "y": 2009,
+        "w": 32,
+        "h": 32
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 32
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 32
+      },
+      "duration": 125
+    },
+    {
+      "filename": "family-key/idle/s/0",
+      "frame": {
+        "x": 1572,
+        "y": 2009,
+        "w": 32,
+        "h": 32
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 32
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 32
+      },
+      "duration": 125
+    },
+    {
+      "filename": "fx-hit/play/s/0",
+      "frame": {
+        "x": 1539,
+        "y": 1599,
+        "w": 24,
+        "h": 24
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 24
+      },
+      "sourceSize": {
+        "w": 24,
+        "h": 24
+      },
+      "duration": 75
+    },
+    {
+      "filename": "fx-hit/play/s/1",
+      "frame": {
+        "x": 1605,
+        "y": 2009,
+        "w": 24,
+        "h": 24
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 24
+      },
+      "sourceSize": {
+        "w": 24,
+        "h": 24
+      },
+      "duration": 75
+    },
+    {
+      "filename": "fx-hit/play/s/2",
+      "frame": {
+        "x": 1630,
+        "y": 2009,
+        "w": 24,
+        "h": 24
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 24
+      },
+      "sourceSize": {
+        "w": 24,
+        "h": 24
+      },
+      "duration": 75
+    },
+    {
+      "filename": "fx-hit/play/s/3",
+      "frame": {
+        "x": 1655,
+        "y": 2009,
+        "w": 24,
+        "h": 24
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 24
+      },
+      "sourceSize": {
+        "w": 24,
+        "h": 24
+      },
+      "duration": 75
+    },
+    {
+      "filename": "fx-arrow/play/s/0",
+      "frame": {
+        "x": 1680,
+        "y": 2009,
+        "w": 24,
+        "h": 24
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 24
+      },
+      "sourceSize": {
+        "w": 24,
+        "h": 24
+      },
+      "duration": 75
+    },
+    {
+      "filename": "fx-arrow/play/s/1",
+      "frame": {
+        "x": 1705,
+        "y": 2009,
+        "w": 24,
+        "h": 24
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 24
+      },
+      "sourceSize": {
+        "w": 24,
+        "h": 24
+      },
+      "duration": 75
+    },
+    {
+      "filename": "fx-arrow/play/s/2",
+      "frame": {
+        "x": 1730,
+        "y": 2009,
+        "w": 24,
+        "h": 24
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 24
+      },
+      "sourceSize": {
+        "w": 24,
+        "h": 24
+      },
+      "duration": 75
+    },
+    {
+      "filename": "fx-arrow/play/s/3",
+      "frame": {
+        "x": 1755,
+        "y": 2009,
+        "w": 24,
+        "h": 24
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 24
+      },
+      "sourceSize": {
+        "w": 24,
+        "h": 24
+      },
+      "duration": 75
+    },
+    {
+      "filename": "fx-burst/play/s/0",
+      "frame": {
+        "x": 1780,
+        "y": 2009,
+        "w": 24,
+        "h": 24
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 24
+      },
+      "sourceSize": {
+        "w": 24,
+        "h": 24
+      },
+      "duration": 75
+    },
+    {
+      "filename": "fx-burst/play/s/1",
+      "frame": {
+        "x": 1805,
+        "y": 2009,
+        "w": 24,
+        "h": 24
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 24
+      },
+      "sourceSize": {
+        "w": 24,
+        "h": 24
+      },
+      "duration": 75
+    },
+    {
+      "filename": "fx-burst/play/s/2",
+      "frame": {
+        "x": 1830,
+        "y": 2009,
+        "w": 24,
+        "h": 24
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 24
+      },
+      "sourceSize": {
+        "w": 24,
+        "h": 24
+      },
+      "duration": 75
+    },
+    {
+      "filename": "fx-burst/play/s/3",
+      "frame": {
+        "x": 1855,
+        "y": 2009,
+        "w": 24,
+        "h": 24
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 24
+      },
+      "sourceSize": {
+        "w": 24,
+        "h": 24
+      },
+      "duration": 75
+    },
+    {
+      "filename": "icon-frightened/idle/s/0",
+      "frame": {
+        "x": 2001,
+        "y": 810,
+        "w": 9,
+        "h": 9
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 9,
+        "h": 9
+      },
+      "sourceSize": {
+        "w": 9,
+        "h": 9
+      },
+      "duration": 125
+    },
+    {
+      "filename": "icon-blessed/idle/s/0",
+      "frame": {
+        "x": 1968,
+        "y": 1630,
+        "w": 9,
+        "h": 9
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 9,
+        "h": 9
+      },
+      "sourceSize": {
+        "w": 9,
+        "h": 9
+      },
+      "duration": 125
+    },
+    {
+      "filename": "icon-shield/idle/s/0",
+      "frame": {
+        "x": 1978,
+        "y": 1630,
+        "w": 9,
+        "h": 9
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 9,
+        "h": 9
+      },
+      "sourceSize": {
+        "w": 9,
+        "h": 9
+      },
+      "duration": 125
     }
   ],
   "meta": {
     "app": "artgen",
-    "version": "artgen 0.9.0",
+    "version": "artgen 0.10.0",
     "image": "main-0.png",
     "format": "RGBA8888",
     "size": {
@@ -42844,6 +43570,150 @@
         "name": "family-n/attack/e",
         "from": 1784,
         "to": 1787,
+        "direction": "forward"
+      },
+      {
+        "name": "feature-chest/closed/s",
+        "from": 1788,
+        "to": 1788,
+        "direction": "forward"
+      },
+      {
+        "name": "feature-chest/open/s",
+        "from": 1789,
+        "to": 1789,
+        "direction": "forward"
+      },
+      {
+        "name": "feature-chest/looted/s",
+        "from": 1790,
+        "to": 1790,
+        "direction": "forward"
+      },
+      {
+        "name": "feature-sack/closed/s",
+        "from": 1791,
+        "to": 1791,
+        "direction": "forward"
+      },
+      {
+        "name": "feature-sack/open/s",
+        "from": 1792,
+        "to": 1792,
+        "direction": "forward"
+      },
+      {
+        "name": "feature-sack/looted/s",
+        "from": 1793,
+        "to": 1793,
+        "direction": "forward"
+      },
+      {
+        "name": "feature-pottery/closed/s",
+        "from": 1794,
+        "to": 1794,
+        "direction": "forward"
+      },
+      {
+        "name": "feature-pottery/smashed/s",
+        "from": 1795,
+        "to": 1795,
+        "direction": "forward"
+      },
+      {
+        "name": "feature-fountain/flowing/s",
+        "from": 1796,
+        "to": 1796,
+        "direction": "forward"
+      },
+      {
+        "name": "feature-fountain/dry/s",
+        "from": 1797,
+        "to": 1797,
+        "direction": "forward"
+      },
+      {
+        "name": "feature-lever/up/s",
+        "from": 1798,
+        "to": 1798,
+        "direction": "forward"
+      },
+      {
+        "name": "feature-lever/pulled/s",
+        "from": 1799,
+        "to": 1799,
+        "direction": "forward"
+      },
+      {
+        "name": "feature-trap/armed/s",
+        "from": 1800,
+        "to": 1800,
+        "direction": "forward"
+      },
+      {
+        "name": "family-jewelry/idle/s",
+        "from": 1801,
+        "to": 1801,
+        "direction": "forward"
+      },
+      {
+        "name": "family-potion/idle/s",
+        "from": 1802,
+        "to": 1802,
+        "direction": "forward"
+      },
+      {
+        "name": "family-ring/idle/s",
+        "from": 1803,
+        "to": 1803,
+        "direction": "forward"
+      },
+      {
+        "name": "family-rod/idle/s",
+        "from": 1804,
+        "to": 1804,
+        "direction": "forward"
+      },
+      {
+        "name": "family-key/idle/s",
+        "from": 1805,
+        "to": 1805,
+        "direction": "forward"
+      },
+      {
+        "name": "fx-hit/play/s",
+        "from": 1806,
+        "to": 1809,
+        "direction": "forward"
+      },
+      {
+        "name": "fx-arrow/play/s",
+        "from": 1810,
+        "to": 1813,
+        "direction": "forward"
+      },
+      {
+        "name": "fx-burst/play/s",
+        "from": 1814,
+        "to": 1817,
+        "direction": "forward"
+      },
+      {
+        "name": "icon-frightened/idle/s",
+        "from": 1818,
+        "to": 1818,
+        "direction": "forward"
+      },
+      {
+        "name": "icon-blessed/idle/s",
+        "from": 1819,
+        "to": 1819,
+        "direction": "forward"
+      },
+      {
+        "name": "icon-shield/idle/s",
+        "from": 1820,
+        "to": 1820,
         "direction": "forward"
       }
     ]

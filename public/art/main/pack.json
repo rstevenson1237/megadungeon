@@ -1,7 +1,7 @@
 {
   "format": 1,
   "pack": "main",
-  "generator": "artgen 0.9.0",
+  "generator": "artgen 0.10.0",
   "direction": {
     "id": "megadungeon",
     "version": 1
@@ -72063,6 +72063,1255 @@
       "version": "finish.v1",
       "sourceHash": "1eeac901f53c8bda",
       "normals": true
+    },
+    "feature-chest": {
+      "kind": "prop",
+      "view": "iso",
+      "size": [
+        32,
+        32
+      ],
+      "anchor": [
+        16,
+        31
+      ],
+      "directions": 1,
+      "facings": [
+        "s"
+      ],
+      "states": {
+        "closed": {
+          "frames": 1,
+          "fps": 8,
+          "loop": true
+        },
+        "open": {
+          "frames": 1,
+          "fps": 8,
+          "loop": true
+        },
+        "looted": {
+          "frames": 1,
+          "fps": 8,
+          "loop": true
+        }
+      },
+      "frames": [
+        [
+          0,
+          1011,
+          2009,
+          32,
+          32,
+          0,
+          "closed",
+          0,
+          0
+        ],
+        [
+          0,
+          1044,
+          2009,
+          32,
+          32,
+          0,
+          "open",
+          0,
+          0
+        ],
+        [
+          0,
+          1077,
+          2009,
+          32,
+          32,
+          0,
+          "looted",
+          0,
+          0
+        ]
+      ],
+      "variants": [
+        "base"
+      ],
+      "version": "finish.v2",
+      "sourceHash": "9a07e216499da92d"
+    },
+    "feature-sack": {
+      "kind": "prop",
+      "view": "iso",
+      "size": [
+        32,
+        32
+      ],
+      "anchor": [
+        16,
+        31
+      ],
+      "directions": 1,
+      "facings": [
+        "s"
+      ],
+      "states": {
+        "closed": {
+          "frames": 1,
+          "fps": 8,
+          "loop": true
+        },
+        "open": {
+          "frames": 1,
+          "fps": 8,
+          "loop": true
+        },
+        "looted": {
+          "frames": 1,
+          "fps": 8,
+          "loop": true
+        }
+      },
+      "frames": [
+        [
+          0,
+          1110,
+          2009,
+          32,
+          32,
+          0,
+          "closed",
+          0,
+          0
+        ],
+        [
+          0,
+          1143,
+          2009,
+          32,
+          32,
+          0,
+          "open",
+          0,
+          0
+        ],
+        [
+          0,
+          1176,
+          2009,
+          32,
+          32,
+          0,
+          "looted",
+          0,
+          0
+        ]
+      ],
+      "variants": [
+        "base"
+      ],
+      "version": "finish.v2",
+      "sourceHash": "eb71a1de4e983634",
+      "normals": true
+    },
+    "feature-pottery": {
+      "kind": "prop",
+      "view": "iso",
+      "size": [
+        32,
+        32
+      ],
+      "anchor": [
+        16,
+        31
+      ],
+      "directions": 1,
+      "facings": [
+        "s"
+      ],
+      "states": {
+        "closed": {
+          "frames": 1,
+          "fps": 8,
+          "loop": true
+        },
+        "smashed": {
+          "frames": 1,
+          "fps": 8,
+          "loop": true
+        }
+      },
+      "frames": [
+        [
+          0,
+          1209,
+          2009,
+          32,
+          32,
+          0,
+          "closed",
+          0,
+          0
+        ],
+        [
+          0,
+          1242,
+          2009,
+          32,
+          32,
+          0,
+          "smashed",
+          0,
+          0
+        ]
+      ],
+      "variants": [
+        "base"
+      ],
+      "version": "finish.v1",
+      "sourceHash": "8405c9fad6c8463f",
+      "normals": true
+    },
+    "feature-weapon-rack": {
+      "kind": "prop",
+      "view": "iso",
+      "size": [
+        32,
+        40
+      ],
+      "anchor": [
+        16,
+        39
+      ],
+      "directions": 1,
+      "facings": [
+        "s"
+      ],
+      "states": {
+        "closed": {
+          "frames": 1,
+          "fps": 8,
+          "loop": true
+        },
+        "open": {
+          "frames": 1,
+          "fps": 8,
+          "loop": true
+        },
+        "looted": {
+          "frames": 1,
+          "fps": 8,
+          "loop": true
+        }
+      },
+      "frames": [
+        [
+          1,
+          627,
+          738,
+          32,
+          40,
+          0,
+          "closed",
+          0,
+          0
+        ],
+        [
+          1,
+          627,
+          779,
+          32,
+          40,
+          0,
+          "open",
+          0,
+          0
+        ],
+        [
+          1,
+          627,
+          820,
+          32,
+          40,
+          0,
+          "looted",
+          0,
+          0
+        ]
+      ],
+      "variants": [
+        "base"
+      ],
+      "version": "finish.v2",
+      "sourceHash": "d021bf973a66cabd",
+      "normals": true
+    },
+    "feature-fountain": {
+      "kind": "prop",
+      "view": "iso",
+      "size": [
+        32,
+        32
+      ],
+      "anchor": [
+        16,
+        31
+      ],
+      "directions": 1,
+      "facings": [
+        "s"
+      ],
+      "states": {
+        "flowing": {
+          "frames": 1,
+          "fps": 8,
+          "loop": true
+        },
+        "dry": {
+          "frames": 1,
+          "fps": 8,
+          "loop": true
+        }
+      },
+      "frames": [
+        [
+          0,
+          1275,
+          2009,
+          32,
+          32,
+          0,
+          "flowing",
+          0,
+          0
+        ],
+        [
+          0,
+          1308,
+          2009,
+          32,
+          32,
+          0,
+          "dry",
+          0,
+          0
+        ]
+      ],
+      "variants": [
+        "base"
+      ],
+      "version": "finish.v1",
+      "sourceHash": "69dd5c7c822cd624",
+      "normals": true
+    },
+    "feature-lever": {
+      "kind": "prop",
+      "view": "iso",
+      "size": [
+        32,
+        32
+      ],
+      "anchor": [
+        16,
+        31
+      ],
+      "directions": 1,
+      "facings": [
+        "s"
+      ],
+      "states": {
+        "up": {
+          "frames": 1,
+          "fps": 8,
+          "loop": true
+        },
+        "pulled": {
+          "frames": 1,
+          "fps": 8,
+          "loop": true
+        }
+      },
+      "frames": [
+        [
+          0,
+          1341,
+          2009,
+          32,
+          32,
+          0,
+          "up",
+          0,
+          0
+        ],
+        [
+          0,
+          1374,
+          2009,
+          32,
+          32,
+          0,
+          "pulled",
+          0,
+          0
+        ]
+      ],
+      "variants": [
+        "base"
+      ],
+      "version": "finish.v2",
+      "sourceHash": "092e1dfc4e4d1b6c",
+      "normals": true
+    },
+    "feature-trap": {
+      "kind": "prop",
+      "view": "iso",
+      "size": [
+        32,
+        32
+      ],
+      "anchor": [
+        16,
+        31
+      ],
+      "directions": 1,
+      "facings": [
+        "s"
+      ],
+      "states": {
+        "armed": {
+          "frames": 1,
+          "fps": 8,
+          "loop": true
+        }
+      },
+      "frames": [
+        [
+          0,
+          1407,
+          2009,
+          32,
+          32,
+          0,
+          "armed",
+          0,
+          0
+        ]
+      ],
+      "variants": [
+        "base"
+      ],
+      "version": "base.v4",
+      "sourceHash": "a4c01787939cb4e2"
+    },
+    "family-jewelry": {
+      "kind": "prop",
+      "view": "iso",
+      "size": [
+        32,
+        32
+      ],
+      "anchor": [
+        16,
+        31
+      ],
+      "directions": 1,
+      "facings": [
+        "s"
+      ],
+      "states": {
+        "idle": {
+          "frames": 1,
+          "fps": 8,
+          "loop": true
+        }
+      },
+      "frames": [
+        [
+          0,
+          1440,
+          2009,
+          32,
+          32,
+          0,
+          "idle",
+          0,
+          0
+        ]
+      ],
+      "variants": [
+        "base"
+      ],
+      "version": "base.v3",
+      "sourceHash": "a0d4446ee2db401f",
+      "normals": true
+    },
+    "family-potion": {
+      "kind": "prop",
+      "view": "iso",
+      "size": [
+        32,
+        32
+      ],
+      "anchor": [
+        16,
+        31
+      ],
+      "directions": 1,
+      "facings": [
+        "s"
+      ],
+      "states": {
+        "idle": {
+          "frames": 1,
+          "fps": 8,
+          "loop": true
+        }
+      },
+      "frames": [
+        [
+          0,
+          1473,
+          2009,
+          32,
+          32,
+          0,
+          "idle",
+          0,
+          0
+        ]
+      ],
+      "variants": [
+        "base"
+      ],
+      "version": "base.v3",
+      "sourceHash": "436a43ccda36666e",
+      "normals": true
+    },
+    "family-ring": {
+      "kind": "prop",
+      "view": "iso",
+      "size": [
+        32,
+        32
+      ],
+      "anchor": [
+        16,
+        31
+      ],
+      "directions": 1,
+      "facings": [
+        "s"
+      ],
+      "states": {
+        "idle": {
+          "frames": 1,
+          "fps": 8,
+          "loop": true
+        }
+      },
+      "frames": [
+        [
+          0,
+          1506,
+          2009,
+          32,
+          32,
+          0,
+          "idle",
+          0,
+          0
+        ]
+      ],
+      "variants": [
+        "base"
+      ],
+      "version": "base.v2",
+      "sourceHash": "aa96e5eb86c71b9c",
+      "normals": true
+    },
+    "family-rod": {
+      "kind": "prop",
+      "view": "iso",
+      "size": [
+        32,
+        32
+      ],
+      "anchor": [
+        16,
+        31
+      ],
+      "directions": 1,
+      "facings": [
+        "s"
+      ],
+      "states": {
+        "idle": {
+          "frames": 1,
+          "fps": 8,
+          "loop": true
+        }
+      },
+      "frames": [
+        [
+          0,
+          1539,
+          2009,
+          32,
+          32,
+          0,
+          "idle",
+          0,
+          0
+        ]
+      ],
+      "variants": [
+        "base"
+      ],
+      "version": "base.v1",
+      "sourceHash": "154b885033f51839",
+      "normals": true
+    },
+    "family-key": {
+      "kind": "prop",
+      "view": "iso",
+      "size": [
+        32,
+        32
+      ],
+      "anchor": [
+        16,
+        31
+      ],
+      "directions": 1,
+      "facings": [
+        "s"
+      ],
+      "states": {
+        "idle": {
+          "frames": 1,
+          "fps": 8,
+          "loop": true
+        }
+      },
+      "frames": [
+        [
+          0,
+          1572,
+          2009,
+          32,
+          32,
+          0,
+          "idle",
+          0,
+          0
+        ]
+      ],
+      "variants": [
+        "base"
+      ],
+      "version": "base.v2",
+      "sourceHash": "a1771a83dca9d5e8",
+      "normals": true
+    },
+    "fx-hit": {
+      "kind": "effect",
+      "view": "iso",
+      "size": [
+        24,
+        24
+      ],
+      "anchor": [
+        12,
+        12
+      ],
+      "directions": 1,
+      "facings": [
+        "s"
+      ],
+      "states": {
+        "play": {
+          "frames": 4,
+          "fps": 12,
+          "loop": false,
+          "durations": [
+            75,
+            75,
+            75,
+            75
+          ]
+        }
+      },
+      "frames": [
+        [
+          0,
+          1539,
+          1599,
+          24,
+          24,
+          0,
+          "play",
+          0,
+          0
+        ],
+        [
+          0,
+          1605,
+          2009,
+          24,
+          24,
+          0,
+          "play",
+          1,
+          0
+        ],
+        [
+          0,
+          1630,
+          2009,
+          24,
+          24,
+          0,
+          "play",
+          2,
+          0
+        ],
+        [
+          0,
+          1655,
+          2009,
+          24,
+          24,
+          0,
+          "play",
+          3,
+          0
+        ]
+      ],
+      "variants": [
+        "base"
+      ],
+      "version": "base.v1",
+      "sourceHash": "f7f13ab803e0ed3d"
+    },
+    "fx-arrow": {
+      "kind": "effect",
+      "view": "iso",
+      "size": [
+        24,
+        24
+      ],
+      "anchor": [
+        12,
+        12
+      ],
+      "directions": 1,
+      "facings": [
+        "s"
+      ],
+      "states": {
+        "play": {
+          "frames": 4,
+          "fps": 12,
+          "loop": false,
+          "durations": [
+            75,
+            75,
+            75,
+            75
+          ]
+        }
+      },
+      "frames": [
+        [
+          0,
+          1680,
+          2009,
+          24,
+          24,
+          0,
+          "play",
+          0,
+          0
+        ],
+        [
+          0,
+          1705,
+          2009,
+          24,
+          24,
+          0,
+          "play",
+          1,
+          0
+        ],
+        [
+          0,
+          1730,
+          2009,
+          24,
+          24,
+          0,
+          "play",
+          2,
+          0
+        ],
+        [
+          0,
+          1755,
+          2009,
+          24,
+          24,
+          0,
+          "play",
+          3,
+          0
+        ]
+      ],
+      "variants": [
+        "base"
+      ],
+      "version": "base.v2",
+      "sourceHash": "b87555f4e3ba197c"
+    },
+    "fx-burst": {
+      "kind": "effect",
+      "view": "iso",
+      "size": [
+        24,
+        24
+      ],
+      "anchor": [
+        12,
+        12
+      ],
+      "directions": 1,
+      "facings": [
+        "s"
+      ],
+      "states": {
+        "play": {
+          "frames": 4,
+          "fps": 12,
+          "loop": false,
+          "durations": [
+            75,
+            75,
+            75,
+            75
+          ]
+        }
+      },
+      "frames": [
+        [
+          0,
+          1780,
+          2009,
+          24,
+          24,
+          0,
+          "play",
+          0,
+          0
+        ],
+        [
+          0,
+          1805,
+          2009,
+          24,
+          24,
+          0,
+          "play",
+          1,
+          0
+        ],
+        [
+          0,
+          1830,
+          2009,
+          24,
+          24,
+          0,
+          "play",
+          2,
+          0
+        ],
+        [
+          0,
+          1855,
+          2009,
+          24,
+          24,
+          0,
+          "play",
+          3,
+          0
+        ]
+      ],
+      "variants": [
+        "base"
+      ],
+      "version": "base.v2",
+      "sourceHash": "4034997cd98ba88d"
+    },
+    "fx-frost": {
+      "kind": "effect",
+      "view": "iso",
+      "size": [
+        24,
+        24
+      ],
+      "anchor": [
+        12,
+        12
+      ],
+      "directions": 1,
+      "facings": [
+        "s"
+      ],
+      "states": {
+        "play": {
+          "frames": 4,
+          "fps": 12,
+          "loop": false,
+          "durations": [
+            75,
+            75,
+            75,
+            75
+          ]
+        }
+      },
+      "frames": [
+        [
+          1,
+          627,
+          861,
+          24,
+          24,
+          0,
+          "play",
+          0,
+          0
+        ],
+        [
+          1,
+          627,
+          886,
+          24,
+          24,
+          0,
+          "play",
+          1,
+          0
+        ],
+        [
+          1,
+          627,
+          911,
+          24,
+          24,
+          0,
+          "play",
+          2,
+          0
+        ],
+        [
+          1,
+          627,
+          936,
+          24,
+          24,
+          0,
+          "play",
+          3,
+          0
+        ]
+      ],
+      "variants": [
+        "base"
+      ],
+      "version": "base.v2",
+      "sourceHash": "e193805257d82537"
+    },
+    "fx-aura": {
+      "kind": "effect",
+      "view": "iso",
+      "size": [
+        24,
+        24
+      ],
+      "anchor": [
+        12,
+        12
+      ],
+      "directions": 1,
+      "facings": [
+        "s"
+      ],
+      "states": {
+        "play": {
+          "frames": 4,
+          "fps": 12,
+          "loop": false,
+          "durations": [
+            75,
+            75,
+            75,
+            75
+          ]
+        }
+      },
+      "frames": [
+        [
+          1,
+          627,
+          961,
+          24,
+          24,
+          0,
+          "play",
+          0,
+          0
+        ],
+        [
+          1,
+          627,
+          986,
+          24,
+          24,
+          0,
+          "play",
+          1,
+          0
+        ],
+        [
+          1,
+          652,
+          861,
+          24,
+          24,
+          0,
+          "play",
+          2,
+          0
+        ],
+        [
+          1,
+          652,
+          886,
+          24,
+          24,
+          0,
+          "play",
+          3,
+          0
+        ]
+      ],
+      "variants": [
+        "base"
+      ],
+      "version": "base.v2",
+      "sourceHash": "41f2542f8c3ffb37"
+    },
+    "fx-alert": {
+      "kind": "effect",
+      "view": "iso",
+      "size": [
+        24,
+        24
+      ],
+      "anchor": [
+        12,
+        12
+      ],
+      "directions": 1,
+      "facings": [
+        "s"
+      ],
+      "states": {
+        "play": {
+          "frames": 4,
+          "fps": 12,
+          "loop": false,
+          "durations": [
+            75,
+            75,
+            75,
+            75
+          ]
+        }
+      },
+      "frames": [
+        [
+          1,
+          652,
+          911,
+          24,
+          24,
+          0,
+          "play",
+          0,
+          0
+        ],
+        [
+          1,
+          652,
+          936,
+          24,
+          24,
+          0,
+          "play",
+          1,
+          0
+        ],
+        [
+          1,
+          652,
+          961,
+          24,
+          24,
+          0,
+          "play",
+          2,
+          0
+        ],
+        [
+          1,
+          652,
+          986,
+          24,
+          24,
+          0,
+          "play",
+          3,
+          0
+        ]
+      ],
+      "variants": [
+        "base"
+      ],
+      "version": "base.v2",
+      "sourceHash": "db7d5aaec075bdd6"
+    },
+    "icon-frightened": {
+      "kind": "ui-icon",
+      "view": "iso",
+      "size": [
+        9,
+        9
+      ],
+      "anchor": [
+        4,
+        8
+      ],
+      "directions": 1,
+      "facings": [
+        "s"
+      ],
+      "states": {
+        "idle": {
+          "frames": 1,
+          "fps": 8,
+          "loop": true
+        }
+      },
+      "frames": [
+        [
+          0,
+          2001,
+          810,
+          9,
+          9,
+          0,
+          "idle",
+          0,
+          0
+        ]
+      ],
+      "variants": [
+        "base"
+      ],
+      "version": "base.v1",
+      "sourceHash": "cafc84a0a17bbb02"
+    },
+    "icon-blessed": {
+      "kind": "ui-icon",
+      "view": "iso",
+      "size": [
+        9,
+        9
+      ],
+      "anchor": [
+        4,
+        8
+      ],
+      "directions": 1,
+      "facings": [
+        "s"
+      ],
+      "states": {
+        "idle": {
+          "frames": 1,
+          "fps": 8,
+          "loop": true
+        }
+      },
+      "frames": [
+        [
+          0,
+          1968,
+          1630,
+          9,
+          9,
+          0,
+          "idle",
+          0,
+          0
+        ]
+      ],
+      "variants": [
+        "base"
+      ],
+      "version": "base.v1",
+      "sourceHash": "6a79888ff53cf3ea"
+    },
+    "icon-shield": {
+      "kind": "ui-icon",
+      "view": "iso",
+      "size": [
+        9,
+        9
+      ],
+      "anchor": [
+        4,
+        8
+      ],
+      "directions": 1,
+      "facings": [
+        "s"
+      ],
+      "states": {
+        "idle": {
+          "frames": 1,
+          "fps": 8,
+          "loop": true
+        }
+      },
+      "frames": [
+        [
+          0,
+          1978,
+          1630,
+          9,
+          9,
+          0,
+          "idle",
+          0,
+          0
+        ]
+      ],
+      "variants": [
+        "base"
+      ],
+      "version": "base.v2",
+      "sourceHash": "ffcfeec2d7e241c0"
     }
   }
 }

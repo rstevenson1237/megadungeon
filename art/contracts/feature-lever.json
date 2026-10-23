@@ -1,0 +1,24 @@
+{
+  "format": 1,
+  "asset": "feature-lever",
+  "facings": [
+    "s"
+  ],
+  "states": {
+    "up": {
+      "frames": 1,
+      "durations": [
+        125
+      ],
+      "loop": true
+    },
+    "pulled": {
+      "frames": 1,
+      "durations": [
+        125
+      ],
+      "loop": true
+    }
+  },
+  "anchors": []
+}

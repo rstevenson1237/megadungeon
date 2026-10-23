@@ -1,0 +1,24 @@
+{
+  "format": 1,
+  "asset": "feature-fountain",
+  "facings": [
+    "s"
+  ],
+  "states": {
+    "flowing": {
+      "frames": 1,
+      "durations": [
+        125
+      ],
+      "loop": true
+    },
+    "dry": {
+      "frames": 1,
+      "durations": [
+        125
+      ],
+      "loop": true
+    }
+  },
+  "anchors": []
+}

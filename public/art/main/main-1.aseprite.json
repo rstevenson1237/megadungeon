@@ -16037,11 +16037,341 @@
         "h": 40
       },
       "duration": 120
+    },
+    {
+      "filename": "feature-weapon-rack/closed/s/0",
+      "frame": {
+        "x": 627,
+        "y": 738,
+        "w": 32,
+        "h": 40
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 40
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 40
+      },
+      "duration": 125
+    },
+    {
+      "filename": "feature-weapon-rack/open/s/0",
+      "frame": {
+        "x": 627,
+        "y": 779,
+        "w": 32,
+        "h": 40
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 40
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 40
+      },
+      "duration": 125
+    },
+    {
+      "filename": "feature-weapon-rack/looted/s/0",
+      "frame": {
+        "x": 627,
+        "y": 820,
+        "w": 32,
+        "h": 40
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 40
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 40
+      },
+      "duration": 125
+    },
+    {
+      "filename": "fx-frost/play/s/0",
+      "frame": {
+        "x": 627,
+        "y": 861,
+        "w": 24,
+        "h": 24
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 24
+      },
+      "sourceSize": {
+        "w": 24,
+        "h": 24
+      },
+      "duration": 75
+    },
+    {
+      "filename": "fx-frost/play/s/1",
+      "frame": {
+        "x": 627,
+        "y": 886,
+        "w": 24,
+        "h": 24
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 24
+      },
+      "sourceSize": {
+        "w": 24,
+        "h": 24
+      },
+      "duration": 75
+    },
+    {
+      "filename": "fx-frost/play/s/2",
+      "frame": {
+        "x": 627,
+        "y": 911,
+        "w": 24,
+        "h": 24
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 24
+      },
+      "sourceSize": {
+        "w": 24,
+        "h": 24
+      },
+      "duration": 75
+    },
+    {
+      "filename": "fx-frost/play/s/3",
+      "frame": {
+        "x": 627,
+        "y": 936,
+        "w": 24,
+        "h": 24
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 24
+      },
+      "sourceSize": {
+        "w": 24,
+        "h": 24
+      },
+      "duration": 75
+    },
+    {
+      "filename": "fx-aura/play/s/0",
+      "frame": {
+        "x": 627,
+        "y": 961,
+        "w": 24,
+        "h": 24
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 24
+      },
+      "sourceSize": {
+        "w": 24,
+        "h": 24
+      },
+      "duration": 75
+    },
+    {
+      "filename": "fx-aura/play/s/1",
+      "frame": {
+        "x": 627,
+        "y": 986,
+        "w": 24,
+        "h": 24
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 24
+      },
+      "sourceSize": {
+        "w": 24,
+        "h": 24
+      },
+      "duration": 75
+    },
+    {
+      "filename": "fx-aura/play/s/2",
+      "frame": {
+        "x": 652,
+        "y": 861,
+        "w": 24,
+        "h": 24
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 24
+      },
+      "sourceSize": {
+        "w": 24,
+        "h": 24
+      },
+      "duration": 75
+    },
+    {
+      "filename": "fx-aura/play/s/3",
+      "frame": {
+        "x": 652,
+        "y": 886,
+        "w": 24,
+        "h": 24
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 24
+      },
+      "sourceSize": {
+        "w": 24,
+        "h": 24
+      },
+      "duration": 75
+    },
+    {
+      "filename": "fx-alert/play/s/0",
+      "frame": {
+        "x": 652,
+        "y": 911,
+        "w": 24,
+        "h": 24
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 24
+      },
+      "sourceSize": {
+        "w": 24,
+        "h": 24
+      },
+      "duration": 75
+    },
+    {
+      "filename": "fx-alert/play/s/1",
+      "frame": {
+        "x": 652,
+        "y": 936,
+        "w": 24,
+        "h": 24
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 24
+      },
+      "sourceSize": {
+        "w": 24,
+        "h": 24
+      },
+      "duration": 75
+    },
+    {
+      "filename": "fx-alert/play/s/2",
+      "frame": {
+        "x": 652,
+        "y": 961,
+        "w": 24,
+        "h": 24
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 24
+      },
+      "sourceSize": {
+        "w": 24,
+        "h": 24
+      },
+      "duration": 75
+    },
+    {
+      "filename": "fx-alert/play/s/3",
+      "frame": {
+        "x": 652,
+        "y": 986,
+        "w": 24,
+        "h": 24
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 24
+      },
+      "sourceSize": {
+        "w": 24,
+        "h": 24
+      },
+      "duration": 75
     }
   ],
   "meta": {
     "app": "artgen",
-    "version": "artgen 0.9.0",
+    "version": "artgen 0.10.0",
     "image": "main-1.png",
     "format": "RGBA8888",
     "size": {
@@ -17386,6 +17716,42 @@
         "name": "npc-captive/walk/e",
         "from": 725,
         "to": 728,
+        "direction": "forward"
+      },
+      {
+        "name": "feature-weapon-rack/closed/s",
+        "from": 729,
+        "to": 729,
+        "direction": "forward"
+      },
+      {
+        "name": "feature-weapon-rack/open/s",
+        "from": 730,
+        "to": 730,
+        "direction": "forward"
+      },
+      {
+        "name": "feature-weapon-rack/looted/s",
+        "from": 731,
+        "to": 731,
+        "direction": "forward"
+      },
+      {
+        "name": "fx-frost/play/s",
+        "from": 732,
+        "to": 735,
+        "direction": "forward"
+      },
+      {
+        "name": "fx-aura/play/s",
+        "from": 736,
+        "to": 739,
+        "direction": "forward"
+      },
+      {
+        "name": "fx-alert/play/s",
+        "from": 740,
+        "to": 743,
         "direction": "forward"
       }
     ]
