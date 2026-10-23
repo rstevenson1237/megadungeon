@@ -2,8 +2,10 @@
 // The form is base.v2's exactly (same 9 x 11 stamp: cork, 1 px glass neck, sloped shoulders, red liquid in the belly),
 // only single pixels are cleaned: the cork is one pale wood.0 plug (the lone wood.1 pixels at its corner and in the neck
 // are gone), the glass highlight is one straight 1 px glow.0 line down the left shoulder (it zig-zagged), the lone
-// dark-glass pixel on the right shoulder and the lone glass pixel on the left rim are glass/shade runs, and the liquid's
-// lit left edge is a 2 px run. Every outline row is the same 1 px ink. base.v2 header follows.
+// dark-glass pixel on the right shoulder is gone, and the liquid's lit left edge is a 2 px run. The outline's lone
+// diagonal corner pixels now touch a neighbour: the cork's top ink is as wide as the cork, the shoulders' outer glass
+// corners are ink (the shoulder steps 1 px in), and the base's ink runs one pixel wider each side. 0 orphans in the
+// stamp. base.v2 header follows.
 // family-potion base.v2 (r2) — from base.v1 (7.5). One change, the roster note: the squat voxel bottle read as "a red
 // cherry or apple" and twinned family-ring (both small red blobs). The bottle is now an upright hand-placed pixel drawing
 // (the fine-voxel model cannot hold a 1 px neck or a glass highlight at this size): a wide cork, a narrow glass neck,
@@ -24,17 +26,17 @@ export function render(ctx) {
     if (col) g.set(cx + ox + i, cy + oy + j, col);
   }));
   stamp([
-    '...XXX...',
+    '..XXXXX..',
     '..XwwwX..',
     '...XwX...',
     '...XcX...',
     '..XGcbX..',
-    '.XcGcbbX.',
+    '.XXGcbXX.',
     'XccGccbbX',
     'XrrRRRRDX',
     'XrRRRRDDX',
     '.XRRRDDX.',
-    '..XXXXX..',
+    '.XXXXXXX.',
   ], {
     w: pal.wood[0], W: pal.wood[1],
     G: pal.glow[0], c: pal.cloth[0], b: pal.cloth[1], K: pal.cloth[2],
