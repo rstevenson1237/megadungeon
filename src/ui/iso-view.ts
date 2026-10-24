@@ -43,6 +43,8 @@ export const CARD_H = CELL_H + 2;
 /** Status icons above a head: at most three, this far apart, this high over the feet (Spec 01b, Markers). */
 const ICONS_MAX = 3;
 const ICON_GAP = 10;
+/** A status icon's art is a 9 x 9 frame (art/briefs.yaml), drawn by the painter with its bottom edge at y + 8. */
+const ICON_SIZE = 9;
 const ICON_RISE = FRAME.character[1] + 6;
 
 /**
@@ -307,7 +309,16 @@ export function buildIsoDraws(state: GameState, options: IsoOptions = {}): IsoDr
       draws.push({ ...base, layer: 'mark', asset: resolveAsset(['feature-trap'], pack), frame: 'armed', tint: cell.trap.fg, shape: 'card', glyph: cell.trap.glyph, fg: cell.trap.fg, box: standing(FRAME.prop) });
     }
     const f = cell.feature;
-    if (f) {
+    if (f && t?.kind === 'wall') {
+      // A mark on a wall (a sign, graffiti, a rune carved in it; Spec 06) is drawn over the wall block, on the face it
+      // is read from, or on the top of the wall's cap when the wall is cut (task 6.7).
+      const face = isCut(scene, cell.x, cell.y) ? 'cap' : isOpen(scene, cell.x, cell.y + 1) || !isOpen(scene, cell.x + 1, cell.y) ? 'left' : 'right';
+      const rune = f.kind === 'rune';
+      draws.push({
+        ...base, layer: 'feature', asset: resolveAsset([rune ? 'feature-wall-rune' : 'feature-sign'], pack), frame: rune && f.state === 'spent' ? `${face}-spent` : face,
+        tint: f.fg, shape: 'card', glyph: f.glyph, fg: f.fg, box: { x: diamondBox.x, y: diamondBox.y - WALL_H, w: TILE_W, h: TILE_H + WALL_H },
+      });
+    } else if (f) {
       // Debris and the teleporter are terrain art of one state (task 6.5): searched or spent, they draw the same.
       const oneState = FEATURE_ASSET[f.kind].startsWith('terrain-');
       draws.push({
@@ -342,7 +353,7 @@ export function buildIsoDraws(state: GameState, options: IsoOptions = {}): IsoDr
       shown.forEach((id, i) => {
         const ix = at.x + Math.round((i - (shown.length - 1) / 2) * ICON_GAP);
         const iy = at.y - (large ? FRAME.large[1] + 6 : ICON_RISE);
-        draws.push({ ...base, x: ix, y: iy, layer: 'effect', asset: resolveAsset([id], pack), frame: '', tint: 0xffffff, shape: 'none', glyph: 0, fg: 0xffffff, box: { x: ix - 4, y: iy - 8, w: 8, h: 8 } });
+        draws.push({ ...base, x: ix, y: iy, layer: 'effect', asset: resolveAsset([id], pack), frame: '', tint: 0xffffff, shape: 'none', glyph: 0, fg: 0xffffff, box: { x: ix - 4, y: iy - 1, w: ICON_SIZE, h: ICON_SIZE } });
       });
     }
   }

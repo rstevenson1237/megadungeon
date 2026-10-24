@@ -2315,8 +2315,9 @@
   height: 0.6
   states:
     - closed
+    - open
     - looted
-  notes: a tied sack of coarse cloth
+  notes: a tied sack of coarse cloth; open is untied and slumped, looted is empty and flat
 - id: feature-pottery
   kind: prop
   batch: 3
@@ -2324,9 +2325,9 @@
   importance: standard
   height: 0.6
   states:
-    - whole
+    - closed
     - smashed
-  notes: a clay urn
+  notes: a clay urn; smashed is a low ring of shards
 - id: feature-weapon-rack
   kind: prop
   batch: 3
@@ -2334,9 +2335,13 @@
   importance: standard
   height: 1.6
   states:
-    - full
+    - closed
+    - open
     - looted
-  notes: a wooden weapon rack
+  notes: a wooden weapon rack; closed is full, open has a gap, looted is bare
+  size:
+    - 32
+    - 40
 - id: feature-fountain
   kind: prop
   batch: 3
@@ -2366,8 +2371,7 @@
   states:
     - closed
     - open
-    - looted
-  notes: a carved stone sarcophagus
+  notes: a carved stone sarcophagus; open has its lid pushed aside
 - id: feature-rune
   kind: prop
   batch: 3
@@ -2377,44 +2381,72 @@
   states:
     - dormant
     - spent
-  notes: a carved floor rune
+  notes: a rune carved in the floor
 - id: feature-sign
   kind: prop
   batch: 3
   priority: 308
   importance: standard
-  height: 1.6
+  height: 0.5
   states:
-    - idle
-  notes: a wall-mounted sign or scrawled graffiti
-- id: feature-lever
+    - left
+    - right
+    - cap
+  notes: "a weathered wooden plaque with scratched letters, for signs and graffiti; drawn over a wall block in its own 32
+    x 40 frame, placed as the wall is (terrain-wall): on the lower-left face (left), the lower-right face (right) or the
+    top of the 4 px cap (cap)"
+  size:
+    - 32
+    - 40
+- id: feature-wall-rune
   kind: prop
   batch: 3
   priority: 309
+  importance: standard
+  height: 0.4
+  states:
+    - left
+    - right
+    - cap
+    - left-spent
+    - right-spent
+    - cap-spent
+  notes: "a rune carved in a wall, glowing while dormant and cold once spent; drawn over a wall block in its own 32 x 40
+    frame, placed as the wall is (terrain-wall): on the lower-left face (left), the lower-right face (right) or the top
+    of the 4 px cap (cap)"
+  size:
+    - 32
+    - 40
+- id: feature-lever
+  kind: prop
+  batch: 3
+  priority: 310
   importance: standard
   height: 1
   states:
     - up
     - pulled
-  notes: an iron wall lever
+  notes: an iron lever on a stone post; pulled is thrown down
 - id: feature-spirit-totem
   kind: prop
   batch: 3
-  priority: 310
+  priority: 311
   importance: standard
   height: 1.8
   states:
     - idle
   notes: a carved spirit totem pole
+  size:
+    - 32
+    - 40
 - id: feature-trap
   kind: prop
   batch: 3
-  priority: 311
+  priority: 312
   importance: standard
   height: 0.1
   states:
     - armed
-    - disarmed
   notes: "a found floor trap: a pressure plate and its mechanism"
 - id: family-coins
   kind: prop
@@ -2513,153 +2545,260 @@
   priority: 340
   importance: filler
   object: a star of sparks
+  states:
+    - play
   anims:
     play:
       frames: 4
-  notes: shows a hit; at most 300 ms
+      loop: false
+      durations:
+        - 75
+        - 75
+        - 75
+        - 75
+  notes: shows a hit; 300 ms
 - id: fx-miss
   kind: effect
   batch: 3
   priority: 341
   importance: filler
   object: a puff of dust
+  states:
+    - play
   anims:
     play:
       frames: 4
-  notes: shows a miss; at most 300 ms
+      loop: false
+      durations:
+        - 75
+        - 75
+        - 75
+        - 75
+  notes: shows a miss; 300 ms
 - id: fx-arrow
   kind: effect
   batch: 3
   priority: 342
   importance: filler
   object: an arrow in flight
+  states:
+    - play
   anims:
     play:
       frames: 4
-  notes: shows a shot or thrown missile; at most 300 ms
+      loop: false
+      durations:
+        - 75
+        - 75
+        - 75
+        - 75
+  notes: shows a shot or thrown missile; 300 ms
 - id: fx-bolt
   kind: effect
   batch: 3
   priority: 343
   importance: filler
   object: an arcane dart
+  states:
+    - play
   anims:
     play:
       frames: 4
-  notes: shows a bolt spell; at most 300 ms
+      loop: false
+      durations:
+        - 75
+        - 75
+        - 75
+        - 75
+  notes: shows a bolt spell; 300 ms
 - id: fx-burst
   kind: effect
   batch: 3
   priority: 344
   importance: filler
   object: a ring of fire
+  states:
+    - play
   anims:
     play:
       frames: 4
-  notes: shows an area spell's footprint; at most 300 ms
+      loop: false
+      durations:
+        - 75
+        - 75
+        - 75
+        - 75
+  notes: shows an area spell's footprint; 300 ms
 - id: fx-frost
   kind: effect
   batch: 3
   priority: 345
   importance: filler
   object: shards of ice
+  states:
+    - play
   anims:
     play:
       frames: 4
-  notes: shows a cold spell; at most 300 ms
+      loop: false
+      durations:
+        - 75
+        - 75
+        - 75
+        - 75
+  notes: shows a cold spell; 300 ms
 - id: fx-push
   kind: effect
   batch: 3
   priority: 346
   importance: filler
   object: a curved shock wave
+  states:
+    - play
   anims:
     play:
       frames: 4
-  notes: shows a push or knockback; at most 300 ms
+      loop: false
+      durations:
+        - 75
+        - 75
+        - 75
+        - 75
+  notes: shows a push or knockback; 300 ms
 - id: fx-aura
   kind: effect
   batch: 3
   priority: 347
   importance: filler
   object: a ring of rising motes
+  states:
+    - play
   anims:
     play:
       frames: 4
-  notes: shows a self spell; at most 300 ms
+      loop: false
+      durations:
+        - 75
+        - 75
+        - 75
+        - 75
+  notes: shows a self spell; 300 ms
 - id: fx-die-lost
   kind: effect
   batch: 3
   priority: 348
   importance: filler
   object: a small six-sided die
+  states:
+    - play
   anims:
     play:
       frames: 4
-  notes: shows a die lost; at most 300 ms
+      loop: false
+      durations:
+        - 75
+        - 75
+        - 75
+        - 75
+  notes: shows a die lost; 300 ms
 - id: fx-alert
   kind: effect
   batch: 3
   priority: 349
   importance: filler
   object: an exclamation mark
+  states:
+    - play
   anims:
     play:
       frames: 4
-  notes: shows a creature becoming alert; at most 300 ms
+      loop: false
+      durations:
+        - 75
+        - 75
+        - 75
+        - 75
+  notes: shows a creature becoming alert; 300 ms
 - id: icon-poisoned
   kind: ui-icon
   batch: 3
   priority: 360
   importance: filler
+  size:
+    - 9
+    - 9
   notes: "status icon above the head: a dripping fang"
 - id: icon-slowed
   kind: ui-icon
   batch: 3
   priority: 361
   importance: filler
+  size:
+    - 9
+    - 9
   notes: "status icon above the head: a snail shell"
 - id: icon-hasted
   kind: ui-icon
   batch: 3
   priority: 362
   importance: filler
+  size:
+    - 9
+    - 9
   notes: "status icon above the head: a winged boot"
 - id: icon-asleep
   kind: ui-icon
   batch: 3
   priority: 363
   importance: filler
+  size:
+    - 9
+    - 9
   notes: "status icon above the head: a closed eye"
 - id: icon-held
   kind: ui-icon
   batch: 3
   priority: 364
   importance: filler
+  size:
+    - 9
+    - 9
   notes: "status icon above the head: a shackle"
 - id: icon-frightened
   kind: ui-icon
   batch: 3
   priority: 365
   importance: filler
+  size:
+    - 9
+    - 9
   notes: "status icon above the head: a skull"
 - id: icon-blessed
   kind: ui-icon
   batch: 3
   priority: 366
   importance: filler
+  size:
+    - 9
+    - 9
   notes: "status icon above the head: a sunburst"
 - id: icon-cursed
   kind: ui-icon
   batch: 3
   priority: 367
   importance: filler
+  size:
+    - 9
+    - 9
   notes: "status icon above the head: a broken circle"
 - id: icon-shield
   kind: ui-icon
   batch: 3
   priority: 368
   importance: filler
+  size:
+    - 9
+    - 9
   notes: "status icon above the head: a kite shield"
 - id: boss-grask-the-pale
   kind: creature

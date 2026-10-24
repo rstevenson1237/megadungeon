@@ -1,0 +1,31 @@
+{
+  "format": 1,
+  "asset": "feature-sack",
+  "facings": [
+    "s"
+  ],
+  "states": {
+    "closed": {
+      "frames": 1,
+      "durations": [
+        125
+      ],
+      "loop": true
+    },
+    "open": {
+      "frames": 1,
+      "durations": [
+        125
+      ],
+      "loop": true
+    },
+    "looted": {
+      "frames": 1,
+      "durations": [
+        125
+      ],
+      "loop": true
+    }
+  },
+  "anchors": []
+}

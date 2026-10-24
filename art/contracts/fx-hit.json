@@ -1,0 +1,20 @@
+{
+  "format": 1,
+  "asset": "fx-hit",
+  "facings": [
+    "s"
+  ],
+  "states": {
+    "play": {
+      "frames": 4,
+      "durations": [
+        75,
+        75,
+        75,
+        75
+      ],
+      "loop": false
+    }
+  },
+  "anchors": []
+}

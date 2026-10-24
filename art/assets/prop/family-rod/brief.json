@@ -1,0 +1,9 @@
+{
+  "id": "family-rod",
+  "template": "iso/prop",
+  "review": {
+    "scale": 6,
+    "sym": "none",
+    "iso": true
+  }
+}

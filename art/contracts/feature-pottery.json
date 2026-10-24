@@ -1,0 +1,24 @@
+{
+  "format": 1,
+  "asset": "feature-pottery",
+  "facings": [
+    "s"
+  ],
+  "states": {
+    "closed": {
+      "frames": 1,
+      "durations": [
+        125
+      ],
+      "loop": true
+    },
+    "smashed": {
+      "frames": 1,
+      "durations": [
+        125
+      ],
+      "loop": true
+    }
+  },
+  "anchors": []
+}
