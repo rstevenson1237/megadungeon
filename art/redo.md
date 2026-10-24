@@ -63,7 +63,7 @@ Task 6.7 ran one capped revision per asset (October 23, 2026). Robert approved t
 | feature-sign | finish.v2 | 7 / 5.5 | base revision: put the face on the mid wood steps with a darker grain line, cut the letters as 2 rows of 1 px dark strokes along the plane, thicken the rim to 2 px with corner nails |
 | feature-wall-rune | finish.v1 | 7.5 / 6 | base revision: cut the rune in (dark inner groove + 1px light lower lip, no full outer outline) so spent reads as an engraving on stone, give it a more angular multi-stroke rune shape, and keep the dormant glow to the groove core with a one-step accent halo |
 | feature-spirit-totem | finish.v1 | 7.5 / 5.5 | base revision: narrow the shaft to ~10-12px with wings only at the top, separate 2-3 faces with lit brow/nose planes and fewer dark interior lines, sit it on a wider stone plinth reading on the floor diamond's bottom 16 rows |
-| family-coins | base.v1 | 7 / 4 | next change (base): rebuild as a spill of 5-7 flat iso ellipses (about 5x3 px each) with a short stack of 3-4 at the back, using the metal/accent ramp (light rim top-left, dark underside band), a 1-2 px specular glint on the top coin, scattered unevenly across the diamond rather than a tight block |
+| family-coins | base.v1 | 7 / 4 | next change (base): rebuild as a spill of 5-7 flat iso ellipses (about 5x3 px each) with a short stack of 3-4 at the back, using the gold ramp (light rim top-left, dark underside band), a 1-2 px specular glint on the top coin, scattered unevenly across the diamond rather than a tight block |
 | family-gems | finish.v2 | 7 / 6 | recolour the tan stone to a gem hue with a pointed pavilion, add a bright table facet and darker pavilion facets to each gem, and a 1px sparkle highlight so the pile reads at 1x |
 | family-weapon | base.v1 | 7.5 / 5.5 | lengthen the blade to about two thirds of the item, taper it to a 1-2px point, make the crossguard a thin bar across the blade, shrink the grip and pommel, and centre it on the diamond |
 | family-armour | base.v1 | 6 / 6 | add a ring-mail texture (alternating light/mid 1px rows across the top face), a visible fold line and a sleeve edge, and darken the neck opening to the metal shadow step instead of brown |
@@ -84,5 +84,5 @@ Task 6.7 ran one capped revision per asset (October 23, 2026). Robert approved t
 
 Open lineup notes from batch 3:
 
-- **Coins** never read as gold: `art/direction.json` maps gold to the red-orange accent ramp, which the lineup keeps for magic and lights. A redo needs a palette decision first (a gold step for props), which is a direction change for Robert.
+- **Coins:** Robert chose gold on October 24, 2026. `art/direction.json` now has a `gold` ramp for props (the gold material maps to it), so the redo draws the coins in `gold`, not the metal or accent ramp.
 - **fx-hit and icon-blessed** (both approved) are four-point stars. Redraw icon-blessed as a disc with eight rays.

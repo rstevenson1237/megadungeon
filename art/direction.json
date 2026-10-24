@@ -72,14 +72,14 @@
       "grass": "grass",
       "foliage": "grass",
       "accent": "accent",
-      "gold": "accent",
+      "gold": "gold",
       "glow": "glow",
       "fx": "glow"
     },
     "perKindMax": {
       "character": 19,
       "creature": 19,
-      "prop": 18,
+      "prop": 21,
       "tile": 21,
       "effect": 9
     },
@@ -111,7 +111,8 @@
         "accent",
         "glow",
         "cloth",
-        "dirt"
+        "dirt",
+        "gold"
       ],
       "tile": [
         "dirt",
@@ -129,7 +130,7 @@
       ]
     },
     "source": "generated",
-    "maxColors": 32,
+    "maxColors": 35,
     "ramps": {
       "skin": [
         "#dfcfc4",
@@ -184,6 +185,11 @@
       "glow": [
         "#f3dcb8",
         "#f84114"
+      ],
+      "gold": [
+        "#f2d98a",
+        "#c4922c",
+        "#5e3b12"
       ]
     },
     "outline": "#101918"

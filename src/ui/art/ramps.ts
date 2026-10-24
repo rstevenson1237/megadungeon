@@ -13,4 +13,5 @@ export const DIRECTION_RAMPS = {
   grass: ['#cbd8d7', '#71949b', '#3e515b'],
   accent: ['#eac0a4', '#d1421e', '#710b0b'],
   glow: ['#f3dcb8', '#f84114'],
+  gold: ['#f2d98a', '#c4922c', '#5e3b12'],
 } as const;

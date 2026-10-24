@@ -190,6 +190,7 @@ The spec lists batch 3's features, floor items, effects and icons, but not which
 - **Status icons** are 9 x 9 frames, drawn 10 px apart where task 6.4 placed them.
 - **Features, floor items and icons are drawn as they are,** not recoloured: only terrain takes the theme and only family sprites take a row's colour.
 - **Cold effects:** effects may use the art direction's cloth ramp (its pale and dark blues) as well as accent and glow, up to 9 colours, so the frost shards read cold rather than orange. No colour of the direction changes, and no approved asset changes.
+- **Gold** (approved by the owner on October 24, 2026): coins must read as gold, and the art direction mapped gold to the red-orange accent ramp, which the lineup keeps for magic and lights. The direction gains a three-step gold ramp, the gold material maps to it, and props may use it (21 colours; the palette holds 35). No other colour changes and no approved asset uses it, so the direction keeps its version.
 - **Effects are drawn, approved and exported in this batch** and first shown in the game by task 6.8 (Animation and events).
 
 ## Acceptance criteria
