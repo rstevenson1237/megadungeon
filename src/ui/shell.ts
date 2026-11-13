@@ -47,6 +47,7 @@ import { resolvesAtOnce, needsCell } from '../rules/magic/spells.ts';
 import { fascinateTargets, markTargets, volleyProblem, volleyTargets, waitRoundsNow } from '../game/actives.ts';
 import { canDecoyAt, decoyCells } from '../game/allies.ts';
 import type { Monster } from '../game/monsters.ts';
+import { IsoAnimator } from './iso-anim.ts';
 
 /** The map commands that spend an action, which real time carries out at once or holds during the cooldown (Spec 04, Addendum B). */
 const ACTIONS: readonly CommandType[] = ['wait', 'interact', 'pickup', 'search'];
@@ -100,6 +101,17 @@ export class Shell {
   art: IsoArt | null = null;
   /** The art is still loading: until it arrives the text display stays (Spec 01b, Loading). */
   artWaiting = false;
+  /** The isometric display's animations (Spec 01b, Animation and effects; task 6.8). */
+  readonly anim = new IsoAnimator();
+  /** The animations' clock, in ms: it runs with the page's clock, and stops under an overlay or a real-time pause. */
+  private animClock = 0;
+  private animLast: number | null = null;
+  /** The level the animations belong to: a new one drops them and what each creature faced. */
+  private animGame: Game | null = null;
+  /** How the player arrived on this level, for the teleport's aura. */
+  private arrival: 'teleport' | 'fall' | null = null;
+  /** The last loop frame drawn, so looping art (water, idle) is drawn again only when a frame turns over. */
+  private loopMark = '';
 
   constructor(
     public title: string,
@@ -282,8 +294,14 @@ export class Shell {
   private applyResult(result: ActResult): void {
     for (const m of result.messages) this.log.add(m, this.game ? this.game.state.round : this.turn);
     if (result.stairs) return this.travel(result.stairs);
-    if (result.teleport !== undefined) return this.moved(this.run!.teleport(result.teleport));
-    if (result.fall) return this.moved(this.run!.fall());
+    if (result.teleport !== undefined) {
+      this.arrival = 'teleport';
+      return this.moved(this.run!.teleport(result.teleport));
+    }
+    if (result.fall) {
+      this.arrival = 'fall';
+      return this.moved(this.run!.fall());
+    }
     if (this.game) this.afterAction();
     else this.syncCharacter();
     const game = this.game;
@@ -309,6 +327,8 @@ export class Shell {
   handleKey(e: KeyInput): boolean {
     const command = keyToCommand(e);
     if (!command) return false;
+    // In turn mode a key press first finishes every running animation at once, so input never waits (Spec 01b).
+    if (!this.realTime) this.anim.finish();
     if (this.realTime && this.clockKey(command)) return true;
     const top = this.overlays[this.overlays.length - 1];
     if (top) this.apply(top.handle(command), top);
@@ -956,13 +976,63 @@ export class Shell {
    * The isometric picture of the level, when the display is isometric and a level is on screen (Spec 01b): its draws,
    * with whatever is being aimed or looked at, and dimmed while an overlay is open. Null in a village or the text display.
    */
-  picture(): IsoPicture | null {
+  picture(now = 0): IsoPicture | null {
     const game = this.game;
-    if (!game || !this.iso) return null;
+    if (!game) return null;
+    this.animate(game, now);
+    if (!this.iso) return null;
     const aim = { targeting: this.targeting, cursor: this.cursor, look: this.looking };
     const look = mapLook(this.run?.theme);
     if (this.art) this.art.look = look;
-    return { draws: buildIsoDraws(game.state, { look, aim, pack: this.art?.ids ?? null }), dimmed: this.overlays.length > 0 };
+    const motion = this.anim.motion(this.animClock);
+    // The camera follows the player's drawn position, so it slides with the player's step (Spec 01b, Real time).
+    const me = motion.actors.get('player');
+    const at = game.state.map.player;
+    const camera = me ? { x: at.x + me.dx, y: at.y + me.dy } : at;
+    return { draws: buildIsoDraws(game.state, { look, aim, pack: this.art?.ids ?? null, motion, camera }), dimmed: this.overlays.length > 0 };
+  }
+
+  /** Whether the animations' clock is stopped: under an overlay, or while a real-time level is paused. */
+  private get animFrozen(): boolean {
+    return this.overlays.length > 0 || (this.realTime && !this.ticking && !this.game?.state.player.dead);
+  }
+
+  /**
+   * Bring the animations up to `now` (task 6.8): run their clock unless it is frozen, start afresh on a new level, and
+   * take the Game's display events. They are taken in the text display too, and dropped there, so a switch to the
+   * isometric display never replays old ones.
+   */
+  private animate(game: Game, now: number): void {
+    if (this.animLast !== null && !this.animFrozen) this.animClock += Math.max(0, now - this.animLast);
+    this.animLast = now;
+    if (this.animGame !== game) {
+      this.anim.clear();
+      this.animGame = game;
+      game.takeDisplay();
+      if (this.arrival === 'teleport') this.anim.add([{ type: 'arrive', how: 'teleport', at: { ...game.state.map.player }, phase: 0, tick: game.tick }], this.animClock, { mode: 'turn' });
+      this.arrival = null;
+      return;
+    }
+    const events = game.takeDisplay();
+    if (!this.iso) return this.anim.clear();
+    this.anim.add(events, this.animClock, { mode: game.time, tickMs: this.tickMs });
+  }
+
+  /**
+   * Whether the picture should be drawn again at `now` with no key pressed (Spec 01b, Redraw): every frame while an
+   * animation runs or real time ticks, and otherwise when a looping frame (water, lava, the teleporter, idle) turns over.
+   */
+  animating(now: number): boolean {
+    const game = this.game;
+    if (!game || !this.iso) return false;
+    if (this.ticking) return true;
+    const clock = this.animClock + (this.animLast !== null && !this.animFrozen ? Math.max(0, now - this.animLast) : 0);
+    if (this.anim.running(clock)) return true;
+    if (this.animFrozen) return false;
+    const mark = (this.art?.loopPeriods ?? []).map((ms) => Math.floor(clock / ms)).join();
+    if (mark === this.loopMark) return false;
+    this.loopMark = mark;
+    return true;
   }
 
   /** Draw the whole screen: panes, character, log, then any overlay on top. */

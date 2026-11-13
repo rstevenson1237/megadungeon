@@ -72,7 +72,7 @@ export function mountGame(root: HTMLElement, options: Partial<AppDeps> = {}): Ap
       app.draw(grid);
       renderer.render(grid);
       // The isometric picture beneath the text, repainted with every redraw while it shows (Spec 01b, Redraw).
-      const shown = app.picture();
+      const shown = app.picture(performance.now());
       if (shown) paintPicture(picture, shown, atlas, app.art ?? undefined);
       else if (painted) picture.clearRect(ISO_VIEW.x, ISO_VIEW.y, ISO_VIEW.w, ISO_VIEW.h);
       painted = shown !== null;
@@ -109,7 +109,8 @@ export function mountGame(root: HTMLElement, options: Partial<AppDeps> = {}): Ap
     // runs no tick and draws nothing, so the screen still redraws only after an action.
     const loop = new FrameLoop(() => app.clock, redraw);
     const frame = (now: number): void => {
-      loop.frame(now);
+      // A frame in which ticks ran has redrawn already; otherwise the picture is drawn again while it animates (task 6.8).
+      if (loop.frame(now) === 0 && app.animating(now)) redraw();
       requestAnimationFrame(frame);
     };
     requestAnimationFrame(frame);

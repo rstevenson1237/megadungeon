@@ -274,7 +274,10 @@ function piles(state: GameState): Map<number, SceneItem> {
   return out;
 }
 
-function roleOf(m: Monster): CreatureRole {
+/** How a creature stands in the scene: its role, glyph and colour (also the dying, drawn as they fade; task 6.8). */
+export const creatureOccupant = (m: Monster): SceneOccupant => ({ kind: 'creature', creature: m, role: roleOf(m), glyph: toCp437(m.glyph), fg: m.colour });
+
+export function roleOf(m: Monster): CreatureRole {
   if (m.kind === 'ally') return m.ally === 'phantom' ? 'phantom' : 'ally';
   if (m.kind === 'bandit' || m.kind === 'rival') return m.kind;
   return m.role === 'boss' ? 'boss' : 'monster';
@@ -355,7 +358,7 @@ export function buildScene(state: GameState, area: Rect, look: MapLook = DEFAULT
     const npcLook = NPC_LOOK[npc.kind];
     if (npcLook && !used.npcs[index]?.freed) stand(npc.x, npc.y, { kind: 'npc', role: npc.kind as 'trader' | 'hermit' | 'captive', index, glyph: toCp437(npcLook.glyph), fg: npcLook.colour });
   });
-  for (const m of state.monsters) stand(m.x, m.y, { kind: 'creature', creature: m, role: roleOf(m), glyph: toCp437(m.glyph), fg: m.colour });
+  for (const m of state.monsters) stand(m.x, m.y, creatureOccupant(m));
   const me = slot(player.x, player.y);
   if (me >= 0 && inLevel(player.x, player.y)) {
     cells[me] ??= { x: player.x, y: player.y, light: visible[cellAt(player.x, player.y)] === 1 ? 'visible' : 'remembered' };

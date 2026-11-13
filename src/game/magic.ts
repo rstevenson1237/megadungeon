@@ -16,6 +16,7 @@ import type { Game } from './game.ts';
 import { TERRAIN_BLOCKED, isOpen } from './map-state.ts';
 import { type Monster, isAlly } from './monsters.ts';
 import { type TargetSpec, validTargets } from './targeting.ts';
+import { spellFx } from './display.ts';
 
 /** What a spell is aimed at: a creature, or for Blink a cell. */
 export type Aim = Monster | Point;
@@ -126,6 +127,7 @@ export function castSpell(game: Game, plain: Spell, aim: Aim | undefined, messag
 }
 
 function apply(game: Game, spell: Spell, aim: Aim | undefined, messages: LogMessage[]): void {
+  spellShown(game, spell, aim);
   switch (spell.effect) {
     case 'restore_die':
       return void heal(game, messages, 'You feel your strength return.');
@@ -151,6 +153,31 @@ function apply(game: Game, spell: Spell, aim: Aim | undefined, messages: LogMess
     case 'push':
       return push(game, spell, messages);
   }
+}
+
+/**
+ * A spell that works, for the isometric display (Spec 01b, task 6.8): the cells it touches, from the caster. A self
+ * spell touches the caster's cell (Blink its destination), a target spell its target, an area its footprint, and one
+ * centred on the caster every cell within its reach.
+ */
+function spellShown(game: Game, spell: Spell, aim: Aim | undefined): void {
+  const me = { ...game.state.map.player };
+  const target = aim ? { x: aim.x, y: aim.y } : undefined;
+  let cells: Point[];
+  if (spell.shape === 'self') cells = [spell.effect === 'blink' && target ? target : me];
+  else if (spell.shape === 'target') cells = target ? [target] : [];
+  else if (spell.centred) {
+    const reach = Math.max(1, reachOf(spell));
+    cells = [];
+    for (let dy = -reach; dy <= reach; dy++) {
+      for (let dx = -reach; dx <= reach; dx++) {
+        if ((dx || dy) && (reach <= 1 || dx * dx + dy * dy <= reach * reach)) cells.push({ x: me.x + dx, y: me.y + dy });
+      }
+    }
+  } else cells = footprint(spell, aim);
+  const { width, height } = game.state.map.level;
+  cells = cells.filter((c) => c.x >= 0 && c.y >= 0 && c.x < width && c.y < height);
+  game.display.add({ type: 'spell', who: 'player', from: me, spell: spell.id, fx: spellFx(spell), cells, ...(spell.shape === 'target' && target ? { at: target } : {}) });
 }
 
 /** A spell's duration: its number, or one d6 rolled for the whole spell; null for none. */
