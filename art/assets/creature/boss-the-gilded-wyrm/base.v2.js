@@ -30,22 +30,25 @@ function layout(ctx) {
   // the neck and head are laid out in the body frame (the same S and head in every facing) and follow how far the rig's
   // neck end has moved from its idle rest (the idle sway, the walk's bob, the strike's arc down and forward)
   const rest = rig.pose('idle', 0), e0 = rest.end('neck'), e1 = P.end('neck'), dv = [e1[0] - e0[0], e1[1] - e0[1]];
-  const N = (f, s, hgt, k = 1) => { const q = B(f, s, hgt); return [q[0] + dv[0] * k * 0.7, q[1] + dv[1] * k * 0.7]; };
+  const N = (f, s, hgt, k = 1) => { const q = B(f, s, hgt); return [q[0] + dv[0] * k * 0.55, q[1] + dv[1] * k * 0.7]; };
   const nk = ctx.params?.neck ?? 1, hf = spineL / 2 + U(11), hh = spineY + U(21) * nk;
   const skull = N(hf, 0, hh), near = front > 0, eyeSide = sx > 0 ? -1 : 1;
   const eye = near ? N(hf + U(2.2), eyeSide * U(2.2), hh + U(1.2)).map(Math.round) : null;
   const mouth = N(hf + U(8), 0, hh - U(2)).map(Math.round);
+  // the tail curls out to the side the viewer sees past the haunch
+  const tside = ctx.facing === 's' || ctx.facing === 'n' ? -1 : 1;
   // the rig stands its spine on the frame's middle, but the neck reaches further ahead than the tail behind: centre the
   // figure's reach (snout to tail hook, at idle rest) on the frame, the same shift in every frame of a facing
   // (half of the strike's body lunge is taken back, so the lunging head stays inside the frame)
   const mid = Q => (Q.at('spine', 0.5, hf + U(8), 0, 0)[0] + Q.at('spine', 0.5, -spineL / 2 - U(20), 0, 0)[0]) / 2;
   // then nudged so the snout, the horn tips and the tail hook (as posed in this frame) keep a margin inside the frame
-  const reach = [N(hf + U(8.5), 0, hh - U(2)), N(hf + U(7), 0, hh - U(9)), N(hf - U(11), -U(5.5), hh + U(7.5)), N(hf - U(11), U(5.5), hh + U(7.5)),
-    ...[[-16, 3, 4], [-21, 5, 7], [-24, 6, 12], [-24, 6.5, 17], [-21, 6.5, 19.5], [-10, 1.5, 5]].map(([f, sd, hg]) => B(-spineL / 2 + U(f) * 0.78, U(sd), U(hg)))].map(q => q[0]);
-  const lo = Math.min(...reach) - U(2.5), hi = Math.max(...reach) + U(2.5);
+  const reach = [N(hf + U(8.5), 0, hh - U(2)), N(hf + U(7), 0, hh - U(9)), N(hf - U(13), -U(5.5), hh + U(6)), N(hf - U(13), U(5.5), hh + U(6)),
+    ...[[-15, 7, 4], [-19, 11, 7], [-21, 14, 12], [-20, 15.5, 17], [-17, 15.5, 19.5], [-10, 3.5, 5]].map(([f, sd, hg]) => B(-spineL / 2 + U(f) * 0.78, U(sd) * 0.7 * tside, U(hg)))].map(q => q[0]);
+  const lo = Math.min(...reach) - U(3), hi = Math.max(...reach) + U(3);
   let dx = Math.round(w / 2 - (mid(rest) + mid(P)) / 2);
-  if (lo + dx < 1) dx = Math.ceil(1 - lo); else if (hi + dx > w - 2) dx = Math.floor(w - 2 - hi);
-  return { w, h, U, rig, P, sk, sx, front, side, ground, spineY, spineL, B, D, N, hf, hh, skull, eye, mouth, near, dx };
+  if (hi - lo > w - 3) dx = Math.round(w / 2 - (lo + hi) / 2);
+  else if (lo + dx < 1) dx = Math.ceil(1 - lo); else if (hi + dx > w - 2) dx = Math.floor(w - 2 - hi);
+  return { w, h, U, rig, P, sk, sx, front, side, ground, spineY, spineL, B, D, N, hf, hh, skull, eye, mouth, near, dx, tside };
 }
 
 export function render(ctx) {
@@ -69,11 +72,12 @@ export function render(ctx) {
     for (const c of claws) put(z + 0.01, c);
   }
 
-  // the tail: a long S — down and back off the haunch, sweeping low along the ground, then rising in a hook to a fine tip
+  // the tail: a long S — down and back off the haunch, sweeping low and curving out to one side (so it shows beside the
+  // body in the front views too), then rising in a hook to a fine tip
   const hind = -spineL / 2, tl = [
-    [3, 0, spineY + U(1), U(4.8)], [-4, 0.5, spineY - U(3), U(4)], [-10, 1.5, U(5), U(3.3)], [-16, 3, U(4), U(2.7)],
-    [-21, 5, U(7), U(2.1)], [-24, 6, U(12), U(1.6)], [-24, 6.5, U(17), U(1.1)], [-21, 6.5, U(19.5), U(0.5)],
-  ].map(([f, sd, hgt, r]) => [hind + U(f) * 0.78, U(sd), hgt, r]);
+    [3, 0, spineY + U(1), U(4.8)], [-4, 1, spineY - U(3), U(4)], [-10, 3.5, U(5), U(3.3)], [-15, 7, U(4), U(2.7)],
+    [-19, 11, U(7), U(2.1)], [-21, 14, U(12), U(1.6)], [-20, 15.5, U(17), U(1.1)], [-17, 15.5, U(19.5), U(0.5)],
+  ].map(([f, sd, hgt, r]) => [hind + U(f) * 0.78, U(sd) * 0.7 * L.tside, hgt, r]);
   for (let i = 0; i < tl.length - 1; i++) {
     const [f0, s0, h0, r0] = tl[i], [f1, s1, h1, r1] = tl[i + 1];
     put(D((f0 + f1) / 2, (s0 + s1) / 2) - 0.2, { type: 'group', name: 'tail', underlay: true, children: [
@@ -102,14 +106,14 @@ export function render(ctx) {
   // membrane hangs back from it to a point over the haunch; the far wing behind the body, the near one over it
   for (const v of [-1, 1]) {
     const sd = v * U(5.5), W = (f, hgt, m = 1) => B(spineL * f, sd * m, spineY + U(hgt));
-    const sh = W(0.26, 5), wr = W(0.22, 16, 1.15), tip = W(-0.6, 5, 1.1), root = W(0.08, 5);
+    const sh = W(0.26, 5), wr = W(0.24, 20, 1.15), tip = W(-0.72, 6, 1.1), root = W(0.08, 5);
     // the folded membrane's trailing edge: three finger points with notches between
     const edge = [W(-0.46, 2, 1.05), W(-0.36, 5), W(-0.24, 1.5), W(-0.14, 5.5), W(-0.02, 2.5)];
     const nearW = v * sx > 0, z = D(0) + (nearW ? 0.5 : -0.5);
     put(z, { type: 'group', name: 'wing', underlay: true, children: [
       { type: 'poly', name: 'wing', pts: [sh, wr, tip, ...edge, root], mat: pal.leather, shade: 'flat', band: 1 },
-      { type: 'capsule', name: 'wing-arm', a: sh, b: wr, r: U(2), r1: U(1.3), mat: hide, shade: 'cyl' },
-      { type: 'capsule', name: 'wing-arm', a: wr, b: tip, r: U(1.3), r1: U(0.6), mat: hide, shade: 'cyl' },
+      { type: 'capsule', name: 'wing-arm', a: sh, b: wr, r: U(1.8), r1: U(0.9), mat: hide, shade: 'cyl' },
+      { type: 'capsule', name: 'wing-arm', a: wr, b: tip, r: U(1), r1: U(0.5), mat: hide, shade: 'cyl' },
     ] });
   }
 
@@ -121,8 +125,8 @@ export function render(ctx) {
   const jawRoot = N(hf - U(1), 0, hh - U(2)), jawTip = N(hf + U(6) - open * U(1.5), 0, hh - U(3.2) - open * U(6));
   // the crown: four horns from the back of the skull, swept back and up, the middle ones longest
   const horns = [[-1, 1], [1, 1], [-0.4, 0.65], [0.4, 0.65]].flatMap(([j, tall]) => {
-    const root = N(hf - U(1.2), j * U(2.4), hh + U(1.8)), mid = N(hf - U(5) * tall, j * U(4.5), hh + U(4.5) * tall + U(1.5)),
-      tip = N(hf - U(11) * tall, j * U(5.5), hh + U(6.5) * tall + U(1));
+    const root = N(hf - U(1.2), j * U(2.4), hh + U(1.8)), mid = N(hf - U(5.5) * tall, j * U(4.5), hh + U(4.2) * tall + U(1.5)),
+      tip = N(hf - U(13) * tall, j * U(5.5), hh + U(4.5) * tall + U(1.5));
     return [{ type: 'capsule', name: 'horn', a: root, b: mid, r: U(1.3), r1: U(0.9), mat: plate, shade: 'flat', band: 0 },
       { type: 'capsule', name: 'horn', a: mid, b: tip, r: U(0.9), r1: U(0.35), mat: plate, shade: 'flat', band: 0 }];
   });
