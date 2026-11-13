@@ -8,7 +8,7 @@ description: Make terrain maps for tabletop RPGs with artgen — a regional hex-
 A map is one file, `art/maps/<id>/map.json`: generator settings, an ordered list of **edits**, and an **overlay** of
 labels and symbols. Every render is rebuilt from it into `art/maps/<id>/out/` (gitignored). The user may also open the
 same file in the image tools web app (**Terrain Map**), paint on it and save it back: always re-read the map
-(`node tools/artgen/artgen.js map show <id>`) before changing it. CLI: `node tools/artgen/artgen.js map …`; the `artgen` MCP server has the same
+(`node tools/artgen/artgen-maps.js map show <id>`) before changing it. CLI: `node tools/artgen/artgen-maps.js map …`; the `artgen` MCP server has the same
 operations as `map_*` tools (images come back inline).
 
 Coordinates are **map cells**: x to the right, y down, one unit per grid cell (a square, or a hex across its flats).
@@ -19,25 +19,25 @@ Ask only what changes the map: what it is for (overland travel → `regional`; a
 big, the land (`mixed`, `island`, or `inland` with only lakes), how wet, and the grid (hex for regional travel,
 squares for battle maps, or none). Then:
 ```
-node tools/artgen/artgen.js map new <id> --preset regional|local [--size 30x22] [--grid hex|square|none] [--title "…"] [--seed n]
-node tools/artgen/artgen.js map render <id>            # colour + B/W, SVG + PNG; open the colour PNG and look at it
+node tools/artgen/artgen-maps.js map new <id> --preset regional|local [--size 30x22] [--grid hex|square|none] [--title "…"] [--seed n]
+node tools/artgen/artgen-maps.js map render <id>            # colour + B/W, SVG + PNG; open the colour PNG and look at it
 ```
 Presets: `regional` = 30×22 hexes of 6 mi, contours every 500 ft; `local` = 30×20 squares of 5 ft, contours every 5 ft.
 
 ## 2. Shape the terrain
 Big changes first, with the generator; then local fixes with edits. Render and look after each round.
 ```
-node tools/artgen/artgen.js map gen <id> --seed 7                    # a different world with the same settings
-node tools/artgen/artgen.js map gen <id> --land island --sea 0.45     # sea = share of the map under water (0..0.9)
-node tools/artgen/artgen.js map gen <id> --moisture 0.7 --rivers 4    # wetter: more forest and marsh, fewer deserts
-node tools/artgen/artgen.js map gen <id> --relief 0.8 --roughness 0.3 # taller, smoother mountains
-node tools/artgen/artgen.js map gen <id> --simplify 4 --interval 1000 # calmer: fewer, larger patches and fewer contour lines
-node tools/artgen/artgen.js map edit <id> paint --terrain forest --circle 12,8,3
-node tools/artgen/artgen.js map edit <id> paint --terrain water --poly 4,4,8,3,9,7,5,8       # a lake
-node tools/artgen/artgen.js map edit <id> elevate --amount 0.4 --stroke 3,15,10,12,18,14 --width 3   # a ridge (negative: a valley)
-node tools/artgen/artgen.js map edit <id> river --points 20,2,18,8,21,14,19,22   # source first: thin there, full width at the mouth
-node tools/artgen/artgen.js map edit <id> road --points 2,10,10,11,25,9
-node tools/artgen/artgen.js map edit <id> undo
+node tools/artgen/artgen-maps.js map gen <id> --seed 7                    # a different world with the same settings
+node tools/artgen/artgen-maps.js map gen <id> --land island --sea 0.45     # sea = share of the map under water (0..0.9)
+node tools/artgen/artgen-maps.js map gen <id> --moisture 0.7 --rivers 4    # wetter: more forest and marsh, fewer deserts
+node tools/artgen/artgen-maps.js map gen <id> --relief 0.8 --roughness 0.3 # taller, smoother mountains
+node tools/artgen/artgen-maps.js map gen <id> --simplify 4 --interval 1000 # calmer: fewer, larger patches and fewer contour lines
+node tools/artgen/artgen-maps.js map edit <id> paint --terrain forest --circle 12,8,3
+node tools/artgen/artgen-maps.js map edit <id> paint --terrain water --poly 4,4,8,3,9,7,5,8       # a lake
+node tools/artgen/artgen-maps.js map edit <id> elevate --amount 0.4 --stroke 3,15,10,12,18,14 --width 3   # a ridge (negative: a valley)
+node tools/artgen/artgen-maps.js map edit <id> river --points 20,2,18,8,21,14,19,22   # source first: thin there, full width at the mouth
+node tools/artgen/artgen-maps.js map edit <id> road --points 2,10,10,11,25,9
+node tools/artgen/artgen-maps.js map edit <id> undo
 ```
 Rivers (generated and drawn) are drawn as a water-filled ribbon between two thin banks that widens gently from the
 source to the mouth. One that ends in the sea or a lake (painted lakes count) is carried to the shore and flares into
@@ -47,24 +47,68 @@ draw rivers from the source down, never from the mouth up.
 Terrains: `deep water marsh sand desert grass scrub forest rock snow`. Edits apply in order on top of the generated
 terrain, so a later paint wins; `gen` keeps every edit. If the user wants "the same map but …", edit — don't reseed.
 
+## 2b. State what the ground must be, and check it
+When a consumer (a campaign tool, a brief) needs a place to be a certain ground — a wood here, marsh by the road, hills of 150
+to 400 ft, a stream through these points, no river across the road — write it as `require` in `map.json` instead of painting
+it. The generator shapes the ground to each requirement (it does not paint over it), and `map check` says which are met:
+```
+"require": [
+  {"id": "C-ground", "kind": "terrain", "area": {"poly": [48,55, 58,51, 70,56, 74,64]}, "terrain": "forest", "share": 0.8},
+  {"id": "E-hills",  "kind": "height",  "area": {"circle": [58,20,20]}, "low": 150, "high": 400},
+  {"id": "E-stream", "kind": "path", "path": "stream", "points": [62,14, 60,53]},
+  {"id": "B-road",   "kind": "path", "path": "road",   "points": [52,140, 54,98]},
+  {"id": "B-clear",  "kind": "clear", "area": {"stroke": [52,140, 54,98], "width": 10}}
+]
+node tools/artgen/artgen-maps.js map check <id> [--json]     # C-ground terrain forest 0.71 < 0.80 unmet   (exit 1 when any is unmet)
+```
+An unmet requirement is named, never fixed behind your back: change the requirement, the area or the seed (`map gen --seed`),
+knowing which one failed. `gen.rivers` is a count: set it to 0 for no rivers but the streams you require. Areas are shapes as
+edits take them (`circle`, `poly`, `stroke`); each fades out over `blend` (default `gen.feature`) beyond its area. A `height`'s `high`
+may not exceed `topo.maxElevation` (`map gen <id> --max-elevation 450`).
+
 ## 3. Grid, labels and symbols (the follow-up layers)
 ```
-node tools/artgen/artgen.js map grid <id> hex|square|none [--size 1] [--coords on|off]
-node tools/artgen/artgen.js map label <id> "The Greywold" --at 8,6 --kind region     # region: big spaced capitals
-node tools/artgen/artgen.js map label <id> "Thornby" --at 0507 --kind place          # place: bold, beside its symbol
-node tools/artgen/artgen.js map label <id> "Silver Mere" --at 20,16 --kind water     # water: italic
-node tools/artgen/artgen.js map symbol <id> town --at 0506                           # node tools/artgen/artgen.js map symbols lists the kinds
-node tools/artgen/artgen.js map overlay <id> rm label 2 | clear labels
-node tools/artgen/artgen.js map set <id> --title "The Drowned Marches" --legend on --scale-bar on --compass on
+node tools/artgen/artgen-maps.js map grid <id> hex|square|none [--size 1] [--coords on|off]
+node tools/artgen/artgen-maps.js map label <id> "The Greywold" --at 8,6 --kind region     # region: big spaced capitals
+node tools/artgen/artgen-maps.js map label <id> "Thornby" --at 0507 --kind place          # place: bold, beside its symbol
+node tools/artgen/artgen-maps.js map label <id> "Silver Mere" --at 20,16 --kind water     # water: italic
+node tools/artgen/artgen-maps.js map symbol <id> town --at 0506                           # node tools/artgen/artgen-maps.js map symbols lists the kinds
+node tools/artgen/artgen-maps.js map overlay <id> rm label 2 | clear labels
+node tools/artgen/artgen-maps.js map set <id> --title "The Drowned Marches" --legend on --scale-bar on --compass on
 ```
 
 ## 4. Render and hand over
 ```
-node tools/artgen/artgen.js map render <id> [--theme color|bw|both] [--format svg|png|both] [--ppu 60] [--layers grid=off,labels=off]
+node tools/artgen/artgen-maps.js map render <id> [--theme color|bw|both] [--format svg|png|both] [--ppu 60] [--layers grid=off,labels=off]
 ```
-`--ppu` is pixels per cell (default 40; use 70+ for print or a VTT battle map at 70 px per square). `--layers` turns
+`--ppu` is pixels per cell (default 40; use 70+ for print or a VTT battle map at 70 px per square). `--fit 180x260mm` picks the ppu that fits a page instead. `--crop x,y,w,h` renders a window of the map, in map units (`…cells` for grid cells); what is inside it matches the full render. `--layers` turns
 any of `terrain rivers roads contours grid symbols labels legend scale compass title` off — e.g. a clean player copy
 without labels, or a terrain-only image to letter by hand. Give the user the file paths and show the PNGs.
+
+### For a game or a level editor
+```
+node tools/artgen/artgen-maps.js map export <id> [--to tiled|ldtk|both] [--xml] [--cell 2] [--pack public/assets/main/pack.json --tiles grass=…,water=…]
+```
+Writes Tiled (`out/<id>.tmj` + `.tsj`, or `--xml`) and LDtk (`out/<id>.ldtk`) files, the tile sheet and a preview: each
+cell is the terrain most of it has (`deep water marsh sand desert grass scrub forest rock snow`); rivers and roads are
+polylines with their width, labels and symbols points. A square grid's cell is the grid's size (`--cell` overrides it);
+a hex grid exports as Tiled's staggered hexagons (Tiled only).
+
+## 5. Brief, versions, review, and the user's approval
+A terrain map goes through the same steps as a pixel asset: write what it is for, record each round as a version, review it, show it to the user, and let them decide. **Only the user approves**: never run `approve` yourself (over MCP it needs `user_approved`, and only after they said so in this conversation).
+```
+node tools/artgen/artgen-maps.js map brief <id> --text "what it is for, in the user's words" --refs refs/coast.png   # before you generate; references are PNGs under art/
+node tools/artgen/artgen-maps.js map version <id> --note "what this round changes"   # a frozen copy (map.v1.json, v2, …); refused when nothing changed
+node tools/artgen/artgen-maps.js map review <id>        # the render, the one-page data sheet and the references on one sheet
+node tools/artgen/artgen-maps.js map review <id> --score 7 --note "labels read" --reviewer art-reviewer   # the same, and logs a score for the version
+node tools/artgen/artgen-maps.js map diff <id> v1 v2   # what changed between two versions (no versions named: the latest one against the file now)
+node tools/artgen/artgen-maps.js map status             # in-pipeline, revision, final (waiting for the user), approved, stale; with one id also its history
+node tools/artgen/artgen-maps.js map approve <id> --note "the user's words"    # only after the user said so
+node tools/artgen/artgen-maps.js map feedback <id> --note "the user's words"   # they want changes: rework, version again, review again
+```
+Look at the review sheet before you show it: labels can be read, symbols don't overlap, the legend matches what is drawn, the requirements are met, and in black and white the patterns still tell the terrains apart. The checks it lists must not fail (an approval is refused while one does); warnings are the user's to weigh. A fresh reviewer subagent scores better than the maker (`--reviewer`). Then show the user the sheet (or point them to **Asset Review** in `node tools/artgen/artgen-maps.js ui`, where the versions sit side by side) and ask: approve, or what to change. A map edited after its approval is `stale` until a new version is recorded and approved.
+
+The **map direction** (`art/map-direction.json`) fixes the theme of each kind of map and the symbols a kind may use, for review sheets and checks: `node tools/artgen/artgen-maps.js map direction --theme map=bw,settlement=color --symbols dungeon=altar,statue`, then `--lock` once the user agrees (locking moves its version up, so maps approved under the old one are `stale`). It never changes what `map render` draws.
 
 ## Readability rules (check every render)
 - **Read at a glance.** Five or six terrains carry a map; if it looks busy, raise `--simplify` or the contour interval
