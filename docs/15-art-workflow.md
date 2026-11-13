@@ -27,11 +27,12 @@ Most of 0.11 to 0.14 is tabletop maps (settlements, dungeon layouts), which this
 changes below are all opt-in: with our config unchanged, every asset keeps its status and final (checked on the update:
 159 assets, no difference between 0.10.0 and 0.14.0), so nothing approved moves.
 
-- **Shape gates (off here).** With `review.gates` set for a kind, or `gates` on a brief, v1 is a silhouette draft only
-  (flat colours, no finish). The pipeline stops at `stage-gate shape` until Robert approves or rejects the shape
-  (`artgen stage approve|reject <id> shape --note "…"`), and only then decorates it. A fresh `artgen init` gates
-  characters and creatures; our config was made before that, so no gate is set. Turning it on is a settings change for
-  Robert to approve (proposed with the update, November 13, 2026).
+- **Shape gates (on for characters and creatures).** With `review.gates` set for a kind, or `gates` on a brief, v1 is a
+  silhouette draft only (flat colours, no finish). The pipeline stops at `stage-gate shape` until Robert approves or
+  rejects the shape (`artgen stage approve|reject <id> shape --note "…"`), and only then decorates it. Robert turned
+  them on for characters and creatures on November 13, 2026 (`review.gates` in the config), for the redo list and the
+  batch 4 bosses; approved assets keep their status. Show each shape sheet (`artgen review <id> --version base.v1
+  --stage shape`) on a card, several to a card, and record his answer in his words.
 - **Shared body rigs.** The walker and the quadruped, serpent, flyer and large templates now draw on
   `ctx.lib.rigs.body(…)`, with bone lengths fixed per asset; the `rig-lengths` stage check fails limbs that stretch
   between frames. `FAMILY_BODIES` (below) still picks the rig; a redo starts from the new template.

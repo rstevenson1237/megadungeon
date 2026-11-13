@@ -59,6 +59,14 @@
     "heightFail": 0.15,
     "sheetDetail": {
       "r1": "low"
+    },
+    "gates": {
+      "character": [
+        "shape"
+      ],
+      "creature": [
+        "shape"
+      ]
     }
   },
   "gate": {}
