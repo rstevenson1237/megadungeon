@@ -156,6 +156,10 @@ export function paintIso(ctx: IsoContext, draws: readonly IsoDraw[], atlas: Atla
       case 'card':
         card(ctx, atlas, d.x, d.y, d.glyph, d.fg);
         break;
+      case 'glyph':
+        // An effect with no art yet: its glyph centred on its point, with no card (task 6.8).
+        atlas.draw(ctx, d.glyph, d.fg, d.x - Math.floor(CELL_W / 2), d.y - CELL_H / 2);
+        break;
       case 'tint':
         diamond(ctx, d.x, d.y, d.fg);
         break;

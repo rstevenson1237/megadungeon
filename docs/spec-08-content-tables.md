@@ -176,6 +176,7 @@ From Intake Addendum B (requirements R3 and R4, finding F9, decision D9). The ar
 - **Themes:** a theme without an `art` block draws the shared terrain set recoloured from its eight `palette` tokens (Addendum A); a theme may name its own terrain assets instead.
 - **Validation** (in the content check, run in CI): every `sprite` and `art` id named in the tables exists in the built art packs and is approved; every family sprite the tables need exists once Phase 6's batches are done (before then, a missing family is a warning, not an error). artgen's own conformance checks (palette, sizes, outline) run in CI on `art/`.
 - **No content id changes** for the art: sprites are looked up by content id, never the reverse.
+- **An optional `fx` field** on `spells` rows (task 6.8, approved November 13, 2026): the effect the isometric display shows when the spell works, one of `bolt`, `burst`, `frost`, `push` or `aura`. A row without one shows push for a push effect, aura for a self spell, burst for an area and bolt for a target (Spec 01b). Blizzard and Frost Nova carry `fx: frost`.
 
 **Acceptance criteria added**
 

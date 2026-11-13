@@ -58,7 +58,8 @@ import { type Monster, isAlly, spawnAll } from './monsters.ts';
 import type { Fact } from '../core/templates.ts';
 import type { Link } from '../rules/world/run-layout.ts';
 import { type RivalArc, rivalsArrive } from './connective.ts';
-import { Schedule, cooldownTicks } from './schedule.ts';
+import { Schedule, TICKS_PER_ACTION, cooldownTicks } from './schedule.ts';
+import { DisplayRecorder, type Stamped } from './display.ts';
 import { type TownState, freshTown } from './town-state.ts';
 
 export { MAX_SIMULATED, actionsInRound };
@@ -434,6 +435,8 @@ export class Game {
    * window to open), its messages already in what `advance` returned. Taken and cleared by `carried()`. Not saved.
    */
   private outcome: ActResult | null = null;
+  /** What the isometric display animates (Spec 01b, task 6.8): events since the UI last took them. Not saved. */
+  readonly display: DisplayRecorder;
 
   constructor(
     readonly runSeed: number,
@@ -470,6 +473,7 @@ export class Game {
       mark: null,
       fallen: [],
     };
+    this.display = new DisplayRecorder(this);
     // A level a map fragment has mapped shows its layout the first time it is entered (Spec 02, task 2.10).
     if (!delta && player.mapped.includes(level.depth)) mapLevel(this);
     // The named rival is gone once killed, hostile once attacked, and carries what it took from the last level (Spec 02, Addendum A).
@@ -931,6 +935,7 @@ export class Game {
     player.halfRound = false;
     // A fall or a teleport leaves the level before anything else moves.
     if (this.pending.fall || this.pending.teleport !== undefined) return { messages, spent: true };
+    this.display.creaturesBegin();
     for (let rounds = speed === 'slow' ? 2 : 1; rounds > 0 && !player.dead; rounds--) this.runRound(messages, waiting);
     return { messages, spent: true };
   }
@@ -993,6 +998,19 @@ export class Game {
   /** Real time: the movement key comes up, or the game pauses, so the player stops walking. A step already held still happens. */
   halt(): void {
     this.walking = null;
+  }
+
+  /**
+   * The display events since the last call (Spec 01b, task 6.8), oldest first: in turn mode phased into the player's
+   * action and the creatures' round; in real time stamped with their tick, a step with its mover's interval.
+   */
+  takeDisplay(): Stamped[] {
+    if (this.time === 'turn') return this.display.take();
+    return this.display.take((who) => {
+      if (who === 'player') return cooldownTicks(this.state.player.statuses);
+      const m = this.state.monsters.find((o) => o.id === who);
+      return m ? TICKS_PER_ACTION[effectiveSpeed(m.speed, m.statuses)] : TICKS_PER_ROUND;
+    });
   }
 
   /** What the last command carried out during `advance` left for the shell, once: a level change, or something to open. */

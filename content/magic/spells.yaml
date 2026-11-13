@@ -102,6 +102,7 @@
   size: 5
   reach: 8
   text: Every creature in a 5 x 5 area is slowed for 5 rounds.
+  fx: frost
   tags: [starting]
 - id: thunderclap
   name: Thunderclap
@@ -213,6 +214,8 @@
   centred: true
   reach: 3
   text: Every creature within 3 cells of you is slowed for 6 rounds.
+  fx: frost
+
 - id: slumber
   name: Slumber
   shape: area

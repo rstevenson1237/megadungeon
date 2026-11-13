@@ -322,7 +322,9 @@ const backstabs = (game: Game, m: Monster): boolean =>
 export function playerAttacks(game: Game, m: Monster, messages: LogMessage[], reach = false, cleaved = false): void {
   const { player } = game.state;
   joinFight(player, game.state.round);
+  const shown = (hit: boolean): void => game.display.add({ type: 'attack', who: 'player', from: { ...game.state.map.player }, target: m.id, at: { x: m.x, y: m.y }, ranged: false, hit });
   if (backstabs(game, m)) {
+    shown(true);
     provoke(game, m);
     combatAt(game, m, [m]);
     playerHits(game, m, messages, { margin: 0, backstab: true, cleaved });
@@ -332,6 +334,7 @@ export function playerAttacks(game: Game, m: Monster, messages: LogMessage[], re
   const exchange = playerMelee(game.rng, { step: combatStep(player), dice: player.pools.combat.dice }, { modifier: m.modifier, unaware: m.awareness !== 'alert', asleep: hasStatus(m.statuses, 'asleep'), mode: weakMode(game, m) }, d.melee, tagMode(game, m));
   provoke(game, m);
   combatAt(game, m, [m]);
+  shown(exchange.defenderHit);
   if (exchange.defenderHit) playerHits(game, m, messages, { margin: exchange.attacker - exchange.defender, cleaved });
   // A spear's reach cannot be answered from 2 cells away (Spec 05, task 2.9); in a Rage a tie hits only the creature (Spec 03, Addendum A).
   if (exchange.attackerHit && !reach && !ragingTie(game, exchange)) hitPlayer(game, m, messages);
@@ -348,6 +351,7 @@ export function monsterAttacks(game: Game, m: Monster, messages: LogMessage[]): 
   const exchange = monsterMelee(game.rng, { ...m, mode: weakMode(game, m) }, { step: combatStep(player), dice: player.pools.combat.dice }, hasStatus(player.statuses, 'asleep'), defence, tagMode(game, m), monsterMeleePenalty(player));
   m.ambush = false;
   combatAt(game, game.state.map.player, [m]);
+  game.display.add({ type: 'attack', who: m.id, from: { x: m.x, y: m.y }, target: 'player', at: { ...game.state.map.player }, ranged: false, hit: exchange.defenderHit && !ragingTie(game, exchange) });
   if (exchange.defenderHit && !ragingTie(game, exchange) && hitPlayer(game, m, messages) && m.kind === 'bandit') steal(game, m, messages);
   if (exchange.attackerHit) playerHits(game, m, messages, { margin: exchange.defender - exchange.attacker, counter: true });
 }

@@ -32,6 +32,26 @@ interface Selection {
   facing?: string;
 }
 
+/** A sprite's moving states (task 6.8), which fall back to idle when its art has none. */
+const MOVING: ReadonlySet<string> = new Set(['walk', 'attack', 'hurt']);
+
+/**
+ * Which frame of a state plays `t` ms into it (task 6.8): by its frame lengths, else its frames a second; a loop wraps,
+ * and a one-shot holds its last frame. An empty state is the first.
+ */
+export function frameAt(asset: PackAsset, state: string, t: number): number {
+  const def = asset.states[state || Object.keys(asset.states)[0]!];
+  if (!def || def.frames <= 1 || !(t > 0)) return 0;
+  const lengths = def.durations ?? Array.from({ length: def.frames }, () => 1000 / (def.fps || 8));
+  const total = lengths.reduce((a, b) => a + b, 0);
+  let left = def.loop ? t % total : Math.min(t, total - 1e-6);
+  for (let i = 0; i < lengths.length; i++) {
+    if (left < lengths[i]!) return i;
+    left -= lengths[i]!;
+  }
+  return lengths.length - 1;
+}
+
 /** The pack format this reader knows (artgen pack.json format 1). */
 export function checkPack(json: unknown): PackManifest {
   const p = json as PackManifest;
@@ -61,7 +81,9 @@ export class IsoArt implements SpriteSource {
   draw(ctx: IsoContext, d: IsoDraw): boolean {
     const asset = d.asset ? this.manifest.assets[d.asset] : undefined;
     if (!asset || !this.look) return false;
-    const index = frameIndex(asset, { state: d.frame, variant: d.variant, frame: 0, facing: d.facing });
+    // A sprite with no hurt (or walk, or attack) state of its own plays idle (task 6.8).
+    const state = asset.states[d.frame] || !MOVING.has(d.frame) ? d.frame : 'idle';
+    const index = frameIndex(asset, { state, variant: d.variant, frame: frameAt(asset, state, d.t), facing: d.facing });
     if (index < 0) return false;
     const [, , , w, h] = asset.frames[index]!;
     const family = FAMILY_RAMPS[d.asset!] !== undefined;
@@ -83,8 +105,24 @@ export class IsoArt implements SpriteSource {
     // A sprite stands on the cell's centre by the point between its feet; terrain sits its diamond on the cell.
     const ground = asset.anchors?.ground?.[index];
     if (ground) ctx.drawImage(image, d.x - ground[0], d.y - ground[1]);
+    else if (asset.kind === 'effect') ctx.drawImage(image, d.x - asset.anchor[0], d.y - asset.anchor[1]); // an effect centres on its point
     else ctx.drawImage(image, d.x - Math.floor(w / 2), d.y + TILE_H / 2 - h);
     return true;
+  }
+
+  /**
+   * The frame lengths of every looping state in the pack, in ms (task 6.8): water, lava, the teleporter and idle loops.
+   * A still picture is drawn again when a multiple of one of them passes, so the loops play with no event running.
+   */
+  get loopPeriods(): number[] {
+    const out = new Set<number>();
+    for (const asset of Object.values(this.manifest.assets)) {
+      for (const def of Object.values(asset.states)) {
+        if (!def.loop || def.frames <= 1) continue;
+        for (const ms of def.durations ?? [1000 / (def.fps || 8)]) out.add(ms);
+      }
+    }
+    return [...out].sort((a, b) => a - b);
   }
 
   /** The asset's main step of each ramp (terrain-recolour.ts), counted over all its frames once. */

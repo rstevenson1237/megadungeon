@@ -205,6 +205,7 @@ function shoot(game: Game, m: Monster, messages: LogMessage[]): void {
   m.ambush = false;
   joinFight(player, game.state.round); // an exchange involving the player (Spec 03, Addendum A)
   combatAt(game, game.state.map.player, [m]);
+  game.display.add({ type: 'attack', who: m.id, from: { x: m.x, y: m.y }, target: 'player', at: { ...game.state.map.player }, ranged: true, hit: result.hit, fx: caster(m) ? 'bolt' : 'arrow' });
   if (result.hit) hitPlayer(game, m, messages, caster(m) ? 'blasts' : 'shoots');
   else messages.push({ kind: 'combat', text: `${Name(m)} ${caster(m) ? 'casts at' : 'shoots at'} you and misses.` });
 }
@@ -381,6 +382,10 @@ function besideAlly(game: Game, m: Monster): Monster | undefined {
   return undefined;
 }
 
+/** A melee exchange between two creatures, for the isometric display (Spec 01b, task 6.8). */
+const meleeShown = (game: Game, attacker: Monster, defender: Monster, hit: boolean): void =>
+  game.display.add({ type: 'attack', who: attacker.id, from: { x: attacker.x, y: attacker.y }, target: defender.id, at: { x: defender.x, y: defender.y }, ranged: false, hit });
+
 /**
  * One exchange between an ally and a creature, `attacker` first: ordinary melee in which both roll d6 plus modifier,
  * as rivals fight. It is combat for awareness and noise, and the creature an ally attacks is provoked.
@@ -391,6 +396,7 @@ function allyExchange(round: Round, attacker: Monster, defender: Monster): void 
   attacker.ambush = false;
   if (!isAlly(defender)) provoke(game, defender);
   combatAt(game, defender, [attacker, defender]);
+  meleeShown(game, attacker, defender, exchange.defenderHit);
   if (exchange.defenderHit) damage(game, defender, messages, attacker);
   if (exchange.attackerHit && game.state.monsters.includes(defender) && game.state.monsters.includes(attacker)) damage(game, attacker, messages, defender);
 }
@@ -430,6 +436,7 @@ function rivalFights(round: Round, rival: Monster, target: Monster): void {
   const exchange = creatureMelee(game.rng, rival, { modifier: target.modifier, unaware: target.awareness !== 'alert', asleep: hasStatus(target.statuses, 'asleep') });
   provoke(game, target);
   combatAt(game, target, [target]);
+  meleeShown(game, rival, target, exchange.defenderHit);
   if (exchange.defenderHit) damage(game, target, messages, rival);
   if (exchange.attackerHit && game.state.monsters.includes(target)) damage(game, rival, messages, target);
 }

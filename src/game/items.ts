@@ -112,6 +112,7 @@ export function fireRanged(game: Game, target: Monster, messages: LogMessage[]):
   const option = rangedOption(game)!;
   const result = playerRanged(game.rng, player.pools.skill, adjacentToPlayer(game, target), derived(game).rangedMode === 'disadvantage');
   shotTaken(game, [target]);
+  shotShown(game, target, result.success);
   const weapon = readied(game);
   if (option.thrown) {
     const dagger = throwableDagger(game)!;
@@ -142,6 +143,7 @@ export function fireVolley(game: Game, targets: readonly Monster[], messages: Lo
   const adjacent = targets.some((t) => adjacentToPlayer(game, t));
   const result = playerRanged(game.rng, player.pools.skill, adjacent, derived(game).rangedMode === 'disadvantage');
   shotTaken(game, targets);
+  for (const t of targets) shotShown(game, t, result.success);
   for (const _ of targets) spendAmmo(player.pack, weapon.ammo!);
   if (weapon.traits.includes('reload')) player.reload = 2;
   messages.push({ kind: 'combat', text: `You loose a volley at ${targets.map(nameOf).join(' and ')}.` });
@@ -156,6 +158,10 @@ const adjacentToPlayer = (game: Game, target: Monster): boolean => {
   const at = game.state.map.player;
   return Math.max(Math.abs(target.x - at.x), Math.abs(target.y - at.y)) <= 1;
 };
+
+/** A shot or a throw, for the isometric display (Spec 01b, task 6.8): an arrow flies from the player to the target. */
+const shotShown = (game: Game, target: Monster, hit: boolean): void =>
+  game.display.add({ type: 'attack', who: 'player', from: { ...game.state.map.player }, target: target.id, at: { x: target.x, y: target.y }, ranged: true, hit, fx: 'arrow' });
 
 /** A shot is an exchange involving the player (Spec 03, Addendum A): each target is provoked, and the fight is heard. */
 function shotTaken(game: Game, targets: readonly Monster[]): void {

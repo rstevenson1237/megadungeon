@@ -383,8 +383,13 @@ export class App {
    * The isometric picture to paint under the text, when the display is isometric and a level is on screen with no
    * other screen over it (Spec 01b); null otherwise, and the text display draws the whole screen.
    */
-  picture(): IsoPicture | null {
-    return this.clock?.picture() ?? null;
+  picture(now = 0): IsoPicture | null {
+    return this.clock?.picture(now) ?? null;
+  }
+
+  /** Whether the isometric picture needs drawing again at `now` with no key pressed: an animation runs (task 6.8). */
+  animating(now: number): boolean {
+    return this.clock?.animating(now) ?? false;
   }
 
   /** Whether a real-time run is on screen, where the browser's own key repeat is ignored (Spec 01, Addendum B). */

@@ -368,6 +368,8 @@ export const spellSchema = z
     rounds: spellRounds.optional(),
     distance: z.number().int().positive().optional(),
     affects: z.array(z.string()).min(1).optional(),
+    /** The effect the isometric display shows for it (Spec 01b, task 6.8); chosen by shape and effect when absent. */
+    fx: z.enum(['bolt', 'burst', 'frost', 'push', 'aura']).optional(),
   })
   .superRefine((spell, ctx) => {
     const bad = (message: string): void => void ctx.addIssue({ code: 'custom', message });

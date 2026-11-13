@@ -17,7 +17,9 @@ import { artId, familyId } from './art-ids.ts';
 import { CELL_H, CELL_W } from './grid.ts';
 import { DEFAULT_LOOK, ISO, type MapLook } from './palette.ts';
 import { MAIN_PANE, inner } from './panes.ts';
-import { buildScene, sceneAt, type FeatureKind, type Scene, type SceneCell, type SceneOccupant, type TerrainKind } from './scene.ts';
+import { buildScene, creatureOccupant, sceneAt, type FeatureKind, type Scene, type SceneCell, type SceneOccupant, type TerrainKind } from './scene.ts';
+import type { IsoMotion } from './iso-anim.ts';
+import { FX_GLYPH } from './iso-anim.ts';
 
 /** A floor cell's diamond, in native pixels (Spec 01b, Projection and camera). */
 export const TILE_W = 32;
@@ -59,7 +61,7 @@ export type IsoLayer = (typeof ISO_LAYERS)[number];
  * with their glyph on top, walls and doors as shaded blocks, everything else as its glyph on a standing card. A ring
  * marks an ally or a person; an icon has no glyph, so it is left out until its art is loaded.
  */
-export type IsoShape = 'diamond' | 'block' | 'card' | 'ring' | 'none' | IsoAimShape;
+export type IsoShape = 'diamond' | 'block' | 'card' | 'ring' | 'glyph' | 'none' | IsoAimShape;
 
 /**
  * How aiming and looking draw (Spec 01b, Targeting and look; task 6.4): a tinted diamond (a footprint cell, a cell
@@ -95,6 +97,8 @@ export interface IsoDraw {
   asset: string | null;
   /** The asset's state or animation: a wall's full or cap, a door's or feature's state, a creature's idle. */
   frame: string;
+  /** How far into its state's animation, in ms (task 6.8): 0 is the first frame; loops wrap, one-shots hold the last. */
+  t: number;
   /** Which of a tile's variants (floors have four), chosen by the cell so it never flickers. */
   variant: number;
   /** The map direction a player, creature or person faces (task 6.6); terrain and things are drawn as 's'. */
@@ -256,6 +260,8 @@ export interface IsoOptions {
   camera?: IsoCamera;
   /** Targeting, a cell cursor or look, when one is open. */
   aim?: IsoAim;
+  /** What is animating now (task 6.8): slides, lunges, effects, the fading dead, and the clock for looping art. */
+  motion?: IsoMotion;
 }
 
 /** Every draw of the isometric main view, in paint order (back to front), culled to the view area. */
@@ -265,12 +271,14 @@ export function buildIsoDraws(state: GameState, options: IsoOptions = {}): IsoDr
   const scene = buildScene(state, isoArea(camera), options.look ?? DEFAULT_LOOK);
   const classId = state.player.classId;
   const known = scene.cells.filter((c): c is SceneCell => c !== null);
+  const motion = options.motion;
+  const clock = motion?.clock ?? 0;
 
   const draws: IsoDraw[] = [];
   for (const cell of known) {
     const at = project(cell.x, cell.y, camera);
     const dim = cell.light === 'remembered';
-    const base = { cell: { x: cell.x, y: cell.y }, x: at.x, y: at.y, variant: 0, facing: 's' as IsoFacing, height: 0, alpha: 1, dim, large: false };
+    const base = { cell: { x: cell.x, y: cell.y }, x: at.x, y: at.y, t: 0, variant: 0, facing: 's' as IsoFacing, height: 0, alpha: 1, dim, large: false };
     const diamondBox: Rect = { x: at.x - TILE_W / 2, y: at.y - TILE_H / 2, w: TILE_W, h: TILE_H };
     const standing = (size: readonly [number, number]): Rect => {
       const w = Math.max(size[0], CARD_W);
@@ -300,7 +308,7 @@ export function buildIsoDraws(state: GameState, options: IsoOptions = {}): IsoDr
           });
         }
         draws.push({
-          ...base, layer: 'floor', asset, frame: liquid ? 'idle' : '',
+          ...base, layer: 'floor', asset, frame: liquid ? 'idle' : '', t: liquid ? clock : 0,
           variant: t.kind === 'floor' ? variantOf(cell.x, cell.y) : 0, tint: t.fg, shape: 'diamond', glyph: t.glyph, fg: t.fg, box: diamondBox,
         });
       }
@@ -322,7 +330,7 @@ export function buildIsoDraws(state: GameState, options: IsoOptions = {}): IsoDr
       // Debris and the teleporter are terrain art of one state (task 6.5): searched or spent, they draw the same.
       const oneState = FEATURE_ASSET[f.kind].startsWith('terrain-');
       draws.push({
-        ...base, layer: FLOOR_MARKS.has(f.kind) ? 'mark' : 'feature', asset: resolveAsset([FEATURE_ASSET[f.kind]], pack), frame: oneState ? '' : f.state ?? '',
+        ...base, layer: FLOOR_MARKS.has(f.kind) ? 'mark' : 'feature', asset: resolveAsset([FEATURE_ASSET[f.kind]], pack), frame: oneState ? '' : f.state ?? '', t: oneState ? clock : 0,
         tint: f.fg, shape: 'card', glyph: f.glyph, fg: f.fg, box: standing(FRAME.prop),
       });
     }
@@ -330,32 +338,26 @@ export function buildIsoDraws(state: GameState, options: IsoOptions = {}): IsoDr
       const it = cell.item;
       draws.push({ ...base, layer: 'item', asset: resolveAsset(it.cls ? [`family-${it.cls}`] : [], pack), frame: '', tint: it.fg, shape: 'card', glyph: it.glyph, fg: it.fg, box: standing(FRAME.prop) });
     }
-    const o = cell.occupant;
-    if (o) {
-      const large = o.kind === 'creature' && o.role === 'boss';
-      const size = large ? FRAME.large : FRAME.character;
-      // A ring under an ally (the ally colour) or a person (their role colour), Spec 01b, Markers.
-      const ringColour = o.kind === 'npc' ? o.fg : o.kind === 'creature' && o.role === 'ally' ? ALLY_COLOUR : o.kind === 'creature' && (o.role === 'rival' || o.role === 'bandit') ? o.fg : null;
-      if (ringColour !== null) {
-        draws.push({ ...base, layer: 'marker', asset: null, frame: '', tint: ringColour, shape: 'ring', glyph: 0, fg: ringColour, box: { x: at.x - 12, y: at.y - 6, w: 24, h: 12 } });
-      }
-      // The player faces their last move or attack; until task 6.8 tracks every last step, others face the player.
-      const me = state.map.player;
-      const facing = o.kind === 'player' ? facingOf(state.player.facing.dx, state.player.facing.dy) : facingOf(me.x - cell.x, me.y - cell.y);
-      const asset = resolveAsset(occupantChain(o, classId), pack);
-      // A family's sprite may be drawn in the large frame (a giant, a dragon), so its box allows for it.
-      const box = standing(asset?.startsWith('family-') ? FRAME.large : size);
-      draws.push({
-        ...base, layer: 'creature', asset, frame: 'idle', facing, tint: o.fg,
-        shape: 'card', glyph: o.glyph, fg: o.fg, alpha: o.kind === 'creature' && o.role === 'phantom' ? 0.5 : 1, large, box,
-      });
-      const shown = o.kind === 'player' ? icons(state.player.statuses, state.player.shield) : o.kind === 'creature' ? icons(o.creature.statuses) : [];
-      shown.forEach((id, i) => {
-        const ix = at.x + Math.round((i - (shown.length - 1) / 2) * ICON_GAP);
-        const iy = at.y - (large ? FRAME.large[1] + 6 : ICON_RISE);
-        draws.push({ ...base, x: ix, y: iy, layer: 'effect', asset: resolveAsset([id], pack), frame: '', tint: 0xffffff, shape: 'none', glyph: 0, fg: 0xffffff, box: { x: ix - 4, y: iy - 1, w: ICON_SIZE, h: ICON_SIZE } });
-      });
-    }
+    if (cell.occupant) draws.push(...occupantDraws(cell, cell.occupant, base, camera, state, classId, pack, motion));
+  }
+  for (const g of motion?.ghosts ?? []) {
+    const cell = sceneAt(scene, g.at.x, g.at.y);
+    if (!cell || cell.light !== 'visible') continue;
+    const at = project(g.at.x, g.at.y, camera);
+    const base = { cell: { x: g.at.x, y: g.at.y }, x: at.x, y: at.y, t: 0, variant: 0, facing: g.facing, height: 0, alpha: g.alpha, dim: false, large: false };
+    draws.push(...occupantDraws(cell, creatureOccupant(g.creature), base, camera, state, classId, pack, motion, g.alpha).filter((d) => d.layer === 'creature'));
+  }
+  for (const e of motion?.effects ?? []) {
+    const cx = Math.round(e.x);
+    const cy = Math.round(e.y);
+    if (sceneAt(scene, cx, cy)?.light !== 'visible') continue;
+    const at = project(e.x, e.y, camera);
+    const y = at.y - Math.round(e.rise);
+    draws.push({
+      cell: { x: cx, y: cy }, layer: 'effect', x: at.x, y, t: e.t, asset: resolveAsset([`fx-${e.fx}`], pack), frame: 'play', variant: 0, facing: 's',
+      tint: 0xffffff, shape: 'glyph', glyph: FX_GLYPH[e.fx], fg: 0xffffff, height: 0, alpha: 1, dim: false, large: false,
+      box: { x: at.x - 16, y: y - 16, w: 32, h: 32 },
+    });
   }
   const aim = options.aim ?? {};
   draws.push(...floorAim(aim, camera));
@@ -366,11 +368,57 @@ export function buildIsoDraws(state: GameState, options: IsoOptions = {}): IsoDr
   return draws.filter((d) => overlaps(d.box, ISO_VIEW));
 }
 
+type DrawBase = Pick<IsoDraw, 'cell' | 'x' | 'y' | 't' | 'variant' | 'facing' | 'height' | 'alpha' | 'dim' | 'large'>;
+
+/**
+ * Whoever stands on a cell: a ring for an ally or a person, the sprite, and its status icons. While it animates (task
+ * 6.8) it is drawn off its cell (a slide, a lunge) in its moving state; otherwise it plays idle on the clock. A
+ * creature faces its last step or attack this visit, else the player; the player faces their last move or attack.
+ * `fade` draws a dying creature as it fades out.
+ */
+function occupantDraws(cell: SceneCell, o: SceneOccupant, base: DrawBase, camera: IsoCamera, state: GameState, classId: string, pack: IsoPack, motion: IsoMotion | undefined, fade?: number): IsoDraw[] {
+  const draws: IsoDraw[] = [];
+  const who = o.kind === 'player' ? 'player' : o.kind === 'creature' ? o.creature.id : null;
+  const moving = who !== null && fade === undefined ? motion?.actors.get(who) : undefined;
+  const at = moving ? project(cell.x + moving.dx, cell.y + moving.dy, camera) : { x: base.x, y: base.y };
+  const standing = (size: readonly [number, number]): Rect => {
+    const w = Math.max(size[0], CARD_W);
+    const h = Math.max(size[1], CARD_H);
+    return { x: at.x - Math.floor(w / 2), y: at.y + 2 - h, w, h };
+  };
+  const placed = { ...base, x: at.x, y: at.y };
+  const large = o.kind === 'creature' && o.role === 'boss';
+  const size = large ? FRAME.large : FRAME.character;
+  // A ring under an ally (the ally colour) or a person (their role colour), Spec 01b, Markers.
+  const ringColour = o.kind === 'npc' ? o.fg : o.kind === 'creature' && o.role === 'ally' ? ALLY_COLOUR : o.kind === 'creature' && (o.role === 'rival' || o.role === 'bandit') ? o.fg : null;
+  if (ringColour !== null) {
+    draws.push({ ...placed, layer: 'marker', asset: null, frame: '', tint: ringColour, shape: 'ring', glyph: 0, fg: ringColour, box: { x: at.x - 12, y: at.y - 6, w: 24, h: 12 } });
+  }
+  const me = state.map.player;
+  const remembered = o.kind === 'creature' ? motion?.facings.get(o.creature.id) : undefined;
+  const facing = fade !== undefined ? base.facing : o.kind === 'player' ? facingOf(state.player.facing.dx, state.player.facing.dy) : remembered ?? facingOf(me.x - cell.x, me.y - cell.y);
+  const asset = resolveAsset(occupantChain(o, classId), pack);
+  // A family's sprite may be drawn in the large frame (a giant, a dragon), so its box allows for it.
+  const box = standing(asset?.startsWith('family-') ? FRAME.large : size);
+  const phantom = o.kind === 'creature' && o.role === 'phantom' ? 0.5 : 1;
+  draws.push({
+    ...placed, layer: 'creature', asset, frame: moving?.state ?? 'idle', t: moving?.t ?? motion?.clock ?? 0, facing, tint: o.fg,
+    shape: 'card', glyph: o.glyph, fg: o.fg, alpha: phantom * (fade ?? 1), large, box,
+  });
+  const shown = o.kind === 'player' ? icons(state.player.statuses, state.player.shield) : o.kind === 'creature' ? icons(o.creature.statuses) : [];
+  shown.forEach((id, i) => {
+    const ix = at.x + Math.round((i - (shown.length - 1) / 2) * ICON_GAP);
+    const iy = at.y - (large ? FRAME.large[1] + 6 : ICON_RISE);
+    draws.push({ ...placed, x: ix, y: iy, layer: 'effect', asset: resolveAsset([id], pack), frame: '', tint: 0xffffff, shape: 'none', glyph: 0, fg: 0xffffff, box: { x: ix - 4, y: iy - 1, w: ICON_SIZE, h: ICON_SIZE } });
+  });
+  return draws;
+}
+
 /** One aiming draw on cell `p`: a diamond-sized box, no asset and no glyph. */
 function aimDraw(p: { x: number; y: number }, camera: IsoCamera, layer: IsoLayer, shape: IsoAimShape, colour: number, alpha: number): IsoDraw {
   const at = project(p.x, p.y, camera);
   return {
-    cell: { x: p.x, y: p.y }, layer, x: at.x, y: at.y, asset: null, frame: '', variant: 0, facing: 's', tint: colour, shape, glyph: 0, fg: colour,
+    cell: { x: p.x, y: p.y }, layer, x: at.x, y: at.y, t: 0, asset: null, frame: '', variant: 0, facing: 's', tint: colour, shape, glyph: 0, fg: colour,
     height: 0, alpha, dim: false, large: false, box: { x: at.x - TILE_W / 2, y: at.y - TILE_H / 2, w: TILE_W, h: TILE_H },
   };
 }
