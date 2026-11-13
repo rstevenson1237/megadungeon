@@ -1,8 +1,9 @@
 // boss-magister-voss base.v2 (r2, from base.v1) - the decoration pass on the owner-approved v1 shape (silhouette kept,
-// inside the line only). Forms are lit as round masses along the direction's light (up-left): robe, mantle and hood
-// linear, sleeves, legs and the staff shaft cyl, hands and face sphere (19 colours: no metal.2, no accent.0). Proc layers: AO on robe and mantle, light
+// inside the line only). Forms are lit as round masses along the direction's light (up-left): robe linear, mantle and
+// hood normal (rounded), sleeves, legs and the staff shaft cyl, hands sphere; beard pale with darker partings
+// (19 colours: no metal.2, no accent.0). Proc layers: AO on robe and mantle, light
 // material noise on the robe. Decals: robe folds (a dark line with a lit edge toward the light), a metal clasp and a lit
-// rim on the mantle, a glyph-stitched hem band, a lit rim inside the hood opening with its brow shadow on the face, a
+// rim on the mantle, a glyph-stitched hem band, a lit rim inside the hood opening, a lit cheek and a shaded jaw on the face, a
 // nose and a mouth under glowing eyes, beard strands, the grimoire's metal corners and accent sigil, metal ferrules on
 // the leather shaft, a lit edge on the crescent and a hot core in the orb. Back view: a hood seam and a fold down the
 // back of the hood and mantle instead of the face. The held contact frame keeps its pose; the orb flares there.
@@ -137,22 +138,22 @@ export function render(ctx) {
   const mantle = [[nx, ny - 3 * U], [nx + 0.75 * (mR - nx), ny - 1.8 * U], [mR, ny + 3.5 * U], [mR - 0.6 * U, my],
     [nx + 0.55 * (mR - nx), my - 3 * U], [nx + 0.3 * (mR - nx), my + 0.5 * U], [nx, my - 2.8 * U], [nx - 0.3 * (nx - mL), my + 0.5 * U], [nx - 0.55 * (nx - mL), my - 3 * U],
     [mL + 0.6 * U, my], [mL, ny + 3.5 * U], [nx - 0.75 * (nx - mL), ny - 1.8 * U]];
-  s.add({ type: 'path', name: 'mantle', underlay: true, d: smooth(mantle, [3, 4, 5, 6, 7, 8, 9]), mat: pal.cloth, shade: 'linear', gain: 0.8 });
+  s.add({ type: 'path', name: 'mantle', underlay: true, d: smooth(mantle, [3, 4, 5, 6, 7, 8, 9]), mat: pal.cloth, shade: 'normal', round: 3 * U });
 
   // the long beard from the hood's mouth to the sash, jutting forward in profile
   if (showFace) {
     const bcx = hcx + fx * (profile ? 1.25 : 1), bt = top + headH * 0.72, bw = (3.6 - 1.2 * side) * U, tip = hy - 6 * U, bend = sx * 2 * U;
-    s.add({ type: 'path', name: 'beard', underlay: true, d: `M${bcx - bw} ${bt} Q${bcx - bw * 1.1} ${(bt + tip) / 2} ${bcx - 0.8 * U + bend} ${tip} L${bcx + bend * 0.5} ${tip - 2 * U} L${bcx + 0.8 * U + bend} ${tip} Q${bcx + bw * 1.1} ${(bt + tip) / 2} ${bcx + bw} ${bt} Z`, mat: pal.hair, shade: 'linear' });
+    s.add({ type: 'path', name: 'beard', underlay: true, d: `M${bcx - bw} ${bt} Q${bcx - bw * 1.1} ${(bt + tip) / 2} ${bcx - 0.8 * U + bend} ${tip} L${bcx + bend * 0.5} ${tip - 2 * U} L${bcx + 0.8 * U + bend} ${tip} Q${bcx + bw * 1.1} ${(bt + tip) / 2} ${bcx + bw} ${bt} Z`, mat: pal.hair, shade: 'flat', band: 0 });
   }
 
   // the deep pointed hood; its point droops back, away from the facing
   const hw = headW / 2, tipX = hcx - sx * 3.5 * U - (back ? 0 : 0), tipY = top - 7 * U;
-  s.add({ type: 'path', name: 'hood', underlay: true, d: `M${tipX} ${tipY} Q${hcx + hw * 1.05} ${top - 2 * U} ${hcx + hw * 1.12} ${top + headH * 0.5} Q${hcx + hw * 1.2} ${top + headH * 0.95} ${hcx + hw * 1.3} ${top + headH + 2 * U} L${hcx - hw * 1.3} ${top + headH + 2 * U} Q${hcx - hw * 1.2} ${top + headH * 0.95} ${hcx - hw * 1.12} ${top + headH * 0.5} Q${hcx - hw * 1.05} ${top - 2 * U} ${tipX} ${tipY} Z`, mat: pal.cloth, shade: 'linear' });
+  s.add({ type: 'path', name: 'hood', underlay: true, d: `M${tipX} ${tipY} Q${hcx + hw * 1.05} ${top - 2 * U} ${hcx + hw * 1.12} ${top + headH * 0.5} Q${hcx + hw * 1.2} ${top + headH * 0.95} ${hcx + hw * 1.3} ${top + headH + 2 * U} L${hcx - hw * 1.3} ${top + headH + 2 * U} Q${hcx - hw * 1.2} ${top + headH * 0.95} ${hcx - hw * 1.12} ${top + headH * 0.5} Q${hcx - hw * 1.05} ${top - 2 * U} ${tipX} ${tipY} Z`, mat: pal.cloth, shade: 'normal', round: 4 * U });
   if (showFace) {
     // the hood's opening: shadow over the brow, the face below it
     const ox = hcx + fx, oy = top + headH * 0.5;
     s.add({ type: 'ellipse', name: 'hood-opening', cx: ox, cy: oy, rx: fw * 0.62, ry: headH * 0.36, mat: pal.cloth, shade: 'flat', band: 2 });
-    s.add({ type: 'ellipse', name: 'face', cx: ox + sx * 0.5 * U, cy: oy + headH * 0.1, rx: fw * 0.42, ry: headH * 0.24, mat: pal.skin, shade: 'sphere' });
+    s.add({ type: 'ellipse', name: 'face', cx: ox + sx * 0.5 * U, cy: oy + headH * 0.1, rx: fw * 0.42, ry: headH * 0.24, mat: pal.skin, shade: 'flat', band: 1 });
     for (const ex of eyes) s.add({ type: 'rect', name: 'eye', x: ex, y: ey, w: 1, h: 1, mat: pal.glow, shade: 'flat', band: 0 });
   }
   // ---- decoration (inside the line): decals on named parts, then AO and light noise
@@ -183,14 +184,15 @@ export function render(ctx) {
     const ox = hcx + fx, oy = top + headH * 0.5;
     // a lit rim inside the hood opening's upper-left, the brow's shadow across the face, a nose and a mouth
     decals.push({ name: 'opening-lit', part: 'hood', mat: 'cloth', band: 0, shape: { type: 'path', d: `M${ox - fw * 0.66} ${oy + headH * 0.1} Q${ox - fw * 0.7} ${oy - headH * 0.4} ${ox} ${oy - headH * 0.4} L${ox} ${oy - headH * 0.34} Q${ox - fw * 0.56} ${oy - headH * 0.34} ${ox - fw * 0.58} ${oy + headH * 0.1} Z` } });
-    decals.push({ name: 'brow-shadow', part: 'face', mat: 'skin', band: 2, shape: { type: 'rect', x: R(ox - fw * 0.42), y: R(ey - 1), w: R(fw * 0.84) + 1, h: 1 } });
+    decals.push({ name: 'cheek-lit', part: 'face', mat: 'skin', band: 0, shape: { type: 'rect', x: R(ox + sx * 0.5 * U - fw * 0.3), y: ey + 1, w: Math.max(1, R(fw * 0.2)), h: 1 } });
+    decals.push({ name: 'jaw-shade', part: 'face', mat: 'skin', band: 2, shape: { type: 'rect', x: R(ox + sx * 0.5 * U + fw * 0.15), y: ey + 2, w: Math.max(1, R(fw * 0.22)), h: 1 } });
     const fcx = ox + sx * 0.5 * U, nose = R(profile ? fcx + sx * (fw * 0.42 - 1.2) : fcx + sx * 0.4 * U);
     decals.push({ name: 'nose', part: 'face', mat: 'skin', band: 0, shape: { type: 'rect', x: nose, y: ey + 1, w: 1, h: Math.max(1, R(U)) } });
     if (L.mouth && !profile) decals.push({ name: 'mouth', part: ['face', 'beard', 'hood-opening'], mat: 'hair', band: 2, shape: { type: 'rect', x: L.mouth[0] - (profile ? 0 : 1), y: L.mouth[1], w: profile ? 1 : 3, h: 1 } });
     // beard strands: dark partings and lit locks toward the light, tapering to the tip
     const bcx = hcx + fx * (profile ? 1.25 : 1), bt = top + headH * 0.8, tip = hy - 7 * U, bend = sx * 2 * U, bw = (3.6 - 1.2 * side) * U;
-    for (const k of (profile ? [0] : [-0.45, 0.35])) decals.push({ name: `beard-part${k}`, part: 'beard', mat: 'hair', band: 2, shape: line(R(bcx + bw * k), R(bt + 2 * U), R(bcx + bw * k * 0.3 + bend * 0.8), R(tip)) });
-    decals.push({ name: 'beard-lit', part: 'beard', mat: 'hair', band: 0, shape: line(R(bcx - bw * 0.75), R(bt + U), R(bcx - bw * 0.2 + bend * 0.7), R(tip - 2 * U)) });
+    for (const k of (profile ? [0] : [-0.45, 0.35])) decals.push({ name: `beard-part${k}`, part: 'beard', mat: 'hair', band: 1, shape: line(R(bcx + bw * k), R(bt + 2 * U), R(bcx + bw * k * 0.3 + bend * 0.8), R(tip)) });
+    decals.push({ name: 'beard-shade', part: 'beard', mat: 'hair', band: 1, shape: line(R(bcx + bw * 0.8), R(bt + U), R(bcx + bw * 0.3 + bend * 0.7), R(tip - 2 * U)) });
   }
   // the grimoire: metal corner caps and an accent sigil on the cover (when its cover faces us)
   if (!back && !(side > 0.5 && arms[0] === 'L')) { const b = pose.end('armL_lo'), bw = (3.6 - 1.4 * side) * U, bh = 4.6 * U;

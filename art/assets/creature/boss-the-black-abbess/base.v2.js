@@ -166,7 +166,7 @@ export function render(ctx) {
     { type: 'group', name: `${name}-cuff`, clip: { type: 'capsule', a: a.el, b: a.hand, r: X(3.1), r1: X(4.6) }, children: [
       { type: 'circle', name: `${name}-bell`, cx: a.hand[0], cy: a.hand[1] + X(0.5), r: X(3.4), color: 'cloth.2' }] },
   ];
-  const hand = (a, name) => ({ type: 'path', name: `${name}-hand`, underlay: true, mat: pal.skin, shade: 'sphere',
+  const hand = (a, name) => ({ type: 'path', name: `${name}-hand`, underlay: true, mat: pal.skin, shade: 'flat', band: 0,
     d: smooth([[a.hand[0] - X(2), a.hand[1] - X(1.5)], [a.hand[0] + X(2), a.hand[1] - X(1.5)], [a.hand[0] + X(2.2), a.hand[1] + X(2)], [a.hand[0], a.hand[1] + X(3.5)], [a.hand[0] - X(2.2), a.hand[1] + X(2)]]) });
   const dOff = off.depth, dMain = main.depth;
   put(dOff, ...sleeve(off, 'off'), hand(off, 'off'));
