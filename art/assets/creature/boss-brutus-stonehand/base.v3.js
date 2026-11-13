@@ -10,7 +10,7 @@
 // a rocky brow and a stone slab on one shoulder. Seen from behind, a boulder hump of spine hides the head and the arms swap
 // sides, so front, back and side facings differ. Flat materials only, no proc layers, no finish; feet on the pivot row.
 import { biped, bipedAnchors, bipedLayout } from '../../../lib/beast.v1.js';
-export const meta = { brief: 'family-g-cap', pass: 'r3', notes: 'decorated: cracked stone fists/brow/slab/hump, value split of head and arms from the tunic, face, rope belt', mirror: false };
+export const meta = { brief: 'family-g-cap', pass: 'r3', notes: 'decorated: cracked stone fists/brow/slab/hump, value split of head and arms from the tunic, face, rope belt', mirror: false, recolour: 'leather' };
 const H = 4.5;
 
 // Per state and frame (body-centre dx, absolute y): the raised arm's elbow and fist, the trailing arm's elbow and fist.

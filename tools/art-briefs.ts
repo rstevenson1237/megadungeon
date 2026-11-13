@@ -52,23 +52,35 @@ export const FAMILY_HEIGHTS: Record<string, number> = {
   T: 3.0, V: 1.8, W: 2.0, Y: 1.6,
 };
 
+/** The player as drawn: the approved class sprites stand about 37 px tall, not the 29 px of 1.8 m at 16 px a metre. */
+export const DRAWN_PLAYER_PX = 37;
+/** The art direction's scale, which the conformance gate measures a brief's height against. */
+export const PX_PER_METRE = 16;
+
 /**
- * A boss's height (Spec 01b, task 6.9): from 1x to 4x the player, rising evenly through the bosses in depth order
- * (the table's order) from 0.8x to 4x, never under 1x or under its own family's height, so the average is 2.5x.
+ * How many times the drawn player a boss stands (Spec 01b, task 6.9): from 1x to 4x, rising evenly through the bosses
+ * in depth order (the table's order) from 0.8x to 4x, never under 1x or under its own family's height, so the
+ * average is 2.5x.
  */
-export function bossHeight(glyph: string, index: number, count: number): number {
+export function bossTimes(glyph: string, index: number, count: number): number {
   const ramp = 0.8 + (3.2 * index) / Math.max(1, count - 1);
-  const times = Math.min(4, Math.max(1, FAMILY_HEIGHTS[glyph]! / PLAYER_HEIGHT, ramp));
-  return Math.round(times * PLAYER_HEIGHT * 10) / 10;
+  return Math.min(4, Math.max(1, FAMILY_HEIGHTS[glyph]! / PLAYER_HEIGHT, ramp));
 }
 
-/** The tallest boss the 64 x 80 large frame holds, with headroom for the attack (74 px at 16 px a metre). */
-export const BOSS_LARGE_UP_TO = 4.6;
+/** A boss's brief height in metres: its times the drawn player (37 px), at the direction's 16 px a metre. */
+export function bossHeight(glyph: string, index: number, count: number): number {
+  return Math.round((bossTimes(glyph, index, count) * DRAWN_PLAYER_PX) / PX_PER_METRE * 10) / 10;
+}
 
-/** The frame of a boss: the large frame up to 4.6 m, the 96 x 128 boss frame above it. */
-export const BOSS_FRAME: [number, number] = [96, 128];
+/** The frames of a boss, each with the tallest boss it holds, leaving headroom for the attack. */
+export const BOSS_FRAMES: { upTo: number; size: 'large' | [number, number] }[] = [
+  { upTo: 74, size: 'large' }, // 64 x 80
+  { upTo: 116, size: [96, 128] },
+  { upTo: Infinity, size: [128, 160] },
+];
 function bossSize(height: number): { height: number; size: 'large' | [number, number] } {
-  return { height, size: height <= BOSS_LARGE_UP_TO ? 'large' : BOSS_FRAME };
+  const px = height * PX_PER_METRE;
+  return { height, size: BOSS_FRAMES.find((f) => px <= f.upTo)!.size };
 }
 
 /** What a family is, in a few words, for its brief; the member names follow. */
@@ -235,7 +247,7 @@ export function buildBriefs(tables: Record<string, unknown[]>): ArtBrief[] {
       id: `boss-${b.id.replace(/_/g, '-')}`, kind: 'creature', batch: 4, priority: 400 + i, importance: 'hero',
       ...bossSize(bossHeight(b.glyph!, i, bosses.length)), ...(FAMILY_BODIES[b.glyph!] ? { body: FAMILY_BODIES[b.glyph!] } : {}),
       directions: 4, states: ['idle', 'walk', 'attack'], anims: fighter,
-      notes: `${b.name}, a unique boss of the ${familyId(b.glyph!)} family, drawn bigger than its family`,
+      notes: `${b.name}, a unique boss of the ${familyId(b.glyph!)} family, drawn bigger than its family: ${bossTimes(b.glyph!, i, bosses.length).toFixed(1)}x the player as drawn, about ${Math.round(bossTimes(b.glyph!, i, bosses.length) * DRAWN_PLAYER_PX)} px tall`,
     }),
   );
   add({
