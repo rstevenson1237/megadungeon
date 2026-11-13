@@ -1,0 +1,9 @@
+{
+  "id": "boss-qorra-of-the-lake",
+  "template": "iso/creature-serpent",
+  "review": {
+    "scale": 4,
+    "sym": "none",
+    "iso": true
+  }
+}

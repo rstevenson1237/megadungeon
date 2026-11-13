@@ -1,0 +1,9 @@
+{
+  "id": "boss-skarn-the-burning",
+  "template": "iso/creature-large",
+  "review": {
+    "scale": 3,
+    "sym": "none",
+    "iso": true
+  }
+}
