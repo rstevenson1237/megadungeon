@@ -1,0 +1,9 @@
+{
+  "id": "boss-grask-the-pale",
+  "template": "iso/character-walk",
+  "review": {
+    "scale": 4,
+    "sym": "none",
+    "iso": true
+  }
+}

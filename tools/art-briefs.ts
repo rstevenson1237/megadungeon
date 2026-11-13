@@ -52,6 +52,25 @@ export const FAMILY_HEIGHTS: Record<string, number> = {
   T: 3.0, V: 1.8, W: 2.0, Y: 1.6,
 };
 
+/**
+ * A boss's height (Spec 01b, task 6.9): from 1x to 4x the player, rising evenly through the bosses in depth order
+ * (the table's order) from 0.8x to 4x, never under 1x or under its own family's height, so the average is 2.5x.
+ */
+export function bossHeight(glyph: string, index: number, count: number): number {
+  const ramp = 0.8 + (3.2 * index) / Math.max(1, count - 1);
+  const times = Math.min(4, Math.max(1, FAMILY_HEIGHTS[glyph]! / PLAYER_HEIGHT, ramp));
+  return Math.round(times * PLAYER_HEIGHT * 10) / 10;
+}
+
+/** The tallest boss the 64 x 80 large frame holds, with headroom for the attack (74 px at 16 px a metre). */
+export const BOSS_LARGE_UP_TO = 4.6;
+
+/** The frame of a boss: the large frame up to 4.6 m, the 96 x 128 boss frame above it. */
+export const BOSS_FRAME: [number, number] = [96, 128];
+function bossSize(height: number): { height: number; size: 'large' | [number, number] } {
+  return { height, size: height <= BOSS_LARGE_UP_TO ? 'large' : BOSS_FRAME };
+}
+
 /** What a family is, in a few words, for its brief; the member names follow. */
 const FAMILY_NOTES: Record<string, string> = {
   a: 'giant insects and scorpions', b: 'cave bats', c: 'giant centipedes and crayfish', e: 'eels and deep things of the water',
@@ -209,13 +228,14 @@ export function buildBriefs(tables: Record<string, unknown[]>): ArtBrief[] {
     add({ id: `icon-${id}`, kind: 'ui-icon', batch: 3, priority: 360 + i, importance: 'filler', size: ICON_SIZE, notes: `status icon above the head: ${object}` }),
   );
 
-  // Batch 4: unique bosses at the large size, and the level 100 set piece.
-  rows('bosses').forEach((b, i) =>
+  // Batch 4: unique bosses, drawn bigger than their families (bossHeight), and the level 100 set piece.
+  const bosses = rows('bosses');
+  bosses.forEach((b, i) =>
     add({
-      id: `boss-${b.id.replace(/_/g, '-')}`, kind: 'creature', batch: 4, priority: 400 + i, importance: 'hero', size: 'large',
-      height: FAMILY_HEIGHTS[b.glyph!], ...(FAMILY_BODIES[b.glyph!] ? { body: FAMILY_BODIES[b.glyph!] } : {}),
+      id: `boss-${b.id.replace(/_/g, '-')}`, kind: 'creature', batch: 4, priority: 400 + i, importance: 'hero',
+      ...bossSize(bossHeight(b.glyph!, i, bosses.length)), ...(FAMILY_BODIES[b.glyph!] ? { body: FAMILY_BODIES[b.glyph!] } : {}),
       directions: 4, states: ['idle', 'walk', 'attack'], anims: fighter,
-      notes: `${b.name}, a unique boss of the ${familyId(b.glyph!)} family, drawn at the large size`,
+      notes: `${b.name}, a unique boss of the ${familyId(b.glyph!)} family, drawn bigger than its family`,
     }),
   );
   add({

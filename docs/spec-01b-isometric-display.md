@@ -130,7 +130,7 @@ The asset list leaves four points of naming and size open. Proposed as built in 
 
 - **Family ids keep upper and lower case apart:** artgen ids are lower case, and both `h` (men and dwarves) and `H` (many-headed beasts) are families, so a lower case letter's family is `family-h` and an upper case letter's is `family-h-cap`. Floor items use their glyph class: `family-potion`, `family-coins`, `family-quest-item` (Spec 08, Addendum B, fallback step 2).
 - **Other ids by group:** `terrain-<piece>`, `class-<class id>`, `npc-<role>`, `feature-<fixture>`, `fx-<effect>`, `icon-<status>`, `boss-<boss id>` and `setpiece-abyssal-throne`, with content ids' underscores written as hyphens.
-- **The size table** gives each brief a real-world height against the player's 1.8 m: a rat 0.25 m, a goblin 1.1 m, an ogre 3.6 m (twice the player), a giant 4.5 m, a dragon 4 m. A boss keeps its family's height and is drawn at the large frame size.
+- **The size table** gives each brief a real-world height against the player's 1.8 m: a rat 0.25 m, a goblin 1.1 m, an ogre 3.6 m (twice the player), a giant 4.5 m, a dragon 4 m. A boss is drawn bigger than its family: see the clarification of task 6.9.
 - **Effects carry no height:** they are sized by what they show (a cell, an area), not by a real-world height.
 
 ## Clarification (task 6.3, proposed and approved October 12, 2026)
@@ -208,6 +208,11 @@ The spec lists the display events, the turn-mode times and the effects, but not 
 - **No animation for:** a door (it switches state, as now), a status gained (its icon appears, as now), and a fall or teleport (the new level draws at once; the player's sprite plays fx-aura on arrival from a teleport).
 - **Looping art and redraw.** Liquids, the teleporter and idle loops play their pack frames (8 frames a second for terrain, idle's 600 ms). In turn mode the map redraws only when a frame changes or an event runs, so a still screen costs a few redraws a second; this counts as "while animations run".
 - **Pauses and switches.** An overlay or a real-time pause freezes running animations where they are (in turn mode a key press that opens an overlay first finishes them, as any key does). Switching to text or a level change drops them. Nothing in the game changes.
+
+## Clarification (task 6.9, proposed and approved November 13, 2026)
+
+- **Boss height.** A boss is drawn from 1 to 4 times the player's 1.8 m. Its height rises evenly through the bosses in the content table's depth order. The rise starts at 0.8x for the shallowest boss and ends at 4x for the deepest. No boss is drawn under 1x, or under its own family's height. Over the 43 bosses the average is 2.5x. The range runs from Varn Ironmouth at 1.9 m to The Seat Itself at 7.2 m. Heights are rounded to 0.1 m and drawn at 16 px a metre. `tools/art-briefs.ts` (`bossHeight`) writes them into `art/briefs.yaml`.
+- **Boss frames.** A boss up to 4.6 m (74 px, with headroom for the attack) uses the 64 x 80 large frame; that is 24 bosses. The 19 bosses over 4.6 m use a 96 x 128 boss frame. They stand on the cell's centre by their ground anchor, like every sprite, so the tallest cover the cells behind them. Frames, states and durations are otherwise as task 6.6 set them.
 
 ## Acceptance criteria
 
