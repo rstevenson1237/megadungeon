@@ -13,7 +13,11 @@ floor). `artgen make` starts characters and creatures that have more than one fa
 it; other brief kinds without a template of their own borrow a related one (creature → character, tileset/texture →
 tile, viewmodel/ui-icon → prop).
 
-The character templates compute their geometry once in `layout(ctx)`, shared by `render` and `anchors`, so the
+The character and creature templates are built on the shared body rigs (`ctx.lib.rigs.body(plan, ctx, { height })`, from
+`artgen-scene/src/anim/rigs.ts`: plans biped, quadruped (and `large`), flyer, serpent, turret). The rig owns the skeleton,
+the clips (idle, walk, attack, hurt; flyers beat their wings in every state), foot IK and the facing's projection; a template
+only draws primitives along its bones (`pose.start/end/at`) and must not change bone lengths between cells (the `rig-lengths`
+stage check). They compute their geometry once in `layout(ctx)`, shared by `render` and `anchors`, so the
 anchors land on the drawn pixels: `head`, `hand` (exported in `pack.json`, for effects and held props) and the face
 anchors `eye`, `eye2`, `mouth` (only on facings where the face is visible).
 
@@ -23,3 +27,8 @@ naga tail), `flyer` (bat, wasp, bird; hovers over its ground shadow and beats it
 (dragon, giant beast; brief it on a large frame with its real height). Each computes its geometry in `layout(ctx)`,
 draws four facings and a walk, and exports `ground` (where it stands), `head` and the face anchors. Low bodies
 (quadruped, serpent, flyer) are seen along their length, so the height check only flags them.
+
+`fp/character-rigged/` is the rigged 3D figure (R7b, `docs/RIGS3D.md`): a 3D-mode biped built along the same rig in 3D
+(`ctx.lib.rigs.body3d('biped', { height })`, every part with its `bone`, the pose passed to `ctx.lib.t2.scene3d({ k, pose })`).
+It draws in the brief's own view at the brief's `height`, so it serves any view; briefs with `rigged: true` start from it,
+and `artgen rig <id>` exports the skinned `.glb` with a clip per state.

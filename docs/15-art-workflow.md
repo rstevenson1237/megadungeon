@@ -1,13 +1,14 @@
 # Art workflow: how this project runs artgen
 
 How each art batch of Phase 6 is produced, from task 6.7 on. It applies the review of batches 1 and 2 (October 18,
-2026: 70 assets, 371 scored passes) on top of artgen 0.10.0. artgen's own skills (`.claude/skills/asset-production`,
+2026: 70 assets, 371 scored passes) on top of artgen, now 0.14.0 (updated November 13, 2026, from 0.10.0), and the cost
+lesson of batch 3. artgen's own skills (`.claude/skills/asset-production`,
 `.claude/skills/artgen`) describe the pipeline itself; this page names only the project's choices, and wins where the
 two differ.
 
-## What artgen 0.10.0 already does
+## What artgen has done since 0.10.0
 
-These came from our review and are now artgen's defaults, written out in `art/artgen.config.json` so they are visible:
+These came from our review and have been artgen's defaults since 0.10.0, written out in `art/artgen.config.json` so they are visible:
 
 - **The best version ships.** The final is the gate-passing version with the best blind score, then the best own
   score, not the newest. `status` and the gallery show `final≠best` when a higher score lost.
@@ -19,6 +20,38 @@ These came from our review and are now artgen's defaults, written out in `art/ar
   v1s, and its notes go into each asset's v2 step. The final roster still runs before the gallery.
 - **Heights fail.** An upright character or creature more than 15% off its brief height fails the gate.
 - **BELOW BAR.** The gallery labels any asset whose blind score is under 6.5.
+
+## What artgen 0.11 to 0.14 added
+
+Most of 0.11 to 0.14 is tabletop maps (settlements, dungeon layouts), which this game does not use. The art pipeline
+changes below are all opt-in: with our config unchanged, every asset keeps its status and final (checked on the update:
+159 assets, no difference between 0.10.0 and 0.14.0), so nothing approved moves.
+
+- **Shape gates (off here).** With `review.gates` set for a kind, or `gates` on a brief, v1 is a silhouette draft only
+  (flat colours, no finish). The pipeline stops at `stage-gate shape` until Robert approves or rejects the shape
+  (`artgen stage approve|reject <id> shape --note "…"`), and only then decorates it. A fresh `artgen init` gates
+  characters and creatures; our config was made before that, so no gate is set. Turning it on is a settings change for
+  Robert to approve (proposed with the update, November 13, 2026).
+- **Shared body rigs.** The walker and the quadruped, serpent, flyer and large templates now draw on
+  `ctx.lib.rigs.body(…)`, with bone lengths fixed per asset; the `rig-lengths` stage check fails limbs that stretch
+  between frames. `FAMILY_BODIES` (below) still picks the rig; a redo starts from the new template.
+- **Stages.** `artgen stages <id>` prints a version's stage keys (placeholder, shape, decorate, animation) and what has
+  been approved, so a revision that keeps the silhouette needs no new shape review.
+- **Review on the pull request.** `artgen pr prepare` writes `art/review/REVIEW.md` and the review sheets to commit to a
+  pull request; Robert answers in a comment, one line per asset (`approve feature-altar`, or `feature-altar: too
+  squat`), read with `artgen pr parse` and recorded `--via pr`. Only his own comment counts. The review UI (`artgen ui`)
+  can't be reached from a cloud session, so this or the project's cards are the ways to review there.
+- **References and data sheets.** A brief may list reference PNGs (`refs:`, under `art/refs/`); every review sheet
+  shows them. `artgen sheet <id>` writes the asset's one-page data sheet.
+- **Placeholders.** `artgen placeholder <id>` and `artgen export --placeholders` put flat stand-ins in the pack. Not
+  used: the game already draws a glyph card for any asset with no art (task 6.3).
+- **Feedback to artgen.** `artgen report <id> --note "…"` writes a feedback bundle to `art/feedback/`; nothing is sent
+  unless Robert agrees (`--issue`). `artgen metrics export` writes counts and ratios (no images or ids) to
+  `art/metrics/`, for Robert to commit or send on.
+- **Image tools.** `artgen trace-base <id> <sketch.png>` turns a traced sketch into an asset's base, beside
+  `artgen import-edit` for a hand-edited PNG (see the hand-edit offer under approvals).
+- **Runtime 1.5.0.** Additive (lights for Pixi, placeholder lookups). The game's copy in `src/ui/art/runtime/` stays
+  at 1.2.1 until an export with `--runtime` is asked for; nothing the game calls changed.
 
 ## Project settings (`art/artgen.config.json`)
 
@@ -43,6 +76,15 @@ change to Robert) before drawing, never partway through.
 `tools/art-briefs.ts` gives each non-humanoid family a body rig (`FAMILY_BODIES`): four-legged beasts (q, r, l, Y),
 serpents (c, e, n, w, S), flyers (b, I) and the large rig (D, H). Bosses take their family's rig. Redos of those
 families and the batch 4 bosses start from the rig, not the humanoid walker.
+
+## Budget for a batch
+
+The full pipeline used up the session limit and then the weekly limit during batch 3 (October 23, 2026), so a batch
+starts with a capped budget proposed to Robert before any drawing: how many revisions per asset, whether blind
+re-revisions, the roster revision and the finish run, and the waves. Batch 3 finished on one revision per asset then
+the blind checks, with a temporary local config (`passes 1`, `blindRevisions 0`, `rosterRevisions 0`, `finish
+"never"`); blind scores ran 1 to 2 under own scores. That config is never committed, and it must be in place while
+approving, since `approve` and the gallery compute finals from the config. artgen has no token budget of its own.
 
 ## Running a batch
 

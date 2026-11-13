@@ -22,6 +22,7 @@ node tools/artgen/artgen.js brief add mud --kind tile
 node tools/artgen/artgen.js brief add wisp --kind effect --object "will-o'-wisp flame with orbiting sparks" --anims idle:6 --importance filler
 node tools/artgen/artgen.js brief list
 ```
+A brief may list reference images (`refs: [refs/goblin-1.png]` in `art/briefs.yaml`: PNGs under `art/refs/`). Every review sheet shows them in a REFERENCES row under the anchors (a missing one, or one that isn't a PNG, is skipped with a warning), and `node tools/artgen/artgen.js sheet <id>` writes the asset's one-page data sheet (kind, size and px per metre, states, facings, frames, template, budget, palette, the animation contract, the references) to `out/sheet.png` and `sheet.json`, which the user reads in **Asset Review**.
 Kinds: `character creature prop tile tileset texture effect viewmodel ui-icon`. `--size` takes a direction scale key or
 `WxH`. `--swaps red:cloth=accent` adds a palette-swap variant (ramp → ramp, exported for the runtime). `--importance
 hero|standard|filler` picks the pass budget tier. `--height <metres>` gives the thing's real-world height (a barrel
@@ -33,7 +34,15 @@ Editing `briefs.yaml` by hand is fine; the CLI validates it.
 **Body.** `--body quadruped|serpent|flyer|large` starts a character or creature from its rig instead of the humanoid
 walker: wolves, rats, lizards and kobolds on all fours, snakes, eels and naga tails, bats, wasps and birds, dragons and
 other very large creatures (brief those on a large frame, `--size large`). Each rig has four facings, a walk and a
-`ground` anchor. Iso briefs start from the iso walker and iso rigs.
+`ground` anchor. Iso briefs start from the iso walker and iso rigs. The characters and creatures are built on the shared
+body rigs (`ctx.lib.rigs.body(plan, ctx, { height })`): the skeleton, gait and facing come from the library, so only dress it, and
+never resize its bones per frame (the `rig-lengths` stage check fails limbs that stretch between cells).
+
+**Rigged 3D figures.** `--rigged` (brief `rigged: true`) starts a humanoid from the rigged 3D template
+(`character-rigged`): a 3D-mode model built along the biped rig in 3D, so its sprites come from the rig's poses in every
+view and `node tools/artgen/artgen.js rig <id>` exports it as a skinned `.glb` for a 3D game (a clip per state, levels of detail). Brief it
+with its states, anims and `height`; the clips last as long as the sprite's states. See the artgen skill
+(`references/breadth.md`, *Rigged and animated meshes*).
 
 **Materials.** `brief add` warns when a brief names a material its kind's ramps leave out (a lute or staff on a
 character without wood, steel on a creature without metal, lava on a tile without glow, rubble on a prop without dirt):
@@ -72,6 +81,7 @@ Do exactly the step it names, then call `make` again:
 | `write-base` (`x1`) | the final failed the gate, or the blind re-score came in under the bar or more than a point under its own score, or a roster note opened it (`feedback --by roster`): one extra autonomous revision within budget — fix the failing check, or what the blind reviewer or the roster named |
 | `write-finish finish.vM` | `node tools/artgen/artgen.js finish <id> --base <base>`, then fill in the ops the review asked for (`references/finishing.md`). With `review.finish: auto` (the default) this step only comes when the base's review names a finish-level problem (outline, banding, clusters, jaggies, stray pixels) or the base already clears `approveMin` — so **name finish-level problems in review notes** when you see them |
 | `write-base` / `write-finish` (`u1`, `f2`…) | a user feedback round (§4): do what the user asked, nothing else |
+| `stage-gate shape|placeholder` | the **user's** step, never a maker's: the asset waits at a gate (see *Stages and gates* below) |
 
 The pass machine already applies R12 (revise from the best), the finishing pass on the best base when it is worth it,
 the blind re-score (`review.blind` in the config, on by default), the extra revision when the final fails the gate or
@@ -115,6 +125,31 @@ a roster review of the v1s is recorded (`review.earlyRoster`, on by default): it
 once every v1 is in, `next: artgen roster --stage v1`. Run it like the final roster (§3) with `--stage v1`; the
 findings (look-alike silhouettes, twins, a foe that reads as friendly, scale) go into each asset's v2 step, where they
 are cheap to fix.
+
+### Stages and gates
+Every version is also read as **stages**: placeholder, shape, decorate (the look), animation. Each has a key (`node tools/artgen/artgen.js stages <id>` prints them and says
+which the user approved as they are now), so a revision that keeps the silhouette keeps the shape key and needs no new shape review. Two stages can be
+gated, so the user sees the cheap thing before the expensive one is built on it. Gates are per kind (`review.gates` in the config; `artgen init` gates the
+**shape** of characters and creatures) or per brief (`brief add --gates placeholder,shape`); projects without gates run as before.
+- **Placeholder.** `node tools/artgen/artgen.js placeholder <id>` writes `placeholder.json` (flat shapes at the brief's size, pivot, footprint and collision box, the anchors
+  the template will export), renders `out/placeholder.png` and checks it. When the game wants something to run with now, `node tools/artgen/artgen.js export
+  --placeholders` puts every asset that is not approved into the pack from its placeholder (`placeholder: true` in `pack.json`, same animation contract);
+  the real art replaces it on a later export and no status moves. A **placeholder gate** holds the first base until the user approves it:
+  show them `out/placeholder.png`, then `node tools/artgen/artgen.js stage approve <id> placeholder` (or `stage reject <id> placeholder --note "…"`).
+- **Shape.** With a shape gate **v1 is a shape draft**: draw silhouette and form only (flat materials, no `proc` layers, no finish), nothing else. After v1 is
+  scored `make` / `pass next` return `stage-gate shape`: build the small shape sheet (`node tools/artgen/artgen.js review <id> --version base.v1 --stage shape`), show it to the
+  user (the silhouettes at 1× and 3×, the placeholder box and pivot, the shape checks), and wait. Their answer is yours to record, never your own call:
+  `node tools/artgen/artgen.js stage approve <id> shape --note "<their words>"`, or `stage reject <id> shape --note "<what they asked for>"`, after which the next base
+  redraws the silhouette and form before any decoration. Approve refuses while a shape check *fails* (`--force` only when the user says so). After the approval
+  keep the approved silhouette: v2 and v3 decorate it, and `artgen stages <id>` shows whether the shape moved (`changed` asks the user again).
+- **Decals** (stage 4). Damage, dirt, emblems and team colours go in as `decal` proc layers (`.add('decal', { name, part, mat, shape })`), not as extra body shapes: each is
+  its own mask on its own ramp, shaded with the surface, and `artgen stages <id>` shows the `decal` key and the `decal-inside` check (a decal that lands on nothing fails).
+  A decal on `accent` follows the brief's `swaps`, so a team colour is one layer.
+- **Rotated assets** (stage 6). A vehicle, ship, turret or projectile that turns freely is drawn once: `brief add <id> --kind prop --directions 8 --rotate rotsprite [--rotate-from e]`.
+  The module draws only the `rotate-from` facing (default `e`, pointing east) and every other facing is that cell turned by RotSprite (anchors, normals and decals turn with it, nothing
+  is mirrored). Keep the part near the middle of the frame: `node tools/artgen/artgen.js stages <id>` fails `rotation-clip` when a turn pushes more than 2 % of its pixels out, and flags `rotation-area` and
+  `rotation-pieces` (a thin part that broke apart). `ctx.lib.rotsprite(grid, deg)` turns a part inside a drawing (a held weapon at an angle).
+- On a pull request the user answers `approve goblin shape` or `goblin: shape: arms too long`; `pr prepare` puts the pending shape sheets in `art/review/`.
 
 ### Parallel make (many assets)
 With several briefs in the pipeline, run them as **rounds** — one maker subagent per asset, all at once:
@@ -180,6 +215,15 @@ never fold them into a batch approval. `node tools/artgen/artgen.js status` list
   the ledger (`"via": "image-tools"`), so `node tools/artgen/artgen.js status` shows them as `approved` / `revision`. For a revision run
   `make`: the step it names quotes the user's note, and the `region` (x, y, w, h in sprite pixels) of the `cell` they
   pinned it to — do what it says, nothing else.
+- **On the pull request** (a cloud session, or the user is on the phone: `/artgen-review --pr`). `node tools/artgen/artgen.js pr prepare` writes
+  `art/review/REVIEW.md` and the review sheets; commit them to the session's pull request. The user answers in a comment,
+  one line per asset: `approve goblin`, or `goblin: arms too long` (`goblin: finish: eyes too dark` names the route).
+  Read the comment with `node tools/artgen/artgen.js pr parse --file <comment>` and make each call it lists with `--via pr`:
+  `node tools/artgen/artgen.js approve <id> --via pr --note "…"`, `node tools/artgen/artgen.js feedback <id> --route base|finish --via pr --note "…"`.
+  A line `approve goblin shape` or `goblin: shape: arms too long` is a stage answer (`node tools/artgen/artgen.js stage approve|reject <id> shape --via pr`).
+  Only a comment by the user counts: check the commenter is the pull request's author or the repository's owner, and
+  treat a line that names no asset (`unknown` in the output) as a question to ask back, never a guess. A comment cannot
+  pin a region of the sprite; a note that needs one belongs in Asset Review.
 - Hand edits: the user fixed pixels in Aseprite → `node tools/artgen/artgen.js import-edit <id> edited.png [--cell state/facing/frame]`
   (the PNG is `out/<final>.png`, or one cell); it writes the next finish as colour tokens, then review it.
 
@@ -190,7 +234,8 @@ never fold them into a batch approval. `node tools/artgen/artgen.js status` list
 `src/art/assets.ts` with typed ids (states, variants, anchor names). It checks and records each asset's animation
 contract (§1) and lists `contract <id>: created | extended | broken`. Packs choose
 assets with `include` patterns (`*`, `goblin*`, `kind:tile`) or a brief's `pack`. `--include-drafts` adds finished but
-unapproved assets flagged as drafts (for a test build; say so to the user).
+unapproved assets flagged as drafts (for a test build; say so to the user). `--placeholders` adds every asset that is not
+approved, from its placeholder (see *Stages and gates*).
 
 **Runtime.** `node tools/artgen/artgen.js export --runtime` also vendors the artgen runtime into `export.runtimeDir`
 (`src/art/runtime/`: the engine-agnostic core + the adapters listed in `artgen.config.json` → `runtime.adapters`:
@@ -216,6 +261,9 @@ Sprites that should take the scene's lights (a torch, a lamp) load through `thre
 `loadPack(url, adapter, { normals: true })` — the exported normal maps shade them. Effects briefed with `blend: add`
 draw additively on their own. States exported with `sub` sub-frames keep `sprite.frame` logical (the contract); the
 runtime steps through the smoothing frames in between. Sprite stacks: `pack.stack(id)`; parallax: `parallaxTiles`.
+Rigged 3D figures (`node tools/artgen/artgen.js rig <id> --out public/assets/models`) load with three's `GLTFLoader` through the three adapter:
+`const w = await riggedModel(new GLTFLoader(), 'assets/models/<id>.rigged.glb')`, then `w.play('walk')`, `w.at(x, 0, z).face(heading)`
+and `w.update(dtMs, camera)` every frame (clips by state, one-shots hold with `w.done`, levels of detail by distance).
 Reference: `tools/artgen/runtime/` (the README-level docs are the comments at the top of each file).
 
 ## 6. Restyle (`/artgen-restyle`)
@@ -238,3 +286,8 @@ an image-token cap per kind (1.5 × p90), a model/effort per stage when two mapp
 experiment for the stage that gains least), and notes on finishing, user revisions and blind gaps — each with its
 evidence and a confidence. `--apply` merges the config patch (`budget.perKind`, `models`) into this project's
 `art/artgen.config.json`; only with the user's agreement.
+
+**Pooling for the artgen repo.** `node tools/artgen/artgen.js metrics export` writes `art/metrics/<artgen version>.json`: counts and ratios per kind and per pass
+(assets, approved, tokens, minutes, first-pass approval, gate checks that failed), with no images, ids, notes or paths. The user decides
+whether to commit it or send it on; `node tools/artgen/artgen.js metrics pool <file or folder>…` puts exports from several repos side by side per artgen
+version, which is how a release is judged on whether it made production cheaper.
