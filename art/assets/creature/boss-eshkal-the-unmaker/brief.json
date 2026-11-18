@@ -1,0 +1,9 @@
+{
+  "id": "boss-eshkal-the-unmaker",
+  "template": "iso/creature-large",
+  "review": {
+    "scale": 3,
+    "sym": "none",
+    "iso": true
+  }
+}
