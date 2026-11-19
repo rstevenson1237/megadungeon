@@ -9,10 +9,10 @@
 // the outlines of creatures in a footprint are drawn last, over everything.
 
 import type { GameState } from '../game/game.ts';
-import { ALLY_COLOUR } from '../game/monsters.ts';
+import { ALLY_COLOUR, type Monster } from '../game/monsters.ts';
 import type { CellCursor, Targeting } from '../game/targeting.ts';
 import type { StatusEffect } from '../rules/magic/status.ts';
-import type { Point, Rect } from '../rules/world/level.ts';
+import { SET_PIECE_GENERATOR, type Level, type Point, type Rect } from '../rules/world/level.ts';
 import { artId, familyId } from './art-ids.ts';
 import { CELL_H, CELL_W } from './grid.ts';
 import { DEFAULT_LOOK, ISO, type MapLook } from './palette.ts';
@@ -38,7 +38,7 @@ export const CAMERA_ANCHOR: Point = { x: 315, y: 260 };
  * Sprite frame sizes (art/direction.json, scale), used to know what a standing thing covers once its art is loaded, so
  * a sprite reaching into the view from a cell outside it is still drawn.
  */
-const FRAME = { character: [32, 40], prop: [32, 32], large: [64, 80] } as const;
+const FRAME = { character: [32, 40], prop: [32, 32], large: [64, 80], tallest: [128, 160] } as const;
 /** The glyph card: a 9 x 16 glyph on an 11 x 18 card whose bottom edge stands 2 px below the cell's centre. */
 export const CARD_W = CELL_W + 2;
 export const CARD_H = CELL_H + 2;
@@ -153,7 +153,7 @@ export function project(x: number, y: number, camera: IsoCamera): Point {
  */
 export function isoArea(camera: IsoCamera): Rect {
   const halfW = Math.ceil(CAMERA_ANCHOR.x / (TILE_W / 2)) + 2; // columns of diamonds to the side edges
-  const up = Math.ceil((CAMERA_ANCHOR.y + FRAME.large[1]) / (TILE_H / 2)) + 2; // rows above, tallest sprite included
+  const up = Math.ceil((CAMERA_ANCHOR.y + FRAME.tallest[1]) / (TILE_H / 2)) + 2; // rows above, the tallest boss included
   const down = Math.ceil((ISO_VIEW.h - CAMERA_ANCHOR.y) / (TILE_H / 2)) + 2;
   // x + y spans [-up, down] and x - y spans [-halfW, halfW] around the camera.
   const lo = Math.floor((-up - halfW) / 2);
@@ -222,7 +222,7 @@ export function resolveAsset(chain: readonly string[], pack: IsoPack): string | 
 }
 
 /** The sprites to try for whoever stands on a cell, best first (Spec 01b, Sprites; Spec 08, Addendum B). */
-export function occupantChain(o: SceneOccupant, classId: string): string[] {
+export function occupantChain(o: SceneOccupant, classId: string, bossRow?: string): string[] {
   const family = (glyph: string): string[] => (/^[a-zA-Z]$/.test(glyph) ? [familyId(glyph)] : []);
   switch (o.kind) {
     case 'player':
@@ -232,8 +232,19 @@ export function occupantChain(o: SceneOccupant, classId: string): string[] {
     case 'creature':
       if (o.role === 'phantom') return classId ? [`class-${artId(classId)}`] : [];
       if (o.role === 'rival' || o.role === 'bandit') return [`npc-${o.role}`, ...family(o.creature.glyph)];
+      // A boss is drawn by its own sprite, `boss-<boss id>` (Spec 01b, task 6.9), then by its family's.
+      if (o.role === 'boss' && bossRow) return [`boss-${artId(bossRow)}`, ...family(o.creature.glyph)];
       return family(o.creature.glyph);
   }
+}
+
+/**
+ * The boss row a boss on this level was placed from (its content id), found by its name among the level's placed
+ * bosses: the game's creature keeps the row's name, not its id, and every boss row has its own name.
+ */
+export function bossRowOf(state: GameState, m: Monster): string | undefined {
+  if (m.role !== 'boss') return undefined;
+  return state.map.level.monsters.find((p) => p.role === 'boss' && p.name === m.name)?.id;
 }
 
 /** Status effects shown over a head, in the Status block's order (Spec 01, Status): effects, then a Shield. */
@@ -264,6 +275,19 @@ export interface IsoOptions {
   motion?: IsoMotion;
 }
 
+const THRONE_ASSET = 'setpiece-abyssal-throne';
+
+/**
+ * Where the Abyssal Throne stands on the level 100 set piece (Spec 01b, clarification of task 6.9): on the throne
+ * room's middle row, one cell from its far wall, behind the final boss. The throne room is the template's last room.
+ * Null on any other level, and on a level 100 built by an older generator or by the fallback.
+ */
+export function throneCell(level: Level): Point | null {
+  if (level.layout !== 'set_piece' || level.generatorVersion < SET_PIECE_GENERATOR || level.fallback) return null;
+  const room = level.rooms[level.rooms.length - 1];
+  return room ? { x: room.x + room.w - 2, y: room.y + (room.h >> 1) } : null;
+}
+
 /** Every draw of the isometric main view, in paint order (back to front), culled to the view area. */
 export function buildIsoDraws(state: GameState, options: IsoOptions = {}): IsoDraw[] {
   const camera = options.camera ?? state.map.player;
@@ -274,6 +298,7 @@ export function buildIsoDraws(state: GameState, options: IsoOptions = {}): IsoDr
   const motion = options.motion;
   const clock = motion?.clock ?? 0;
 
+  const throne = throneCell(state.map.level);
   const draws: IsoDraw[] = [];
   for (const cell of known) {
     const at = project(cell.x, cell.y, camera);
@@ -333,6 +358,10 @@ export function buildIsoDraws(state: GameState, options: IsoOptions = {}): IsoDr
         ...base, layer: FLOOR_MARKS.has(f.kind) ? 'mark' : 'feature', asset: resolveAsset([FEATURE_ASSET[f.kind]], pack), frame: oneState ? '' : f.state ?? '', t: oneState ? clock : 0,
         tint: f.fg, shape: 'card', glyph: f.glyph, fg: f.fg, box: standing(FRAME.prop),
       });
+    }
+    if (throne && cell.x === throne.x && cell.y === throne.y) {
+      // The Abyssal Throne (Spec 01b, clarification of task 6.9): picture only, so with no art nothing is drawn.
+      draws.push({ ...base, layer: 'feature', asset: resolveAsset([THRONE_ASSET], pack), frame: '', tint: 0xffffff, shape: 'none', glyph: 0, fg: 0xffffff, box: standing(FRAME.large) });
     }
     if (cell.item) {
       const it = cell.item;
@@ -397,9 +426,9 @@ function occupantDraws(cell: SceneCell, o: SceneOccupant, base: DrawBase, camera
   const me = state.map.player;
   const remembered = o.kind === 'creature' ? motion?.facings.get(o.creature.id) : undefined;
   const facing = fade !== undefined ? base.facing : o.kind === 'player' ? facingOf(state.player.facing.dx, state.player.facing.dy) : remembered ?? facingOf(me.x - cell.x, me.y - cell.y);
-  const asset = resolveAsset(occupantChain(o, classId), pack);
+  const asset = resolveAsset(occupantChain(o, classId, o.kind === 'creature' ? bossRowOf(state, o.creature) : undefined), pack);
   // A family's sprite may be drawn in the large frame (a giant, a dragon), so its box allows for it.
-  const box = standing(asset?.startsWith('family-') ? FRAME.large : size);
+  const box = standing(asset?.startsWith('family-') || asset?.startsWith('boss-') ? FRAME.large : size);
   const phantom = o.kind === 'creature' && o.role === 'phantom' ? 0.5 : 1;
   draws.push({
     ...placed, layer: 'creature', asset, frame: moving?.state ?? 'idle', t: moving?.t ?? motion?.clock ?? 0, facing, tint: o.fg,

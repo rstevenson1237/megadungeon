@@ -10,7 +10,7 @@ import { applyStatus } from '../src/rules/magic/status.ts';
 import type { Atlas } from '../src/ui/atlas.ts';
 import { paintIso, type IsoContext } from '../src/ui/iso-paint.ts';
 import {
-  CAMERA_ANCHOR, CAP_H, ISO_LAYERS, ISO_VIEW, TILE_H, TILE_W, WALL_H, buildIsoDraws, isoArea, project, resolveAsset, type IsoDraw,
+  CAMERA_ANCHOR, CAP_H, ISO_LAYERS, ISO_VIEW, TILE_H, TILE_W, WALL_H, buildIsoDraws, isoArea, project, resolveAsset, throneCell, type IsoDraw,
 } from '../src/ui/iso-view.ts';
 import { DEFAULT_LOOK, MAP, NPC_LOOK, mapLook } from '../src/ui/palette.ts';
 import { buildScene, type SceneCell } from '../src/ui/scene.ts';
@@ -245,6 +245,32 @@ describe('isometric markers (Spec 01b, Sprites)', () => {
     expect(one(draws, 3, 3, 'creature')).toMatchObject({ alpha: 0.5, glyph: 64 });
     expect(one(draws, 6, 3, 'creature')).toMatchObject({ large: true, alpha: 1 });
     expect(one(draws, 6, 3, 'creature')!.box.h).toBe(80);
+  });
+
+  it('draws a boss by its own sprite, then by its family, found from the row it was placed from (task 6.9)', () => {
+    const game = gameOn(lvl());
+    const boss = monsterAt(6, 3, { role: 'boss', glyph: 'D', name: 'The Gilded Wyrm' });
+    game.state.monsters.push(boss, monsterAt(8, 3, { glyph: 'D', name: 'The Gilded Wyrm' }));
+    game.state.map.level.monsters.push({ x: 6, y: 3, id: 'the_gilded_wyrm', name: 'The Gilded Wyrm', glyph: 'D', colour: 'gold', dice: 9, modifier: 2, speed: 'normal', behaviour: 'brute', group: 0, role: 'boss' });
+    const pack = new Set(['boss-the-gilded-wyrm', 'family-d-cap']);
+    let draws = buildIsoDraws(game.state, { pack });
+    expect(one(draws, 6, 3, 'creature')).toMatchObject({ asset: 'boss-the-gilded-wyrm', large: true });
+    expect(one(draws, 8, 3, 'creature')!.asset).toBe('family-d-cap'); // a plain monster of the same name is not the boss
+    draws = buildIsoDraws(game.state, { pack: new Set(['family-d-cap']) });
+    expect(one(draws, 6, 3, 'creature')!.asset).toBe('family-d-cap'); // no boss sprite in the pack: the family's
+  });
+
+  it('places the Abyssal Throne only on the level 100 set piece, at the far end of the throne room (task 6.9)', () => {
+    const game = gameOn(lvl());
+    const level = game.state.map.level;
+    expect(throneCell(level)).toBeNull();
+    const set = { ...level, layout: 'set_piece' as const, generatorVersion: 6, fallback: false, rooms: [...level.rooms, { x: 1, y: 1, w: 9, h: 5 }] };
+    expect(throneCell(set)).toEqual({ x: 8, y: 3 });
+    expect(throneCell({ ...set, generatorVersion: 5 })).toBeNull();
+    expect(throneCell({ ...set, fallback: true })).toBeNull();
+    game.state.map.level = set;
+    const pack = new Set(['setpiece-abyssal-throne']);
+    expect(buildIsoDraws(game.state, { pack }).filter((d) => d.asset === 'setpiece-abyssal-throne').map((d) => d.cell)).toEqual([{ x: 8, y: 3 }]);
   });
 
   it('puts status icons over a head, at most three, in the Status block\'s order with the Shield last', () => {

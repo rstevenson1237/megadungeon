@@ -5,7 +5,8 @@ import { runOptionsFor } from '../src/game/world.ts';
 import { makeArtifact } from '../src/rules/items/magic.ts';
 import { generateLevel } from '../src/rules/world/generate.ts';
 import { distancesFrom, toCells } from '../src/rules/world/grid.ts';
-import { FINAL_BOSS_RATING, MAX_DEPTH, type Level, type Rect } from '../src/rules/world/level.ts';
+import { FINAL_BOSS_RATING, MAX_DEPTH, TILE, type Level, type Rect } from '../src/rules/world/level.ts';
+import { throneCell } from '../src/ui/iso-view.ts';
 import { findProblems } from '../src/rules/world/validate.ts';
 import { ITEMS, content, testPlayer } from './helpers.ts';
 
@@ -102,6 +103,19 @@ describe('level 100 is the throne set piece', () => {
       const boss = level.monsters.find((m) => m.role === 'boss')!;
       expect(open[boss.y * level.width + boss.x], `seed ${seed}`).toBeGreaterThanOrEqual(0);
       expect(inRect(throne, boss)).toBe(true);
+    }
+  });
+
+  it('stands the Abyssal Throne on plain floor at the far end of the throne room, behind the boss (task 6.9)', () => {
+    for (const seed of SEEDS) {
+      const level = level100(seed);
+      const room = level.rooms[level.rooms.length - 1]!;
+      const at = throneCell(level)!;
+      const boss = level.monsters.find((m) => m.role === 'boss')!;
+      expect(inRect(room, at), `seed ${seed}`).toBe(true);
+      expect(level.tiles[at.y]![at.x], `seed ${seed}`).toBe(TILE.floor);
+      expect(at.x, `seed ${seed}`).toBeGreaterThan(boss.x);
+      expect([...level.features, ...level.specials].some((f) => f.x === at.x && f.y === at.y), `seed ${seed}`).toBe(false);
     }
   });
 
