@@ -1,0 +1,9 @@
+{
+  "id": "boss-sovereign-aurelian",
+  "template": "iso/character-walk",
+  "review": {
+    "scale": 4,
+    "sym": "none",
+    "iso": true
+  }
+}

@@ -130,7 +130,7 @@ The asset list leaves four points of naming and size open. Proposed as built in 
 
 - **Family ids keep upper and lower case apart:** artgen ids are lower case, and both `h` (men and dwarves) and `H` (many-headed beasts) are families, so a lower case letter's family is `family-h` and an upper case letter's is `family-h-cap`. Floor items use their glyph class: `family-potion`, `family-coins`, `family-quest-item` (Spec 08, Addendum B, fallback step 2).
 - **Other ids by group:** `terrain-<piece>`, `class-<class id>`, `npc-<role>`, `feature-<fixture>`, `fx-<effect>`, `icon-<status>`, `boss-<boss id>` and `setpiece-abyssal-throne`, with content ids' underscores written as hyphens.
-- **The size table** gives each brief a real-world height against the player's 1.8 m: a rat 0.25 m, a goblin 1.1 m, an ogre 3.6 m (twice the player), a giant 4.5 m, a dragon 4 m. A boss keeps its family's height and is drawn at the large frame size.
+- **The size table** gives each brief a real-world height against the player's 1.8 m: a rat 0.25 m, a goblin 1.1 m, an ogre 3.6 m (twice the player), a giant 4.5 m, a dragon 4 m. A boss is drawn bigger than its family: see the clarification of task 6.9.
 - **Effects carry no height:** they are sized by what they show (a cell, an area), not by a real-world height.
 
 ## Clarification (task 6.3, proposed and approved October 12, 2026)
@@ -208,6 +208,13 @@ The spec lists the display events, the turn-mode times and the effects, but not 
 - **No animation for:** a door (it switches state, as now), a status gained (its icon appears, as now), and a fall or teleport (the new level draws at once; the player's sprite plays fx-aura on arrival from a teleport).
 - **Looping art and redraw.** Liquids, the teleporter and idle loops play their pack frames (8 frames a second for terrain, idle's 600 ms). In turn mode the map redraws only when a frame changes or an event runs, so a still screen costs a few redraws a second; this counts as "while animations run".
 - **Pauses and switches.** An overlay or a real-time pause freezes running animations where they are (in turn mode a key press that opens an overlay first finishes them, as any key does). Switching to text or a level change drops them. Nothing in the game changes.
+
+## Clarification (task 6.9, proposed and approved November 13, 2026; boss sizes measured against the drawn player, approved the same day)
+
+- **Boss height.** A boss is drawn from 1 to 4 times the player as drawn on screen. The approved class sprites stand about 37 px tall (the player's 1.8 m at 16 px a metre would be 29 px), so a boss stands from 37 px to 148 px. Its multiple rises evenly through the bosses in the content table's depth order, from 0.8x for the shallowest boss to 4x for the deepest. No boss is drawn under 1x, or under its own family's height against the player's 1.8 m. Over the 43 bosses the average is 2.5x. The range runs from Varn Ironmouth at 1x (37 px) to The Seat Itself at 4x (148 px). The brief's height is that size in metres at the direction's 16 px a metre (Varn 2.4 m, The Seat Itself 9.3 m), rounded to 0.1 m, so the conformance gate checks it. `tools/art-briefs.ts` (`bossTimes`, `bossHeight`) writes them into `art/briefs.yaml`.
+- **Boss frames.** A boss up to 74 px uses the 64 x 80 large frame (13 bosses), up to 116 px a 96 x 128 frame (18), and the 12 tallest a 128 x 160 frame, each leaving headroom for the attack. They stand on the cell's centre by their ground anchor, like every sprite, so the tallest cover the cells behind them. Frames, states and durations are otherwise as task 6.6 set them.
+- **Boss sprites** (approved November 19, 2026). A boss is drawn by its own sprite, `boss-<boss id>`, before its family's, which stays the fallback. The display finds the boss row from the level's placed bosses by the boss's name, since every boss row has its own name.
+- **The Abyssal Throne** (approved November 19, 2026). On the level 100 set piece the isometric display draws `setpiece-abyssal-throne` on the throne room's middle row, one cell from its far wall, behind where the final boss starts. It is picture only: the cell stays floor, no rule changes, the text map is unchanged, and with no art nothing is drawn there. A level 100 built by an older generator or by the fallback has no throne.
 
 ## Acceptance criteria
 

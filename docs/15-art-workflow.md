@@ -13,7 +13,11 @@ These came from our review and have been artgen's defaults since 0.10.0, written
 - **The best version ships.** The final is the gate-passing version with the best blind score, then the best own
   score, not the newest. `status` and the gallery show `final≠best` when a higher score lost.
 - **The blind score is the gate.** A fresh reviewer's score chooses and gates the final; a blind miss gets one revision
-  of its own (`review.blindRevisions`).
+  of its own (`review.blindRevisions`). Every version needs its own (not blind) score too, before the blind one: `approve`
+  takes only a finished pipeline, and a version with a blind score alone leaves it waiting on a review (batch 4 had to
+  score 51 versions again before approving). The final is then the best blind score among every gate-passing version
+  whose shape was not rejected, so an older draft with a higher score can win: reject its shape (the owner's call) and
+  approve the shape of the version that should ship again.
 - **The finishing pass is optional** (`review.finish: "auto"`): it runs only when a review names a finish-level problem,
   or the base already scores at least the bar.
 - **The lineup check runs after the first drafts** (`review.earlyRoster`): every v2 waits for a roster review of the

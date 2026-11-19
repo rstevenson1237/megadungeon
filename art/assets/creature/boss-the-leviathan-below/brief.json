@@ -1,0 +1,9 @@
+{
+  "id": "boss-the-leviathan-below",
+  "template": "iso/creature-serpent",
+  "review": {
+    "scale": 4,
+    "sym": "none",
+    "iso": true
+  }
+}

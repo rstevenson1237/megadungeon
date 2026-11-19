@@ -1,0 +1,8403 @@
+{
+  "frames": [
+    {
+      "filename": "class-warrior/idle/w/0",
+      "frame": {
+        "x": 2015,
+        "y": 1935,
+        "w": 32,
+        "h": 40
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 40
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 40
+      },
+      "duration": 600
+    },
+    {
+      "filename": "class-warrior/idle/w/1",
+      "frame": {
+        "x": 2015,
+        "y": 1976,
+        "w": 32,
+        "h": 40
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 40
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 40
+      },
+      "duration": 600
+    },
+    {
+      "filename": "family-d-cap/attack/w/0",
+      "frame": {
+        "x": 0,
+        "y": 1935,
+        "w": 64,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 64,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 64,
+        "h": 80
+      },
+      "duration": 80
+    },
+    {
+      "filename": "family-d-cap/attack/w/1",
+      "frame": {
+        "x": 65,
+        "y": 1935,
+        "w": 64,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 64,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 64,
+        "h": 80
+      },
+      "duration": 40
+    },
+    {
+      "filename": "family-d-cap/attack/w/2",
+      "frame": {
+        "x": 130,
+        "y": 1935,
+        "w": 64,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 64,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 64,
+        "h": 80
+      },
+      "duration": 120
+    },
+    {
+      "filename": "family-d-cap/attack/w/3",
+      "frame": {
+        "x": 195,
+        "y": 1935,
+        "w": 64,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 64,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 64,
+        "h": 80
+      },
+      "duration": 60
+    },
+    {
+      "filename": "family-d-cap/attack/n/0",
+      "frame": {
+        "x": 260,
+        "y": 1935,
+        "w": 64,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 64,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 64,
+        "h": 80
+      },
+      "duration": 80
+    },
+    {
+      "filename": "family-d-cap/attack/n/1",
+      "frame": {
+        "x": 325,
+        "y": 1935,
+        "w": 64,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 64,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 64,
+        "h": 80
+      },
+      "duration": 40
+    },
+    {
+      "filename": "family-d-cap/attack/n/2",
+      "frame": {
+        "x": 390,
+        "y": 1935,
+        "w": 64,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 64,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 64,
+        "h": 80
+      },
+      "duration": 120
+    },
+    {
+      "filename": "family-d-cap/attack/n/3",
+      "frame": {
+        "x": 455,
+        "y": 1935,
+        "w": 64,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 64,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 64,
+        "h": 80
+      },
+      "duration": 60
+    },
+    {
+      "filename": "family-d-cap/attack/e/0",
+      "frame": {
+        "x": 520,
+        "y": 1935,
+        "w": 64,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 64,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 64,
+        "h": 80
+      },
+      "duration": 80
+    },
+    {
+      "filename": "family-d-cap/attack/e/1",
+      "frame": {
+        "x": 585,
+        "y": 1935,
+        "w": 64,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 64,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 64,
+        "h": 80
+      },
+      "duration": 40
+    },
+    {
+      "filename": "family-d-cap/attack/e/2",
+      "frame": {
+        "x": 650,
+        "y": 1935,
+        "w": 64,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 64,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 64,
+        "h": 80
+      },
+      "duration": 120
+    },
+    {
+      "filename": "family-d-cap/attack/e/3",
+      "frame": {
+        "x": 715,
+        "y": 1935,
+        "w": 64,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 64,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 64,
+        "h": 80
+      },
+      "duration": 60
+    },
+    {
+      "filename": "family-e-cap/idle/s/0",
+      "frame": {
+        "x": 780,
+        "y": 1935,
+        "w": 64,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 64,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 64,
+        "h": 80
+      },
+      "duration": 600
+    },
+    {
+      "filename": "family-e-cap/idle/s/1",
+      "frame": {
+        "x": 845,
+        "y": 1935,
+        "w": 64,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 64,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 64,
+        "h": 80
+      },
+      "duration": 600
+    },
+    {
+      "filename": "family-e-cap/idle/w/0",
+      "frame": {
+        "x": 910,
+        "y": 1935,
+        "w": 64,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 64,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 64,
+        "h": 80
+      },
+      "duration": 600
+    },
+    {
+      "filename": "family-e-cap/idle/w/1",
+      "frame": {
+        "x": 975,
+        "y": 1935,
+        "w": 64,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 64,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 64,
+        "h": 80
+      },
+      "duration": 600
+    },
+    {
+      "filename": "family-e-cap/idle/n/0",
+      "frame": {
+        "x": 1040,
+        "y": 1935,
+        "w": 64,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 64,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 64,
+        "h": 80
+      },
+      "duration": 600
+    },
+    {
+      "filename": "family-e-cap/idle/n/1",
+      "frame": {
+        "x": 1105,
+        "y": 1935,
+        "w": 64,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 64,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 64,
+        "h": 80
+      },
+      "duration": 600
+    },
+    {
+      "filename": "family-e-cap/idle/e/0",
+      "frame": {
+        "x": 1170,
+        "y": 1935,
+        "w": 64,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 64,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 64,
+        "h": 80
+      },
+      "duration": 600
+    },
+    {
+      "filename": "family-e-cap/idle/e/1",
+      "frame": {
+        "x": 1235,
+        "y": 1935,
+        "w": 64,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 64,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 64,
+        "h": 80
+      },
+      "duration": 600
+    },
+    {
+      "filename": "family-e-cap/walk/s/0",
+      "frame": {
+        "x": 1300,
+        "y": 1935,
+        "w": 64,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 64,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 64,
+        "h": 80
+      },
+      "duration": 120
+    },
+    {
+      "filename": "family-e-cap/walk/s/1",
+      "frame": {
+        "x": 1365,
+        "y": 1935,
+        "w": 64,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 64,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 64,
+        "h": 80
+      },
+      "duration": 120
+    },
+    {
+      "filename": "family-e-cap/walk/s/2",
+      "frame": {
+        "x": 1430,
+        "y": 1935,
+        "w": 64,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 64,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 64,
+        "h": 80
+      },
+      "duration": 120
+    },
+    {
+      "filename": "family-e-cap/walk/s/3",
+      "frame": {
+        "x": 1495,
+        "y": 1935,
+        "w": 64,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 64,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 64,
+        "h": 80
+      },
+      "duration": 120
+    },
+    {
+      "filename": "family-e-cap/walk/w/0",
+      "frame": {
+        "x": 1560,
+        "y": 1935,
+        "w": 64,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 64,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 64,
+        "h": 80
+      },
+      "duration": 120
+    },
+    {
+      "filename": "family-e-cap/walk/w/1",
+      "frame": {
+        "x": 1625,
+        "y": 1935,
+        "w": 64,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 64,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 64,
+        "h": 80
+      },
+      "duration": 120
+    },
+    {
+      "filename": "family-e-cap/walk/w/2",
+      "frame": {
+        "x": 1690,
+        "y": 1935,
+        "w": 64,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 64,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 64,
+        "h": 80
+      },
+      "duration": 120
+    },
+    {
+      "filename": "family-e-cap/walk/w/3",
+      "frame": {
+        "x": 1755,
+        "y": 1935,
+        "w": 64,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 64,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 64,
+        "h": 80
+      },
+      "duration": 120
+    },
+    {
+      "filename": "family-e-cap/walk/n/0",
+      "frame": {
+        "x": 1820,
+        "y": 1935,
+        "w": 64,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 64,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 64,
+        "h": 80
+      },
+      "duration": 120
+    },
+    {
+      "filename": "family-e-cap/walk/n/1",
+      "frame": {
+        "x": 1885,
+        "y": 1935,
+        "w": 64,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 64,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 64,
+        "h": 80
+      },
+      "duration": 120
+    },
+    {
+      "filename": "family-e-cap/walk/n/2",
+      "frame": {
+        "x": 1950,
+        "y": 1935,
+        "w": 64,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 64,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 64,
+        "h": 80
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-thorne-ashgrave/attack/s/0",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 80
+    },
+    {
+      "filename": "boss-thorne-ashgrave/attack/s/1",
+      "frame": {
+        "x": 0,
+        "y": 129,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 40
+    },
+    {
+      "filename": "boss-thorne-ashgrave/attack/s/2",
+      "frame": {
+        "x": 0,
+        "y": 258,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-thorne-ashgrave/attack/s/3",
+      "frame": {
+        "x": 0,
+        "y": 387,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 60
+    },
+    {
+      "filename": "boss-thorne-ashgrave/attack/w/0",
+      "frame": {
+        "x": 0,
+        "y": 516,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 80
+    },
+    {
+      "filename": "boss-thorne-ashgrave/attack/w/1",
+      "frame": {
+        "x": 0,
+        "y": 645,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 40
+    },
+    {
+      "filename": "boss-thorne-ashgrave/attack/w/2",
+      "frame": {
+        "x": 0,
+        "y": 774,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-thorne-ashgrave/attack/w/3",
+      "frame": {
+        "x": 0,
+        "y": 903,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 60
+    },
+    {
+      "filename": "boss-thorne-ashgrave/attack/n/0",
+      "frame": {
+        "x": 0,
+        "y": 1032,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 80
+    },
+    {
+      "filename": "boss-thorne-ashgrave/attack/n/1",
+      "frame": {
+        "x": 0,
+        "y": 1161,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 40
+    },
+    {
+      "filename": "boss-thorne-ashgrave/attack/n/2",
+      "frame": {
+        "x": 0,
+        "y": 1290,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-thorne-ashgrave/attack/n/3",
+      "frame": {
+        "x": 0,
+        "y": 1419,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 60
+    },
+    {
+      "filename": "boss-thorne-ashgrave/attack/e/0",
+      "frame": {
+        "x": 0,
+        "y": 1548,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 80
+    },
+    {
+      "filename": "boss-thorne-ashgrave/attack/e/1",
+      "frame": {
+        "x": 0,
+        "y": 1677,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 40
+    },
+    {
+      "filename": "boss-thorne-ashgrave/attack/e/2",
+      "frame": {
+        "x": 0,
+        "y": 1806,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-thorne-ashgrave/attack/e/3",
+      "frame": {
+        "x": 97,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 60
+    },
+    {
+      "filename": "boss-the-pale-prior/idle/s/0",
+      "frame": {
+        "x": 194,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 600
+    },
+    {
+      "filename": "boss-the-pale-prior/idle/s/1",
+      "frame": {
+        "x": 291,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 600
+    },
+    {
+      "filename": "boss-the-pale-prior/idle/w/0",
+      "frame": {
+        "x": 388,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 600
+    },
+    {
+      "filename": "boss-the-pale-prior/idle/w/1",
+      "frame": {
+        "x": 485,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 600
+    },
+    {
+      "filename": "boss-the-pale-prior/idle/n/0",
+      "frame": {
+        "x": 582,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 600
+    },
+    {
+      "filename": "boss-the-pale-prior/idle/n/1",
+      "frame": {
+        "x": 679,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 600
+    },
+    {
+      "filename": "boss-the-pale-prior/idle/e/0",
+      "frame": {
+        "x": 776,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 600
+    },
+    {
+      "filename": "boss-the-pale-prior/idle/e/1",
+      "frame": {
+        "x": 873,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 600
+    },
+    {
+      "filename": "boss-the-pale-prior/walk/s/0",
+      "frame": {
+        "x": 970,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-pale-prior/walk/s/1",
+      "frame": {
+        "x": 1067,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-pale-prior/walk/s/2",
+      "frame": {
+        "x": 1164,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-pale-prior/walk/s/3",
+      "frame": {
+        "x": 1261,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-pale-prior/walk/w/0",
+      "frame": {
+        "x": 1358,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-pale-prior/walk/w/1",
+      "frame": {
+        "x": 1455,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-pale-prior/walk/w/2",
+      "frame": {
+        "x": 1552,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-pale-prior/walk/w/3",
+      "frame": {
+        "x": 1649,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-pale-prior/walk/n/0",
+      "frame": {
+        "x": 1746,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-pale-prior/walk/n/1",
+      "frame": {
+        "x": 1843,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-pale-prior/walk/n/2",
+      "frame": {
+        "x": 1940,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-pale-prior/walk/n/3",
+      "frame": {
+        "x": 97,
+        "y": 129,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-pale-prior/walk/e/0",
+      "frame": {
+        "x": 97,
+        "y": 258,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-pale-prior/walk/e/1",
+      "frame": {
+        "x": 97,
+        "y": 387,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-pale-prior/walk/e/2",
+      "frame": {
+        "x": 97,
+        "y": 516,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-pale-prior/walk/e/3",
+      "frame": {
+        "x": 97,
+        "y": 645,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-pale-prior/attack/s/0",
+      "frame": {
+        "x": 97,
+        "y": 774,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 80
+    },
+    {
+      "filename": "boss-the-pale-prior/attack/s/1",
+      "frame": {
+        "x": 97,
+        "y": 903,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 40
+    },
+    {
+      "filename": "boss-the-pale-prior/attack/s/2",
+      "frame": {
+        "x": 97,
+        "y": 1032,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-pale-prior/attack/s/3",
+      "frame": {
+        "x": 97,
+        "y": 1161,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 60
+    },
+    {
+      "filename": "boss-the-pale-prior/attack/w/0",
+      "frame": {
+        "x": 97,
+        "y": 1290,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 80
+    },
+    {
+      "filename": "boss-the-pale-prior/attack/w/1",
+      "frame": {
+        "x": 97,
+        "y": 1419,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 40
+    },
+    {
+      "filename": "boss-the-pale-prior/attack/w/2",
+      "frame": {
+        "x": 97,
+        "y": 1548,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-pale-prior/attack/w/3",
+      "frame": {
+        "x": 97,
+        "y": 1677,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 60
+    },
+    {
+      "filename": "boss-the-pale-prior/attack/n/0",
+      "frame": {
+        "x": 97,
+        "y": 1806,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 80
+    },
+    {
+      "filename": "boss-the-pale-prior/attack/n/1",
+      "frame": {
+        "x": 194,
+        "y": 129,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 40
+    },
+    {
+      "filename": "boss-the-pale-prior/attack/n/2",
+      "frame": {
+        "x": 291,
+        "y": 129,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-pale-prior/attack/n/3",
+      "frame": {
+        "x": 388,
+        "y": 129,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 60
+    },
+    {
+      "filename": "boss-the-pale-prior/attack/e/0",
+      "frame": {
+        "x": 485,
+        "y": 129,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 80
+    },
+    {
+      "filename": "boss-the-pale-prior/attack/e/1",
+      "frame": {
+        "x": 582,
+        "y": 129,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 40
+    },
+    {
+      "filename": "boss-the-pale-prior/attack/e/2",
+      "frame": {
+        "x": 679,
+        "y": 129,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-pale-prior/attack/e/3",
+      "frame": {
+        "x": 776,
+        "y": 129,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 60
+    },
+    {
+      "filename": "boss-magister-voss/idle/s/0",
+      "frame": {
+        "x": 873,
+        "y": 129,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 600
+    },
+    {
+      "filename": "boss-magister-voss/idle/s/1",
+      "frame": {
+        "x": 970,
+        "y": 129,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 600
+    },
+    {
+      "filename": "boss-magister-voss/idle/w/0",
+      "frame": {
+        "x": 1067,
+        "y": 129,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 600
+    },
+    {
+      "filename": "boss-magister-voss/idle/w/1",
+      "frame": {
+        "x": 1164,
+        "y": 129,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 600
+    },
+    {
+      "filename": "boss-magister-voss/idle/n/0",
+      "frame": {
+        "x": 1261,
+        "y": 129,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 600
+    },
+    {
+      "filename": "boss-magister-voss/idle/n/1",
+      "frame": {
+        "x": 1358,
+        "y": 129,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 600
+    },
+    {
+      "filename": "boss-magister-voss/idle/e/0",
+      "frame": {
+        "x": 1455,
+        "y": 129,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 600
+    },
+    {
+      "filename": "boss-magister-voss/idle/e/1",
+      "frame": {
+        "x": 1552,
+        "y": 129,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 600
+    },
+    {
+      "filename": "boss-magister-voss/walk/s/0",
+      "frame": {
+        "x": 1649,
+        "y": 129,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-magister-voss/walk/s/1",
+      "frame": {
+        "x": 1746,
+        "y": 129,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-magister-voss/walk/s/2",
+      "frame": {
+        "x": 1843,
+        "y": 129,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-magister-voss/walk/s/3",
+      "frame": {
+        "x": 1940,
+        "y": 129,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-magister-voss/walk/w/0",
+      "frame": {
+        "x": 194,
+        "y": 258,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-magister-voss/walk/w/1",
+      "frame": {
+        "x": 194,
+        "y": 387,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-magister-voss/walk/w/2",
+      "frame": {
+        "x": 194,
+        "y": 516,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-magister-voss/walk/w/3",
+      "frame": {
+        "x": 194,
+        "y": 645,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-magister-voss/walk/n/0",
+      "frame": {
+        "x": 194,
+        "y": 774,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-magister-voss/walk/n/1",
+      "frame": {
+        "x": 194,
+        "y": 903,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-magister-voss/walk/n/2",
+      "frame": {
+        "x": 194,
+        "y": 1032,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-magister-voss/walk/n/3",
+      "frame": {
+        "x": 194,
+        "y": 1161,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-magister-voss/walk/e/0",
+      "frame": {
+        "x": 194,
+        "y": 1290,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-magister-voss/walk/e/1",
+      "frame": {
+        "x": 194,
+        "y": 1419,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-magister-voss/walk/e/2",
+      "frame": {
+        "x": 194,
+        "y": 1548,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-magister-voss/walk/e/3",
+      "frame": {
+        "x": 194,
+        "y": 1677,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-magister-voss/attack/s/0",
+      "frame": {
+        "x": 194,
+        "y": 1806,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 80
+    },
+    {
+      "filename": "boss-magister-voss/attack/s/1",
+      "frame": {
+        "x": 291,
+        "y": 258,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 40
+    },
+    {
+      "filename": "boss-magister-voss/attack/s/2",
+      "frame": {
+        "x": 291,
+        "y": 387,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-magister-voss/attack/s/3",
+      "frame": {
+        "x": 291,
+        "y": 516,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 60
+    },
+    {
+      "filename": "boss-magister-voss/attack/w/0",
+      "frame": {
+        "x": 291,
+        "y": 645,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 80
+    },
+    {
+      "filename": "boss-magister-voss/attack/w/1",
+      "frame": {
+        "x": 291,
+        "y": 774,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 40
+    },
+    {
+      "filename": "boss-magister-voss/attack/w/2",
+      "frame": {
+        "x": 291,
+        "y": 903,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-magister-voss/attack/w/3",
+      "frame": {
+        "x": 291,
+        "y": 1032,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 60
+    },
+    {
+      "filename": "boss-magister-voss/attack/n/0",
+      "frame": {
+        "x": 291,
+        "y": 1161,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 80
+    },
+    {
+      "filename": "boss-magister-voss/attack/n/1",
+      "frame": {
+        "x": 291,
+        "y": 1290,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 40
+    },
+    {
+      "filename": "boss-magister-voss/attack/n/2",
+      "frame": {
+        "x": 291,
+        "y": 1419,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-magister-voss/attack/n/3",
+      "frame": {
+        "x": 291,
+        "y": 1548,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 60
+    },
+    {
+      "filename": "boss-magister-voss/attack/e/0",
+      "frame": {
+        "x": 291,
+        "y": 1677,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 80
+    },
+    {
+      "filename": "boss-magister-voss/attack/e/1",
+      "frame": {
+        "x": 291,
+        "y": 1806,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 40
+    },
+    {
+      "filename": "boss-magister-voss/attack/e/2",
+      "frame": {
+        "x": 388,
+        "y": 258,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-magister-voss/attack/e/3",
+      "frame": {
+        "x": 485,
+        "y": 258,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 60
+    },
+    {
+      "filename": "boss-the-stone-mother/idle/s/0",
+      "frame": {
+        "x": 582,
+        "y": 258,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 600
+    },
+    {
+      "filename": "boss-the-stone-mother/idle/s/1",
+      "frame": {
+        "x": 679,
+        "y": 258,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 600
+    },
+    {
+      "filename": "boss-the-stone-mother/idle/w/0",
+      "frame": {
+        "x": 776,
+        "y": 258,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 600
+    },
+    {
+      "filename": "boss-the-stone-mother/idle/w/1",
+      "frame": {
+        "x": 873,
+        "y": 258,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 600
+    },
+    {
+      "filename": "boss-the-stone-mother/idle/n/0",
+      "frame": {
+        "x": 970,
+        "y": 258,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 600
+    },
+    {
+      "filename": "boss-the-stone-mother/idle/n/1",
+      "frame": {
+        "x": 1067,
+        "y": 258,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 600
+    },
+    {
+      "filename": "boss-the-stone-mother/idle/e/0",
+      "frame": {
+        "x": 1164,
+        "y": 258,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 600
+    },
+    {
+      "filename": "boss-the-stone-mother/idle/e/1",
+      "frame": {
+        "x": 1261,
+        "y": 258,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 600
+    },
+    {
+      "filename": "boss-the-stone-mother/walk/s/0",
+      "frame": {
+        "x": 1358,
+        "y": 258,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-stone-mother/walk/s/1",
+      "frame": {
+        "x": 1455,
+        "y": 258,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-stone-mother/walk/s/2",
+      "frame": {
+        "x": 1552,
+        "y": 258,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-stone-mother/walk/s/3",
+      "frame": {
+        "x": 1649,
+        "y": 258,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-stone-mother/walk/w/0",
+      "frame": {
+        "x": 1746,
+        "y": 258,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-stone-mother/walk/w/1",
+      "frame": {
+        "x": 1843,
+        "y": 258,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-stone-mother/walk/w/2",
+      "frame": {
+        "x": 1940,
+        "y": 258,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-stone-mother/walk/w/3",
+      "frame": {
+        "x": 388,
+        "y": 387,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-stone-mother/walk/n/0",
+      "frame": {
+        "x": 388,
+        "y": 516,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-stone-mother/walk/n/1",
+      "frame": {
+        "x": 388,
+        "y": 645,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-stone-mother/walk/n/2",
+      "frame": {
+        "x": 388,
+        "y": 774,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-stone-mother/walk/n/3",
+      "frame": {
+        "x": 388,
+        "y": 903,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-stone-mother/walk/e/0",
+      "frame": {
+        "x": 388,
+        "y": 1032,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-stone-mother/walk/e/1",
+      "frame": {
+        "x": 388,
+        "y": 1161,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-stone-mother/walk/e/2",
+      "frame": {
+        "x": 388,
+        "y": 1290,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-stone-mother/walk/e/3",
+      "frame": {
+        "x": 388,
+        "y": 1419,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-stone-mother/attack/s/0",
+      "frame": {
+        "x": 388,
+        "y": 1548,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 80
+    },
+    {
+      "filename": "boss-the-stone-mother/attack/s/1",
+      "frame": {
+        "x": 388,
+        "y": 1677,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 40
+    },
+    {
+      "filename": "boss-the-stone-mother/attack/s/2",
+      "frame": {
+        "x": 388,
+        "y": 1806,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-stone-mother/attack/s/3",
+      "frame": {
+        "x": 485,
+        "y": 387,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 60
+    },
+    {
+      "filename": "boss-the-stone-mother/attack/w/0",
+      "frame": {
+        "x": 582,
+        "y": 387,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 80
+    },
+    {
+      "filename": "boss-the-stone-mother/attack/w/1",
+      "frame": {
+        "x": 679,
+        "y": 387,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 40
+    },
+    {
+      "filename": "boss-the-stone-mother/attack/w/2",
+      "frame": {
+        "x": 776,
+        "y": 387,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-stone-mother/attack/w/3",
+      "frame": {
+        "x": 873,
+        "y": 387,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 60
+    },
+    {
+      "filename": "boss-the-stone-mother/attack/n/0",
+      "frame": {
+        "x": 970,
+        "y": 387,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 80
+    },
+    {
+      "filename": "boss-the-stone-mother/attack/n/1",
+      "frame": {
+        "x": 1067,
+        "y": 387,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 40
+    },
+    {
+      "filename": "boss-the-stone-mother/attack/n/2",
+      "frame": {
+        "x": 1164,
+        "y": 387,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-stone-mother/attack/n/3",
+      "frame": {
+        "x": 1261,
+        "y": 387,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 60
+    },
+    {
+      "filename": "boss-the-stone-mother/attack/e/0",
+      "frame": {
+        "x": 1358,
+        "y": 387,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 80
+    },
+    {
+      "filename": "boss-the-stone-mother/attack/e/1",
+      "frame": {
+        "x": 1455,
+        "y": 387,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 40
+    },
+    {
+      "filename": "boss-the-stone-mother/attack/e/2",
+      "frame": {
+        "x": 1552,
+        "y": 387,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-stone-mother/attack/e/3",
+      "frame": {
+        "x": 1649,
+        "y": 387,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 60
+    },
+    {
+      "filename": "boss-qorra-of-the-lake/idle/s/0",
+      "frame": {
+        "x": 1746,
+        "y": 387,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 600
+    },
+    {
+      "filename": "boss-qorra-of-the-lake/idle/s/1",
+      "frame": {
+        "x": 1843,
+        "y": 387,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 600
+    },
+    {
+      "filename": "boss-qorra-of-the-lake/idle/w/0",
+      "frame": {
+        "x": 1940,
+        "y": 387,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 600
+    },
+    {
+      "filename": "boss-qorra-of-the-lake/idle/w/1",
+      "frame": {
+        "x": 485,
+        "y": 516,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 600
+    },
+    {
+      "filename": "boss-qorra-of-the-lake/idle/n/0",
+      "frame": {
+        "x": 485,
+        "y": 645,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 600
+    },
+    {
+      "filename": "boss-qorra-of-the-lake/idle/n/1",
+      "frame": {
+        "x": 485,
+        "y": 774,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 600
+    },
+    {
+      "filename": "boss-qorra-of-the-lake/idle/e/0",
+      "frame": {
+        "x": 485,
+        "y": 903,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 600
+    },
+    {
+      "filename": "boss-qorra-of-the-lake/idle/e/1",
+      "frame": {
+        "x": 485,
+        "y": 1032,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 600
+    },
+    {
+      "filename": "boss-qorra-of-the-lake/walk/s/0",
+      "frame": {
+        "x": 485,
+        "y": 1161,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-qorra-of-the-lake/walk/s/1",
+      "frame": {
+        "x": 485,
+        "y": 1290,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-qorra-of-the-lake/walk/s/2",
+      "frame": {
+        "x": 485,
+        "y": 1419,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-qorra-of-the-lake/walk/s/3",
+      "frame": {
+        "x": 485,
+        "y": 1548,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-qorra-of-the-lake/walk/w/0",
+      "frame": {
+        "x": 485,
+        "y": 1677,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-qorra-of-the-lake/walk/w/1",
+      "frame": {
+        "x": 485,
+        "y": 1806,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-qorra-of-the-lake/walk/w/2",
+      "frame": {
+        "x": 582,
+        "y": 516,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-qorra-of-the-lake/walk/w/3",
+      "frame": {
+        "x": 679,
+        "y": 516,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-qorra-of-the-lake/walk/n/0",
+      "frame": {
+        "x": 776,
+        "y": 516,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-qorra-of-the-lake/walk/n/1",
+      "frame": {
+        "x": 873,
+        "y": 516,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-qorra-of-the-lake/walk/n/2",
+      "frame": {
+        "x": 970,
+        "y": 516,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-qorra-of-the-lake/walk/n/3",
+      "frame": {
+        "x": 1067,
+        "y": 516,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-qorra-of-the-lake/walk/e/0",
+      "frame": {
+        "x": 1164,
+        "y": 516,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-qorra-of-the-lake/walk/e/1",
+      "frame": {
+        "x": 1261,
+        "y": 516,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-qorra-of-the-lake/walk/e/2",
+      "frame": {
+        "x": 1358,
+        "y": 516,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-qorra-of-the-lake/walk/e/3",
+      "frame": {
+        "x": 1455,
+        "y": 516,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-qorra-of-the-lake/attack/s/0",
+      "frame": {
+        "x": 1552,
+        "y": 516,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 80
+    },
+    {
+      "filename": "boss-qorra-of-the-lake/attack/s/1",
+      "frame": {
+        "x": 1649,
+        "y": 516,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 40
+    },
+    {
+      "filename": "boss-qorra-of-the-lake/attack/s/2",
+      "frame": {
+        "x": 1746,
+        "y": 516,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-qorra-of-the-lake/attack/s/3",
+      "frame": {
+        "x": 1843,
+        "y": 516,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 60
+    },
+    {
+      "filename": "boss-qorra-of-the-lake/attack/w/0",
+      "frame": {
+        "x": 1940,
+        "y": 516,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 80
+    },
+    {
+      "filename": "boss-qorra-of-the-lake/attack/w/1",
+      "frame": {
+        "x": 582,
+        "y": 645,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 40
+    },
+    {
+      "filename": "boss-qorra-of-the-lake/attack/w/2",
+      "frame": {
+        "x": 582,
+        "y": 774,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-qorra-of-the-lake/attack/w/3",
+      "frame": {
+        "x": 582,
+        "y": 903,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 60
+    },
+    {
+      "filename": "boss-qorra-of-the-lake/attack/n/0",
+      "frame": {
+        "x": 582,
+        "y": 1032,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 80
+    },
+    {
+      "filename": "boss-qorra-of-the-lake/attack/n/1",
+      "frame": {
+        "x": 582,
+        "y": 1161,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 40
+    },
+    {
+      "filename": "boss-qorra-of-the-lake/attack/n/2",
+      "frame": {
+        "x": 582,
+        "y": 1290,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-qorra-of-the-lake/attack/n/3",
+      "frame": {
+        "x": 582,
+        "y": 1419,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 60
+    },
+    {
+      "filename": "boss-qorra-of-the-lake/attack/e/0",
+      "frame": {
+        "x": 582,
+        "y": 1548,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 80
+    },
+    {
+      "filename": "boss-qorra-of-the-lake/attack/e/1",
+      "frame": {
+        "x": 582,
+        "y": 1677,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 40
+    },
+    {
+      "filename": "boss-qorra-of-the-lake/attack/e/2",
+      "frame": {
+        "x": 582,
+        "y": 1806,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-qorra-of-the-lake/attack/e/3",
+      "frame": {
+        "x": 679,
+        "y": 645,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 60
+    },
+    {
+      "filename": "boss-the-black-abbess/idle/s/0",
+      "frame": {
+        "x": 679,
+        "y": 774,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 600
+    },
+    {
+      "filename": "boss-the-black-abbess/idle/s/1",
+      "frame": {
+        "x": 679,
+        "y": 903,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 600
+    },
+    {
+      "filename": "boss-the-black-abbess/idle/w/0",
+      "frame": {
+        "x": 679,
+        "y": 1032,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 600
+    },
+    {
+      "filename": "boss-the-black-abbess/idle/w/1",
+      "frame": {
+        "x": 679,
+        "y": 1161,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 600
+    },
+    {
+      "filename": "boss-the-black-abbess/idle/n/0",
+      "frame": {
+        "x": 679,
+        "y": 1290,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 600
+    },
+    {
+      "filename": "boss-the-black-abbess/idle/n/1",
+      "frame": {
+        "x": 679,
+        "y": 1419,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 600
+    },
+    {
+      "filename": "boss-the-black-abbess/idle/e/0",
+      "frame": {
+        "x": 679,
+        "y": 1548,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 600
+    },
+    {
+      "filename": "boss-the-black-abbess/idle/e/1",
+      "frame": {
+        "x": 679,
+        "y": 1677,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 600
+    },
+    {
+      "filename": "boss-the-black-abbess/walk/s/0",
+      "frame": {
+        "x": 679,
+        "y": 1806,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-black-abbess/walk/s/1",
+      "frame": {
+        "x": 776,
+        "y": 645,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-black-abbess/walk/s/2",
+      "frame": {
+        "x": 679,
+        "y": 1806,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-black-abbess/walk/s/3",
+      "frame": {
+        "x": 873,
+        "y": 645,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-black-abbess/walk/w/0",
+      "frame": {
+        "x": 970,
+        "y": 645,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-black-abbess/walk/w/1",
+      "frame": {
+        "x": 1067,
+        "y": 645,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-black-abbess/walk/w/2",
+      "frame": {
+        "x": 970,
+        "y": 645,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-black-abbess/walk/w/3",
+      "frame": {
+        "x": 1164,
+        "y": 645,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-black-abbess/walk/n/0",
+      "frame": {
+        "x": 1261,
+        "y": 645,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-black-abbess/walk/n/1",
+      "frame": {
+        "x": 1358,
+        "y": 645,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-black-abbess/walk/n/2",
+      "frame": {
+        "x": 1261,
+        "y": 645,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-black-abbess/walk/n/3",
+      "frame": {
+        "x": 1455,
+        "y": 645,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-black-abbess/walk/e/0",
+      "frame": {
+        "x": 1552,
+        "y": 645,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-black-abbess/walk/e/1",
+      "frame": {
+        "x": 1649,
+        "y": 645,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-black-abbess/walk/e/2",
+      "frame": {
+        "x": 1552,
+        "y": 645,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-black-abbess/walk/e/3",
+      "frame": {
+        "x": 1746,
+        "y": 645,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-black-abbess/attack/s/0",
+      "frame": {
+        "x": 1843,
+        "y": 645,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 80
+    },
+    {
+      "filename": "boss-the-black-abbess/attack/s/1",
+      "frame": {
+        "x": 1940,
+        "y": 645,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 40
+    },
+    {
+      "filename": "boss-the-black-abbess/attack/s/2",
+      "frame": {
+        "x": 776,
+        "y": 774,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-black-abbess/attack/s/3",
+      "frame": {
+        "x": 776,
+        "y": 903,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 60
+    },
+    {
+      "filename": "boss-the-black-abbess/attack/w/0",
+      "frame": {
+        "x": 776,
+        "y": 1032,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 80
+    },
+    {
+      "filename": "boss-the-black-abbess/attack/w/1",
+      "frame": {
+        "x": 776,
+        "y": 1161,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 40
+    },
+    {
+      "filename": "boss-the-black-abbess/attack/w/2",
+      "frame": {
+        "x": 776,
+        "y": 1290,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-black-abbess/attack/w/3",
+      "frame": {
+        "x": 776,
+        "y": 1419,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 60
+    },
+    {
+      "filename": "boss-the-black-abbess/attack/n/0",
+      "frame": {
+        "x": 776,
+        "y": 1548,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 80
+    },
+    {
+      "filename": "boss-the-black-abbess/attack/n/1",
+      "frame": {
+        "x": 776,
+        "y": 1677,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 40
+    },
+    {
+      "filename": "boss-the-black-abbess/attack/n/2",
+      "frame": {
+        "x": 776,
+        "y": 1806,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-black-abbess/attack/n/3",
+      "frame": {
+        "x": 873,
+        "y": 774,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 60
+    },
+    {
+      "filename": "boss-the-black-abbess/attack/e/0",
+      "frame": {
+        "x": 970,
+        "y": 774,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 80
+    },
+    {
+      "filename": "boss-the-black-abbess/attack/e/1",
+      "frame": {
+        "x": 1067,
+        "y": 774,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 40
+    },
+    {
+      "filename": "boss-the-black-abbess/attack/e/2",
+      "frame": {
+        "x": 1164,
+        "y": 774,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-black-abbess/attack/e/3",
+      "frame": {
+        "x": 1261,
+        "y": 774,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 60
+    },
+    {
+      "filename": "boss-hrolf-the-hammerlord/idle/s/0",
+      "frame": {
+        "x": 1358,
+        "y": 774,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 600
+    },
+    {
+      "filename": "boss-hrolf-the-hammerlord/idle/s/1",
+      "frame": {
+        "x": 1455,
+        "y": 774,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 600
+    },
+    {
+      "filename": "boss-hrolf-the-hammerlord/idle/w/0",
+      "frame": {
+        "x": 1552,
+        "y": 774,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 600
+    },
+    {
+      "filename": "boss-hrolf-the-hammerlord/idle/w/1",
+      "frame": {
+        "x": 1649,
+        "y": 774,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 600
+    },
+    {
+      "filename": "boss-hrolf-the-hammerlord/idle/n/0",
+      "frame": {
+        "x": 1746,
+        "y": 774,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 600
+    },
+    {
+      "filename": "boss-hrolf-the-hammerlord/idle/n/1",
+      "frame": {
+        "x": 1843,
+        "y": 774,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 600
+    },
+    {
+      "filename": "boss-hrolf-the-hammerlord/idle/e/0",
+      "frame": {
+        "x": 1940,
+        "y": 774,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 600
+    },
+    {
+      "filename": "boss-hrolf-the-hammerlord/idle/e/1",
+      "frame": {
+        "x": 873,
+        "y": 903,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 600
+    },
+    {
+      "filename": "boss-hrolf-the-hammerlord/walk/s/0",
+      "frame": {
+        "x": 873,
+        "y": 1032,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-hrolf-the-hammerlord/walk/s/1",
+      "frame": {
+        "x": 873,
+        "y": 1161,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-hrolf-the-hammerlord/walk/s/2",
+      "frame": {
+        "x": 873,
+        "y": 1290,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-hrolf-the-hammerlord/walk/s/3",
+      "frame": {
+        "x": 873,
+        "y": 1419,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-hrolf-the-hammerlord/walk/w/0",
+      "frame": {
+        "x": 873,
+        "y": 1548,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-hrolf-the-hammerlord/walk/w/1",
+      "frame": {
+        "x": 873,
+        "y": 1677,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-hrolf-the-hammerlord/walk/w/2",
+      "frame": {
+        "x": 873,
+        "y": 1806,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-hrolf-the-hammerlord/walk/w/3",
+      "frame": {
+        "x": 970,
+        "y": 903,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-hrolf-the-hammerlord/walk/n/0",
+      "frame": {
+        "x": 1067,
+        "y": 903,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-hrolf-the-hammerlord/walk/n/1",
+      "frame": {
+        "x": 1164,
+        "y": 903,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-hrolf-the-hammerlord/walk/n/2",
+      "frame": {
+        "x": 1261,
+        "y": 903,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-hrolf-the-hammerlord/walk/n/3",
+      "frame": {
+        "x": 1358,
+        "y": 903,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-hrolf-the-hammerlord/walk/e/0",
+      "frame": {
+        "x": 1455,
+        "y": 903,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-hrolf-the-hammerlord/walk/e/1",
+      "frame": {
+        "x": 1552,
+        "y": 903,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-hrolf-the-hammerlord/walk/e/2",
+      "frame": {
+        "x": 1649,
+        "y": 903,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-hrolf-the-hammerlord/walk/e/3",
+      "frame": {
+        "x": 1746,
+        "y": 903,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-hrolf-the-hammerlord/attack/s/0",
+      "frame": {
+        "x": 1843,
+        "y": 903,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 80
+    },
+    {
+      "filename": "boss-hrolf-the-hammerlord/attack/s/1",
+      "frame": {
+        "x": 1940,
+        "y": 903,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 40
+    },
+    {
+      "filename": "boss-hrolf-the-hammerlord/attack/s/2",
+      "frame": {
+        "x": 970,
+        "y": 1032,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-hrolf-the-hammerlord/attack/s/3",
+      "frame": {
+        "x": 970,
+        "y": 1161,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 60
+    },
+    {
+      "filename": "boss-hrolf-the-hammerlord/attack/w/0",
+      "frame": {
+        "x": 970,
+        "y": 1290,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 80
+    },
+    {
+      "filename": "boss-hrolf-the-hammerlord/attack/w/1",
+      "frame": {
+        "x": 970,
+        "y": 1419,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 40
+    },
+    {
+      "filename": "boss-hrolf-the-hammerlord/attack/w/2",
+      "frame": {
+        "x": 970,
+        "y": 1548,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-hrolf-the-hammerlord/attack/w/3",
+      "frame": {
+        "x": 970,
+        "y": 1677,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 60
+    },
+    {
+      "filename": "boss-hrolf-the-hammerlord/attack/n/0",
+      "frame": {
+        "x": 970,
+        "y": 1806,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 80
+    },
+    {
+      "filename": "boss-hrolf-the-hammerlord/attack/n/1",
+      "frame": {
+        "x": 1067,
+        "y": 1032,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 40
+    },
+    {
+      "filename": "boss-hrolf-the-hammerlord/attack/n/2",
+      "frame": {
+        "x": 1067,
+        "y": 1161,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-hrolf-the-hammerlord/attack/n/3",
+      "frame": {
+        "x": 1067,
+        "y": 1290,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 60
+    },
+    {
+      "filename": "boss-hrolf-the-hammerlord/attack/e/0",
+      "frame": {
+        "x": 1067,
+        "y": 1419,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 80
+    },
+    {
+      "filename": "boss-hrolf-the-hammerlord/attack/e/1",
+      "frame": {
+        "x": 1067,
+        "y": 1548,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 40
+    },
+    {
+      "filename": "boss-hrolf-the-hammerlord/attack/e/2",
+      "frame": {
+        "x": 1067,
+        "y": 1677,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-hrolf-the-hammerlord/attack/e/3",
+      "frame": {
+        "x": 1067,
+        "y": 1806,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 60
+    },
+    {
+      "filename": "boss-the-weeping-knight/idle/s/0",
+      "frame": {
+        "x": 1164,
+        "y": 1032,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 600
+    },
+    {
+      "filename": "boss-the-weeping-knight/idle/s/1",
+      "frame": {
+        "x": 1261,
+        "y": 1032,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 600
+    },
+    {
+      "filename": "boss-the-weeping-knight/idle/w/0",
+      "frame": {
+        "x": 1358,
+        "y": 1032,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 600
+    },
+    {
+      "filename": "boss-the-weeping-knight/idle/w/1",
+      "frame": {
+        "x": 1455,
+        "y": 1032,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 600
+    },
+    {
+      "filename": "boss-the-weeping-knight/idle/n/0",
+      "frame": {
+        "x": 1552,
+        "y": 1032,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 600
+    },
+    {
+      "filename": "boss-the-weeping-knight/idle/n/1",
+      "frame": {
+        "x": 1649,
+        "y": 1032,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 600
+    },
+    {
+      "filename": "boss-the-weeping-knight/idle/e/0",
+      "frame": {
+        "x": 1746,
+        "y": 1032,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 600
+    },
+    {
+      "filename": "boss-the-weeping-knight/idle/e/1",
+      "frame": {
+        "x": 1843,
+        "y": 1032,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 600
+    },
+    {
+      "filename": "boss-the-weeping-knight/walk/s/0",
+      "frame": {
+        "x": 1940,
+        "y": 1032,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-weeping-knight/walk/s/1",
+      "frame": {
+        "x": 1164,
+        "y": 1161,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-weeping-knight/walk/s/2",
+      "frame": {
+        "x": 1164,
+        "y": 1290,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-weeping-knight/walk/s/3",
+      "frame": {
+        "x": 1164,
+        "y": 1419,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-weeping-knight/walk/w/0",
+      "frame": {
+        "x": 1164,
+        "y": 1548,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-weeping-knight/walk/w/1",
+      "frame": {
+        "x": 1164,
+        "y": 1677,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-weeping-knight/walk/w/2",
+      "frame": {
+        "x": 1164,
+        "y": 1806,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-weeping-knight/walk/w/3",
+      "frame": {
+        "x": 1261,
+        "y": 1161,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-weeping-knight/walk/n/0",
+      "frame": {
+        "x": 1358,
+        "y": 1161,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-weeping-knight/walk/n/1",
+      "frame": {
+        "x": 1455,
+        "y": 1161,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-weeping-knight/walk/n/2",
+      "frame": {
+        "x": 1552,
+        "y": 1161,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-weeping-knight/walk/n/3",
+      "frame": {
+        "x": 1649,
+        "y": 1161,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-weeping-knight/walk/e/0",
+      "frame": {
+        "x": 1746,
+        "y": 1161,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-weeping-knight/walk/e/1",
+      "frame": {
+        "x": 1843,
+        "y": 1161,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-weeping-knight/walk/e/2",
+      "frame": {
+        "x": 1940,
+        "y": 1161,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-weeping-knight/walk/e/3",
+      "frame": {
+        "x": 1261,
+        "y": 1290,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-weeping-knight/attack/s/0",
+      "frame": {
+        "x": 1261,
+        "y": 1419,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 80
+    },
+    {
+      "filename": "boss-the-weeping-knight/attack/s/1",
+      "frame": {
+        "x": 1261,
+        "y": 1548,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 40
+    },
+    {
+      "filename": "boss-the-weeping-knight/attack/s/2",
+      "frame": {
+        "x": 1261,
+        "y": 1677,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-weeping-knight/attack/s/3",
+      "frame": {
+        "x": 1261,
+        "y": 1806,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 60
+    },
+    {
+      "filename": "boss-the-weeping-knight/attack/w/0",
+      "frame": {
+        "x": 1358,
+        "y": 1290,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 80
+    },
+    {
+      "filename": "boss-the-weeping-knight/attack/w/1",
+      "frame": {
+        "x": 1455,
+        "y": 1290,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 40
+    },
+    {
+      "filename": "boss-the-weeping-knight/attack/w/2",
+      "frame": {
+        "x": 1552,
+        "y": 1290,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-weeping-knight/attack/w/3",
+      "frame": {
+        "x": 1649,
+        "y": 1290,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 60
+    },
+    {
+      "filename": "boss-the-weeping-knight/attack/n/0",
+      "frame": {
+        "x": 1746,
+        "y": 1290,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 80
+    },
+    {
+      "filename": "boss-the-weeping-knight/attack/n/1",
+      "frame": {
+        "x": 1843,
+        "y": 1290,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 40
+    },
+    {
+      "filename": "boss-the-weeping-knight/attack/n/2",
+      "frame": {
+        "x": 1940,
+        "y": 1290,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-weeping-knight/attack/n/3",
+      "frame": {
+        "x": 1358,
+        "y": 1419,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 60
+    },
+    {
+      "filename": "boss-the-weeping-knight/attack/e/0",
+      "frame": {
+        "x": 1358,
+        "y": 1548,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 80
+    },
+    {
+      "filename": "boss-the-weeping-knight/attack/e/1",
+      "frame": {
+        "x": 1358,
+        "y": 1677,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 40
+    },
+    {
+      "filename": "boss-the-weeping-knight/attack/e/2",
+      "frame": {
+        "x": 1358,
+        "y": 1806,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-the-weeping-knight/attack/e/3",
+      "frame": {
+        "x": 1455,
+        "y": 1419,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 60
+    },
+    {
+      "filename": "boss-azhul-emberheart/idle/s/0",
+      "frame": {
+        "x": 1455,
+        "y": 1548,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 600
+    },
+    {
+      "filename": "boss-azhul-emberheart/idle/s/1",
+      "frame": {
+        "x": 1455,
+        "y": 1677,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 600
+    },
+    {
+      "filename": "boss-azhul-emberheart/idle/w/0",
+      "frame": {
+        "x": 1455,
+        "y": 1806,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 600
+    },
+    {
+      "filename": "boss-azhul-emberheart/idle/w/1",
+      "frame": {
+        "x": 1552,
+        "y": 1419,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 600
+    },
+    {
+      "filename": "boss-azhul-emberheart/idle/n/0",
+      "frame": {
+        "x": 1649,
+        "y": 1419,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 600
+    },
+    {
+      "filename": "boss-azhul-emberheart/idle/n/1",
+      "frame": {
+        "x": 1746,
+        "y": 1419,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 600
+    },
+    {
+      "filename": "boss-azhul-emberheart/idle/e/0",
+      "frame": {
+        "x": 1843,
+        "y": 1419,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 600
+    },
+    {
+      "filename": "boss-azhul-emberheart/idle/e/1",
+      "frame": {
+        "x": 1940,
+        "y": 1419,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 600
+    },
+    {
+      "filename": "boss-azhul-emberheart/walk/s/0",
+      "frame": {
+        "x": 1552,
+        "y": 1548,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-azhul-emberheart/walk/s/1",
+      "frame": {
+        "x": 1552,
+        "y": 1677,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-azhul-emberheart/walk/s/2",
+      "frame": {
+        "x": 1552,
+        "y": 1806,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-azhul-emberheart/walk/s/3",
+      "frame": {
+        "x": 1649,
+        "y": 1548,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-azhul-emberheart/walk/w/0",
+      "frame": {
+        "x": 1746,
+        "y": 1548,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-azhul-emberheart/walk/w/1",
+      "frame": {
+        "x": 1843,
+        "y": 1548,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-azhul-emberheart/walk/w/2",
+      "frame": {
+        "x": 1940,
+        "y": 1548,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-azhul-emberheart/walk/w/3",
+      "frame": {
+        "x": 1649,
+        "y": 1677,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-azhul-emberheart/walk/n/0",
+      "frame": {
+        "x": 1649,
+        "y": 1806,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-azhul-emberheart/walk/n/1",
+      "frame": {
+        "x": 1746,
+        "y": 1677,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-azhul-emberheart/walk/n/2",
+      "frame": {
+        "x": 1843,
+        "y": 1677,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-azhul-emberheart/walk/n/3",
+      "frame": {
+        "x": 1940,
+        "y": 1677,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-azhul-emberheart/walk/e/0",
+      "frame": {
+        "x": 1746,
+        "y": 1806,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-azhul-emberheart/walk/e/1",
+      "frame": {
+        "x": 1843,
+        "y": 1806,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    },
+    {
+      "filename": "boss-azhul-emberheart/walk/e/2",
+      "frame": {
+        "x": 1940,
+        "y": 1806,
+        "w": 96,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 128
+      },
+      "duration": 120
+    }
+  ],
+  "meta": {
+    "app": "artgen",
+    "version": "artgen 0.14.0",
+    "image": "main-3.png",
+    "format": "RGBA8888",
+    "size": {
+      "w": 2048,
+      "h": 2048
+    },
+    "scale": "1",
+    "frameTags": [
+      {
+        "name": "class-warrior/idle/w",
+        "from": 0,
+        "to": 1,
+        "direction": "forward"
+      },
+      {
+        "name": "family-d-cap/attack/w",
+        "from": 2,
+        "to": 5,
+        "direction": "forward"
+      },
+      {
+        "name": "family-d-cap/attack/n",
+        "from": 6,
+        "to": 9,
+        "direction": "forward"
+      },
+      {
+        "name": "family-d-cap/attack/e",
+        "from": 10,
+        "to": 13,
+        "direction": "forward"
+      },
+      {
+        "name": "family-e-cap/idle/s",
+        "from": 14,
+        "to": 15,
+        "direction": "forward"
+      },
+      {
+        "name": "family-e-cap/idle/w",
+        "from": 16,
+        "to": 17,
+        "direction": "forward"
+      },
+      {
+        "name": "family-e-cap/idle/n",
+        "from": 18,
+        "to": 19,
+        "direction": "forward"
+      },
+      {
+        "name": "family-e-cap/idle/e",
+        "from": 20,
+        "to": 21,
+        "direction": "forward"
+      },
+      {
+        "name": "family-e-cap/walk/s",
+        "from": 22,
+        "to": 25,
+        "direction": "forward"
+      },
+      {
+        "name": "family-e-cap/walk/w",
+        "from": 26,
+        "to": 29,
+        "direction": "forward"
+      },
+      {
+        "name": "family-e-cap/walk/n",
+        "from": 30,
+        "to": 32,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-thorne-ashgrave/attack/s",
+        "from": 33,
+        "to": 36,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-thorne-ashgrave/attack/w",
+        "from": 37,
+        "to": 40,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-thorne-ashgrave/attack/n",
+        "from": 41,
+        "to": 44,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-thorne-ashgrave/attack/e",
+        "from": 45,
+        "to": 48,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-the-pale-prior/idle/s",
+        "from": 49,
+        "to": 50,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-the-pale-prior/idle/w",
+        "from": 51,
+        "to": 52,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-the-pale-prior/idle/n",
+        "from": 53,
+        "to": 54,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-the-pale-prior/idle/e",
+        "from": 55,
+        "to": 56,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-the-pale-prior/walk/s",
+        "from": 57,
+        "to": 60,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-the-pale-prior/walk/w",
+        "from": 61,
+        "to": 64,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-the-pale-prior/walk/n",
+        "from": 65,
+        "to": 68,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-the-pale-prior/walk/e",
+        "from": 69,
+        "to": 72,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-the-pale-prior/attack/s",
+        "from": 73,
+        "to": 76,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-the-pale-prior/attack/w",
+        "from": 77,
+        "to": 80,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-the-pale-prior/attack/n",
+        "from": 81,
+        "to": 84,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-the-pale-prior/attack/e",
+        "from": 85,
+        "to": 88,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-magister-voss/idle/s",
+        "from": 89,
+        "to": 90,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-magister-voss/idle/w",
+        "from": 91,
+        "to": 92,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-magister-voss/idle/n",
+        "from": 93,
+        "to": 94,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-magister-voss/idle/e",
+        "from": 95,
+        "to": 96,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-magister-voss/walk/s",
+        "from": 97,
+        "to": 100,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-magister-voss/walk/w",
+        "from": 101,
+        "to": 104,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-magister-voss/walk/n",
+        "from": 105,
+        "to": 108,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-magister-voss/walk/e",
+        "from": 109,
+        "to": 112,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-magister-voss/attack/s",
+        "from": 113,
+        "to": 116,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-magister-voss/attack/w",
+        "from": 117,
+        "to": 120,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-magister-voss/attack/n",
+        "from": 121,
+        "to": 124,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-magister-voss/attack/e",
+        "from": 125,
+        "to": 128,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-the-stone-mother/idle/s",
+        "from": 129,
+        "to": 130,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-the-stone-mother/idle/w",
+        "from": 131,
+        "to": 132,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-the-stone-mother/idle/n",
+        "from": 133,
+        "to": 134,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-the-stone-mother/idle/e",
+        "from": 135,
+        "to": 136,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-the-stone-mother/walk/s",
+        "from": 137,
+        "to": 140,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-the-stone-mother/walk/w",
+        "from": 141,
+        "to": 144,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-the-stone-mother/walk/n",
+        "from": 145,
+        "to": 148,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-the-stone-mother/walk/e",
+        "from": 149,
+        "to": 152,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-the-stone-mother/attack/s",
+        "from": 153,
+        "to": 156,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-the-stone-mother/attack/w",
+        "from": 157,
+        "to": 160,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-the-stone-mother/attack/n",
+        "from": 161,
+        "to": 164,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-the-stone-mother/attack/e",
+        "from": 165,
+        "to": 168,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-qorra-of-the-lake/idle/s",
+        "from": 169,
+        "to": 170,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-qorra-of-the-lake/idle/w",
+        "from": 171,
+        "to": 172,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-qorra-of-the-lake/idle/n",
+        "from": 173,
+        "to": 174,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-qorra-of-the-lake/idle/e",
+        "from": 175,
+        "to": 176,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-qorra-of-the-lake/walk/s",
+        "from": 177,
+        "to": 180,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-qorra-of-the-lake/walk/w",
+        "from": 181,
+        "to": 184,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-qorra-of-the-lake/walk/n",
+        "from": 185,
+        "to": 188,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-qorra-of-the-lake/walk/e",
+        "from": 189,
+        "to": 192,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-qorra-of-the-lake/attack/s",
+        "from": 193,
+        "to": 196,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-qorra-of-the-lake/attack/w",
+        "from": 197,
+        "to": 200,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-qorra-of-the-lake/attack/n",
+        "from": 201,
+        "to": 204,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-qorra-of-the-lake/attack/e",
+        "from": 205,
+        "to": 208,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-the-black-abbess/idle/s",
+        "from": 209,
+        "to": 210,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-the-black-abbess/idle/w",
+        "from": 211,
+        "to": 212,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-the-black-abbess/idle/n",
+        "from": 213,
+        "to": 214,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-the-black-abbess/idle/e",
+        "from": 215,
+        "to": 216,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-the-black-abbess/walk/s",
+        "from": 217,
+        "to": 220,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-the-black-abbess/walk/w",
+        "from": 221,
+        "to": 224,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-the-black-abbess/walk/n",
+        "from": 225,
+        "to": 228,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-the-black-abbess/walk/e",
+        "from": 229,
+        "to": 232,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-the-black-abbess/attack/s",
+        "from": 233,
+        "to": 236,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-the-black-abbess/attack/w",
+        "from": 237,
+        "to": 240,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-the-black-abbess/attack/n",
+        "from": 241,
+        "to": 244,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-the-black-abbess/attack/e",
+        "from": 245,
+        "to": 248,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-hrolf-the-hammerlord/idle/s",
+        "from": 249,
+        "to": 250,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-hrolf-the-hammerlord/idle/w",
+        "from": 251,
+        "to": 252,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-hrolf-the-hammerlord/idle/n",
+        "from": 253,
+        "to": 254,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-hrolf-the-hammerlord/idle/e",
+        "from": 255,
+        "to": 256,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-hrolf-the-hammerlord/walk/s",
+        "from": 257,
+        "to": 260,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-hrolf-the-hammerlord/walk/w",
+        "from": 261,
+        "to": 264,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-hrolf-the-hammerlord/walk/n",
+        "from": 265,
+        "to": 268,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-hrolf-the-hammerlord/walk/e",
+        "from": 269,
+        "to": 272,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-hrolf-the-hammerlord/attack/s",
+        "from": 273,
+        "to": 276,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-hrolf-the-hammerlord/attack/w",
+        "from": 277,
+        "to": 280,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-hrolf-the-hammerlord/attack/n",
+        "from": 281,
+        "to": 284,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-hrolf-the-hammerlord/attack/e",
+        "from": 285,
+        "to": 288,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-the-weeping-knight/idle/s",
+        "from": 289,
+        "to": 290,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-the-weeping-knight/idle/w",
+        "from": 291,
+        "to": 292,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-the-weeping-knight/idle/n",
+        "from": 293,
+        "to": 294,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-the-weeping-knight/idle/e",
+        "from": 295,
+        "to": 296,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-the-weeping-knight/walk/s",
+        "from": 297,
+        "to": 300,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-the-weeping-knight/walk/w",
+        "from": 301,
+        "to": 304,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-the-weeping-knight/walk/n",
+        "from": 305,
+        "to": 308,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-the-weeping-knight/walk/e",
+        "from": 309,
+        "to": 312,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-the-weeping-knight/attack/s",
+        "from": 313,
+        "to": 316,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-the-weeping-knight/attack/w",
+        "from": 317,
+        "to": 320,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-the-weeping-knight/attack/n",
+        "from": 321,
+        "to": 324,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-the-weeping-knight/attack/e",
+        "from": 325,
+        "to": 328,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-azhul-emberheart/idle/s",
+        "from": 329,
+        "to": 330,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-azhul-emberheart/idle/w",
+        "from": 331,
+        "to": 332,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-azhul-emberheart/idle/n",
+        "from": 333,
+        "to": 334,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-azhul-emberheart/idle/e",
+        "from": 335,
+        "to": 336,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-azhul-emberheart/walk/s",
+        "from": 337,
+        "to": 340,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-azhul-emberheart/walk/w",
+        "from": 341,
+        "to": 344,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-azhul-emberheart/walk/n",
+        "from": 345,
+        "to": 348,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-azhul-emberheart/walk/e",
+        "from": 349,
+        "to": 351,
+        "direction": "forward"
+      }
+    ]
+  }
+}

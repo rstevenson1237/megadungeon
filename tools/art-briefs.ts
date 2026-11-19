@@ -52,6 +52,37 @@ export const FAMILY_HEIGHTS: Record<string, number> = {
   T: 3.0, V: 1.8, W: 2.0, Y: 1.6,
 };
 
+/** The player as drawn: the approved class sprites stand about 37 px tall, not the 29 px of 1.8 m at 16 px a metre. */
+export const DRAWN_PLAYER_PX = 37;
+/** The art direction's scale, which the conformance gate measures a brief's height against. */
+export const PX_PER_METRE = 16;
+
+/**
+ * How many times the drawn player a boss stands (Spec 01b, task 6.9): from 1x to 4x, rising evenly through the bosses
+ * in depth order (the table's order) from 0.8x to 4x, never under 1x or under its own family's height, so the
+ * average is 2.5x.
+ */
+export function bossTimes(glyph: string, index: number, count: number): number {
+  const ramp = 0.8 + (3.2 * index) / Math.max(1, count - 1);
+  return Math.min(4, Math.max(1, FAMILY_HEIGHTS[glyph]! / PLAYER_HEIGHT, ramp));
+}
+
+/** A boss's brief height in metres: its times the drawn player (37 px), at the direction's 16 px a metre. */
+export function bossHeight(glyph: string, index: number, count: number): number {
+  return Math.round((bossTimes(glyph, index, count) * DRAWN_PLAYER_PX) / PX_PER_METRE * 10) / 10;
+}
+
+/** The frames of a boss, each with the tallest boss it holds, leaving headroom for the attack. */
+export const BOSS_FRAMES: { upTo: number; size: 'large' | [number, number] }[] = [
+  { upTo: 74, size: 'large' }, // 64 x 80
+  { upTo: 116, size: [96, 128] },
+  { upTo: Infinity, size: [128, 160] },
+];
+function bossSize(height: number): { height: number; size: 'large' | [number, number] } {
+  const px = height * PX_PER_METRE;
+  return { height, size: BOSS_FRAMES.find((f) => px <= f.upTo)!.size };
+}
+
 /** What a family is, in a few words, for its brief; the member names follow. */
 const FAMILY_NOTES: Record<string, string> = {
   a: 'giant insects and scorpions', b: 'cave bats', c: 'giant centipedes and crayfish', e: 'eels and deep things of the water',
@@ -209,13 +240,14 @@ export function buildBriefs(tables: Record<string, unknown[]>): ArtBrief[] {
     add({ id: `icon-${id}`, kind: 'ui-icon', batch: 3, priority: 360 + i, importance: 'filler', size: ICON_SIZE, notes: `status icon above the head: ${object}` }),
   );
 
-  // Batch 4: unique bosses at the large size, and the level 100 set piece.
-  rows('bosses').forEach((b, i) =>
+  // Batch 4: unique bosses, drawn bigger than their families (bossHeight), and the level 100 set piece.
+  const bosses = rows('bosses');
+  bosses.forEach((b, i) =>
     add({
-      id: `boss-${b.id.replace(/_/g, '-')}`, kind: 'creature', batch: 4, priority: 400 + i, importance: 'hero', size: 'large',
-      height: FAMILY_HEIGHTS[b.glyph!], ...(FAMILY_BODIES[b.glyph!] ? { body: FAMILY_BODIES[b.glyph!] } : {}),
+      id: `boss-${b.id.replace(/_/g, '-')}`, kind: 'creature', batch: 4, priority: 400 + i, importance: 'hero',
+      ...bossSize(bossHeight(b.glyph!, i, bosses.length)), ...(FAMILY_BODIES[b.glyph!] ? { body: FAMILY_BODIES[b.glyph!] } : {}),
       directions: 4, states: ['idle', 'walk', 'attack'], anims: fighter,
-      notes: `${b.name}, a unique boss of the ${familyId(b.glyph!)} family, drawn at the large size`,
+      notes: `${b.name}, a unique boss of the ${familyId(b.glyph!)} family, drawn bigger than its family: ${bossTimes(b.glyph!, i, bosses.length).toFixed(1)}x the player as drawn, about ${Math.round(bossTimes(b.glyph!, i, bosses.length) * DRAWN_PLAYER_PX)} px tall`,
     }),
   );
   add({

@@ -1,0 +1,9 @@
+{
+  "id": "boss-the-gilded-wyrm",
+  "template": "iso/creature-large",
+  "review": {
+    "scale": 3,
+    "sym": "none",
+    "iso": true
+  }
+}
