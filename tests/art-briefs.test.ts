@@ -36,7 +36,8 @@ describe('art briefs (Spec 01b, Briefs)', () => {
   it('follows the asset list: a player per class, the NPC roles, a unique sprite per boss', () => {
     for (const c of tables['classes']!) expect(byId.get(`class-${c.id.replace(/_/g, '-')}`)?.height).toBe(PLAYER_HEIGHT);
     for (const role of ['rival', 'trader', 'bandit', 'hermit', 'captive']) expect(byId.has(`npc-${role}`)).toBe(true);
-    for (const b of tables['bosses']!) expect(byId.get(`boss-${b.id.replace(/_/g, '-')}`)?.size).toBe('large');
+    // A boss's frame is the 64 x 80 large frame, 96 x 128 or 128 x 160 by its height (Spec 01b, clarification of task 6.9).
+    for (const b of tables['bosses']!) expect([JSON.stringify('large'), '[96,128]', '[128,160]']).toContain(JSON.stringify(byId.get(`boss-${b.id.replace(/_/g, '-')}`)?.size));
     expect(inBatch(1)).toHaveLength(10);
     expect(inBatch(4)).toHaveLength(tables['bosses']!.length + 1);
   });
