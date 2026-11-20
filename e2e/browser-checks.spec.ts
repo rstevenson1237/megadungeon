@@ -163,7 +163,9 @@ test.describe('Spec 01: the screen in play', () => {
   });
 });
 
-test.describe('timing criteria', () => {
+// Tagged @timing: npm run smoke runs these on their own, one at a time, so no other test shares the machine while they
+// measure (package.json).
+test.describe('timing criteria @timing', () => {
   test('Spec 02: a large level generates in under 50 ms', async ({ page }) => {
     await openHarness(page);
     const ms = await page.evaluate(() => (window as unknown as { harness: { largeLevelMs: () => number } }).harness.largeLevelMs());

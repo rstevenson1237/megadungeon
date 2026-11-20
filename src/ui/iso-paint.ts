@@ -54,8 +54,7 @@ export class FloorLayer {
 
   /** Paint the flat draws on the layer if they changed, and return it. */
   layerFor(flat: readonly IsoDraw[], atlas: Atlas, sprites: SpriteSource | undefined): CanvasImageSource {
-    let key = sprites?.key ?? '';
-    for (const d of flat) key += `|${d.x},${d.y},${d.asset},${d.frame},${d.variant},${d.dim ? 1 : 0},${d.tint},${d.glyph},${d.fg}`;
+    const key = `${sprites?.key ?? ''}|${flat.length}|${fingerprint(flat)}`;
     if (!this.layer) this.layer = this.make();
     if (key !== this.key) {
       this.key = key;
@@ -71,6 +70,36 @@ export class FloorLayer {
     }
     return this.layer.image;
   }
+}
+
+/**
+ * Two 32-bit hashes of everything that decides how the flat draws look, taken without building a string for each
+ * draw (this runs every frame): positions, assets, frames, variants, light, colours and glyphs.
+ */
+function fingerprint(flat: readonly IsoDraw[]): string {
+  let a = 0x811c9dc5;
+  let b = 0x01000193;
+  const mix = (n: number): void => {
+    a = Math.imul(a ^ n, 0x01000193);
+    b = Math.imul(b ^ n, 0x5bd1e995) ^ (b >>> 15);
+  };
+  const text = (s: string | null): void => {
+    if (s === null) return mix(-1);
+    for (let i = 0; i < s.length; i++) mix(s.charCodeAt(i));
+    mix(-2);
+  };
+  for (const d of flat) {
+    mix(d.x);
+    mix(d.y);
+    text(d.asset);
+    text(d.frame);
+    mix(d.variant);
+    mix(d.dim ? 1 : 0);
+    mix(d.tint);
+    mix(d.glyph);
+    mix(d.fg);
+  }
+  return `${(a >>> 0).toString(16)}${(b >>> 0).toString(16)}`;
 }
 
 /** Does this draw lie flat in its diamond and stay still, so it can go on the floor layer? */

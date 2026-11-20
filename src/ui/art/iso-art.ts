@@ -66,11 +66,12 @@ export class IsoArt implements SpriteSource {
   readonly ids: ReadonlySet<string>;
   /** The level's look, which the terrain is recoloured to; set by the shell before each paint. */
   look: MapLook | null = null;
-  private readonly cut = new Map<string, CanvasImageSource>();
+  /** Cut and recoloured frames, by asset, then by frame index, remembered or not, and a family sprite's colour. */
+  private readonly cut = new Map<string, Map<number, CanvasImageSource>>();
   private cutLook = '';
   private readonly mains = new Map<string, MainSteps>();
   private readonly lookKeys = new WeakMap<MapLook, string>();
-  private readonly indices = new Map<string, number>();
+  private readonly indices = new Map<string, Map<string, Map<number, number>>>();
 
   constructor(
     private readonly manifest: PackManifest,
@@ -93,13 +94,20 @@ export class IsoArt implements SpriteSource {
     return key;
   }
 
-  /** The index into an asset's frames for a selection, worked out once (every frame of every draw asks again). */
+  /**
+   * The index into an asset's frames for a selection, worked out once: every frame of every draw asks again, so it is
+   * kept by asset, state and a number made of the rest, with no key string built for each draw.
+   */
   private indexOf(id: string, asset: PackAsset, sel: Selection): number {
-    const key = `${id}|${sel.state}|${sel.variant}|${sel.frame}|${sel.facing ?? ''}`;
-    let index = this.indices.get(key);
+    let byState = this.indices.get(id);
+    if (!byState) this.indices.set(id, (byState = new Map()));
+    let byRest = byState.get(sel.state);
+    if (!byRest) byState.set(sel.state, (byRest = new Map()));
+    const rest = (sel.variant * 4096 + sel.frame) * 8 + FACING_CODE.indexOf(sel.facing ?? '');
+    let index = byRest.get(rest);
     if (index === undefined) {
       index = frameIndex(asset, sel);
-      this.indices.set(key, index);
+      byRest.set(rest, index);
     }
     return index;
   }
@@ -129,14 +137,16 @@ export class IsoArt implements SpriteSource {
       this.cut.clear();
       this.cutLook = lookKey;
     }
-    const key = `${d.asset}|${index}|${d.dim ? 1 : 0}|${family ? d.tint : ''}`;
-    let image = this.cut.get(key);
+    let cuts = this.cut.get(d.asset!);
+    if (!cuts) this.cut.set(d.asset!, (cuts = new Map()));
+    const key = (index * 2 + (d.dim ? 1 : 0)) * 0x1000000 + (family ? d.tint : 0);
+    let image = cuts.get(key);
     if (!image) {
       const map = family
         ? spriteColourMap(d.asset!, d.tint, this.familyMain(d.asset!, asset))
         : terrainColourMap(d.asset!, this.look, d.dim, this.mainOf(d.asset!, asset));
       image = this.makeImage(this.pixels(asset, index, map, d.dim));
-      this.cut.set(key, image);
+      cuts.set(key, image);
     }
     // A sprite stands on the cell's centre by the point between its feet; terrain sits its diamond on the cell.
     const ground = asset.anchors?.ground?.[index];
@@ -214,6 +224,9 @@ export class IsoArt implements SpriteSource {
     return { width: w, height: h, data };
   }
 }
+
+/** The facings as numbers for the frame index cache: none, then s, e, n and w. */
+const FACING_CODE = ['', 's', 'e', 'n', 'w'];
 
 const halve = (rgb: number): number => (((rgb >> 17) & 0x7f) << 16) | (((rgb >> 9) & 0x7f) << 8) | ((rgb >> 1) & 0x7f);
 
