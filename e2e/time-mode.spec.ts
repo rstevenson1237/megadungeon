@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { choose, descend, newCharacter, screen } from './play.ts';
+import { choose, descend, newCharacter, saved, screen } from './play.ts';
 
 // The browser check of task 5.6 (Spec 01 and Spec 09, Addendum B): on the built page, the title's time row and
 // `?time=` choose the mode of a new game, the browser remembers the row, and Continue plays the save's own mode.
@@ -43,6 +43,7 @@ test('?time=real presets the row, the run is real time, and Continue keeps it on
   expect(await screen(page)).toContain('Time: Real time');
   await newCharacter(page, 'Ranger', 'Quick');
   await expectMode(page, 'real');
+  await saved(page, 0);
 
   // The plain page's row is turn-based (a preset is not remembered), but Continue plays the save's mode.
   await open(page, './', 'Resume at your last rest');

@@ -46,3 +46,32 @@ export async function descend(page: Page): Promise<void> {
     if (!(await choose(page, 'Go down'))) throw new Error('No Go down in the village menu');
   }
 }
+
+/**
+ * The number of the browser's current save (`save-N` in IndexedDB, src/game/store.ts), 0 when there is none. A save is
+ * written after the action that makes it, so a check waits for this to go up before it reloads the page.
+ */
+export const saveNumber = (page: Page): Promise<number> =>
+  page.evaluate(
+    () =>
+      new Promise<number>((resolve, reject) => {
+        const request = indexedDB.open('megadungeon', 1);
+        request.onupgradeneeded = () => request.result.createObjectStore('saves');
+        request.onerror = () => reject(request.error);
+        request.onsuccess = () => {
+          const db = request.result;
+          const get = db.transaction('saves', 'readonly').objectStore('saves').get('current');
+          get.onsuccess = () => {
+            db.close();
+            const key = get.result as string | undefined;
+            resolve(key ? Number(key.slice('save-'.length)) : 0);
+          };
+          get.onerror = () => (db.close(), reject(get.error));
+        };
+      }),
+  );
+
+/** Wait until a save newer than number `after` is in the browser. */
+export async function saved(page: Page, after: number): Promise<void> {
+  await expect.poll(() => saveNumber(page), 'the save is written').toBeGreaterThan(after);
+}

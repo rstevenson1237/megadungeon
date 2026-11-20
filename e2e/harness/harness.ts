@@ -15,7 +15,7 @@ import { crowdedGame, fightCrowd, surround, timeRounds, timeTicks } from '../../
 import { crowdedView, timeFrames } from '../../tests/iso-budget.ts';
 import { loadIsoArt } from '../../src/ui/art/iso-art.ts';
 import { buildIsoDraws } from '../../src/ui/iso-view.ts';
-import { paintPicture } from '../../src/ui/iso-paint.ts';
+import { FloorLayer, paintPicture } from '../../src/ui/iso-paint.ts';
 import { mapLook } from '../../src/ui/palette.ts';
 
 // The browser checks of task 4.12 that need the game's own modules rather than the built page: the glyph atlas as the
@@ -105,10 +105,10 @@ function tickBudget(fighting: boolean): { creatures: number; dead: boolean; mean
 
 /**
  * Spec 01b, the isometric frame budget (task 6.10): frames of a large level with 80 creatures in view, each built and
- * painted as the page does it (the draw list, then the picture with the real art pack and the compass), with the
- * animation clock running 50 ms a frame so the idle and liquid loops turn over. The first frame, which cuts and
- * recolours every frame it draws for the first time, is timed on its own; then 30 frames warm the engine up and
- * 300 are measured.
+ * painted as the page does it (the draw list, then the picture with the real art pack, the cached floor layer and the
+ * compass), one to an animation frame, with the animation clock running 50 ms a frame so the idle and liquid loops
+ * turn over. The first frame, which cuts and recolours every frame it draws for the first time, is timed on its own;
+ * then 30 frames warm the engine up and 300 are measured.
  */
 async function frameBudget(): Promise<{ creatures: number; first: number; mean: number; worst: number }> {
   await document.fonts.load(`${CELL_H}px "${FONT}"`);
@@ -121,14 +121,20 @@ async function frameBudget(): Promise<{ creatures: number; first: number; mean: 
   const canvas = Object.assign(document.createElement('canvas'), { width: NATIVE_W, height: NATIVE_H });
   document.body.append(canvas);
   const ctx = canvas.getContext('2d')!;
+  const floor = new FloorLayer(() => {
+    const layer = Object.assign(document.createElement('canvas'), { width: NATIVE_W, height: NATIVE_H });
+    return { image: layer, ctx: layer.getContext('2d')! };
+  });
   const frame = (clock: number): void => {
     const motion = { clock, actors: new Map(), effects: [], ghosts: [], facings: new Map() };
     ctx.clearRect(0, 0, NATIVE_W, NATIVE_H);
-    paintPicture(ctx, { draws: buildIsoDraws(game.state, { look, pack: art.ids, motion }), dimmed: false }, atlas, art);
+    paintPicture(ctx, { draws: buildIsoDraws(game.state, { look, pack: art.ids, motion }), dimmed: false }, atlas, art, floor);
   };
-  const first = timeFrames(1, frame).worst;
-  timeFrames(30, frame, 50);
-  const { mean, worst } = timeFrames(300, frame, 1600);
+  // Each frame is drawn in an animation frame of its own, as the game's loop draws them (src/mount.ts).
+  const next = (): Promise<number> => new Promise((resolve) => requestAnimationFrame(resolve));
+  const first = (await timeFrames(1, frame, 0, next)).worst;
+  await timeFrames(30, frame, 50, next);
+  const { mean, worst } = await timeFrames(300, frame, 1600, next);
   return { creatures: game.state.monsters.length, first, mean, worst };
 }
 

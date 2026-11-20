@@ -8,7 +8,7 @@ import type { LoreMark } from '../src/rules/world/level.ts';
 import { ALLY_COLOUR, BANDIT, RIVAL } from '../src/game/monsters.ts';
 import { applyStatus } from '../src/rules/magic/status.ts';
 import type { Atlas } from '../src/ui/atlas.ts';
-import { paintIso, type IsoContext } from '../src/ui/iso-paint.ts';
+import { FloorLayer, paintIso, type IsoContext } from '../src/ui/iso-paint.ts';
 import {
   CAMERA_ANCHOR, CAP_H, ISO_LAYERS, ISO_VIEW, TILE_H, TILE_W, WALL_H, buildIsoDraws, isoArea, project, resolveAsset, throneCell, type IsoDraw,
 } from '../src/ui/iso-view.ts';
@@ -471,6 +471,68 @@ describe('painting the draw list', () => {
     const { ctx: ctx2, glyphs: glyphs2, atlas: atlas2 } = recorder();
     paintIso(ctx2, draws, atlas2, { draw: () => false });
     expect(glyphs2.some((s) => s.startsWith('103 '))).toBe(true);
+  });
+
+  describe('the cached floor layer (task 6.10)', () => {
+    /** A floor layer on a canvas of its own, a main canvas that records the images copied to it, and the glyphs each gets. */
+    function layered() {
+      const main = recorder();
+      const images: unknown[] = [];
+      main.ctx.drawImage = ((image: unknown) => void images.push(image)) as IsoContext['drawImage'];
+      const layerCtx = { ...recorder().ctx, clearRect: () => undefined };
+      const onLayer: number[] = [];
+      const onMain: number[] = [];
+      const atlas: Atlas = { draw: (c, code) => void (c === layerCtx ? onLayer : onMain).push(code) };
+      const image = { layer: true };
+      const floor = new FloorLayer(() => ({ image: image as unknown as CanvasImageSource, ctx: layerCtx }));
+      return { ctx: main.ctx, atlas, onLayer, onMain, images, image, floor };
+    }
+
+    it('paints the flat still floor on its layer once, copies it under the rest, and paints the rest each frame', () => {
+      const { ctx, atlas, onLayer, onMain, images, image, floor } = layered();
+      const draws = buildIsoDraws(game().state);
+      paintIso(ctx, draws, atlas, undefined, floor);
+      const floors = draws.filter((d) => d.layer === 'floor' && d.shape === 'diamond');
+      expect(floors.length).toBeGreaterThan(10);
+      // Every floor glyph is on the layer, and every other glyph on the picture.
+      expect(onLayer).toHaveLength(floors.length);
+      expect(onMain).toHaveLength(draws.filter((d) => d.shape === 'card' || (d.shape === 'block' && d.frame !== 'full' && d.frame !== 'cap')).length);
+      expect(images).toEqual([image]);
+      expect(floor.repaints).toBe(1);
+      // The same picture again: the layer is copied, not painted.
+      paintIso(ctx, buildIsoDraws(game().state), atlas, undefined, floor);
+      expect(floor.repaints).toBe(1);
+      expect(onLayer).toHaveLength(floors.length);
+      expect(images).toEqual([image, image]);
+    });
+
+    it('paints the layer again when a floor tile, the camera or the theme changes', () => {
+      const { ctx, atlas, floor } = layered();
+      const g = game();
+      const moved = { x: g.state.map.player.x + 1, y: g.state.map.player.y };
+      paintIso(ctx, buildIsoDraws(g.state), atlas, undefined, floor);
+      paintIso(ctx, buildIsoDraws(g.state, { camera: moved }), atlas, undefined, floor);
+      expect(floor.repaints).toBe(2);
+      const look = mapLook({ palette: { wall: '#808080', floor: '#303030', door: '#a06030' }, tiles: { wall: 219, floor: 46 } });
+      paintIso(ctx, buildIsoDraws(g.state, { camera: moved, look }), atlas, undefined, floor);
+      expect(floor.repaints).toBe(3);
+      const art = { draw: () => false, flat: () => true, key: 'a' };
+      paintIso(ctx, buildIsoDraws(g.state), atlas, art, floor);
+      art.key = 'b';
+      paintIso(ctx, buildIsoDraws(g.state), atlas, art, floor);
+      expect(floor.repaints).toBe(5);
+    });
+
+    it('leaves animated floors, and art that stands taller than its diamond, in depth order', () => {
+      const { ctx, atlas, onLayer, onMain, floor } = layered();
+      const first = buildIsoDraws(game().state).find((d) => d.layer === 'floor')!;
+      const water: IsoDraw = { ...first, t: 400, asset: 'terrain-water-shallow', glyph: 247 };
+      const stair: IsoDraw = { ...first, asset: 'terrain-stairs-up', glyph: 60 };
+      const art = { draw: () => false, flat: (d: IsoDraw) => d.asset !== 'terrain-stairs-up' };
+      paintIso(ctx, [water, stair], atlas, art, floor);
+      expect(onLayer).toEqual([]);
+      expect(onMain).toEqual([247, 60]);
+    });
   });
 
   it('paints a full wall taller than a cap', () => {

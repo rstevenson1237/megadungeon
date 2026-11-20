@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { choose, descend, newCharacter, openTitle, press, screen } from './play.ts';
+import { choose, descend, newCharacter, openTitle, press, saveNumber, saved, screen } from './play.ts';
 
 // The browser smoke test (plan, task 3.11): on the built page, create a non-Thief character (a Priest), take a step in
 // the dungeon, cast a starting spell (Heal), rest in the village, reload, and check that the character pane shows the
@@ -67,12 +67,13 @@ test('create a Priest, step, cast Heal, rest, reload', async ({ page }) => {
   await press(page, 'e');
   await expect.poll(() => screen(page)).toContain('Lodging');
   expect(await choose(page, 'Lodging')).toBe(true);
+  const before = await saveNumber(page);
   expect(await choose(page, 'Rest for the night')).toBe(true);
   await expect.poll(() => screen(page)).toMatch(/sleep|bed/);
   await expectPriestPane(page);
 
   // Reload: Continue resumes at the village of the last rest, with the same Priest.
-  await page.waitForTimeout(500); // the save is written to IndexedDB after the rest
+  await saved(page, before); // the save is written to IndexedDB after the rest
   await openTitle(page, 'Continue');
   expect(await choose(page, 'Continue')).toBe(true);
   await expect.poll(() => screen(page)).toContain('Lodging');

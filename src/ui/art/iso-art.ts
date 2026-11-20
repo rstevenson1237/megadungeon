@@ -69,6 +69,8 @@ export class IsoArt implements SpriteSource {
   private readonly cut = new Map<string, CanvasImageSource>();
   private cutLook = '';
   private readonly mains = new Map<string, MainSteps>();
+  private readonly lookKeys = new WeakMap<MapLook, string>();
+  private readonly indices = new Map<string, number>();
 
   constructor(
     private readonly manifest: PackManifest,
@@ -78,17 +80,51 @@ export class IsoArt implements SpriteSource {
     this.ids = new Set(Object.keys(manifest.assets));
   }
 
+  /** The look the terrain is recoloured to now, as a key: the floor layer is painted again when it changes (task 6.10). */
+  get key(): string {
+    const look = this.look;
+    if (!look) return '';
+    // The shell builds the look afresh for each picture, so its key is worked out once per look and kept with it.
+    let key = this.lookKeys.get(look);
+    if (key === undefined) {
+      key = Object.values(look.colours).map((c) => c.visible).join();
+      this.lookKeys.set(look, key);
+    }
+    return key;
+  }
+
+  /** The index into an asset's frames for a selection, worked out once (every frame of every draw asks again). */
+  private indexOf(id: string, asset: PackAsset, sel: Selection): number {
+    const key = `${id}|${sel.state}|${sel.variant}|${sel.frame}|${sel.facing ?? ''}`;
+    let index = this.indices.get(key);
+    if (index === undefined) {
+      index = frameIndex(asset, sel);
+      this.indices.set(key, index);
+    }
+    return index;
+  }
+
+  /** Whether a draw's art lies flat in its cell's diamond: terrain whose frame is no taller than the diamond (task 6.10). */
+  flat(d: IsoDraw): boolean {
+    const asset = d.asset ? this.manifest.assets[d.asset] : undefined;
+    if (!asset || asset.anchors?.ground || asset.kind === 'effect') return false;
+    const index = this.indexOf(d.asset!, asset, { state: d.frame, variant: d.variant, frame: 0, facing: d.facing });
+    // With no such frame the draw falls back to its glyph shape, which is flat only as a diamond.
+    if (index < 0) return d.shape === 'diamond' || d.shape === 'none';
+    return asset.frames[index]![4] <= TILE_H;
+  }
+
   draw(ctx: IsoContext, d: IsoDraw): boolean {
     const asset = d.asset ? this.manifest.assets[d.asset] : undefined;
     if (!asset || !this.look) return false;
     // A sprite with no hurt (or walk, or attack) state of its own plays idle (task 6.8).
     const state = asset.states[d.frame] || !MOVING.has(d.frame) ? d.frame : 'idle';
-    const index = frameIndex(asset, { state, variant: d.variant, frame: frameAt(asset, state, d.t), facing: d.facing });
+    const index = this.indexOf(d.asset!, asset, { state, variant: d.variant, frame: frameAt(asset, state, d.t), facing: d.facing });
     if (index < 0) return false;
     const [, , , w, h] = asset.frames[index]!;
     const family = FAMILY_RAMPS[d.asset!] !== undefined;
     // A new theme recolours everything again (the look is rebuilt each paint, so it is compared by its colours).
-    const lookKey = Object.values(this.look.colours).map((c) => c.visible).join();
+    const lookKey = this.key;
     if (this.cutLook !== lookKey) {
       this.cut.clear();
       this.cutLook = lookKey;
