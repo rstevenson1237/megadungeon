@@ -111,6 +111,19 @@ describe('the isometric art (task 6.5)', () => {
     expect(new Set([0, 1, 2, 3].map((variant) => frameIndex(floor, { state: '', variant, frame: 0 }))).size).toBe(4);
   });
 
+  it('says which shipped art lies flat in its diamond, for the cached floor layer (task 6.10)', () => {
+    const pack = checkPack(JSON.parse(readFileSync('public/art/main/pack.json', 'utf8')));
+    const art = new IsoArt(pack, [], (image) => image as unknown as CanvasImageSource);
+    const draw = (asset: string, frame = ''): IsoDraw =>
+      ({ cell: { x: 0, y: 0 }, layer: 'floor', x: 0, y: 0, t: 0, asset, frame, variant: 0, facing: 's', tint: 0, shape: 'diamond', glyph: 0, fg: 0, height: 0, alpha: 1, dim: false, large: false, box: { x: 0, y: 0, w: 32, h: 16 } });
+    expect(art.flat(draw('terrain-floor'))).toBe(true);
+    expect(art.flat(draw('terrain-stairs-down'))).toBe(true);
+    expect(art.flat(draw('terrain-water-shallow', 'idle'))).toBe(true);
+    expect(art.flat(draw('terrain-stairs-up'))).toBe(false);
+    expect(art.flat(draw('terrain-debris'))).toBe(false);
+    expect(art.flat(draw('family-g', 'idle'))).toBe(false);
+  });
+
   it('refuses a file that is not an artgen pack', () => {
     expect(() => checkPack({ format: 2 })).toThrow(/not an artgen pack/);
     expect(checkPack(manifest)).toBe(manifest);

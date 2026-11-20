@@ -5,7 +5,7 @@ import { descend, newCharacter, openTitle, press, screen } from './play.ts';
 // The browser checks of task 4.12 (plan: "Every spec's criteria pass in Chrome, Firefox and Safari"). Every rule is
 // proved by the unit tests in Node; what can differ between browsers is the browser's own part, and these check it in
 // each engine: the canvas fitting the window, the glyphs the font paints, the repaint, the keyboard, the overlays,
-// and the timing criteria (Spec 02, Spec 04, and Spec 04's real-time tick budget). The smoke test (smoke.spec.ts) runs
+// and the timing criteria (Spec 02, Spec 04, Spec 04's real-time tick budget, and Spec 01b's isometric frame budget). The smoke test (smoke.spec.ts) runs
 // a whole loop in each engine too.
 
 const HARNESS = 'http://localhost:5174/megadungeon/e2e/harness/';
@@ -163,7 +163,9 @@ test.describe('Spec 01: the screen in play', () => {
   });
 });
 
-test.describe('timing criteria', () => {
+// Tagged @timing: npm run smoke runs these on their own, one at a time, so no other test shares the machine while they
+// measure (package.json).
+test.describe('timing criteria @timing', () => {
   test('Spec 02: a large level generates in under 50 ms', async ({ page }) => {
     await openHarness(page);
     const ms = await page.evaluate(() => (window as unknown as { harness: { largeLevelMs: () => number } }).harness.largeLevelMs());
@@ -181,6 +183,18 @@ test.describe('timing criteria', () => {
     expect(r.dead).toBe(false);
     expect(r.mean).toBeLessThan(5);
     expect(r.worst).toBeLessThan(50);
+  });
+
+  test('Spec 01b: an isometric frame with 80 creatures in view takes under 8 ms on average, and 99 in 100 under 16 ms', async ({ page }) => {
+    await openHarness(page);
+    const r = await page.evaluate(() =>
+      (window as unknown as { harness: { frameBudget: () => Promise<{ creatures: number; first: number; mean: number; worst: number; p99: number; over16: number }> } }).harness.frameBudget(),
+    );
+    note('isometric frame, large level, 80 creatures in view, art loaded', `mean ${r.mean.toFixed(2)} ms, 99th percentile ${r.p99.toFixed(1)} ms, worst ${r.worst.toFixed(1)} ms, ${r.over16} of 300 at 16 ms or more (first frame ${r.first.toFixed(0)} ms)`);
+    expect(r.creatures).toBe(80);
+    expect(r.mean).toBeLessThan(8);
+    // Spec 01b, clarification of task 6.10: the 16 ms limit holds for 99 frames in 100 on the build machine.
+    expect(r.p99).toBeLessThan(16);
   });
 
   for (const fighting of [false, true]) {

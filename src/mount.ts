@@ -9,9 +9,9 @@ import { App, type AppDeps } from './ui/app.ts';
 import { displayParam } from './ui/display.ts';
 import { loadIsoArt } from './ui/art/iso-art.ts';
 import { FrameLoop } from './ui/frame-loop.ts';
-import { paintPicture } from './ui/iso-paint.ts';
+import { FloorLayer, paintPicture } from './ui/iso-paint.ts';
 import { ISO_VIEW } from './ui/iso-view.ts';
-import { Grid } from './ui/grid.ts';
+import { Grid, NATIVE_H, NATIVE_W } from './ui/grid.ts';
 import { claimsKey, keyToCommand } from './ui/input.ts';
 import { mountScreen } from './ui/screen.ts';
 import { timeParam } from './ui/title.ts';
@@ -68,12 +68,17 @@ export function mountGame(root: HTMLElement, options: Partial<AppDeps> = {}): Ap
   void mountScreen(root, 'Px437 IBM VGA 9x16').then(({ renderer, picture, atlas }) => {
     // Whether the picture canvas holds a picture, so it is cleared once when the text display takes over again.
     let painted = false;
+    // The flat floor tiles, kept on a canvas of their own between frames (task 6.10, the frame budget).
+    const floor = new FloorLayer(() => {
+      const canvas = Object.assign(document.createElement('canvas'), { width: NATIVE_W, height: NATIVE_H });
+      return { image: canvas, ctx: canvas.getContext('2d')! };
+    });
     redraw = (): void => {
       app.draw(grid);
       renderer.render(grid);
       // The isometric picture beneath the text, repainted with every redraw while it shows (Spec 01b, Redraw).
       const shown = app.picture(performance.now());
-      if (shown) paintPicture(picture, shown, atlas, app.art ?? undefined);
+      if (shown) paintPicture(picture, shown, atlas, app.art ?? undefined, floor);
       else if (painted) picture.clearRect(ISO_VIEW.x, ISO_VIEW.y, ISO_VIEW.w, ISO_VIEW.h);
       painted = shown !== null;
     };

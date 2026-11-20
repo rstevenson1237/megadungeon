@@ -26,6 +26,87 @@ export interface IsoContext {
 /** Draws loaded art (tasks 6.5 to 6.9); returns false when it cannot, and the glyph shape is drawn instead. */
 export interface SpriteSource {
   draw(ctx: IsoContext, draw: IsoDraw): boolean;
+  /** Whether this draw's art lies flat in its cell's diamond, so nothing drawn later can be behind it (task 6.10). */
+  flat?(draw: IsoDraw): boolean;
+  /** What the art's look is now (the theme it is recoloured to), so the floor layer is painted again when it changes. */
+  readonly key?: string;
+}
+
+/** A canvas the floor layer is kept on: the picture's native size, transparent. */
+export interface LayerCanvas {
+  image: CanvasImageSource;
+  ctx: IsoContext & { clearRect(x: number, y: number, w: number, h: number): void };
+}
+
+/**
+ * The cached floor layer (task 6.10; plan, Risks: "a cached terrain layer"): the flat floor tiles that do not animate,
+ * painted once on a canvas of their own and copied under the rest of the picture, until a tile, the camera or the theme
+ * changes. A flat tile lies inside its own diamond, and diamonds do not overlap, so painting every one of them before
+ * anything that stands up gives the same picture as painting them in depth order.
+ */
+export class FloorLayer {
+  private layer: LayerCanvas | null = null;
+  private key = '';
+  /** How many times the layer was painted afresh, for the tests. */
+  repaints = 0;
+
+  constructor(private readonly make: () => LayerCanvas) {}
+
+  /** Paint the flat draws on the layer if they changed, and return it. */
+  layerFor(flat: readonly IsoDraw[], atlas: Atlas, sprites: SpriteSource | undefined): CanvasImageSource {
+    const key = `${sprites?.key ?? ''}|${flat.length}|${fingerprint(flat)}`;
+    if (!this.layer) this.layer = this.make();
+    if (key !== this.key) {
+      this.key = key;
+      this.repaints++;
+      const { ctx } = this.layer;
+      ctx.clearRect(ISO_VIEW.x, ISO_VIEW.y, ISO_VIEW.w, ISO_VIEW.h);
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(ISO_VIEW.x, ISO_VIEW.y, ISO_VIEW.w, ISO_VIEW.h);
+      ctx.clip();
+      for (const d of flat) paintDraw(ctx, d, atlas, sprites);
+      ctx.restore();
+    }
+    return this.layer.image;
+  }
+}
+
+/**
+ * Two 32-bit hashes of everything that decides how the flat draws look, taken without building a string for each
+ * draw (this runs every frame): positions, assets, frames, variants, light, colours and glyphs.
+ */
+function fingerprint(flat: readonly IsoDraw[]): string {
+  let a = 0x811c9dc5;
+  let b = 0x01000193;
+  const mix = (n: number): void => {
+    a = Math.imul(a ^ n, 0x01000193);
+    b = Math.imul(b ^ n, 0x5bd1e995) ^ (b >>> 15);
+  };
+  const text = (s: string | null): void => {
+    if (s === null) return mix(-1);
+    for (let i = 0; i < s.length; i++) mix(s.charCodeAt(i));
+    mix(-2);
+  };
+  for (const d of flat) {
+    mix(d.x);
+    mix(d.y);
+    text(d.asset);
+    text(d.frame);
+    mix(d.variant);
+    mix(d.dim ? 1 : 0);
+    mix(d.tint);
+    mix(d.glyph);
+    mix(d.fg);
+  }
+  return `${(a >>> 0).toString(16)}${(b >>> 0).toString(16)}`;
+}
+
+/** Does this draw lie flat in its diamond and stay still, so it can go on the floor layer? */
+function isFlat(d: IsoDraw, sprites: SpriteSource | undefined): boolean {
+  if (d.layer !== 'floor' || d.t !== 0 || d.alpha !== 1) return false;
+  if (d.asset && sprites) return sprites.flat?.(d) ?? false;
+  return d.shape === 'diamond' || d.shape === 'none';
 }
 
 /** A colour scaled toward black: `k` of its brightness. */
@@ -127,57 +208,70 @@ function card(ctx: IsoContext, atlas: Atlas, x: number, y: number, glyph: number
 const flatGlyph = (ctx: IsoContext, atlas: Atlas, x: number, y: number, glyph: number, fg: number): void =>
   atlas.draw(ctx, glyph, fg, x - Math.floor(CELL_W / 2), y - CELL_H / 2);
 
-/** Paint the draw list into the view area: the background, then every draw back to front, clipped to the view. */
-export function paintIso(ctx: IsoContext, draws: readonly IsoDraw[], atlas: Atlas, sprites?: SpriteSource): void {
+/**
+ * Paint the draw list into the view area: the background, then every draw back to front, clipped to the view. With a
+ * floor layer, the flat still floor tiles come from it, painted once, and only the rest is drawn each frame.
+ */
+export function paintIso(ctx: IsoContext, draws: readonly IsoDraw[], atlas: Atlas, sprites?: SpriteSource, floor?: FloorLayer): void {
   ctx.save();
   ctx.beginPath();
   ctx.rect(ISO_VIEW.x, ISO_VIEW.y, ISO_VIEW.w, ISO_VIEW.h);
   ctx.clip();
   ctx.fillStyle = cssColor(ISO.background);
   ctx.fillRect(ISO_VIEW.x, ISO_VIEW.y, ISO_VIEW.w, ISO_VIEW.h);
-  for (const d of draws) {
-    ctx.globalAlpha = d.alpha;
-    if (d.asset && sprites?.draw(ctx, d)) continue;
-    switch (d.shape) {
-      case 'diamond':
-        diamond(ctx, d.x, d.y, shade(d.fg, FLOOR_FILL));
-        flatGlyph(ctx, atlas, d.x, d.y, d.glyph, d.fg);
-        break;
-      case 'block':
-        if (isDoor(d)) {
-          // A door's block is darker, so its glyph (closed or open) reads on its top.
-          block(ctx, d.x, d.y, d.height, shade(d.fg, DOOR_BLOCK));
-          flatGlyph(ctx, atlas, d.x, d.y - d.height, d.glyph, d.fg);
-        } else block(ctx, d.x, d.y, d.height, d.fg);
-        break;
-      case 'ring':
-        ring(ctx, d.x, d.y, d.fg);
-        break;
-      case 'card':
-        card(ctx, atlas, d.x, d.y, d.glyph, d.fg);
-        break;
-      case 'glyph':
-        // An effect with no art yet: its glyph centred on its point, with no card (task 6.8).
-        atlas.draw(ctx, d.glyph, d.fg, d.x - Math.floor(CELL_W / 2), d.y - CELL_H / 2);
-        break;
-      case 'tint':
-        diamond(ctx, d.x, d.y, d.fg);
-        break;
-      case 'dot':
-        diamond(ctx, d.x, d.y, d.fg, DOT_H);
-        break;
-      case 'outline':
-        outline(ctx, d.x, d.y, d.fg);
-        break;
-      case 'frame':
-        frame(ctx, d.box, d.fg);
-        break;
-      case 'none':
-        break;
-    }
+  let rest = draws;
+  if (floor) {
+    const flat = draws.filter((d) => isFlat(d, sprites));
+    ctx.globalAlpha = 1;
+    ctx.drawImage(floor.layerFor(flat, atlas, sprites), ISO_VIEW.x, ISO_VIEW.y, ISO_VIEW.w, ISO_VIEW.h, ISO_VIEW.x, ISO_VIEW.y, ISO_VIEW.w, ISO_VIEW.h);
+    rest = draws.filter((d) => !isFlat(d, sprites));
   }
+  for (const d of rest) paintDraw(ctx, d, atlas, sprites);
   ctx.globalAlpha = 1;
   ctx.restore();
+}
+
+/** Paint one draw: its art when the sprite source can draw it, else its glyph shape. */
+function paintDraw(ctx: IsoContext, d: IsoDraw, atlas: Atlas, sprites: SpriteSource | undefined): void {
+  ctx.globalAlpha = d.alpha;
+  if (d.asset && sprites?.draw(ctx, d)) return;
+  switch (d.shape) {
+    case 'diamond':
+      diamond(ctx, d.x, d.y, shade(d.fg, FLOOR_FILL));
+      flatGlyph(ctx, atlas, d.x, d.y, d.glyph, d.fg);
+      break;
+    case 'block':
+      if (isDoor(d)) {
+        // A door's block is darker, so its glyph (closed or open) reads on its top.
+        block(ctx, d.x, d.y, d.height, shade(d.fg, DOOR_BLOCK));
+        flatGlyph(ctx, atlas, d.x, d.y - d.height, d.glyph, d.fg);
+      } else block(ctx, d.x, d.y, d.height, d.fg);
+      break;
+    case 'ring':
+      ring(ctx, d.x, d.y, d.fg);
+      break;
+    case 'card':
+      card(ctx, atlas, d.x, d.y, d.glyph, d.fg);
+      break;
+    case 'glyph':
+      // An effect with no art yet: its glyph centred on its point, with no card (task 6.8).
+      atlas.draw(ctx, d.glyph, d.fg, d.x - Math.floor(CELL_W / 2), d.y - CELL_H / 2);
+      break;
+    case 'tint':
+      diamond(ctx, d.x, d.y, d.fg);
+      break;
+    case 'dot':
+      diamond(ctx, d.x, d.y, d.fg, DOT_H);
+      break;
+    case 'outline':
+      outline(ctx, d.x, d.y, d.fg);
+      break;
+    case 'frame':
+      frame(ctx, d.box, d.fg);
+      break;
+    case 'none':
+      break;
+  }
 }
 
 /** What the picture canvas shows of a level: its draw list, and whether an overlay is open over it. */
@@ -208,8 +302,8 @@ function compass(ctx: IsoContext, atlas: Atlas): void {
 }
 
 /** Paint a level's picture: the draw list, the compass, and the dimming while an overlay is open. */
-export function paintPicture(ctx: IsoContext, picture: IsoPicture, atlas: Atlas, sprites?: SpriteSource): void {
-  paintIso(ctx, picture.draws, atlas, sprites);
+export function paintPicture(ctx: IsoContext, picture: IsoPicture, atlas: Atlas, sprites?: SpriteSource, floor?: FloorLayer): void {
+  paintIso(ctx, picture.draws, atlas, sprites, floor);
   compass(ctx, atlas);
   if (!picture.dimmed) return;
   ctx.globalAlpha = ISO.dim;
