@@ -86,3 +86,34 @@ Open lineup notes from batch 3:
 
 - **Coins:** Robert chose gold on October 24, 2026. `art/direction.json` now has a `gold` ramp for props (the gold material maps to it), so the redo draws the coins in `gold`, not the metal or accent ramp.
 - **fx-hit and icon-blessed** (both approved) are four-point stars. Redraw icon-blessed as a disc with eight rays.
+
+## Batch 4: approved below the bar (16)
+
+Robert approved all 44 task 6.9 assets on November 18, 2026. These 16 carried a blind score under 6.5 in their approval
+warnings (`art/ledger.jsonl`). Robert asked on November 20, 2026 to work through the whole list, so they are added here.
+The common complaint: boxy bodies, thin or small for a boss, facings that differ little.
+
+| Asset | Final | Blind | Proposed fix |
+| --- | --- | --- | --- |
+| boss-the-drowned-duke | base.v5 | 5 | Read as drowned: a bloated, weed-hung body, split legs, a coat that drips; drop the grey pillar legs |
+| boss-the-tallow-king | base.v4 | 5.5 | Keep the candle crown; a melting, sagging body that is taller than wide |
+| boss-morrigan-dusk | base.v3 | 5.5 | Open the mantle so the arms show; make the four facings differ; a second ramp beside the teal |
+| boss-azhul-emberheart | base.v2 | 6 | Simplify the wing and arm masses; distinct facings; clearly bigger than its family |
+| boss-eshkal-the-unmaker | base.v2 | 6 | Something that unmakes: a broken or dissolving outline, not a generic red dragon |
+| boss-grask-the-pale | base.v4 | 6 | Rounder head and limbs; bone-pale skin, not salmon |
+| boss-hexmother-yarrow | base.v3 | 6 | Bulk her up to boss size: a wide hat and robe, a big staff, a bright accent |
+| boss-hrolf-the-hammerlord | base.v2 | 6 | Break the boxy body and the cloak slab; bigger, with more contrast |
+| boss-old-mawkin | base.v5 | 6 | Jointed, splayed legs on the quadruped rig |
+| boss-sister-gloam | base.v4 | 6 | A flowing robe with a tapered, ragged hem |
+| boss-the-gilded-wyrm | base.v3 | 6 | Gold scales and horns in the gold ramp (Spec 01b, art redo clarification); a bigger footprint |
+| boss-the-hollow-abbot | base.v4 | 6 | A flowing robe, not a flat-hemmed trapezoid |
+| boss-the-hungering-dark | base.v2 | 6 | Dark body (deep cloth or stone ramp) with a glowing maw; firmer side and back views |
+| boss-the-lantern-man | base.v2 | 6 | A big, bright lantern as the focus; break the plain robe column |
+| boss-varn-ironmouth | base.v5 | 6 | Thick legs and a hulking torso; a bigger head and iron jaw |
+| boss-qorra-of-the-lake | base.v2 | 6 | A thick neck and a large coil in idle and walk, as strong as the attack pose |
+
+## Lineup notes only (7)
+
+Above the bar, but redrawn in the same pass for the lineup notes above: class-illusionist, class-warlock,
+class-necromancer, npc-hermit (the casters), npc-bandit (looks hostile), family-c-cap (stone or iron golem, not a mech)
+and icon-blessed (a disc with eight rays, apart from fx-hit).

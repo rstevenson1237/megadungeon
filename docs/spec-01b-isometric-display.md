@@ -225,6 +225,10 @@ The frame budget and the smoke test leave three points open. Proposed as built:
 - **How it is measured.** A large level (140 x 60) with every cell in the picture that sight could ever show explored and visible (each open cell and each wall beside one; solid rock is never seen), and 80 creatures of the monster table on the floor cells nearest the player, so each family's sprite and colour is drawn. Each frame builds the draw list and paints the picture as the game does, with the real art pack and the compass, one frame to an animation frame, the animation clock 50 ms on from the last so idle and liquid loops turn over; 30 frames warm up, then 300 are measured. The build machine is the CI runner, in each of the three engines.
 - **Where the targeting cursor is checked.** Aiming needs a creature in sight, which a fresh level may not have, so that part runs on the check harness's page of the whole game (it reads `?display=` and `?time=` as the built page does), with a goblin put in sight, in both time modes. The rest of the smoke test, and the pack loading on the sub-path, run on the built page.
 
+## Clarification (art redo, approved November 20, 2026)
+
+- **Gold on bosses.** Boss sprites may use the art direction's gold ramp (added for props on October 24, 2026), so a boss named for gold, such as The Gilded Wyrm, can read as gilded. Family sprites may not: a family takes its row's colour on its body ramp, and gold would compete with it. No colour of the direction changes and no approved asset changes. artgen sets colour limits per kind and a boss is a creature, so the direction's creature limits gain gold, and `tools/art-briefs.ts` says in every family brief that it uses no gold.
+
 ## Acceptance criteria
 
 - [ ] With no art loaded, every cell and thing the text display shows is drawn, by the glyph fallback where nothing better exists.
