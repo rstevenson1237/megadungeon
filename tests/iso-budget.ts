@@ -79,16 +79,19 @@ export async function timeFrames(
   frame: (clock: number) => void,
   start = 0,
   wait: () => Promise<unknown> = async () => undefined,
-): Promise<{ mean: number; worst: number }> {
-  let worst = 0;
-  let total = 0;
+): Promise<{ mean: number; worst: number; p99: number; over16: number }> {
+  const times: number[] = [];
   for (let i = 0; i < frames; i++) {
     await wait();
     const t = performance.now();
     frame(start + i * 50);
-    const took = performance.now() - t;
-    total += took;
-    worst = Math.max(worst, took);
+    times.push(performance.now() - t);
   }
-  return { mean: total / frames, worst };
+  const sorted = [...times].sort((a, b) => a - b);
+  return {
+    mean: times.reduce((a, b) => a + b, 0) / frames,
+    worst: sorted[frames - 1]!,
+    p99: sorted[Math.min(frames - 1, Math.ceil(frames * 0.99) - 1)]!,
+    over16: times.filter((ms) => ms >= 16).length,
+  };
 }

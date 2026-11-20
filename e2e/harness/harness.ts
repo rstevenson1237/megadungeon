@@ -110,7 +110,7 @@ function tickBudget(fighting: boolean): { creatures: number; dead: boolean; mean
  * turn over. The first frame, which cuts and recolours every frame it draws for the first time, is timed on its own;
  * then 30 frames warm the engine up and 300 are measured.
  */
-async function frameBudget(): Promise<{ creatures: number; first: number; mean: number; worst: number }> {
+async function frameBudget(): Promise<{ creatures: number; first: number; mean: number; worst: number; p99: number; over16: number }> {
   await document.fonts.load(`${CELL_H}px "${FONT}"`);
   const atlas = new CanvasAtlas((w, h) => Object.assign(document.createElement('canvas'), { width: w, height: h }), fontMaskSource(`"${FONT}"`));
   const art = await loadIsoArt(`${import.meta.env.BASE_URL}art/main/pack.json`);
@@ -134,8 +134,7 @@ async function frameBudget(): Promise<{ creatures: number; first: number; mean: 
   const next = (): Promise<number> => new Promise((resolve) => requestAnimationFrame(resolve));
   const first = (await timeFrames(1, frame, 0, next)).worst;
   await timeFrames(30, frame, 50, next);
-  const { mean, worst } = await timeFrames(300, frame, 1600, next);
-  return { creatures: game.state.monsters.length, first, mean, worst };
+  return { creatures: game.state.monsters.length, first, ...(await timeFrames(300, frame, 1600, next)) };
 }
 
 Object.assign(window, { harness: { glyphMasks, largeLevelMs, turnBudget, tickBudget, frameBudget } });

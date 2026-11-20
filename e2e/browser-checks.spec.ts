@@ -188,9 +188,9 @@ test.describe('timing criteria @timing', () => {
   test('Spec 01b: an isometric frame with 80 creatures in view takes under 8 ms on average and never over 16 ms', async ({ page }) => {
     await openHarness(page);
     const r = await page.evaluate(() =>
-      (window as unknown as { harness: { frameBudget: () => Promise<{ creatures: number; first: number; mean: number; worst: number }> } }).harness.frameBudget(),
+      (window as unknown as { harness: { frameBudget: () => Promise<{ creatures: number; first: number; mean: number; worst: number; p99: number; over16: number }> } }).harness.frameBudget(),
     );
-    note('isometric frame, large level, 80 creatures in view, art loaded', `mean ${r.mean.toFixed(2)} ms, worst ${r.worst.toFixed(1)} ms (first frame ${r.first.toFixed(0)} ms)`);
+    note('isometric frame, large level, 80 creatures in view, art loaded', `mean ${r.mean.toFixed(2)} ms, 99th percentile ${r.p99.toFixed(1)} ms, worst ${r.worst.toFixed(1)} ms, ${r.over16} of 300 at 16 ms or more (first frame ${r.first.toFixed(0)} ms)`);
     expect(r.creatures).toBe(80);
     expect(r.mean).toBeLessThan(8);
     expect(r.worst).toBeLessThan(16);
