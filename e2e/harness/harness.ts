@@ -8,14 +8,19 @@ import { spellsFrom } from '../../src/rules/magic/spells.ts';
 import { generateLevel } from '../../src/rules/world/generate.ts';
 import { isVillageLevel } from '../../src/rules/world/run-layout.ts';
 import { CanvasAtlas, fontMaskSource } from '../../src/ui/atlas.ts';
-import { CELL_H, CELL_W } from '../../src/ui/grid.ts';
+import { CELL_H, CELL_W, NATIVE_H, NATIVE_W } from '../../src/ui/grid.ts';
 import { FROZEN } from '../../tests/frozen.ts';
 import { applyStatus } from '../../src/rules/magic/status.ts';
 import { crowdedGame, fightCrowd, surround, timeRounds, timeTicks } from '../../tests/turn-budget.ts';
+import { crowdedView, timeFrames } from '../../tests/iso-budget.ts';
+import { loadIsoArt } from '../../src/ui/art/iso-art.ts';
+import { buildIsoDraws } from '../../src/ui/iso-view.ts';
+import { paintPicture } from '../../src/ui/iso-paint.ts';
+import { mapLook } from '../../src/ui/palette.ts';
 
 // The browser checks of task 4.12 that need the game's own modules rather than the built page: the glyph atlas as the
 // renderer bakes it, and the timing criteria (Spec 02, a large level in under 50 ms; Spec 04, the turn budget, and in
-// real time the tick budget of task 5.7).
+// real time the tick budget of task 5.7; Spec 01b, the isometric frame budget of task 6.10).
 // The Vite dev server serves this page to Playwright (playwright.config.ts); it is not part of the build.
 
 const BUNDLE = bundle as ContentBundle;
@@ -98,4 +103,33 @@ function tickBudget(fighting: boolean): { creatures: number; dead: boolean; mean
   return { creatures, dead: game.state.player.dead, ...timeTicks(game, 300, player) };
 }
 
-Object.assign(window, { harness: { glyphMasks, largeLevelMs, turnBudget, tickBudget } });
+/**
+ * Spec 01b, the isometric frame budget (task 6.10): frames of a large level with 80 creatures in view, each built and
+ * painted as the page does it (the draw list, then the picture with the real art pack and the compass), with the
+ * animation clock running 50 ms a frame so the idle and liquid loops turn over. The first frame, which cuts and
+ * recolours every frame it draws for the first time, is timed on its own; then 30 frames warm the engine up and
+ * 300 are measured.
+ */
+async function frameBudget(): Promise<{ creatures: number; first: number; mean: number; worst: number }> {
+  await document.fonts.load(`${CELL_H}px "${FONT}"`);
+  const atlas = new CanvasAtlas((w, h) => Object.assign(document.createElement('canvas'), { width: w, height: h }), fontMaskSource(`"${FONT}"`));
+  const art = await loadIsoArt(`${import.meta.env.BASE_URL}art/main/pack.json`);
+  const game = crowdedView({ levels: BUNDLE, spells: spellsFrom(BUNDLE), items: itemDataFrom(BUNDLE), content: gameContentOf(BUNDLE) });
+  const depth = game.state.map.level.depth;
+  const look = mapLook(runOptionsFor(BUNDLE, game.runSeed).themeFor?.(depth));
+  art.look = look;
+  const canvas = Object.assign(document.createElement('canvas'), { width: NATIVE_W, height: NATIVE_H });
+  document.body.append(canvas);
+  const ctx = canvas.getContext('2d')!;
+  const frame = (clock: number): void => {
+    const motion = { clock, actors: new Map(), effects: [], ghosts: [], facings: new Map() };
+    ctx.clearRect(0, 0, NATIVE_W, NATIVE_H);
+    paintPicture(ctx, { draws: buildIsoDraws(game.state, { look, pack: art.ids, motion }), dimmed: false }, atlas, art);
+  };
+  const first = timeFrames(1, frame).worst;
+  timeFrames(30, frame, 50);
+  const { mean, worst } = timeFrames(300, frame, 1600);
+  return { creatures: game.state.monsters.length, first, mean, worst };
+}
+
+Object.assign(window, { harness: { glyphMasks, largeLevelMs, turnBudget, tickBudget, frameBudget } });

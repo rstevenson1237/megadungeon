@@ -5,7 +5,7 @@ import { descend, newCharacter, openTitle, press, screen } from './play.ts';
 // The browser checks of task 4.12 (plan: "Every spec's criteria pass in Chrome, Firefox and Safari"). Every rule is
 // proved by the unit tests in Node; what can differ between browsers is the browser's own part, and these check it in
 // each engine: the canvas fitting the window, the glyphs the font paints, the repaint, the keyboard, the overlays,
-// and the timing criteria (Spec 02, Spec 04, and Spec 04's real-time tick budget). The smoke test (smoke.spec.ts) runs
+// and the timing criteria (Spec 02, Spec 04, Spec 04's real-time tick budget, and Spec 01b's isometric frame budget). The smoke test (smoke.spec.ts) runs
 // a whole loop in each engine too.
 
 const HARNESS = 'http://localhost:5174/megadungeon/e2e/harness/';
@@ -181,6 +181,17 @@ test.describe('timing criteria', () => {
     expect(r.dead).toBe(false);
     expect(r.mean).toBeLessThan(5);
     expect(r.worst).toBeLessThan(50);
+  });
+
+  test('Spec 01b: an isometric frame with 80 creatures in view takes under 8 ms on average and never over 16 ms', async ({ page }) => {
+    await openHarness(page);
+    const r = await page.evaluate(() =>
+      (window as unknown as { harness: { frameBudget: () => Promise<{ creatures: number; first: number; mean: number; worst: number }> } }).harness.frameBudget(),
+    );
+    note('isometric frame, large level, 80 creatures in view, art loaded', `mean ${r.mean.toFixed(2)} ms, worst ${r.worst.toFixed(1)} ms (first frame ${r.first.toFixed(0)} ms)`);
+    expect(r.creatures).toBe(80);
+    expect(r.mean).toBeLessThan(8);
+    expect(r.worst).toBeLessThan(16);
   });
 
   for (const fighting of [false, true]) {

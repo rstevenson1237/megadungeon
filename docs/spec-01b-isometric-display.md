@@ -216,6 +216,14 @@ The spec lists the display events, the turn-mode times and the effects, but not 
 - **Boss sprites** (approved November 19, 2026). A boss is drawn by its own sprite, `boss-<boss id>`, before its family's, which stays the fallback. The display finds the boss row from the level's placed bosses by the boss's name, since every boss row has its own name.
 - **The Abyssal Throne** (approved November 19, 2026). On the level 100 set piece the isometric display draws `setpiece-abyssal-throne` on the throne room's middle row, one cell from its far wall, behind where the final boss starts. It is picture only: the cell stays floor, no rule changes, the text map is unchanged, and with no art nothing is drawn there. A level 100 built by an older generator or by the fallback has no throne.
 
+## Clarification (task 6.10, proposed November 20, 2026)
+
+The frame budget and the smoke test leave three points open. Proposed as built:
+
+- **The first frame.** The budget holds for every frame after a level's first. The first frame on a level (or after the art loads, or with a new theme) cuts and recolours each frame of art it draws, once, and takes longer: about 100 ms in Chromium. It is timed and reported on its own, not held to 16 ms. Later frames cut only an animation frame not drawn before.
+- **How it is measured.** A large level (140 x 60) with every cell in the picture explored and visible, and 80 creatures of the monster table on the floor cells nearest the player, so each family's sprite and colour is drawn. Each frame builds the draw list and paints the picture with the real art pack and the compass, the animation clock 50 ms on from the last so idle and liquid loops turn over; 30 frames warm up, then 300 are measured. The build machine is the CI runner, in each of the three engines.
+- **Where the targeting cursor is checked.** Aiming needs a creature in sight, which a fresh level may not have, so that part runs on the check harness's page of the whole game (it reads `?display=` and `?time=` as the built page does), with a goblin put in sight, in both time modes. The rest of the smoke test, and the pack loading on the sub-path, run on the built page.
+
 ## Acceptance criteria
 
 - [ ] With no art loaded, every cell and thing the text display shows is drawn, by the glyph fallback where nothing better exists.

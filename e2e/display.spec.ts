@@ -3,7 +3,8 @@ import { choose, descend, newCharacter, press, screen } from './play.ts';
 
 // The browser check of task 6.4 (Spec 01, Addendum B; Spec 01b): on the built page, `?display=iso` draws the level as
 // the isometric picture beneath the text, an overlay dims it, look's cursor draws on it, and the game menu's display
-// row switches back to text and again to isometric, remembered by the browser.
+// row switches back to text and again to isometric, remembered by the browser. Task 6.10 adds that the art pack loads
+// from the GitHub Pages sub-path (Spec 01b, Loading): pack.json and every atlas it names, under /megadungeon/art/main/.
 
 /** What the picture canvas holds in the view area: lit pixels, pure white ones, and the mean brightness. */
 interface Probe {
@@ -44,6 +45,12 @@ async function switchDisplay(page: Page, from: string): Promise<void> {
 }
 
 test('the isometric display draws the level, dims under an overlay, shows look, and switches with text', async ({ page }) => {
+  // Every request for art, with its answer's status.
+  const art = new Map<string, number>();
+  page.on('response', (r) => {
+    const path = new URL(r.url()).pathname;
+    if (path.includes('/art/')) art.set(path, r.status());
+  });
   await open(page, './?display=iso');
   await newCharacter(page, 'Warrior', 'Iso');
   // In the village the menu is text and nothing is drawn beneath it.
@@ -57,6 +64,12 @@ test('the isometric display draws the level, dims under an overlay, shows look, 
   // The art pack (task 6.5) loaded: the display did not fall back to text.
   expect(await screen(page)).not.toContain('could not be loaded');
   expect(await display(page)).toBe('iso');
+  // It came from the Pages sub-path: pack.json and each of its atlases, all found.
+  const pack = (await (await page.request.get('./art/main/pack.json')).json()) as { atlases: string[] };
+  const wanted = ['pack.json', ...pack.atlases].map((name) => `/megadungeon/art/main/${name}`);
+  expect(pack.atlases.length).toBeGreaterThan(0);
+  for (const path of wanted) expect(art.get(path), path).toBe(200);
+  expect([...art.keys()].every((path) => path.startsWith('/megadungeon/art/main/'))).toBe(true);
   const shown = await probe(page);
   const viewText = (await screen(page)).split('\n').slice(1, 29).map((r) => r.slice(1, 71)).join('');
   expect(viewText.replace(/[\s\0]/g, '')).toBe('');
