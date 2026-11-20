@@ -3,7 +3,7 @@
     {
       "filename": "terrain-floor/idle/s/0",
       "frame": {
-        "x": 1425,
+        "x": 1857,
         "y": 2017,
         "w": 32,
         "h": 16
@@ -25,7 +25,7 @@
     {
       "filename": "terrain-floor/idle/s/0#v1",
       "frame": {
-        "x": 1458,
+        "x": 1890,
         "y": 2017,
         "w": 32,
         "h": 16
@@ -47,7 +47,7 @@
     {
       "filename": "terrain-floor/idle/s/0#v2",
       "frame": {
-        "x": 1491,
+        "x": 1923,
         "y": 2017,
         "w": 32,
         "h": 16
@@ -69,7 +69,7 @@
     {
       "filename": "terrain-floor/idle/s/0#v3",
       "frame": {
-        "x": 1524,
+        "x": 1956,
         "y": 2017,
         "w": 32,
         "h": 16
@@ -157,271 +157,7 @@
     {
       "filename": "terrain-stairs-down/idle/s/0",
       "frame": {
-        "x": 1557,
-        "y": 2017,
-        "w": 32,
-        "h": 16
-      },
-      "rotated": false,
-      "trimmed": false,
-      "spriteSourceSize": {
-        "x": 0,
-        "y": 0,
-        "w": 32,
-        "h": 16
-      },
-      "sourceSize": {
-        "w": 32,
-        "h": 16
-      },
-      "duration": 125
-    },
-    {
-      "filename": "terrain-water-shallow/idle/s/0",
-      "frame": {
-        "x": 1590,
-        "y": 2017,
-        "w": 32,
-        "h": 16
-      },
-      "rotated": false,
-      "trimmed": false,
-      "spriteSourceSize": {
-        "x": 0,
-        "y": 0,
-        "w": 32,
-        "h": 16
-      },
-      "sourceSize": {
-        "w": 32,
-        "h": 16
-      },
-      "duration": 125
-    },
-    {
-      "filename": "terrain-water-shallow/idle/s/1",
-      "frame": {
-        "x": 1623,
-        "y": 2017,
-        "w": 32,
-        "h": 16
-      },
-      "rotated": false,
-      "trimmed": false,
-      "spriteSourceSize": {
-        "x": 0,
-        "y": 0,
-        "w": 32,
-        "h": 16
-      },
-      "sourceSize": {
-        "w": 32,
-        "h": 16
-      },
-      "duration": 125
-    },
-    {
-      "filename": "terrain-water-shallow/idle/s/2",
-      "frame": {
-        "x": 1656,
-        "y": 2017,
-        "w": 32,
-        "h": 16
-      },
-      "rotated": false,
-      "trimmed": false,
-      "spriteSourceSize": {
-        "x": 0,
-        "y": 0,
-        "w": 32,
-        "h": 16
-      },
-      "sourceSize": {
-        "w": 32,
-        "h": 16
-      },
-      "duration": 125
-    },
-    {
-      "filename": "terrain-water-shallow/idle/s/3",
-      "frame": {
-        "x": 1623,
-        "y": 2017,
-        "w": 32,
-        "h": 16
-      },
-      "rotated": false,
-      "trimmed": false,
-      "spriteSourceSize": {
-        "x": 0,
-        "y": 0,
-        "w": 32,
-        "h": 16
-      },
-      "sourceSize": {
-        "w": 32,
-        "h": 16
-      },
-      "duration": 125
-    },
-    {
-      "filename": "terrain-water-deep/idle/s/0",
-      "frame": {
-        "x": 1689,
-        "y": 2017,
-        "w": 32,
-        "h": 16
-      },
-      "rotated": false,
-      "trimmed": false,
-      "spriteSourceSize": {
-        "x": 0,
-        "y": 0,
-        "w": 32,
-        "h": 16
-      },
-      "sourceSize": {
-        "w": 32,
-        "h": 16
-      },
-      "duration": 125
-    },
-    {
-      "filename": "terrain-water-deep/idle/s/1",
-      "frame": {
-        "x": 1722,
-        "y": 2017,
-        "w": 32,
-        "h": 16
-      },
-      "rotated": false,
-      "trimmed": false,
-      "spriteSourceSize": {
-        "x": 0,
-        "y": 0,
-        "w": 32,
-        "h": 16
-      },
-      "sourceSize": {
-        "w": 32,
-        "h": 16
-      },
-      "duration": 125
-    },
-    {
-      "filename": "terrain-water-deep/idle/s/2",
-      "frame": {
-        "x": 1755,
-        "y": 2017,
-        "w": 32,
-        "h": 16
-      },
-      "rotated": false,
-      "trimmed": false,
-      "spriteSourceSize": {
-        "x": 0,
-        "y": 0,
-        "w": 32,
-        "h": 16
-      },
-      "sourceSize": {
-        "w": 32,
-        "h": 16
-      },
-      "duration": 125
-    },
-    {
-      "filename": "terrain-water-deep/idle/s/3",
-      "frame": {
-        "x": 1788,
-        "y": 2017,
-        "w": 32,
-        "h": 16
-      },
-      "rotated": false,
-      "trimmed": false,
-      "spriteSourceSize": {
-        "x": 0,
-        "y": 0,
-        "w": 32,
-        "h": 16
-      },
-      "sourceSize": {
-        "w": 32,
-        "h": 16
-      },
-      "duration": 125
-    },
-    {
-      "filename": "terrain-lava/idle/s/0",
-      "frame": {
-        "x": 1821,
-        "y": 2017,
-        "w": 32,
-        "h": 16
-      },
-      "rotated": false,
-      "trimmed": false,
-      "spriteSourceSize": {
-        "x": 0,
-        "y": 0,
-        "w": 32,
-        "h": 16
-      },
-      "sourceSize": {
-        "w": 32,
-        "h": 16
-      },
-      "duration": 125
-    },
-    {
-      "filename": "terrain-lava/idle/s/1",
-      "frame": {
-        "x": 1854,
-        "y": 2017,
-        "w": 32,
-        "h": 16
-      },
-      "rotated": false,
-      "trimmed": false,
-      "spriteSourceSize": {
-        "x": 0,
-        "y": 0,
-        "w": 32,
-        "h": 16
-      },
-      "sourceSize": {
-        "w": 32,
-        "h": 16
-      },
-      "duration": 125
-    },
-    {
-      "filename": "terrain-lava/idle/s/2",
-      "frame": {
-        "x": 1887,
-        "y": 2017,
-        "w": 32,
-        "h": 16
-      },
-      "rotated": false,
-      "trimmed": false,
-      "spriteSourceSize": {
-        "x": 0,
-        "y": 0,
-        "w": 32,
-        "h": 16
-      },
-      "sourceSize": {
-        "w": 32,
-        "h": 16
-      },
-      "duration": 125
-    },
-    {
-      "filename": "terrain-lava/idle/s/3",
-      "frame": {
-        "x": 1854,
+        "x": 1989,
         "y": 2017,
         "w": 32,
         "h": 16
@@ -1563,7 +1299,7 @@
       "duration": 125
     },
     {
-      "filename": "family-jewelry/idle/s/0",
+      "filename": "family-coins/idle/s/0",
       "frame": {
         "x": 660,
         "y": 2016,
@@ -1585,7 +1321,7 @@
       "duration": 125
     },
     {
-      "filename": "family-potion/idle/s/0",
+      "filename": "family-gems/idle/s/0",
       "frame": {
         "x": 693,
         "y": 2016,
@@ -1607,7 +1343,7 @@
       "duration": 125
     },
     {
-      "filename": "family-ring/idle/s/0",
+      "filename": "family-jewelry/idle/s/0",
       "frame": {
         "x": 726,
         "y": 2016,
@@ -1629,7 +1365,7 @@
       "duration": 125
     },
     {
-      "filename": "family-rod/idle/s/0",
+      "filename": "family-potion/idle/s/0",
       "frame": {
         "x": 759,
         "y": 2016,
@@ -1651,7 +1387,7 @@
       "duration": 125
     },
     {
-      "filename": "family-key/idle/s/0",
+      "filename": "family-ring/idle/s/0",
       "frame": {
         "x": 792,
         "y": 2016,
@@ -1673,9 +1409,97 @@
       "duration": 125
     },
     {
-      "filename": "fx-hit/play/s/0",
+      "filename": "family-rod/idle/s/0",
       "frame": {
         "x": 825,
+        "y": 2016,
+        "w": 32,
+        "h": 32
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 32
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 32
+      },
+      "duration": 125
+    },
+    {
+      "filename": "family-weapon/idle/s/0",
+      "frame": {
+        "x": 858,
+        "y": 2016,
+        "w": 32,
+        "h": 32
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 32
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 32
+      },
+      "duration": 125
+    },
+    {
+      "filename": "family-book/idle/s/0",
+      "frame": {
+        "x": 891,
+        "y": 2016,
+        "w": 32,
+        "h": 32
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 32
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 32
+      },
+      "duration": 125
+    },
+    {
+      "filename": "family-key/idle/s/0",
+      "frame": {
+        "x": 924,
+        "y": 2016,
+        "w": 32,
+        "h": 32
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 32
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 32
+      },
+      "duration": 125
+    },
+    {
+      "filename": "fx-hit/play/s/0",
+      "frame": {
+        "x": 957,
         "y": 2017,
         "w": 24,
         "h": 24
@@ -1697,7 +1521,7 @@
     {
       "filename": "fx-hit/play/s/1",
       "frame": {
-        "x": 850,
+        "x": 982,
         "y": 2017,
         "w": 24,
         "h": 24
@@ -1719,7 +1543,7 @@
     {
       "filename": "fx-hit/play/s/2",
       "frame": {
-        "x": 875,
+        "x": 1007,
         "y": 2017,
         "w": 24,
         "h": 24
@@ -1741,7 +1565,7 @@
     {
       "filename": "fx-hit/play/s/3",
       "frame": {
-        "x": 900,
+        "x": 1032,
         "y": 2017,
         "w": 24,
         "h": 24
@@ -1763,7 +1587,7 @@
     {
       "filename": "fx-arrow/play/s/0",
       "frame": {
-        "x": 925,
+        "x": 1057,
         "y": 2017,
         "w": 24,
         "h": 24
@@ -1785,7 +1609,7 @@
     {
       "filename": "fx-arrow/play/s/1",
       "frame": {
-        "x": 950,
+        "x": 1082,
         "y": 2017,
         "w": 24,
         "h": 24
@@ -1807,7 +1631,7 @@
     {
       "filename": "fx-arrow/play/s/2",
       "frame": {
-        "x": 975,
+        "x": 1107,
         "y": 2017,
         "w": 24,
         "h": 24
@@ -1829,7 +1653,95 @@
     {
       "filename": "fx-arrow/play/s/3",
       "frame": {
-        "x": 1000,
+        "x": 1132,
+        "y": 2017,
+        "w": 24,
+        "h": 24
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 24
+      },
+      "sourceSize": {
+        "w": 24,
+        "h": 24
+      },
+      "duration": 75
+    },
+    {
+      "filename": "fx-bolt/play/s/0",
+      "frame": {
+        "x": 1157,
+        "y": 2017,
+        "w": 24,
+        "h": 24
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 24
+      },
+      "sourceSize": {
+        "w": 24,
+        "h": 24
+      },
+      "duration": 75
+    },
+    {
+      "filename": "fx-bolt/play/s/1",
+      "frame": {
+        "x": 1182,
+        "y": 2017,
+        "w": 24,
+        "h": 24
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 24
+      },
+      "sourceSize": {
+        "w": 24,
+        "h": 24
+      },
+      "duration": 75
+    },
+    {
+      "filename": "fx-bolt/play/s/2",
+      "frame": {
+        "x": 1207,
+        "y": 2017,
+        "w": 24,
+        "h": 24
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 24
+      },
+      "sourceSize": {
+        "w": 24,
+        "h": 24
+      },
+      "duration": 75
+    },
+    {
+      "filename": "fx-bolt/play/s/3",
+      "frame": {
+        "x": 1232,
         "y": 2017,
         "w": 24,
         "h": 24
@@ -1851,7 +1763,7 @@
     {
       "filename": "fx-burst/play/s/0",
       "frame": {
-        "x": 1025,
+        "x": 1257,
         "y": 2017,
         "w": 24,
         "h": 24
@@ -1873,7 +1785,7 @@
     {
       "filename": "fx-burst/play/s/1",
       "frame": {
-        "x": 1050,
+        "x": 1282,
         "y": 2017,
         "w": 24,
         "h": 24
@@ -1895,7 +1807,7 @@
     {
       "filename": "fx-burst/play/s/2",
       "frame": {
-        "x": 1075,
+        "x": 1307,
         "y": 2017,
         "w": 24,
         "h": 24
@@ -1917,7 +1829,7 @@
     {
       "filename": "fx-burst/play/s/3",
       "frame": {
-        "x": 1100,
+        "x": 1332,
         "y": 2017,
         "w": 24,
         "h": 24
@@ -1939,7 +1851,7 @@
     {
       "filename": "fx-frost/play/s/0",
       "frame": {
-        "x": 1125,
+        "x": 1357,
         "y": 2017,
         "w": 24,
         "h": 24
@@ -1961,7 +1873,7 @@
     {
       "filename": "fx-frost/play/s/1",
       "frame": {
-        "x": 1150,
+        "x": 1382,
         "y": 2017,
         "w": 24,
         "h": 24
@@ -1983,7 +1895,7 @@
     {
       "filename": "fx-frost/play/s/2",
       "frame": {
-        "x": 1175,
+        "x": 1407,
         "y": 2017,
         "w": 24,
         "h": 24
@@ -2005,7 +1917,95 @@
     {
       "filename": "fx-frost/play/s/3",
       "frame": {
-        "x": 1200,
+        "x": 1432,
+        "y": 2017,
+        "w": 24,
+        "h": 24
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 24
+      },
+      "sourceSize": {
+        "w": 24,
+        "h": 24
+      },
+      "duration": 75
+    },
+    {
+      "filename": "fx-push/play/s/0",
+      "frame": {
+        "x": 1457,
+        "y": 2017,
+        "w": 24,
+        "h": 24
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 24
+      },
+      "sourceSize": {
+        "w": 24,
+        "h": 24
+      },
+      "duration": 75
+    },
+    {
+      "filename": "fx-push/play/s/1",
+      "frame": {
+        "x": 1482,
+        "y": 2017,
+        "w": 24,
+        "h": 24
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 24
+      },
+      "sourceSize": {
+        "w": 24,
+        "h": 24
+      },
+      "duration": 75
+    },
+    {
+      "filename": "fx-push/play/s/2",
+      "frame": {
+        "x": 1507,
+        "y": 2017,
+        "w": 24,
+        "h": 24
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 24
+      },
+      "sourceSize": {
+        "w": 24,
+        "h": 24
+      },
+      "duration": 75
+    },
+    {
+      "filename": "fx-push/play/s/3",
+      "frame": {
+        "x": 1532,
         "y": 2017,
         "w": 24,
         "h": 24
@@ -2027,7 +2027,7 @@
     {
       "filename": "fx-aura/play/s/0",
       "frame": {
-        "x": 1225,
+        "x": 1557,
         "y": 2017,
         "w": 24,
         "h": 24
@@ -2049,7 +2049,7 @@
     {
       "filename": "fx-aura/play/s/1",
       "frame": {
-        "x": 1250,
+        "x": 1582,
         "y": 2017,
         "w": 24,
         "h": 24
@@ -2071,7 +2071,7 @@
     {
       "filename": "fx-aura/play/s/2",
       "frame": {
-        "x": 1275,
+        "x": 1607,
         "y": 2017,
         "w": 24,
         "h": 24
@@ -2093,7 +2093,95 @@
     {
       "filename": "fx-aura/play/s/3",
       "frame": {
-        "x": 1300,
+        "x": 1632,
+        "y": 2017,
+        "w": 24,
+        "h": 24
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 24
+      },
+      "sourceSize": {
+        "w": 24,
+        "h": 24
+      },
+      "duration": 75
+    },
+    {
+      "filename": "fx-die-lost/play/s/0",
+      "frame": {
+        "x": 1657,
+        "y": 2017,
+        "w": 24,
+        "h": 24
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 24
+      },
+      "sourceSize": {
+        "w": 24,
+        "h": 24
+      },
+      "duration": 75
+    },
+    {
+      "filename": "fx-die-lost/play/s/1",
+      "frame": {
+        "x": 1682,
+        "y": 2017,
+        "w": 24,
+        "h": 24
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 24
+      },
+      "sourceSize": {
+        "w": 24,
+        "h": 24
+      },
+      "duration": 75
+    },
+    {
+      "filename": "fx-die-lost/play/s/2",
+      "frame": {
+        "x": 1707,
+        "y": 2017,
+        "w": 24,
+        "h": 24
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 24
+      },
+      "sourceSize": {
+        "w": 24,
+        "h": 24
+      },
+      "duration": 75
+    },
+    {
+      "filename": "fx-die-lost/play/s/3",
+      "frame": {
+        "x": 1732,
         "y": 2017,
         "w": 24,
         "h": 24
@@ -2115,7 +2203,7 @@
     {
       "filename": "fx-alert/play/s/0",
       "frame": {
-        "x": 1325,
+        "x": 1757,
         "y": 2017,
         "w": 24,
         "h": 24
@@ -2137,7 +2225,7 @@
     {
       "filename": "fx-alert/play/s/1",
       "frame": {
-        "x": 1350,
+        "x": 1782,
         "y": 2017,
         "w": 24,
         "h": 24
@@ -2159,7 +2247,7 @@
     {
       "filename": "fx-alert/play/s/2",
       "frame": {
-        "x": 1375,
+        "x": 1807,
         "y": 2017,
         "w": 24,
         "h": 24
@@ -2181,7 +2269,7 @@
     {
       "filename": "fx-alert/play/s/3",
       "frame": {
-        "x": 1400,
+        "x": 1832,
         "y": 2017,
         "w": 24,
         "h": 24
@@ -2203,7 +2291,7 @@
     {
       "filename": "icon-frightened/idle/s/0",
       "frame": {
-        "x": 1425,
+        "x": 1857,
         "y": 2034,
         "w": 9,
         "h": 9
@@ -2225,7 +2313,7 @@
     {
       "filename": "icon-blessed/idle/s/0",
       "frame": {
-        "x": 1435,
+        "x": 1867,
         "y": 2034,
         "w": 9,
         "h": 9
@@ -2247,7 +2335,7 @@
     {
       "filename": "icon-shield/idle/s/0",
       "frame": {
-        "x": 1445,
+        "x": 1877,
         "y": 2034,
         "w": 9,
         "h": 9
@@ -6705,235 +6793,253 @@
         "direction": "forward"
       },
       {
-        "name": "terrain-water-shallow/idle/s",
+        "name": "terrain-teleporter/idle/s",
         "from": 8,
         "to": 11,
         "direction": "forward"
       },
       {
-        "name": "terrain-water-deep/idle/s",
-        "from": 12,
-        "to": 15,
-        "direction": "forward"
-      },
-      {
-        "name": "terrain-lava/idle/s",
-        "from": 16,
-        "to": 19,
-        "direction": "forward"
-      },
-      {
-        "name": "terrain-teleporter/idle/s",
-        "from": 20,
-        "to": 23,
-        "direction": "forward"
-      },
-      {
         "name": "terrain-debris/idle/s",
-        "from": 24,
-        "to": 24,
+        "from": 12,
+        "to": 12,
         "direction": "forward"
       },
       {
         "name": "terrain-debris/idle/s#v1",
-        "from": 25,
-        "to": 25,
+        "from": 13,
+        "to": 13,
         "direction": "forward"
       },
       {
         "name": "terrain-debris/idle/s#v2",
-        "from": 26,
-        "to": 26,
+        "from": 14,
+        "to": 14,
         "direction": "forward"
       },
       {
         "name": "family-a-cap/idle/s",
-        "from": 27,
-        "to": 28,
+        "from": 15,
+        "to": 16,
         "direction": "forward"
       },
       {
         "name": "family-a-cap/idle/w",
-        "from": 29,
-        "to": 30,
+        "from": 17,
+        "to": 18,
         "direction": "forward"
       },
       {
         "name": "family-a-cap/idle/n",
-        "from": 31,
-        "to": 32,
+        "from": 19,
+        "to": 20,
         "direction": "forward"
       },
       {
         "name": "family-a-cap/idle/e",
-        "from": 33,
-        "to": 34,
+        "from": 21,
+        "to": 22,
         "direction": "forward"
       },
       {
         "name": "family-a-cap/walk/s",
+        "from": 23,
+        "to": 26,
+        "direction": "forward"
+      },
+      {
+        "name": "family-a-cap/walk/w",
+        "from": 27,
+        "to": 30,
+        "direction": "forward"
+      },
+      {
+        "name": "family-a-cap/walk/n",
+        "from": 31,
+        "to": 34,
+        "direction": "forward"
+      },
+      {
+        "name": "family-a-cap/walk/e",
         "from": 35,
         "to": 38,
         "direction": "forward"
       },
       {
-        "name": "family-a-cap/walk/w",
+        "name": "family-a-cap/attack/s",
         "from": 39,
         "to": 42,
         "direction": "forward"
       },
       {
-        "name": "family-a-cap/walk/n",
-        "from": 43,
-        "to": 46,
-        "direction": "forward"
-      },
-      {
-        "name": "family-a-cap/walk/e",
-        "from": 47,
-        "to": 50,
-        "direction": "forward"
-      },
-      {
-        "name": "family-a-cap/attack/s",
-        "from": 51,
-        "to": 54,
-        "direction": "forward"
-      },
-      {
         "name": "family-a-cap/attack/w",
-        "from": 55,
-        "to": 57,
+        "from": 43,
+        "to": 45,
         "direction": "forward"
       },
       {
         "name": "feature-chest/closed/s",
+        "from": 46,
+        "to": 46,
+        "direction": "forward"
+      },
+      {
+        "name": "feature-chest/open/s",
+        "from": 47,
+        "to": 47,
+        "direction": "forward"
+      },
+      {
+        "name": "feature-chest/looted/s",
+        "from": 48,
+        "to": 48,
+        "direction": "forward"
+      },
+      {
+        "name": "feature-sack/closed/s",
+        "from": 49,
+        "to": 49,
+        "direction": "forward"
+      },
+      {
+        "name": "feature-sack/open/s",
+        "from": 50,
+        "to": 50,
+        "direction": "forward"
+      },
+      {
+        "name": "feature-sack/looted/s",
+        "from": 51,
+        "to": 51,
+        "direction": "forward"
+      },
+      {
+        "name": "feature-pottery/closed/s",
+        "from": 52,
+        "to": 52,
+        "direction": "forward"
+      },
+      {
+        "name": "feature-pottery/smashed/s",
+        "from": 53,
+        "to": 53,
+        "direction": "forward"
+      },
+      {
+        "name": "feature-fountain/flowing/s",
+        "from": 54,
+        "to": 54,
+        "direction": "forward"
+      },
+      {
+        "name": "feature-fountain/dry/s",
+        "from": 55,
+        "to": 55,
+        "direction": "forward"
+      },
+      {
+        "name": "feature-lever/up/s",
+        "from": 56,
+        "to": 56,
+        "direction": "forward"
+      },
+      {
+        "name": "feature-lever/pulled/s",
+        "from": 57,
+        "to": 57,
+        "direction": "forward"
+      },
+      {
+        "name": "feature-trap/armed/s",
         "from": 58,
         "to": 58,
         "direction": "forward"
       },
       {
-        "name": "feature-chest/open/s",
+        "name": "family-coins/idle/s",
         "from": 59,
         "to": 59,
         "direction": "forward"
       },
       {
-        "name": "feature-chest/looted/s",
+        "name": "family-gems/idle/s",
         "from": 60,
         "to": 60,
         "direction": "forward"
       },
       {
-        "name": "feature-sack/closed/s",
+        "name": "family-jewelry/idle/s",
         "from": 61,
         "to": 61,
         "direction": "forward"
       },
       {
-        "name": "feature-sack/open/s",
+        "name": "family-potion/idle/s",
         "from": 62,
         "to": 62,
         "direction": "forward"
       },
       {
-        "name": "feature-sack/looted/s",
+        "name": "family-ring/idle/s",
         "from": 63,
         "to": 63,
         "direction": "forward"
       },
       {
-        "name": "feature-pottery/closed/s",
+        "name": "family-rod/idle/s",
         "from": 64,
         "to": 64,
         "direction": "forward"
       },
       {
-        "name": "feature-pottery/smashed/s",
+        "name": "family-weapon/idle/s",
         "from": 65,
         "to": 65,
         "direction": "forward"
       },
       {
-        "name": "feature-fountain/flowing/s",
+        "name": "family-book/idle/s",
         "from": 66,
         "to": 66,
         "direction": "forward"
       },
       {
-        "name": "feature-fountain/dry/s",
+        "name": "family-key/idle/s",
         "from": 67,
         "to": 67,
         "direction": "forward"
       },
       {
-        "name": "feature-lever/up/s",
+        "name": "fx-hit/play/s",
         "from": 68,
-        "to": 68,
-        "direction": "forward"
-      },
-      {
-        "name": "feature-lever/pulled/s",
-        "from": 69,
-        "to": 69,
-        "direction": "forward"
-      },
-      {
-        "name": "feature-trap/armed/s",
-        "from": 70,
-        "to": 70,
-        "direction": "forward"
-      },
-      {
-        "name": "family-jewelry/idle/s",
-        "from": 71,
         "to": 71,
         "direction": "forward"
       },
       {
-        "name": "family-potion/idle/s",
+        "name": "fx-arrow/play/s",
         "from": 72,
-        "to": 72,
-        "direction": "forward"
-      },
-      {
-        "name": "family-ring/idle/s",
-        "from": 73,
-        "to": 73,
-        "direction": "forward"
-      },
-      {
-        "name": "family-rod/idle/s",
-        "from": 74,
-        "to": 74,
-        "direction": "forward"
-      },
-      {
-        "name": "family-key/idle/s",
-        "from": 75,
         "to": 75,
         "direction": "forward"
       },
       {
-        "name": "fx-hit/play/s",
+        "name": "fx-bolt/play/s",
         "from": 76,
         "to": 79,
         "direction": "forward"
       },
       {
-        "name": "fx-arrow/play/s",
+        "name": "fx-burst/play/s",
         "from": 80,
         "to": 83,
         "direction": "forward"
       },
       {
-        "name": "fx-burst/play/s",
+        "name": "fx-frost/play/s",
         "from": 84,
         "to": 87,
         "direction": "forward"
       },
       {
-        "name": "fx-frost/play/s",
+        "name": "fx-push/play/s",
         "from": 88,
         "to": 91,
         "direction": "forward"
@@ -6945,405 +7051,411 @@
         "direction": "forward"
       },
       {
-        "name": "fx-alert/play/s",
+        "name": "fx-die-lost/play/s",
         "from": 96,
         "to": 99,
         "direction": "forward"
       },
       {
-        "name": "icon-frightened/idle/s",
+        "name": "fx-alert/play/s",
         "from": 100,
-        "to": 100,
+        "to": 103,
         "direction": "forward"
       },
       {
-        "name": "icon-blessed/idle/s",
-        "from": 101,
-        "to": 101,
-        "direction": "forward"
-      },
-      {
-        "name": "icon-shield/idle/s",
-        "from": 102,
-        "to": 102,
-        "direction": "forward"
-      },
-      {
-        "name": "boss-brutus-stonehand/idle/s",
-        "from": 103,
+        "name": "icon-frightened/idle/s",
+        "from": 104,
         "to": 104,
         "direction": "forward"
       },
       {
-        "name": "boss-brutus-stonehand/idle/w",
+        "name": "icon-blessed/idle/s",
         "from": 105,
+        "to": 105,
+        "direction": "forward"
+      },
+      {
+        "name": "icon-shield/idle/s",
+        "from": 106,
         "to": 106,
         "direction": "forward"
       },
       {
-        "name": "boss-brutus-stonehand/idle/n",
+        "name": "boss-brutus-stonehand/idle/s",
         "from": 107,
         "to": 108,
         "direction": "forward"
       },
       {
-        "name": "boss-brutus-stonehand/idle/e",
+        "name": "boss-brutus-stonehand/idle/w",
         "from": 109,
         "to": 110,
         "direction": "forward"
       },
       {
-        "name": "boss-brutus-stonehand/walk/s",
+        "name": "boss-brutus-stonehand/idle/n",
         "from": 111,
+        "to": 112,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-brutus-stonehand/idle/e",
+        "from": 113,
         "to": 114,
         "direction": "forward"
       },
       {
-        "name": "boss-brutus-stonehand/walk/w",
+        "name": "boss-brutus-stonehand/walk/s",
         "from": 115,
         "to": 118,
         "direction": "forward"
       },
       {
-        "name": "boss-brutus-stonehand/walk/n",
+        "name": "boss-brutus-stonehand/walk/w",
         "from": 119,
-        "to": 119,
+        "to": 122,
         "direction": "forward"
       },
       {
-        "name": "boss-morrigan-dusk/idle/s",
-        "from": 120,
-        "to": 121,
-        "direction": "forward"
-      },
-      {
-        "name": "boss-morrigan-dusk/idle/w",
-        "from": 122,
+        "name": "boss-brutus-stonehand/walk/n",
+        "from": 123,
         "to": 123,
         "direction": "forward"
       },
       {
-        "name": "boss-morrigan-dusk/idle/n",
+        "name": "boss-morrigan-dusk/idle/s",
         "from": 124,
         "to": 125,
         "direction": "forward"
       },
       {
-        "name": "boss-morrigan-dusk/idle/e",
+        "name": "boss-morrigan-dusk/idle/w",
         "from": 126,
         "to": 127,
         "direction": "forward"
       },
       {
-        "name": "boss-morrigan-dusk/walk/s",
+        "name": "boss-morrigan-dusk/idle/n",
         "from": 128,
+        "to": 129,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-morrigan-dusk/idle/e",
+        "from": 130,
         "to": 131,
         "direction": "forward"
       },
       {
-        "name": "boss-morrigan-dusk/walk/w",
+        "name": "boss-morrigan-dusk/walk/s",
         "from": 132,
         "to": 135,
         "direction": "forward"
       },
       {
-        "name": "boss-morrigan-dusk/walk/n",
+        "name": "boss-morrigan-dusk/walk/w",
         "from": 136,
         "to": 139,
         "direction": "forward"
       },
       {
-        "name": "boss-morrigan-dusk/walk/e",
+        "name": "boss-morrigan-dusk/walk/n",
         "from": 140,
         "to": 143,
         "direction": "forward"
       },
       {
-        "name": "boss-morrigan-dusk/attack/s",
+        "name": "boss-morrigan-dusk/walk/e",
         "from": 144,
         "to": 147,
         "direction": "forward"
       },
       {
-        "name": "boss-morrigan-dusk/attack/w",
+        "name": "boss-morrigan-dusk/attack/s",
         "from": 148,
         "to": 151,
         "direction": "forward"
       },
       {
-        "name": "boss-morrigan-dusk/attack/n",
+        "name": "boss-morrigan-dusk/attack/w",
         "from": 152,
         "to": 155,
         "direction": "forward"
       },
       {
-        "name": "boss-morrigan-dusk/attack/e",
+        "name": "boss-morrigan-dusk/attack/n",
         "from": 156,
         "to": 159,
         "direction": "forward"
       },
       {
-        "name": "boss-the-hungering-dark/idle/s",
+        "name": "boss-morrigan-dusk/attack/e",
         "from": 160,
-        "to": 161,
-        "direction": "forward"
-      },
-      {
-        "name": "boss-the-hungering-dark/idle/w",
-        "from": 162,
         "to": 163,
         "direction": "forward"
       },
       {
-        "name": "boss-the-hungering-dark/idle/n",
+        "name": "boss-the-hungering-dark/idle/s",
         "from": 164,
         "to": 165,
         "direction": "forward"
       },
       {
-        "name": "boss-the-hungering-dark/idle/e",
+        "name": "boss-the-hungering-dark/idle/w",
         "from": 166,
         "to": 167,
         "direction": "forward"
       },
       {
-        "name": "boss-the-hungering-dark/walk/s",
+        "name": "boss-the-hungering-dark/idle/n",
         "from": 168,
+        "to": 169,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-the-hungering-dark/idle/e",
+        "from": 170,
         "to": 171,
         "direction": "forward"
       },
       {
-        "name": "boss-the-hungering-dark/walk/w",
+        "name": "boss-the-hungering-dark/walk/s",
         "from": 172,
         "to": 175,
         "direction": "forward"
       },
       {
-        "name": "boss-the-hungering-dark/walk/n",
+        "name": "boss-the-hungering-dark/walk/w",
         "from": 176,
         "to": 179,
         "direction": "forward"
       },
       {
-        "name": "boss-the-hungering-dark/walk/e",
+        "name": "boss-the-hungering-dark/walk/n",
         "from": 180,
         "to": 183,
         "direction": "forward"
       },
       {
-        "name": "boss-the-hungering-dark/attack/s",
+        "name": "boss-the-hungering-dark/walk/e",
         "from": 184,
         "to": 187,
         "direction": "forward"
       },
       {
-        "name": "boss-the-hungering-dark/attack/w",
+        "name": "boss-the-hungering-dark/attack/s",
         "from": 188,
         "to": 191,
         "direction": "forward"
       },
       {
-        "name": "boss-the-hungering-dark/attack/n",
+        "name": "boss-the-hungering-dark/attack/w",
         "from": 192,
         "to": 195,
         "direction": "forward"
       },
       {
-        "name": "boss-the-hungering-dark/attack/e",
+        "name": "boss-the-hungering-dark/attack/n",
         "from": 196,
         "to": 199,
         "direction": "forward"
       },
       {
-        "name": "boss-sovereign-aurelian/idle/s",
+        "name": "boss-the-hungering-dark/attack/e",
         "from": 200,
-        "to": 201,
-        "direction": "forward"
-      },
-      {
-        "name": "boss-sovereign-aurelian/idle/w",
-        "from": 202,
         "to": 203,
         "direction": "forward"
       },
       {
-        "name": "boss-sovereign-aurelian/idle/n",
+        "name": "boss-sovereign-aurelian/idle/s",
         "from": 204,
         "to": 205,
         "direction": "forward"
       },
       {
-        "name": "boss-sovereign-aurelian/idle/e",
+        "name": "boss-sovereign-aurelian/idle/w",
         "from": 206,
         "to": 207,
         "direction": "forward"
       },
       {
-        "name": "boss-sovereign-aurelian/walk/s",
+        "name": "boss-sovereign-aurelian/idle/n",
         "from": 208,
+        "to": 209,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-sovereign-aurelian/idle/e",
+        "from": 210,
         "to": 211,
         "direction": "forward"
       },
       {
-        "name": "boss-sovereign-aurelian/walk/w",
+        "name": "boss-sovereign-aurelian/walk/s",
         "from": 212,
         "to": 215,
         "direction": "forward"
       },
       {
-        "name": "boss-sovereign-aurelian/walk/n",
+        "name": "boss-sovereign-aurelian/walk/w",
         "from": 216,
         "to": 219,
         "direction": "forward"
       },
       {
-        "name": "boss-sovereign-aurelian/walk/e",
+        "name": "boss-sovereign-aurelian/walk/n",
         "from": 220,
         "to": 223,
         "direction": "forward"
       },
       {
-        "name": "boss-sovereign-aurelian/attack/s",
+        "name": "boss-sovereign-aurelian/walk/e",
         "from": 224,
         "to": 227,
         "direction": "forward"
       },
       {
-        "name": "boss-sovereign-aurelian/attack/w",
+        "name": "boss-sovereign-aurelian/attack/s",
         "from": 228,
         "to": 231,
         "direction": "forward"
       },
       {
-        "name": "boss-sovereign-aurelian/attack/n",
+        "name": "boss-sovereign-aurelian/attack/w",
         "from": 232,
         "to": 235,
         "direction": "forward"
       },
       {
-        "name": "boss-sovereign-aurelian/attack/e",
+        "name": "boss-sovereign-aurelian/attack/n",
         "from": 236,
         "to": 239,
         "direction": "forward"
       },
       {
-        "name": "boss-nethys-the-forgotten/idle/s",
+        "name": "boss-sovereign-aurelian/attack/e",
         "from": 240,
-        "to": 241,
-        "direction": "forward"
-      },
-      {
-        "name": "boss-nethys-the-forgotten/idle/w",
-        "from": 242,
         "to": 243,
         "direction": "forward"
       },
       {
-        "name": "boss-nethys-the-forgotten/idle/n",
+        "name": "boss-nethys-the-forgotten/idle/s",
         "from": 244,
         "to": 245,
         "direction": "forward"
       },
       {
-        "name": "boss-nethys-the-forgotten/idle/e",
+        "name": "boss-nethys-the-forgotten/idle/w",
         "from": 246,
         "to": 247,
         "direction": "forward"
       },
       {
-        "name": "boss-nethys-the-forgotten/walk/s",
+        "name": "boss-nethys-the-forgotten/idle/n",
         "from": 248,
+        "to": 249,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-nethys-the-forgotten/idle/e",
+        "from": 250,
         "to": 251,
         "direction": "forward"
       },
       {
-        "name": "boss-nethys-the-forgotten/walk/w",
+        "name": "boss-nethys-the-forgotten/walk/s",
         "from": 252,
         "to": 255,
         "direction": "forward"
       },
       {
-        "name": "boss-nethys-the-forgotten/walk/n",
+        "name": "boss-nethys-the-forgotten/walk/w",
         "from": 256,
         "to": 259,
         "direction": "forward"
       },
       {
-        "name": "boss-nethys-the-forgotten/walk/e",
+        "name": "boss-nethys-the-forgotten/walk/n",
         "from": 260,
         "to": 263,
         "direction": "forward"
       },
       {
-        "name": "boss-nethys-the-forgotten/attack/s",
+        "name": "boss-nethys-the-forgotten/walk/e",
         "from": 264,
         "to": 267,
         "direction": "forward"
       },
       {
-        "name": "boss-nethys-the-forgotten/attack/w",
+        "name": "boss-nethys-the-forgotten/attack/s",
         "from": 268,
         "to": 271,
         "direction": "forward"
       },
       {
-        "name": "boss-nethys-the-forgotten/attack/n",
+        "name": "boss-nethys-the-forgotten/attack/w",
         "from": 272,
         "to": 275,
         "direction": "forward"
       },
       {
-        "name": "boss-nethys-the-forgotten/attack/e",
+        "name": "boss-nethys-the-forgotten/attack/n",
         "from": 276,
         "to": 279,
         "direction": "forward"
       },
       {
-        "name": "boss-the-magma-sovereign/idle/s",
+        "name": "boss-nethys-the-forgotten/attack/e",
         "from": 280,
-        "to": 281,
-        "direction": "forward"
-      },
-      {
-        "name": "boss-the-magma-sovereign/idle/w",
-        "from": 282,
         "to": 283,
         "direction": "forward"
       },
       {
-        "name": "boss-the-magma-sovereign/idle/n",
+        "name": "boss-the-magma-sovereign/idle/s",
         "from": 284,
         "to": 285,
         "direction": "forward"
       },
       {
-        "name": "boss-the-magma-sovereign/idle/e",
+        "name": "boss-the-magma-sovereign/idle/w",
         "from": 286,
         "to": 287,
         "direction": "forward"
       },
       {
-        "name": "boss-the-magma-sovereign/walk/s",
+        "name": "boss-the-magma-sovereign/idle/n",
         "from": 288,
+        "to": 289,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-the-magma-sovereign/idle/e",
+        "from": 290,
         "to": 291,
         "direction": "forward"
       },
       {
-        "name": "boss-the-magma-sovereign/walk/w",
+        "name": "boss-the-magma-sovereign/walk/s",
         "from": 292,
         "to": 295,
         "direction": "forward"
       },
       {
-        "name": "boss-the-magma-sovereign/walk/n",
+        "name": "boss-the-magma-sovereign/walk/w",
         "from": 296,
         "to": 299,
         "direction": "forward"
       },
       {
-        "name": "boss-the-magma-sovereign/walk/e",
+        "name": "boss-the-magma-sovereign/walk/n",
         "from": 300,
-        "to": 301,
+        "to": 303,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-the-magma-sovereign/walk/e",
+        "from": 304,
+        "to": 305,
         "direction": "forward"
       }
     ]
