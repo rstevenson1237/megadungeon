@@ -216,7 +216,7 @@ The spec lists the display events, the turn-mode times and the effects, but not 
 - **Boss sprites** (approved November 19, 2026). A boss is drawn by its own sprite, `boss-<boss id>`, before its family's, which stays the fallback. The display finds the boss row from the level's placed bosses by the boss's name, since every boss row has its own name.
 - **The Abyssal Throne** (approved November 19, 2026). On the level 100 set piece the isometric display draws `setpiece-abyssal-throne` on the throne room's middle row, one cell from its far wall, behind where the final boss starts. It is picture only: the cell stays floor, no rule changes, the text map is unchanged, and with no art nothing is drawn there. A level 100 built by an older generator or by the fallback has no throne.
 
-## Clarification (task 6.10, proposed November 20, 2026)
+## Clarification (task 6.10, proposed and approved November 20, 2026)
 
 The frame budget and the smoke test leave three points open. Proposed as built:
 
