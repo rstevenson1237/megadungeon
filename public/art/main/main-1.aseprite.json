@@ -45,6 +45,270 @@
       "duration": 125
     },
     {
+      "filename": "terrain-water-shallow/idle/s/0",
+      "frame": {
+        "x": 0,
+        "y": 2017,
+        "w": 32,
+        "h": 16
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 16
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 16
+      },
+      "duration": 125
+    },
+    {
+      "filename": "terrain-water-shallow/idle/s/1",
+      "frame": {
+        "x": 33,
+        "y": 2017,
+        "w": 32,
+        "h": 16
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 16
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 16
+      },
+      "duration": 125
+    },
+    {
+      "filename": "terrain-water-shallow/idle/s/2",
+      "frame": {
+        "x": 66,
+        "y": 2017,
+        "w": 32,
+        "h": 16
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 16
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 16
+      },
+      "duration": 125
+    },
+    {
+      "filename": "terrain-water-shallow/idle/s/3",
+      "frame": {
+        "x": 33,
+        "y": 2017,
+        "w": 32,
+        "h": 16
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 16
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 16
+      },
+      "duration": 125
+    },
+    {
+      "filename": "terrain-water-deep/idle/s/0",
+      "frame": {
+        "x": 99,
+        "y": 2017,
+        "w": 32,
+        "h": 16
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 16
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 16
+      },
+      "duration": 125
+    },
+    {
+      "filename": "terrain-water-deep/idle/s/1",
+      "frame": {
+        "x": 132,
+        "y": 2017,
+        "w": 32,
+        "h": 16
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 16
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 16
+      },
+      "duration": 125
+    },
+    {
+      "filename": "terrain-water-deep/idle/s/2",
+      "frame": {
+        "x": 165,
+        "y": 2017,
+        "w": 32,
+        "h": 16
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 16
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 16
+      },
+      "duration": 125
+    },
+    {
+      "filename": "terrain-water-deep/idle/s/3",
+      "frame": {
+        "x": 198,
+        "y": 2017,
+        "w": 32,
+        "h": 16
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 16
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 16
+      },
+      "duration": 125
+    },
+    {
+      "filename": "terrain-lava/idle/s/0",
+      "frame": {
+        "x": 231,
+        "y": 2017,
+        "w": 32,
+        "h": 16
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 16
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 16
+      },
+      "duration": 125
+    },
+    {
+      "filename": "terrain-lava/idle/s/1",
+      "frame": {
+        "x": 264,
+        "y": 2017,
+        "w": 32,
+        "h": 16
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 16
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 16
+      },
+      "duration": 125
+    },
+    {
+      "filename": "terrain-lava/idle/s/2",
+      "frame": {
+        "x": 297,
+        "y": 2017,
+        "w": 32,
+        "h": 16
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 16
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 16
+      },
+      "duration": 125
+    },
+    {
+      "filename": "terrain-lava/idle/s/3",
+      "frame": {
+        "x": 264,
+        "y": 2017,
+        "w": 32,
+        "h": 16
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 16
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 16
+      },
+      "duration": 125
+    },
+    {
       "filename": "family-a-cap/attack/w/3",
       "frame": {
         "x": 0,
@@ -5173,429 +5437,447 @@
         "direction": "forward"
       },
       {
-        "name": "family-a-cap/attack/w",
+        "name": "terrain-water-shallow/idle/s",
         "from": 2,
-        "to": 2,
+        "to": 5,
         "direction": "forward"
       },
       {
-        "name": "family-a-cap/attack/n",
-        "from": 3,
-        "to": 6,
+        "name": "terrain-water-deep/idle/s",
+        "from": 6,
+        "to": 9,
         "direction": "forward"
       },
       {
-        "name": "family-a-cap/attack/e",
-        "from": 7,
-        "to": 10,
+        "name": "terrain-lava/idle/s",
+        "from": 10,
+        "to": 13,
         "direction": "forward"
       },
       {
-        "name": "family-c-cap/idle/s",
-        "from": 11,
-        "to": 12,
-        "direction": "forward"
-      },
-      {
-        "name": "family-c-cap/idle/w",
-        "from": 13,
+        "name": "family-a-cap/attack/w",
+        "from": 14,
         "to": 14,
         "direction": "forward"
       },
       {
-        "name": "family-c-cap/idle/n",
+        "name": "family-a-cap/attack/n",
         "from": 15,
-        "to": 16,
-        "direction": "forward"
-      },
-      {
-        "name": "family-c-cap/idle/e",
-        "from": 17,
         "to": 18,
         "direction": "forward"
       },
       {
-        "name": "family-c-cap/walk/s",
+        "name": "family-a-cap/attack/e",
         "from": 19,
         "to": 22,
         "direction": "forward"
       },
       {
-        "name": "family-c-cap/walk/w",
+        "name": "family-c-cap/idle/s",
         "from": 23,
+        "to": 24,
+        "direction": "forward"
+      },
+      {
+        "name": "family-c-cap/idle/w",
+        "from": 25,
         "to": 26,
         "direction": "forward"
       },
       {
-        "name": "family-c-cap/walk/n",
+        "name": "family-c-cap/idle/n",
         "from": 27,
+        "to": 28,
+        "direction": "forward"
+      },
+      {
+        "name": "family-c-cap/idle/e",
+        "from": 29,
         "to": 30,
         "direction": "forward"
       },
       {
-        "name": "family-c-cap/walk/e",
+        "name": "family-c-cap/walk/s",
         "from": 31,
         "to": 34,
         "direction": "forward"
       },
       {
-        "name": "family-c-cap/attack/s",
+        "name": "family-c-cap/walk/w",
         "from": 35,
-        "to": 36,
+        "to": 38,
+        "direction": "forward"
+      },
+      {
+        "name": "family-c-cap/walk/n",
+        "from": 39,
+        "to": 42,
+        "direction": "forward"
+      },
+      {
+        "name": "family-c-cap/walk/e",
+        "from": 43,
+        "to": 46,
+        "direction": "forward"
+      },
+      {
+        "name": "family-c-cap/attack/s",
+        "from": 47,
+        "to": 48,
         "direction": "forward"
       },
       {
         "name": "boss-brutus-stonehand/walk/n",
-        "from": 37,
-        "to": 39,
-        "direction": "forward"
-      },
-      {
-        "name": "boss-brutus-stonehand/walk/e",
-        "from": 40,
-        "to": 43,
-        "direction": "forward"
-      },
-      {
-        "name": "boss-brutus-stonehand/attack/s",
-        "from": 44,
-        "to": 47,
-        "direction": "forward"
-      },
-      {
-        "name": "boss-brutus-stonehand/attack/w",
-        "from": 48,
+        "from": 49,
         "to": 51,
         "direction": "forward"
       },
       {
-        "name": "boss-brutus-stonehand/attack/n",
+        "name": "boss-brutus-stonehand/walk/e",
         "from": 52,
-        "to": 53,
-        "direction": "forward"
-      },
-      {
-        "name": "boss-the-magma-sovereign/walk/e",
-        "from": 54,
         "to": 55,
         "direction": "forward"
       },
       {
-        "name": "boss-the-magma-sovereign/attack/s",
+        "name": "boss-brutus-stonehand/attack/s",
         "from": 56,
         "to": 59,
         "direction": "forward"
       },
       {
-        "name": "boss-the-magma-sovereign/attack/w",
+        "name": "boss-brutus-stonehand/attack/w",
         "from": 60,
         "to": 63,
         "direction": "forward"
       },
       {
-        "name": "boss-the-magma-sovereign/attack/n",
+        "name": "boss-brutus-stonehand/attack/n",
         "from": 64,
+        "to": 65,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-the-magma-sovereign/walk/e",
+        "from": 66,
         "to": 67,
         "direction": "forward"
       },
       {
-        "name": "boss-the-magma-sovereign/attack/e",
+        "name": "boss-the-magma-sovereign/attack/s",
         "from": 68,
         "to": 71,
         "direction": "forward"
       },
       {
-        "name": "boss-the-last-delver/idle/s",
+        "name": "boss-the-magma-sovereign/attack/w",
         "from": 72,
-        "to": 73,
-        "direction": "forward"
-      },
-      {
-        "name": "boss-the-last-delver/idle/w",
-        "from": 74,
         "to": 75,
         "direction": "forward"
       },
       {
-        "name": "boss-the-last-delver/idle/n",
+        "name": "boss-the-magma-sovereign/attack/n",
         "from": 76,
-        "to": 77,
-        "direction": "forward"
-      },
-      {
-        "name": "boss-the-last-delver/idle/e",
-        "from": 78,
         "to": 79,
         "direction": "forward"
       },
       {
-        "name": "boss-the-last-delver/walk/s",
+        "name": "boss-the-magma-sovereign/attack/e",
         "from": 80,
         "to": 83,
         "direction": "forward"
       },
       {
-        "name": "boss-the-last-delver/walk/w",
+        "name": "boss-the-last-delver/idle/s",
         "from": 84,
+        "to": 85,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-the-last-delver/idle/w",
+        "from": 86,
         "to": 87,
         "direction": "forward"
       },
       {
-        "name": "boss-the-last-delver/walk/n",
+        "name": "boss-the-last-delver/idle/n",
         "from": 88,
+        "to": 89,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-the-last-delver/idle/e",
+        "from": 90,
         "to": 91,
         "direction": "forward"
       },
       {
-        "name": "boss-the-last-delver/walk/e",
+        "name": "boss-the-last-delver/walk/s",
         "from": 92,
         "to": 95,
         "direction": "forward"
       },
       {
-        "name": "boss-the-last-delver/attack/s",
+        "name": "boss-the-last-delver/walk/w",
         "from": 96,
         "to": 99,
         "direction": "forward"
       },
       {
-        "name": "boss-the-last-delver/attack/w",
+        "name": "boss-the-last-delver/walk/n",
         "from": 100,
         "to": 103,
         "direction": "forward"
       },
       {
-        "name": "boss-the-last-delver/attack/n",
+        "name": "boss-the-last-delver/walk/e",
         "from": 104,
         "to": 107,
         "direction": "forward"
       },
       {
-        "name": "boss-the-last-delver/attack/e",
+        "name": "boss-the-last-delver/attack/s",
         "from": 108,
         "to": 111,
         "direction": "forward"
       },
       {
-        "name": "boss-the-throne-warden/idle/s",
+        "name": "boss-the-last-delver/attack/w",
         "from": 112,
-        "to": 113,
-        "direction": "forward"
-      },
-      {
-        "name": "boss-the-throne-warden/idle/w",
-        "from": 114,
         "to": 115,
         "direction": "forward"
       },
       {
-        "name": "boss-the-throne-warden/idle/n",
+        "name": "boss-the-last-delver/attack/n",
         "from": 116,
-        "to": 117,
-        "direction": "forward"
-      },
-      {
-        "name": "boss-the-throne-warden/idle/e",
-        "from": 118,
         "to": 119,
         "direction": "forward"
       },
       {
-        "name": "boss-the-throne-warden/walk/s",
+        "name": "boss-the-last-delver/attack/e",
         "from": 120,
         "to": 123,
         "direction": "forward"
       },
       {
-        "name": "boss-the-throne-warden/walk/w",
+        "name": "boss-the-throne-warden/idle/s",
         "from": 124,
+        "to": 125,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-the-throne-warden/idle/w",
+        "from": 126,
         "to": 127,
         "direction": "forward"
       },
       {
-        "name": "boss-the-throne-warden/walk/n",
+        "name": "boss-the-throne-warden/idle/n",
         "from": 128,
+        "to": 129,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-the-throne-warden/idle/e",
+        "from": 130,
         "to": 131,
         "direction": "forward"
       },
       {
-        "name": "boss-the-throne-warden/walk/e",
+        "name": "boss-the-throne-warden/walk/s",
         "from": 132,
         "to": 135,
         "direction": "forward"
       },
       {
-        "name": "boss-the-throne-warden/attack/s",
+        "name": "boss-the-throne-warden/walk/w",
         "from": 136,
         "to": 139,
         "direction": "forward"
       },
       {
-        "name": "boss-the-throne-warden/attack/w",
+        "name": "boss-the-throne-warden/walk/n",
         "from": 140,
         "to": 143,
         "direction": "forward"
       },
       {
-        "name": "boss-the-throne-warden/attack/n",
+        "name": "boss-the-throne-warden/walk/e",
         "from": 144,
         "to": 147,
         "direction": "forward"
       },
       {
-        "name": "boss-the-throne-warden/attack/e",
+        "name": "boss-the-throne-warden/attack/s",
         "from": 148,
         "to": 151,
         "direction": "forward"
       },
       {
-        "name": "boss-eshkal-the-unmaker/idle/s",
+        "name": "boss-the-throne-warden/attack/w",
         "from": 152,
-        "to": 153,
-        "direction": "forward"
-      },
-      {
-        "name": "boss-eshkal-the-unmaker/idle/w",
-        "from": 154,
         "to": 155,
         "direction": "forward"
       },
       {
-        "name": "boss-eshkal-the-unmaker/idle/n",
+        "name": "boss-the-throne-warden/attack/n",
         "from": 156,
-        "to": 157,
-        "direction": "forward"
-      },
-      {
-        "name": "boss-eshkal-the-unmaker/idle/e",
-        "from": 158,
         "to": 159,
         "direction": "forward"
       },
       {
-        "name": "boss-eshkal-the-unmaker/walk/s",
+        "name": "boss-the-throne-warden/attack/e",
         "from": 160,
         "to": 163,
         "direction": "forward"
       },
       {
-        "name": "boss-eshkal-the-unmaker/walk/w",
+        "name": "boss-eshkal-the-unmaker/idle/s",
         "from": 164,
+        "to": 165,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-eshkal-the-unmaker/idle/w",
+        "from": 166,
         "to": 167,
         "direction": "forward"
       },
       {
-        "name": "boss-eshkal-the-unmaker/walk/n",
+        "name": "boss-eshkal-the-unmaker/idle/n",
         "from": 168,
+        "to": 169,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-eshkal-the-unmaker/idle/e",
+        "from": 170,
         "to": 171,
         "direction": "forward"
       },
       {
-        "name": "boss-eshkal-the-unmaker/walk/e",
+        "name": "boss-eshkal-the-unmaker/walk/s",
         "from": 172,
         "to": 175,
         "direction": "forward"
       },
       {
-        "name": "boss-eshkal-the-unmaker/attack/s",
+        "name": "boss-eshkal-the-unmaker/walk/w",
         "from": 176,
         "to": 179,
         "direction": "forward"
       },
       {
-        "name": "boss-eshkal-the-unmaker/attack/w",
+        "name": "boss-eshkal-the-unmaker/walk/n",
         "from": 180,
         "to": 183,
         "direction": "forward"
       },
       {
-        "name": "boss-eshkal-the-unmaker/attack/n",
+        "name": "boss-eshkal-the-unmaker/walk/e",
         "from": 184,
         "to": 187,
         "direction": "forward"
       },
       {
-        "name": "boss-eshkal-the-unmaker/attack/e",
+        "name": "boss-eshkal-the-unmaker/attack/s",
         "from": 188,
         "to": 191,
         "direction": "forward"
       },
       {
-        "name": "boss-the-hollow-emperor/idle/s",
+        "name": "boss-eshkal-the-unmaker/attack/w",
         "from": 192,
-        "to": 193,
-        "direction": "forward"
-      },
-      {
-        "name": "boss-the-hollow-emperor/idle/w",
-        "from": 194,
         "to": 195,
         "direction": "forward"
       },
       {
-        "name": "boss-the-hollow-emperor/idle/n",
+        "name": "boss-eshkal-the-unmaker/attack/n",
         "from": 196,
-        "to": 197,
-        "direction": "forward"
-      },
-      {
-        "name": "boss-the-hollow-emperor/idle/e",
-        "from": 198,
         "to": 199,
         "direction": "forward"
       },
       {
-        "name": "boss-the-hollow-emperor/walk/s",
+        "name": "boss-eshkal-the-unmaker/attack/e",
         "from": 200,
         "to": 203,
         "direction": "forward"
       },
       {
-        "name": "boss-the-hollow-emperor/walk/w",
+        "name": "boss-the-hollow-emperor/idle/s",
         "from": 204,
+        "to": 205,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-the-hollow-emperor/idle/w",
+        "from": 206,
         "to": 207,
         "direction": "forward"
       },
       {
-        "name": "boss-the-hollow-emperor/walk/n",
+        "name": "boss-the-hollow-emperor/idle/n",
         "from": 208,
+        "to": 209,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-the-hollow-emperor/idle/e",
+        "from": 210,
         "to": 211,
         "direction": "forward"
       },
       {
-        "name": "boss-the-hollow-emperor/walk/e",
+        "name": "boss-the-hollow-emperor/walk/s",
         "from": 212,
         "to": 215,
         "direction": "forward"
       },
       {
-        "name": "boss-the-hollow-emperor/attack/s",
+        "name": "boss-the-hollow-emperor/walk/w",
         "from": 216,
         "to": 219,
         "direction": "forward"
       },
       {
-        "name": "boss-the-hollow-emperor/attack/w",
+        "name": "boss-the-hollow-emperor/walk/n",
         "from": 220,
         "to": 223,
         "direction": "forward"
       },
       {
-        "name": "boss-the-hollow-emperor/attack/n",
+        "name": "boss-the-hollow-emperor/walk/e",
         "from": 224,
         "to": 227,
         "direction": "forward"
       },
       {
-        "name": "boss-the-hollow-emperor/attack/e",
+        "name": "boss-the-hollow-emperor/attack/s",
         "from": 228,
         "to": 231,
         "direction": "forward"
       },
       {
-        "name": "boss-the-king-below/idle/s",
+        "name": "boss-the-hollow-emperor/attack/w",
         "from": 232,
-        "to": 233,
+        "to": 235,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-the-hollow-emperor/attack/n",
+        "from": 236,
+        "to": 239,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-the-hollow-emperor/attack/e",
+        "from": 240,
+        "to": 243,
+        "direction": "forward"
+      },
+      {
+        "name": "boss-the-king-below/idle/s",
+        "from": 244,
+        "to": 245,
         "direction": "forward"
       }
     ]

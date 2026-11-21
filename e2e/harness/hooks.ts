@@ -2,6 +2,7 @@ import type { App } from '../../src/ui/app.ts';
 import { creature } from '../../src/game/monsters.ts';
 import { isClear } from '../../src/game/map-state.ts';
 import { validTargets } from '../../src/game/targeting.ts';
+import type { Loot } from '../../src/rules/world/level.ts';
 
 // The check pages' helpers on the whole game (tasks 5.5 and 6.10): clear the level of creatures, and put one in the
 // player's sight and take it away again, so a check can target something on any generated level.
@@ -42,5 +43,32 @@ export function installHooks(app: App): void {
     if (i >= 0) monsters!.splice(i, 1);
   }
 
-  Object.assign(window, { harness: { calm, placeTarget, removeTarget } });
+  /** Lay one floor item of each kind on the clear cells around the player, for an art screenshot; how many were laid. */
+  function layItems(): number {
+    const game = app.clock?.game;
+    if (!game) return 0;
+    const loot: Loot[] = [
+      { kind: 'coins', amount: 40 },
+      { kind: 'gem', id: 'ruby', name: 'ruby', value: 50 },
+      { kind: 'weapon' },
+      { kind: 'book', id: 'book-1' },
+      { kind: 'key' },
+      { kind: 'quest_item', quest: 'q', id: 'relic', name: 'relic' },
+    ];
+    const { player } = game.state.map;
+    let laid = 0;
+    for (let r = 1; r <= 3 && laid < loot.length; r++) {
+      for (let dy = -r; dy <= r && laid < loot.length; dy++) {
+        for (let dx = -r; dx <= r && laid < loot.length; dx++) {
+          const x = player.x + dx;
+          const y = player.y + dy;
+          if ((dx === 0 && dy === 0) || !isClear(game.state.map, x, y) || game.state.drops.some((d) => d.x === x && d.y === y)) continue;
+          game.state.drops.push({ x, y, contents: [loot[laid++]!] });
+        }
+      }
+    }
+    return laid;
+  }
+
+  Object.assign(window, { harness: { calm, placeTarget, removeTarget, layItems } });
 }
